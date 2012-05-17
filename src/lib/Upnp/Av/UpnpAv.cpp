@@ -317,7 +317,7 @@ LastChangeReader::read(const std::string& message)
         return;
     }
     Poco::XML::Node* pChangeSet = pNode;
-    
+
     if (pChangeSet && pChangeSet->hasChildNodes()) {
         Poco::XML::Node* pInstanceId = pChangeSet->firstChild();
 
@@ -358,7 +358,7 @@ void
 LastChange::setStateVar(const ui4& InstanceID, const std::string& name, const Variant& val)
 {
     setStateVarAttribute(InstanceID, name, "val", val);
-    notify();
+//    notify();
 }
 
 
@@ -383,7 +383,7 @@ LastChange::write()
 void
 LastChange::writeMessageHeader()
 {
-    Log::instance()->upnpav().debug("LastChange::writeMessageHeader()");
+    Log::instance()->upnpav().debug("last change write message header");
     _pDoc = new Poco::XML::Document;
 
     _pMessage = _pDoc->createElement("Event");
@@ -400,20 +400,20 @@ LastChange::writeMessageHeader()
 void
 LastChange::writeMessageClose()
 {
-    Log::instance()->upnpav().debug("LastChange::writeMessageClose() ...");
+    Log::instance()->upnpav().debug("last change write message header close ...");
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     _message = ss.str();
-    Log::instance()->upnpav().debug("LastChange::writeMessageClose() writes message: \n" + _message);
+    Log::instance()->upnpav().debug("last change write message header close message: \n" + _message);
 }
 
 
 void
 LastChange::writeMessageData()
 {
-    Log::instance()->upnpav().debug("LastChange::writeMessageData()");
+    Log::instance()->upnpav().debug("last change write message header data ...");
 
     for (int instanceId = 0; instanceId < _changeSet.size(); ++instanceId) {
         Poco::AutoPtr<Poco::XML::Element> pInstanceId = _pDoc->createElement("InstanceID");
@@ -421,11 +421,11 @@ LastChange::writeMessageData()
         pInstanceIdVal->setValue(Poco::NumberFormatter::format(instanceId));
         pInstanceId->setAttributeNode(pInstanceIdVal);
         _pMessage->appendChild(pInstanceId);
-        
+
         _changeSet[instanceId].writeStateVar(pInstanceId);
     }
 
-    Log::instance()->upnpav().debug("LastChange::writeMessageData() finished.");
+    Log::instance()->upnpav().debug("last change write message header data finished.");
 }
 
 
@@ -480,7 +480,7 @@ RenderingControlLastChange::setChannelStateVar(const ui4& InstanceID, const std:
     setStateVarAttribute(InstanceID, name, "val", val);
     Variant chan(channel);
     setStateVarAttribute(InstanceID, name, "channel", chan);
-    notify();
+//    notify();
 }
 
 

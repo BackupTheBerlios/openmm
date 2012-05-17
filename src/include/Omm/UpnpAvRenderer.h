@@ -61,6 +61,7 @@ public:
     virtual bool preferStdStream() { return false; }
 
     void setUriEngine(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo());
+    void setAtomicUriEngine(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo());
     virtual void setUri(const std::string& uri, const ProtocolInfo& protInfo = ProtocolInfo()) = 0;
     /// Set uri and protocol info of media item.
     virtual void setUri(std::istream& istr, const ProtocolInfo& protInfo = ProtocolInfo()) {}

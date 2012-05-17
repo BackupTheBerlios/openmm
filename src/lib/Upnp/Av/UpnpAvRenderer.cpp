@@ -93,7 +93,7 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         while(std::getline(istr, line)) {
             _playlist.push_back(line);
         }
-        setUri(_playlist[_trackNumberInPlaylist]);
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
     else if (preferStdStream()) {
         Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
@@ -113,8 +113,21 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         setUri(istr, protInfo);
     }
     else {
-        setUri(uri, protInfo);
+        setAtomicUriEngine(uri, protInfo);
     }
+}
+
+
+void
+Engine::setAtomicUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
+{
+    Omm::Av::Log::instance()->upnpav().debug("engine sets new atomic uri: " + uri);
+
+    setUri(uri, protInfo);
+
+    Variant val;
+    val.setValue(uri);
+    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::CURRENT_TRACK_URI, val);
 }
 
 
@@ -123,7 +136,7 @@ Engine::seekTrack(ui4 trackNumber)
 {
     Omm::Av::Log::instance()->upnpav().debug("engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
     _trackNumberInPlaylist = trackNumber;
-    setUri(_playlist[_trackNumberInPlaylist]);
+    setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
 }
 
 
@@ -133,7 +146,7 @@ Engine::nextTrack()
     if (_trackNumberInPlaylist + 1 < _playlist.size()) {
         _trackNumberInPlaylist++;
         Omm::Av::Log::instance()->upnpav().debug("engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
-        setUri(_playlist[_trackNumberInPlaylist]);
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
 }
 
@@ -144,7 +157,7 @@ Engine::previousTrack()
     if (_trackNumberInPlaylist - 1 >= 0) {
         _trackNumberInPlaylist--;
         Omm::Av::Log::instance()->upnpav().debug("engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
-        setUri(_playlist[_trackNumberInPlaylist]);
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
 }
 
@@ -190,7 +203,7 @@ Engine::transportStateChanged()
     Variant val;
     val.setValue(newTransportState);
     Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
-    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+//    _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
 
@@ -202,7 +215,7 @@ Engine::endOfStream(Poco::Timer& timer)
         Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
         _trackNumberInPlaylist++;
         stop();
-        setUri(_playlist[_trackNumberInPlaylist]);
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
         play();
     }
 

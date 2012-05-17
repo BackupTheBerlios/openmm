@@ -465,9 +465,9 @@ UpnpApplication::generateConfigForm()
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + serverUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
-            "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\"> <option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT +
-                "</option><option " + (layout == Av::ServerContainer::LAYOUT_DIR_STRUCT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_DIR_STRUCT +
-                "</option><option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
+            "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\"> <option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
+                "<option " + (layout == Av::ServerContainer::LAYOUT_DIR_STRUCT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
+                "<option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"delete." + *it + "\" value=\"Delete\"></td></tr>\n"
             "</table>"
@@ -1061,9 +1061,27 @@ MediaRendererGroupWidget::selectedItem(int row)
 
 
 void
+MediaRendererDevice::initController()
+{
+    _rendererName.setLabel(getFriendlyName());
+}
+
+
+void
+MediaRendererDevice::newUri(const std::string& uri)
+{
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
+    _trackName.setLabel(uri);
+    syncViews();
+}
+
+
+void
 MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
+    _trackName.setLabel(artist + " - " + title);
+    syncViews();
 }
 
 
@@ -1089,6 +1107,8 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
 std::string
 MediaRendererDevice::getTransportState()
 {
+    // FIXME: track name should be retrieved from CtlService::TransportState of the corresponding AVTransport instance.
+    //        Don't store it in a separate class member.
     return _transportState;
 }
 
@@ -1286,19 +1306,6 @@ public:
 };
 
 
-class RendererName : public Gui::Label
-{
-public:
-    RendererName(Gui::View* pParent = 0) : Gui::Label(pParent) {}
-
-    virtual std::string getLabel()
-    {
-//        Gui::Log::instance()->gui().debug("media renderer name get label");
-        return static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel())->getFriendlyName();
-    }
-};
-
-
 MediaRendererView::MediaRendererView()
 {
     setName("media renderer view");
@@ -1311,12 +1318,25 @@ MediaRendererView::MediaRendererView()
     _pVolSlider = new VolSlider(this);
     _pSeekSlider = new SeekSlider(this);
 
-    _pRendererName = new RendererName(this);
+//    _pRendererName = new RendererName(this);
+    _pRendererName = new Gui::LabelView(this);
     _pRendererName->setAlignment(Gui::View::AlignCenter);
+
+    _pTrackName = new Gui::LabelView(this);
+    _pTrackName->setAlignment(Gui::View::AlignCenter);
 
     setSizeConstraint(800, 40, Gui::View::Pref);
     resize(800, 40);
     setLayout(&_layout);
+}
+
+
+void
+MediaRendererView::setModel(Gui::Model* pModel)
+{
+    _pRendererName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_rendererName);
+    _pTrackName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_trackName);
+    Gui::View::setModel(pModel);
 }
 
 
@@ -1331,6 +1351,7 @@ void
 MediaRendererView::syncViewImpl()
 {
     Gui::Log::instance()->gui().debug("media renderer view sync view impl");
+    // FIXME: submodels should by synced implicitely
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();

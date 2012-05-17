@@ -145,6 +145,7 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
 
     // dispatcher code for last change state var
     for (LastChangeReader::ChangeSetIterator instanceIdIt = lastChangeReader.beginChangeSet(); instanceIdIt != lastChangeReader.endChangeSet(); ++instanceIdIt) {
+        // instance id of change set can be handled here
         for (LastChangeSet::StateVarIterator it = (*instanceIdIt).beginStateVar(); it != (*instanceIdIt).endStateVar(); ++it) {
             std::string stateVarName = (*it).first;
             std::string val = (*it).second["val"];
@@ -152,6 +153,12 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 Log::instance()->upnpav().debug("controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTransportState(val);
+                }
+            }
+            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_URI) {
+                Log::instance()->upnpav().debug("controller, current track uri changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
+                if (_pMediaRenderer) {
+                    _pMediaRenderer->newUri(val);
                 }
             }
             else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA) {

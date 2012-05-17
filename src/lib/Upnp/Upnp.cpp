@@ -81,13 +81,13 @@ Log::Log()
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_ERROR);
 #endif
 }
 
@@ -1691,7 +1691,7 @@ EventMessageQueue::~EventMessageQueue()
 void
 EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
-//    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
+    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
@@ -1706,14 +1706,14 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
         _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
         Log::instance()->event().debug("timer started.");
     }
-//    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
+    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
 }
 
 
 void
 EventMessageQueue::sendEventMessage(Poco::Timer& timer)
 {
-//    Log::instance()->event().debug("event message queue sends event notifications ...");
+    Log::instance()->event().debug("event message queue sends event notifications ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
 //    _lock.lock();
@@ -1730,7 +1730,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
     for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
         (*i)->sendEventMessage(eventMessage);
     }
-//    Log::instance()->event().debug("event message queue sends event notifications finished.");
+    Log::instance()->event().debug("event message queue sends event notifications finished.");
 }
 
 

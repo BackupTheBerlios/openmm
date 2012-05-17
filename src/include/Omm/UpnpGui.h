@@ -312,6 +312,8 @@ private:
 
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
+    friend class MediaRendererView;
+
 public:
     MediaRendererDevice() : _transportState(""), _volume(-1) {}
 
@@ -319,13 +321,18 @@ public:
     ui2 getVolume();
 
 private:
+    virtual void initController();
+
     virtual void newPosition(int duration, int position) {}
+    virtual void newUri(const std::string& uri);
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
     virtual void newVolume(const int volume);
     virtual void newTransportState(const std::string& transportState);
 
-    std::string _transportState;
-    int         _volume;
+    std::string         _transportState;
+    Gui::LabelModel     _rendererName;
+    Gui::LabelModel     _trackName;
+    int                 _volume;
 };
 
 
@@ -333,6 +340,9 @@ class MediaRendererView : public Gui::View
 {
 public:
     MediaRendererView();
+
+    // FIXME: add submodels in setModel, no needed if submodels are supported
+    virtual void setModel(Gui::Model* pModel);
 
     void selectedRenderer();
 
@@ -346,7 +356,8 @@ private:
     Gui::Button*            _pForwButton;
     Gui::Slider*            _pVolSlider;
     Gui::Slider*            _pSeekSlider;
-    Gui::Label*             _pRendererName;
+    Gui::LabelView*         _pRendererName;
+    Gui::LabelView*         _pTrackName;
 };
 
 
