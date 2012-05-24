@@ -23,10 +23,15 @@
 #define UpnpAv_INCLUDED
 
 #include <string>
+#include <list>
+#include <map>
 
 #include "UpnpTypes.h"
 
 namespace Omm {
+
+class Device;
+
 namespace Av {
 
 
@@ -203,6 +208,126 @@ class PresetName
 public:
     const static std::string FACTORY_DEFAULTS;
     const static std::string INSTALLATION_DEFAULTS;
+};
+
+
+class ProtocolInfo
+{
+public:
+    ProtocolInfo();
+    ProtocolInfo(const ProtocolInfo& protInfo);
+    ProtocolInfo(const std::string& infoString);
+
+    std::string getMimeString() const;
+    std::string getDlnaString() const;
+
+private:
+    std::string _mime;
+    std::string _dlna;
+};
+
+
+class CsvList
+{
+public:
+    CsvList(const std::string& csvListString = "");
+    CsvList(const std::string& item1, const std::string& item2, const std::string& item3 = "", const std::string& item4 = "", const std::string& item5 = "");
+    CsvList(const CsvList& csvList);
+
+    typedef std::list<std::string>::iterator Iterator;
+    Iterator begin();
+    Iterator end();
+
+    std::size_t getSize();
+    void append(const std::string& item);
+    void remove(const std::string& item);
+
+    virtual std::string toString();
+
+private:
+    std::list<std::string>      _items;
+};
+
+
+class ConnectionManagerId
+{
+public:
+    ConnectionManagerId();
+    ConnectionManagerId(const std::string& uuid, const std::string& serviceId);
+
+    void parseManagerIdString(const std::string& idString);
+
+    std::string toString();
+    std::string getUuid();
+    std::string getServiceId();
+
+private:
+    std::string         _uuid;
+    std::string         _serviceId; // NOTE: which service?
+};
+
+
+class ConnectionPeer
+{
+    friend class Connection;
+    friend class CtlConnectionManagerImpl;
+    friend class DevConnectionManagerRendererImpl;
+    friend class DevConnectionManagerServerImpl;
+
+public:
+    ConnectionPeer();
+
+    ui4 getConnectionId();
+    ConnectionManagerId& getConnectionManagerId();
+
+private:
+    ConnectionManagerId         _managerId;
+    ui4                         _connectionId;
+    ui4                         _AVTId;
+    ui4                         _RCId;
+    ProtocolInfo                _protInfo;
+};
+
+
+class Connection
+{
+public:
+//    Connection(Device* pServer, Device* pRenderer);
+    Connection(const std::string& serverUuid, const std::string& rendererUuid);
+
+    i4 getAvTransportId();
+    ConnectionPeer& getRenderer();
+    ConnectionPeer& getServer();
+    ConnectionPeer& getThisPeer(const std::string& deviceType);
+    ConnectionPeer& getRemotePeer(const std::string& deviceType);
+
+private:
+//    Device*                     _pServer;
+    ConnectionPeer              _server;
+//    Device*                     _pRenderer;
+    ConnectionPeer              _renderer;
+    bool                        _pull;
+};
+
+
+class ConnectionManager
+{
+public:
+    ConnectionManager(Device* pDevice);
+
+    typedef std::map<ui4, Connection*>::iterator ConnectionIterator;
+    ConnectionIterator beginConnection();
+    ConnectionIterator endConnection();
+
+    virtual void addConnection(Connection* pConnection, const std::string& protInfo);
+    void removeConnection(ui4 connectionId);
+    Connection* getConnection(ui4 connectionId);
+    int getConnectionCount();
+
+private:
+    // device that owns this connection manager
+    Device*                     _pDevice;
+    std::map<ui4, Connection*>  _connections;
 };
 
 

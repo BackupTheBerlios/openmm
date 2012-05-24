@@ -189,6 +189,299 @@ const std::string PresetName::FACTORY_DEFAULTS = "FactoryDefaults";
 const std::string PresetName::INSTALLATION_DEFAULTS = "InstallationDefaults";
 
 
+ProtocolInfo::ProtocolInfo() :
+_mime(""),
+_dlna("")
+{
+}
+
+
+ProtocolInfo::ProtocolInfo(const ProtocolInfo& protInfo) :
+_mime(protInfo._mime),
+_dlna(protInfo._dlna)
+{
+}
+
+
+ProtocolInfo::ProtocolInfo(const std::string& infoString)
+{
+    Log::instance()->upnpav().debug("Protocol Info: " + infoString);
+
+    Poco::StringTokenizer infoTokens(infoString, ":");
+    try {
+        _mime = infoTokens[2];
+        _dlna = infoTokens[3];
+    }
+    catch (Poco::RangeException) {
+    }
+    Log::instance()->upnpav().debug("Protocol Info mime: " + _mime + ", dlna: " + _dlna);
+}
+
+
+std::string
+ProtocolInfo::getMimeString() const
+{
+    return _mime;
+}
+
+
+std::string
+ProtocolInfo::getDlnaString() const
+{
+    return _dlna;
+}
+
+
+CsvList::CsvList(const std::string& csvListString)
+{
+    Poco::StringTokenizer items(csvListString, ",");
+    for (Poco::StringTokenizer::Iterator it = items.begin(); it != items.end(); ++it) {
+        _items.push_back(*it);
+    }
+}
+
+
+CsvList::CsvList(const std::string& item1, const std::string& item2, const std::string& item3, const std::string& item4, const std::string& item5)
+{
+    _items.push_back(item1);
+    _items.push_back(item2);
+    if (item3 != "") {
+        _items.push_back(item3);
+    }
+    if (item4 != "") {
+        _items.push_back(item4);
+    }
+    if (item5 != "") {
+        _items.push_back(item5);
+    }
+}
+
+
+CsvList::CsvList(const CsvList& csvList)
+{
+    for (std::list<std::string>::const_iterator it = csvList._items.begin(); it != csvList._items.end(); ++it) {
+        append(*it);
+    }
+}
+
+
+CsvList::Iterator
+CsvList::begin()
+{
+    return _items.begin();
+}
+
+
+CsvList::Iterator
+CsvList::end()
+{
+    return _items.end();
+}
+
+
+std::size_t
+CsvList::getSize()
+{
+    return _items.size();
+}
+
+
+void
+CsvList::append(const std::string& item)
+{
+    _items.push_back(item);
+}
+
+
+void
+CsvList::remove(const std::string& item)
+{
+    std::list<std::string>::iterator pos = std::find(_items.begin(), _items.end(), item);
+    if (pos != _items.end()) {
+        _items.erase(pos);
+    }
+}
+
+
+std::string
+CsvList::toString()
+{
+    std::string res;
+    for (std::list<std::string>::iterator it = _items.begin(); it != _items.end(); ++it) {
+        res.append(*it + ",");
+    }
+    return res.substr(0, res.length() - 1);
+}
+
+
+Connection::Connection(const std::string& serverUuid, const std::string& rendererUuid) :
+_pull(false)
+{
+    _server._managerId = ConnectionManagerId(serverUuid, "serviceId");
+    _renderer._managerId = ConnectionManagerId(rendererUuid, "serviceId");
+}
+
+
+i4
+Connection::getAvTransportId()
+{
+    return 0;
+}
+
+
+ConnectionPeer&
+Connection::getRenderer()
+{
+    return _renderer;
+}
+
+
+ConnectionPeer&
+Connection::getServer()
+{
+    return _server;
+}
+
+
+ConnectionPeer&
+Connection::getThisPeer(const std::string& deviceType)
+{
+    if (deviceType == DeviceType::MEDIA_RENDERER_1) {
+        return _renderer;
+    }
+    else {
+        return _server;
+    }
+}
+
+
+ConnectionPeer&
+Connection::getRemotePeer(const std::string& deviceType)
+{
+    if (deviceType == DeviceType::MEDIA_RENDERER_1) {
+        return _server;
+    }
+    else {
+        return _renderer;
+    }
+}
+
+
+ConnectionManagerId::ConnectionManagerId()
+{
+}
+
+
+ConnectionManagerId::ConnectionManagerId(const std::string& uuid, const std::string& serviceId) :
+_uuid(uuid),
+_serviceId(serviceId)
+{
+}
+
+
+void
+ConnectionManagerId::parseManagerIdString(const std::string& idString)
+{
+    Poco::StringTokenizer tokens(idString, "/");
+    if (tokens.count() > 2) {
+        throw Poco::Exception("parsing connection manager id \"" + idString + "\" failed");
+    }
+
+    _uuid = tokens[0];
+    _serviceId = tokens[1];
+}
+
+
+std::string
+ConnectionManagerId::toString()
+{
+    return _uuid + "/" + _serviceId;
+}
+
+
+std::string
+ConnectionManagerId::getUuid()
+{
+    return _uuid;
+}
+
+
+std::string
+ConnectionManagerId::getServiceId()
+{
+    return _serviceId;
+}
+
+
+ConnectionPeer::ConnectionPeer()
+{
+
+}
+
+
+ui4
+ConnectionPeer::getConnectionId()
+{
+    return _connectionId;
+}
+
+
+ConnectionManagerId&
+ConnectionPeer::getConnectionManagerId()
+{
+    return _managerId;
+}
+
+
+ConnectionManager::ConnectionManager(Device* pDevice) :
+_pDevice(pDevice)
+{
+}
+
+
+ConnectionManager::ConnectionIterator
+ConnectionManager::beginConnection()
+{
+    return _connections.begin();
+}
+
+
+ConnectionManager::ConnectionIterator
+ConnectionManager::endConnection()
+{
+    return _connections.end();
+}
+
+
+void
+ConnectionManager::addConnection(Connection* pConnection, const std::string& protInfo)
+{
+    ui4 connectionId = pConnection->getThisPeer(_pDevice->getDeviceType()).getConnectionId();
+    _connections[connectionId] = pConnection;
+}
+
+
+void
+ConnectionManager::removeConnection(ui4 connectionId)
+{
+//    delete _connections[connectionId];
+    _connections.erase(connectionId);
+}
+
+
+Connection*
+ConnectionManager::getConnection(ui4 connectionId)
+{
+    return _connections[connectionId];
+}
+
+
+int
+ConnectionManager::getConnectionCount()
+{
+    return _connections.size();
+}
+
 
 LastChangeSet::StateVarIterator
 LastChangeSet::beginStateVar()

@@ -21,7 +21,9 @@
 
 #include "../UpnpPrivate.h"
 #include "UpnpAvCtlRenderer.h"
+#include "UpnpAvCtlServer.h"
 #include "UpnpAv.h"
+#include "UpnpAvPrivate.h"
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
 #include "UpnpAvCtlObject.h"
@@ -46,7 +48,7 @@ CtlMediaRenderer::addCtlDeviceCode()
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaRendererCode = new CtlMediaRendererCode(this,
         new CtlRenderingControlImpl(0, this),
-        new CtlConnectionManagerImpl(0),
+        new CtlConnectionManagerImpl(this),
         new CtlAVTransportImpl(0, this));
     setCtlDeviceCode(_pCtlMediaRendererCode);
 }
@@ -77,16 +79,25 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
     // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
     AbstractResource* pContainerRes = pParentObject->getResource();
+    CtlMediaServer* pServer = pObject->getServer();
+
+    // when setting AVTransportUri, server and renderer are connected via ControlManager service
+    Connection* pConnection = new Connection(pServer->getUuid(), getUuid());
+    pServer->getConnectionManager()->addConnection(pConnection, pRes->getProtInfo());
+    // TODO: protocol info matching and pass chosen protocol to addConnection();
+    getConnectionManager()->addConnection(pConnection, "");
+    ui4 AvTransportId = pConnection->getAvTransportId();
+
     if (_usePlaylistResource && pContainerRes) {
         Log::instance()->upnpav().debug("selected object is child of a container with playlist resource");
         std::string metaData;
         MediaObjectWriter2 writer;
         writer.write(metaData, pParentObject);
         try {
-            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pContainerRes->getUri(), metaData);
+            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(AvTransportId, pContainerRes->getUri(), metaData);
             Variant seekTarget;
             seekTarget.setValue(row);
-            _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_TRACK_NR, seekTarget.getValue());
+            _pCtlMediaRendererCode->AVTransport()->Seek(AvTransportId, AvTransportArgument::SEEK_MODE_TRACK_NR, seekTarget.getValue());
         }
         catch (Poco::Exception e) {
 //            error(e.message());
@@ -99,7 +110,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
         MediaObjectWriter2 writer;
         writer.write(metaData, pObject);
         try {
-            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
+            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(AvTransportId, pRes->getUri(), metaData);
         }
         catch (Poco::Exception e) {
 //            error(e.message());
@@ -221,6 +232,13 @@ CtlMediaRenderer::getVolume()
 }
 
 
+ConnectionManager*
+CtlMediaRenderer::getConnectionManager()
+{
+    return static_cast<CtlConnectionManagerImpl*>(_pCtlMediaRendererCode->ConnectionManager());
+}
+
+
 std::string
 MediaRendererGroupDelegate::getDeviceType()
 {
@@ -240,7 +258,7 @@ MediaRendererGroupDelegate::init()
 {
     Log::instance()->upnpav().debug("media renderer delegate init");
     Controller* pController = _pDeviceGroup->getController();
-    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
+//    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
     pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaObjectSelectedNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
 }
 

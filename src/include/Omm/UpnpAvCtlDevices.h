@@ -156,11 +156,13 @@ class CtlConnectionManager
 
 public:
     void GetProtocolInfo(std::string& Source, std::string& Sink);
+    void PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID);
     void ConnectionComplete(const i4& ConnectionID);
     void GetCurrentConnectionIDs(std::string& ConnectionIDs);
     void GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status);
 
     void _reqGetProtocolInfo();
+    void _reqPrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const Omm::i4& PeerConnectionID, const std::string& Direction);
     void _reqConnectionComplete(const i4& ConnectionID);
     void _reqGetCurrentConnectionIDs();
     void _reqGetCurrentConnectionInfo(const i4& ConnectionID);
@@ -173,6 +175,7 @@ protected:
     virtual ~CtlConnectionManager() {}
 
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink) = 0;
+    virtual void _ansPrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const Omm::i4& PeerConnectionID, const std::string& Direction, const Omm::i4& ConnectionID, const Omm::i4& AVTransportID, const Omm::i4& RcsID) = 0;
     virtual void _ansConnectionComplete(const i4& ConnectionID) = 0;
     virtual void _ansGetCurrentConnectionIDs(const std::string& ConnectionIDs) = 0;
     virtual void _ansGetCurrentConnectionInfo(const i4& ConnectionID, const i4& RcsID, const i4& AVTransportID, const std::string& ProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const std::string& Status) = 0;
@@ -185,6 +188,7 @@ protected:
 
 private:
     void _threadGetProtocolInfo(Action* pAction);
+    void _threadPrepareForConnection(Action* pAction);
     void _threadConnectionComplete(Action* pAction);
     void _threadGetCurrentConnectionIDs(Action* pAction);
     void _threadGetCurrentConnectionInfo(Action* pAction);

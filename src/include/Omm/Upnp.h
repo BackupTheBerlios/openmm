@@ -234,7 +234,7 @@ public:
         }
         else {
             Log::instance()->upnp().error("container has no element with key: " + key);
-            throw Poco::Exception("");
+            throw Poco::Exception("container has no element with key: " + key);
         }
     }
 

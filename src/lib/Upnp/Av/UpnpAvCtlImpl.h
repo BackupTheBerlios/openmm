@@ -56,13 +56,16 @@ private:
 };
 
 
-class CtlConnectionManagerImpl : public CtlConnectionManager
+class CtlConnectionManagerImpl : public CtlConnectionManager, public ConnectionManager
 {
 public:
-    CtlConnectionManagerImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+    CtlConnectionManagerImpl(Device* pLocalDevice) : ConnectionManager(pLocalDevice), _pThisDevice(pLocalDevice) {}
+
+    virtual void addConnection(Connection* pConnection, const std::string& protInfo);
 
 private:
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink);
+    virtual void _ansPrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const i4& ConnectionID, const i4& AVTransportID, const i4& RcsID);
     virtual void _ansConnectionComplete(const i4& ConnectionID);
     virtual void _ansGetCurrentConnectionIDs(const std::string& ConnectionIDs);
     virtual void _ansGetCurrentConnectionInfo(const i4& ConnectionID, const i4& RcsID, const i4& AVTransportID, const std::string& ProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const std::string& Status);
@@ -71,7 +74,7 @@ private:
     virtual void _changedSinkProtocolInfo(const std::string& val);
     virtual void _changedCurrentConnectionIDs(const std::string& val);
 
-    AvUserInterface*    _pAvUserInterface;
+    Device*             _pThisDevice;
 };
 
 

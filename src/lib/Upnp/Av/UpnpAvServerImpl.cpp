@@ -159,29 +159,64 @@ DevConnectionManagerServerImpl::GetProtocolInfo(std::string& Source, std::string
 
 
 void
+DevConnectionManagerServerImpl::PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID)
+{
+    ConnectionManagerId peerManagerId;
+    try {
+        peerManagerId.parseManagerIdString(PeerConnectionManager);
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("could not parse PeerConnectionManager string: " + e.displayText());
+        return;
+    }
+    Connection* pConnection = new Connection(peerManagerId.getUuid(), _pThisDevice->getUuid());
+
+    ConnectionPeer& thisPeer = pConnection->getRenderer();
+    ConnectionPeer& remotePeer = pConnection->getServer();
+
+    thisPeer._connectionId = getConnectionCount();
+    thisPeer._AVTId = -1;
+    thisPeer._RCId = -1;
+    ConnectionID = thisPeer._connectionId;
+    AVTransportID = thisPeer._AVTId;
+    RcsID = thisPeer._RCId;
+
+    remotePeer._connectionId = PeerConnectionID;
+
+    addConnection(pConnection, RemoteProtocolInfo);
+
+    _connectionIds.append(Poco::NumberFormatter::format(ConnectionID));
+    _setCurrentConnectionIDs(_connectionIds.toString());
+}
+
+
+void
 DevConnectionManagerServerImpl::ConnectionComplete(const i4& ConnectionID)
 {
-// begin of your own code
-
-// end of your own code
+    removeConnection(ConnectionID);
+    _connectionIds.remove(Poco::NumberFormatter::format(ConnectionID));
 }
 
 
 void
 DevConnectionManagerServerImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
-// begin of your own code
-
-// end of your own code
+    ConnectionIDs = _connectionIds.toString();
 }
 
 
 void
 DevConnectionManagerServerImpl::GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status)
 {
-// begin of your own code
+    Connection* pConnection = getConnection(ConnectionID);
+    if (pConnection) {
+        RcsID = pConnection->getServer()._RCId;
+        AVTransportID = pConnection->getServer()._AVTId;
+//        ProtocolInfo = pConnection->getServer()._protInfo;
 
-// end of your own code
+        PeerConnectionManager = pConnection->getRenderer()._managerId.toString();
+        PeerConnectionID = pConnection->getRenderer()._connectionId;
+    }
 }
 
 

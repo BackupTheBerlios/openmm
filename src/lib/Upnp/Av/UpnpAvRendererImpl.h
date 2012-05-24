@@ -68,13 +68,16 @@ private:
 };
 
 
-class DevConnectionManagerRendererImpl : public DevConnectionManager
+class DevConnectionManagerRendererImpl : public DevConnectionManager, public ConnectionManager
 {
+    friend class MediaRenderer;
+
 public:
-    DevConnectionManagerRendererImpl() {}
-    
+    DevConnectionManagerRendererImpl(Device* pThisDevice) : ConnectionManager(pThisDevice), _pThisDevice(pThisDevice) {}
+
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
+    virtual void PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID);
     virtual void ConnectionComplete(const i4& ConnectionID);
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs);
     virtual void GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status);
@@ -82,17 +85,18 @@ private:
     virtual void initStateVars();
 
     std::vector<Engine*>                _engines;
+    Device*                             _pThisDevice;
 };
 
 
 class DevRenderingControlRendererImpl : public DevRenderingControl
 {
     friend class MediaRenderer;
-    
+
 public:
     DevRenderingControlRendererImpl() : _pLastChange(new RenderingControlLastChange(_pService)) {}
     ~DevRenderingControlRendererImpl() { delete _pLastChange; }
-    
+
 private:
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList);
     virtual void SelectPreset(const ui4& InstanceID, const std::string& PresetName);
@@ -133,7 +137,7 @@ private:
     virtual void initStateVars();
 
     void addEngine(Engine* pEngine);
-    
+
     std::vector<Engine*>                _engines;
     RenderingControlLastChange*         _pLastChange;
 };

@@ -29,6 +29,7 @@
 #include "Poco/Data/Common.h"
 
 #include "UpnpTypes.h"
+#include "UpnpAv.h"
 #include "UpnpAvLogger.h"
 #include "Util.h"
 
@@ -197,44 +198,6 @@ public:
     bool isAudio();
     bool isVideo();
     bool isImage();
-};
-
-
-class ProtocolInfo
-{
-public:
-    ProtocolInfo();
-    ProtocolInfo(const ProtocolInfo& protInfo);
-    ProtocolInfo(const std::string& infoString);
-
-    std::string getMimeString() const;
-    std::string getDlnaString() const;
-
-private:
-    std::string _mime;
-    std::string _dlna;
-};
-
-
-class CsvList
-{
-public:
-    CsvList(const std::string& csvListString = "");
-    CsvList(const std::string& item1, const std::string& item2, const std::string& item3 = "", const std::string& item4 = "", const std::string& item5 = "");
-    CsvList(const CsvList& csvList);
-
-    typedef std::list<std::string>::iterator Iterator;
-    Iterator begin();
-    Iterator end();
-
-    std::size_t getSize();
-    void append(const std::string& item);
-    void remove(const std::string& item);
-
-    virtual std::string toString();
-
-private:
-    std::list<std::string>      _items;
 };
 
 

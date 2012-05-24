@@ -281,7 +281,7 @@ CtlAVTransport::_getLastChange()
 }
 
 
-void 
+void
 CtlAVTransport::_reqSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     Action* pAction = _pService->getAction("SetAVTransportURI")->clone();
@@ -292,7 +292,7 @@ CtlAVTransport::_reqSetAVTransportURI(const ui4& InstanceID, const std::string& 
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqGetMediaInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetMediaInfo")->clone();
@@ -301,7 +301,7 @@ CtlAVTransport::_reqGetMediaInfo(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqGetTransportInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetTransportInfo")->clone();
@@ -310,7 +310,7 @@ CtlAVTransport::_reqGetTransportInfo(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqGetPositionInfo(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetPositionInfo")->clone();
@@ -319,7 +319,7 @@ CtlAVTransport::_reqGetPositionInfo(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqGetDeviceCapabilities(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetDeviceCapabilities")->clone();
@@ -328,7 +328,7 @@ CtlAVTransport::_reqGetDeviceCapabilities(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqGetTransportSettings(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetTransportSettings")->clone();
@@ -337,7 +337,7 @@ CtlAVTransport::_reqGetTransportSettings(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqStop(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Stop")->clone();
@@ -346,7 +346,7 @@ CtlAVTransport::_reqStop(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqPlay(const ui4& InstanceID, const std::string& Speed)
 {
     Action* pAction = _pService->getAction("Play")->clone();
@@ -356,7 +356,7 @@ CtlAVTransport::_reqPlay(const ui4& InstanceID, const std::string& Speed)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqPause(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Pause")->clone();
@@ -365,7 +365,7 @@ CtlAVTransport::_reqPause(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqSeek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     Action* pAction = _pService->getAction("Seek")->clone();
@@ -376,7 +376,7 @@ CtlAVTransport::_reqSeek(const ui4& InstanceID, const std::string& Unit, const s
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqNext(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Next")->clone();
@@ -385,7 +385,7 @@ CtlAVTransport::_reqNext(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_reqPrevious(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("Previous")->clone();
@@ -394,7 +394,7 @@ CtlAVTransport::_reqPrevious(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlAVTransport::_threadSetAVTransportURI(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -404,7 +404,7 @@ CtlAVTransport::_threadSetAVTransportURI(Action* pAction)
     _ansSetAVTransportURI(InstanceID, CurrentURI, CurrentURIMetaData);
 }
 
-void 
+void
 CtlAVTransport::_threadGetMediaInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -421,7 +421,7 @@ CtlAVTransport::_threadGetMediaInfo(Action* pAction)
     _ansGetMediaInfo(InstanceID, NrTracks, MediaDuration, CurrentURI, CurrentURIMetaData, NextURI, NextURIMetaData, PlayMedium, RecordMedium, WriteStatus);
 }
 
-void 
+void
 CtlAVTransport::_threadGetTransportInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -432,7 +432,7 @@ CtlAVTransport::_threadGetTransportInfo(Action* pAction)
     _ansGetTransportInfo(InstanceID, CurrentTransportState, CurrentTransportStatus, CurrentSpeed);
 }
 
-void 
+void
 CtlAVTransport::_threadGetPositionInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -448,7 +448,7 @@ CtlAVTransport::_threadGetPositionInfo(Action* pAction)
     _ansGetPositionInfo(InstanceID, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
 }
 
-void 
+void
 CtlAVTransport::_threadGetDeviceCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -459,7 +459,7 @@ CtlAVTransport::_threadGetDeviceCapabilities(Action* pAction)
     _ansGetDeviceCapabilities(InstanceID, PlayMedia, RecMedia, RecQualityModes);
 }
 
-void 
+void
 CtlAVTransport::_threadGetTransportSettings(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -469,7 +469,7 @@ CtlAVTransport::_threadGetTransportSettings(Action* pAction)
     _ansGetTransportSettings(InstanceID, PlayMode, RecQualityMode);
 }
 
-void 
+void
 CtlAVTransport::_threadStop(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -477,7 +477,7 @@ CtlAVTransport::_threadStop(Action* pAction)
     _ansStop(InstanceID);
 }
 
-void 
+void
 CtlAVTransport::_threadPlay(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -486,7 +486,7 @@ CtlAVTransport::_threadPlay(Action* pAction)
     _ansPlay(InstanceID, Speed);
 }
 
-void 
+void
 CtlAVTransport::_threadPause(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -494,7 +494,7 @@ CtlAVTransport::_threadPause(Action* pAction)
     _ansPause(InstanceID);
 }
 
-void 
+void
 CtlAVTransport::_threadSeek(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -504,7 +504,7 @@ CtlAVTransport::_threadSeek(Action* pAction)
     _ansSeek(InstanceID, Unit, Target);
 }
 
-void 
+void
 CtlAVTransport::_threadNext(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -512,7 +512,7 @@ CtlAVTransport::_threadNext(Action* pAction)
     _ansNext(InstanceID);
 }
 
-void 
+void
 CtlAVTransport::_threadPrevious(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -530,6 +530,22 @@ CtlConnectionManager::GetProtocolInfo(std::string& Source, std::string& Sink)
     Source = pAction->getArgument<std::string>("Source");
     Sink = pAction->getArgument<std::string>("Sink");
 }
+
+
+void
+CtlConnectionManager::PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID)
+{
+    Action* pAction = _pService->getAction("PrepareForConnection")->clone();
+    pAction->setArgument<std::string>("RemoteProtocolInfo", RemoteProtocolInfo);
+    pAction->setArgument<std::string>("PeerConnectionManager", PeerConnectionManager);
+    pAction->setArgument<Omm::i4>("PeerConnectionID", PeerConnectionID);
+    pAction->setArgument<std::string>("Direction", Direction);
+    _pService->sendAction(pAction);
+    ConnectionID = pAction->getArgument<Omm::i4>("ConnectionID");
+    AVTransportID = pAction->getArgument<Omm::i4>("AVTransportID");
+    RcsID = pAction->getArgument<Omm::i4>("RcsID");
+}
+
 
 void
 CtlConnectionManager::ConnectionComplete(const i4& ConnectionID)
@@ -581,7 +597,7 @@ CtlConnectionManager::_getCurrentConnectionIDs()
 }
 
 
-void 
+void
 CtlConnectionManager::_reqGetProtocolInfo()
 {
     Action* pAction = _pService->getAction("GetProtocolInfo")->clone();
@@ -589,7 +605,21 @@ CtlConnectionManager::_reqGetProtocolInfo()
     thread.start();
 }
 
-void 
+
+void
+CtlConnectionManager::_reqPrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const Omm::i4& PeerConnectionID, const std::string& Direction)
+{
+    Action* pAction = _pService->getAction("PrepareForConnection")->clone();
+    pAction->setArgument<std::string>("RemoteProtocolInfo", RemoteProtocolInfo);
+    pAction->setArgument<std::string>("PeerConnectionManager", PeerConnectionManager);
+    pAction->setArgument<Omm::i4>("PeerConnectionID", PeerConnectionID);
+    pAction->setArgument<std::string>("Direction", Direction);
+    ActionThread<CtlConnectionManager> thread(this, &CtlConnectionManager::_threadPrepareForConnection, pAction);
+    thread.start();
+}
+
+
+void
 CtlConnectionManager::_reqConnectionComplete(const i4& ConnectionID)
 {
     Action* pAction = _pService->getAction("ConnectionComplete")->clone();
@@ -598,7 +628,7 @@ CtlConnectionManager::_reqConnectionComplete(const i4& ConnectionID)
     thread.start();
 }
 
-void 
+void
 CtlConnectionManager::_reqGetCurrentConnectionIDs()
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionIDs")->clone();
@@ -606,7 +636,7 @@ CtlConnectionManager::_reqGetCurrentConnectionIDs()
     thread.start();
 }
 
-void 
+void
 CtlConnectionManager::_reqGetCurrentConnectionInfo(const i4& ConnectionID)
 {
     Action* pAction = _pService->getAction("GetCurrentConnectionInfo")->clone();
@@ -615,7 +645,7 @@ CtlConnectionManager::_reqGetCurrentConnectionInfo(const i4& ConnectionID)
     thread.start();
 }
 
-void 
+void
 CtlConnectionManager::_threadGetProtocolInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -624,7 +654,23 @@ CtlConnectionManager::_threadGetProtocolInfo(Action* pAction)
     _ansGetProtocolInfo(Source, Sink);
 }
 
-void 
+
+void
+CtlConnectionManager::_threadPrepareForConnection(Action* pAction)
+{
+    _pService->sendAction(pAction);
+    std::string RemoteProtocolInfo = pAction->getArgument<std::string>("RemoteProtocolInfo");
+    std::string PeerConnectionManager = pAction->getArgument<std::string>("PeerConnectionManager");
+    Omm::i4 PeerConnectionID = pAction->getArgument<Omm::i4>("PeerConnectionID");
+    std::string Direction = pAction->getArgument<std::string>("Direction");
+    Omm::i4 ConnectionID = pAction->getArgument<Omm::i4>("ConnectionID");
+    Omm::i4 AVTransportID = pAction->getArgument<Omm::i4>("AVTransportID");
+    Omm::i4 RcsID = pAction->getArgument<Omm::i4>("RcsID");
+    _ansPrepareForConnection(RemoteProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, ConnectionID, AVTransportID, RcsID);
+}
+
+
+void
 CtlConnectionManager::_threadConnectionComplete(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -632,7 +678,7 @@ CtlConnectionManager::_threadConnectionComplete(Action* pAction)
     _ansConnectionComplete(ConnectionID);
 }
 
-void 
+void
 CtlConnectionManager::_threadGetCurrentConnectionIDs(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -640,7 +686,7 @@ CtlConnectionManager::_threadGetCurrentConnectionIDs(Action* pAction)
     _ansGetCurrentConnectionIDs(ConnectionIDs);
 }
 
-void 
+void
 CtlConnectionManager::_threadGetCurrentConnectionInfo(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -989,7 +1035,7 @@ CtlRenderingControl::_getLastChange()
 }
 
 
-void 
+void
 CtlRenderingControl::_reqListPresets(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("ListPresets")->clone();
@@ -998,7 +1044,7 @@ CtlRenderingControl::_reqListPresets(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSelectPreset(const ui4& InstanceID, const std::string& PresetName)
 {
     Action* pAction = _pService->getAction("SelectPreset")->clone();
@@ -1008,7 +1054,7 @@ CtlRenderingControl::_reqSelectPreset(const ui4& InstanceID, const std::string& 
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetBrightness(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBrightness")->clone();
@@ -1017,7 +1063,7 @@ CtlRenderingControl::_reqGetBrightness(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetBrightness(const ui4& InstanceID, const ui2& DesiredBrightness)
 {
     Action* pAction = _pService->getAction("SetBrightness")->clone();
@@ -1027,7 +1073,7 @@ CtlRenderingControl::_reqSetBrightness(const ui4& InstanceID, const ui2& Desired
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetContrast(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetContrast")->clone();
@@ -1036,7 +1082,7 @@ CtlRenderingControl::_reqGetContrast(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetContrast(const ui4& InstanceID, const ui2& DesiredContrast)
 {
     Action* pAction = _pService->getAction("SetContrast")->clone();
@@ -1046,7 +1092,7 @@ CtlRenderingControl::_reqSetContrast(const ui4& InstanceID, const ui2& DesiredCo
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetSharpness(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetSharpness")->clone();
@@ -1055,7 +1101,7 @@ CtlRenderingControl::_reqGetSharpness(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetSharpness(const ui4& InstanceID, const ui2& DesiredSharpness)
 {
     Action* pAction = _pService->getAction("SetSharpness")->clone();
@@ -1065,7 +1111,7 @@ CtlRenderingControl::_reqSetSharpness(const ui4& InstanceID, const ui2& DesiredS
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetRedVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetRedVideoGain")->clone();
@@ -1074,7 +1120,7 @@ CtlRenderingControl::_reqGetRedVideoGain(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetRedVideoGain(const ui4& InstanceID, const ui2& DesiredRedVideoGain)
 {
     Action* pAction = _pService->getAction("SetRedVideoGain")->clone();
@@ -1084,7 +1130,7 @@ CtlRenderingControl::_reqSetRedVideoGain(const ui4& InstanceID, const ui2& Desir
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetGreenVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetGreenVideoGain")->clone();
@@ -1093,7 +1139,7 @@ CtlRenderingControl::_reqGetGreenVideoGain(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetGreenVideoGain(const ui4& InstanceID, const ui2& DesiredGreenVideoGain)
 {
     Action* pAction = _pService->getAction("SetGreenVideoGain")->clone();
@@ -1103,7 +1149,7 @@ CtlRenderingControl::_reqSetGreenVideoGain(const ui4& InstanceID, const ui2& Des
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetBlueVideoGain(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBlueVideoGain")->clone();
@@ -1112,7 +1158,7 @@ CtlRenderingControl::_reqGetBlueVideoGain(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetBlueVideoGain(const ui4& InstanceID, const ui2& DesiredBlueVideoGain)
 {
     Action* pAction = _pService->getAction("SetBlueVideoGain")->clone();
@@ -1122,7 +1168,7 @@ CtlRenderingControl::_reqSetBlueVideoGain(const ui4& InstanceID, const ui2& Desi
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetRedVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetRedVideoBlackLevel")->clone();
@@ -1131,7 +1177,7 @@ CtlRenderingControl::_reqGetRedVideoBlackLevel(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetRedVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredRedVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetRedVideoBlackLevel")->clone();
@@ -1141,7 +1187,7 @@ CtlRenderingControl::_reqSetRedVideoBlackLevel(const ui4& InstanceID, const ui2&
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetGreenVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetGreenVideoBlackLevel")->clone();
@@ -1150,7 +1196,7 @@ CtlRenderingControl::_reqGetGreenVideoBlackLevel(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetGreenVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredGreenVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetGreenVideoBlackLevel")->clone();
@@ -1160,7 +1206,7 @@ CtlRenderingControl::_reqSetGreenVideoBlackLevel(const ui4& InstanceID, const ui
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetBlueVideoBlackLevel(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetBlueVideoBlackLevel")->clone();
@@ -1169,7 +1215,7 @@ CtlRenderingControl::_reqGetBlueVideoBlackLevel(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2& DesiredBlueVideoBlackLevel)
 {
     Action* pAction = _pService->getAction("SetBlueVideoBlackLevel")->clone();
@@ -1179,7 +1225,7 @@ CtlRenderingControl::_reqSetBlueVideoBlackLevel(const ui4& InstanceID, const ui2
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetColorTemperature (const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetColorTemperature ")->clone();
@@ -1188,7 +1234,7 @@ CtlRenderingControl::_reqGetColorTemperature (const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetColorTemperature(const ui4& InstanceID, const ui2& DesiredColorTemperature)
 {
     Action* pAction = _pService->getAction("SetColorTemperature")->clone();
@@ -1198,7 +1244,7 @@ CtlRenderingControl::_reqSetColorTemperature(const ui4& InstanceID, const ui2& D
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetHorizontalKeystone(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetHorizontalKeystone")->clone();
@@ -1207,7 +1253,7 @@ CtlRenderingControl::_reqGetHorizontalKeystone(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetHorizontalKeystone(const ui4& InstanceID, const i2& DesiredHorizontalKeystone)
 {
     Action* pAction = _pService->getAction("SetHorizontalKeystone")->clone();
@@ -1217,7 +1263,7 @@ CtlRenderingControl::_reqSetHorizontalKeystone(const ui4& InstanceID, const i2& 
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetVerticalKeystone(const ui4& InstanceID)
 {
     Action* pAction = _pService->getAction("GetVerticalKeystone")->clone();
@@ -1226,7 +1272,7 @@ CtlRenderingControl::_reqGetVerticalKeystone(const ui4& InstanceID)
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetVerticalKeystone(const ui4& InstanceID, const i2& DesiredVerticalKeystone)
 {
     Action* pAction = _pService->getAction("SetVerticalKeystone")->clone();
@@ -1236,7 +1282,7 @@ CtlRenderingControl::_reqSetVerticalKeystone(const ui4& InstanceID, const i2& De
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetMute(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetMute")->clone();
@@ -1246,7 +1292,7 @@ CtlRenderingControl::_reqGetMute(const ui4& InstanceID, const std::string& Chann
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
     Action* pAction = _pService->getAction("SetMute")->clone();
@@ -1257,7 +1303,7 @@ CtlRenderingControl::_reqSetMute(const ui4& InstanceID, const std::string& Chann
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetVolume(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolume")->clone();
@@ -1267,7 +1313,7 @@ CtlRenderingControl::_reqGetVolume(const ui4& InstanceID, const std::string& Cha
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolume")->clone();
@@ -1278,7 +1324,7 @@ CtlRenderingControl::_reqSetVolume(const ui4& InstanceID, const std::string& Cha
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetVolumeDB(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolumeDB")->clone();
@@ -1288,7 +1334,7 @@ CtlRenderingControl::_reqGetVolumeDB(const ui4& InstanceID, const std::string& C
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetVolumeDB(const ui4& InstanceID, const std::string& Channel, const i2& DesiredVolume)
 {
     Action* pAction = _pService->getAction("SetVolumeDB")->clone();
@@ -1299,7 +1345,7 @@ CtlRenderingControl::_reqSetVolumeDB(const ui4& InstanceID, const std::string& C
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetVolumeDBRange(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetVolumeDBRange")->clone();
@@ -1309,7 +1355,7 @@ CtlRenderingControl::_reqGetVolumeDBRange(const ui4& InstanceID, const std::stri
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqGetLoudness(const ui4& InstanceID, const std::string& Channel)
 {
     Action* pAction = _pService->getAction("GetLoudness")->clone();
@@ -1319,7 +1365,7 @@ CtlRenderingControl::_reqGetLoudness(const ui4& InstanceID, const std::string& C
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_reqSetLoudness(const ui4& InstanceID, const std::string& Channel, const bool& DesiredLoudness)
 {
     Action* pAction = _pService->getAction("SetLoudness")->clone();
@@ -1330,7 +1376,7 @@ CtlRenderingControl::_reqSetLoudness(const ui4& InstanceID, const std::string& C
     thread.start();
 }
 
-void 
+void
 CtlRenderingControl::_threadListPresets(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1339,7 +1385,7 @@ CtlRenderingControl::_threadListPresets(Action* pAction)
     _ansListPresets(InstanceID, CurrentPresetNameList);
 }
 
-void 
+void
 CtlRenderingControl::_threadSelectPreset(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1348,7 +1394,7 @@ CtlRenderingControl::_threadSelectPreset(Action* pAction)
     _ansSelectPreset(InstanceID, PresetName);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetBrightness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1357,7 +1403,7 @@ CtlRenderingControl::_threadGetBrightness(Action* pAction)
     _ansGetBrightness(InstanceID, CurrentBrightness);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetBrightness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1366,7 +1412,7 @@ CtlRenderingControl::_threadSetBrightness(Action* pAction)
     _ansSetBrightness(InstanceID, DesiredBrightness);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetContrast(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1375,7 +1421,7 @@ CtlRenderingControl::_threadGetContrast(Action* pAction)
     _ansGetContrast(InstanceID, CurrentContrast);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetContrast(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1384,7 +1430,7 @@ CtlRenderingControl::_threadSetContrast(Action* pAction)
     _ansSetContrast(InstanceID, DesiredContrast);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetSharpness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1393,7 +1439,7 @@ CtlRenderingControl::_threadGetSharpness(Action* pAction)
     _ansGetSharpness(InstanceID, CurrentSharpness);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetSharpness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1402,7 +1448,7 @@ CtlRenderingControl::_threadSetSharpness(Action* pAction)
     _ansSetSharpness(InstanceID, DesiredSharpness);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetRedVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1411,7 +1457,7 @@ CtlRenderingControl::_threadGetRedVideoGain(Action* pAction)
     _ansGetRedVideoGain(InstanceID, CurrentRedVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetRedVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1420,7 +1466,7 @@ CtlRenderingControl::_threadSetRedVideoGain(Action* pAction)
     _ansSetRedVideoGain(InstanceID, DesiredRedVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetGreenVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1429,7 +1475,7 @@ CtlRenderingControl::_threadGetGreenVideoGain(Action* pAction)
     _ansGetGreenVideoGain(InstanceID, CurrentGreenVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetGreenVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1438,7 +1484,7 @@ CtlRenderingControl::_threadSetGreenVideoGain(Action* pAction)
     _ansSetGreenVideoGain(InstanceID, DesiredGreenVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetBlueVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1447,7 +1493,7 @@ CtlRenderingControl::_threadGetBlueVideoGain(Action* pAction)
     _ansGetBlueVideoGain(InstanceID, CurrentBlueVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetBlueVideoGain(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1456,7 +1502,7 @@ CtlRenderingControl::_threadSetBlueVideoGain(Action* pAction)
     _ansSetBlueVideoGain(InstanceID, DesiredBlueVideoGain);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetRedVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1465,7 +1511,7 @@ CtlRenderingControl::_threadGetRedVideoBlackLevel(Action* pAction)
     _ansGetRedVideoBlackLevel(InstanceID, CurrentRedVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetRedVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1474,7 +1520,7 @@ CtlRenderingControl::_threadSetRedVideoBlackLevel(Action* pAction)
     _ansSetRedVideoBlackLevel(InstanceID, DesiredRedVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetGreenVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1483,7 +1529,7 @@ CtlRenderingControl::_threadGetGreenVideoBlackLevel(Action* pAction)
     _ansGetGreenVideoBlackLevel(InstanceID, CurrentGreenVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetGreenVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1492,7 +1538,7 @@ CtlRenderingControl::_threadSetGreenVideoBlackLevel(Action* pAction)
     _ansSetGreenVideoBlackLevel(InstanceID, DesiredGreenVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetBlueVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1501,7 +1547,7 @@ CtlRenderingControl::_threadGetBlueVideoBlackLevel(Action* pAction)
     _ansGetBlueVideoBlackLevel(InstanceID, CurrentBlueVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetBlueVideoBlackLevel(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1510,7 +1556,7 @@ CtlRenderingControl::_threadSetBlueVideoBlackLevel(Action* pAction)
     _ansSetBlueVideoBlackLevel(InstanceID, DesiredBlueVideoBlackLevel);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetColorTemperature (Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1519,7 +1565,7 @@ CtlRenderingControl::_threadGetColorTemperature (Action* pAction)
     _ansGetColorTemperature (InstanceID, CurrentColorTemperature);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetColorTemperature(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1528,7 +1574,7 @@ CtlRenderingControl::_threadSetColorTemperature(Action* pAction)
     _ansSetColorTemperature(InstanceID, DesiredColorTemperature);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetHorizontalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1537,7 +1583,7 @@ CtlRenderingControl::_threadGetHorizontalKeystone(Action* pAction)
     _ansGetHorizontalKeystone(InstanceID, CurrentHorizontalKeystone);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetHorizontalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1546,7 +1592,7 @@ CtlRenderingControl::_threadSetHorizontalKeystone(Action* pAction)
     _ansSetHorizontalKeystone(InstanceID, DesiredHorizontalKeystone);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetVerticalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1555,7 +1601,7 @@ CtlRenderingControl::_threadGetVerticalKeystone(Action* pAction)
     _ansGetVerticalKeystone(InstanceID, CurrentVerticalKeystone);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetVerticalKeystone(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1564,7 +1610,7 @@ CtlRenderingControl::_threadSetVerticalKeystone(Action* pAction)
     _ansSetVerticalKeystone(InstanceID, DesiredVerticalKeystone);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetMute(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1574,7 +1620,7 @@ CtlRenderingControl::_threadGetMute(Action* pAction)
     _ansGetMute(InstanceID, Channel, CurrentMute);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetMute(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1584,7 +1630,7 @@ CtlRenderingControl::_threadSetMute(Action* pAction)
     _ansSetMute(InstanceID, Channel, DesiredMute);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetVolume(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1594,7 +1640,7 @@ CtlRenderingControl::_threadGetVolume(Action* pAction)
     _ansGetVolume(InstanceID, Channel, CurrentVolume);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetVolume(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1604,7 +1650,7 @@ CtlRenderingControl::_threadSetVolume(Action* pAction)
     _ansSetVolume(InstanceID, Channel, DesiredVolume);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetVolumeDB(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1614,7 +1660,7 @@ CtlRenderingControl::_threadGetVolumeDB(Action* pAction)
     _ansGetVolumeDB(InstanceID, Channel, CurrentVolume);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetVolumeDB(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1624,7 +1670,7 @@ CtlRenderingControl::_threadSetVolumeDB(Action* pAction)
     _ansSetVolumeDB(InstanceID, Channel, DesiredVolume);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetVolumeDBRange(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1635,7 +1681,7 @@ CtlRenderingControl::_threadGetVolumeDBRange(Action* pAction)
     _ansGetVolumeDBRange(InstanceID, Channel, MinValue, MaxValue);
 }
 
-void 
+void
 CtlRenderingControl::_threadGetLoudness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1645,7 +1691,7 @@ CtlRenderingControl::_threadGetLoudness(Action* pAction)
     _ansGetLoudness(InstanceID, Channel, CurrentLoudness);
 }
 
-void 
+void
 CtlRenderingControl::_threadSetLoudness(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1801,7 +1847,7 @@ CtlContentDirectory::_getContainerUpdateIDs()
 }
 
 
-void 
+void
 CtlContentDirectory::_reqGetSearchCapabilities()
 {
     Action* pAction = _pService->getAction("GetSearchCapabilities")->clone();
@@ -1809,7 +1855,7 @@ CtlContentDirectory::_reqGetSearchCapabilities()
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqGetSortCapabilities()
 {
     Action* pAction = _pService->getAction("GetSortCapabilities")->clone();
@@ -1817,7 +1863,7 @@ CtlContentDirectory::_reqGetSortCapabilities()
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqGetSystemUpdateID()
 {
     Action* pAction = _pService->getAction("GetSystemUpdateID")->clone();
@@ -1825,7 +1871,7 @@ CtlContentDirectory::_reqGetSystemUpdateID()
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqBrowse(const std::string& ObjectID, const std::string& BrowseFlag, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
 {
     Action* pAction = _pService->getAction("Browse")->clone();
@@ -1839,7 +1885,7 @@ CtlContentDirectory::_reqBrowse(const std::string& ObjectID, const std::string& 
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqSearch(const std::string& ContainerID, const std::string& SearchCriteria, const std::string& Filter, const ui4& StartingIndex, const ui4& RequestedCount, const std::string& SortCriteria)
 {
     Action* pAction = _pService->getAction("Search")->clone();
@@ -1853,7 +1899,7 @@ CtlContentDirectory::_reqSearch(const std::string& ContainerID, const std::strin
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqCreateObject(const std::string& ContainerID, const std::string& Elements)
 {
     Action* pAction = _pService->getAction("CreateObject")->clone();
@@ -1863,7 +1909,7 @@ CtlContentDirectory::_reqCreateObject(const std::string& ContainerID, const std:
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqDestroyObject(const std::string& ObjectID)
 {
     Action* pAction = _pService->getAction("DestroyObject")->clone();
@@ -1872,7 +1918,7 @@ CtlContentDirectory::_reqDestroyObject(const std::string& ObjectID)
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqUpdateObject(const std::string& ObjectID, const std::string& CurrentTagValue, const std::string& NewTagValue)
 {
     Action* pAction = _pService->getAction("UpdateObject")->clone();
@@ -1883,7 +1929,7 @@ CtlContentDirectory::_reqUpdateObject(const std::string& ObjectID, const std::st
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqImportResource(const uri& SourceURI, const uri& DestinationURI)
 {
     Action* pAction = _pService->getAction("ImportResource")->clone();
@@ -1893,7 +1939,7 @@ CtlContentDirectory::_reqImportResource(const uri& SourceURI, const uri& Destina
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqGetTransferProgress(const ui4& TransferID)
 {
     Action* pAction = _pService->getAction("GetTransferProgress")->clone();
@@ -1902,7 +1948,7 @@ CtlContentDirectory::_reqGetTransferProgress(const ui4& TransferID)
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqDeleteResource(const uri& ResourceURI)
 {
     Action* pAction = _pService->getAction("DeleteResource")->clone();
@@ -1911,7 +1957,7 @@ CtlContentDirectory::_reqDeleteResource(const uri& ResourceURI)
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_reqCreateReference(const std::string& ContainerID, const std::string& ObjectID)
 {
     Action* pAction = _pService->getAction("CreateReference")->clone();
@@ -1921,7 +1967,7 @@ CtlContentDirectory::_reqCreateReference(const std::string& ContainerID, const s
     thread.start();
 }
 
-void 
+void
 CtlContentDirectory::_threadGetSearchCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1929,7 +1975,7 @@ CtlContentDirectory::_threadGetSearchCapabilities(Action* pAction)
     _ansGetSearchCapabilities(SearchCaps);
 }
 
-void 
+void
 CtlContentDirectory::_threadGetSortCapabilities(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1937,7 +1983,7 @@ CtlContentDirectory::_threadGetSortCapabilities(Action* pAction)
     _ansGetSortCapabilities(SortCaps);
 }
 
-void 
+void
 CtlContentDirectory::_threadGetSystemUpdateID(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1945,7 +1991,7 @@ CtlContentDirectory::_threadGetSystemUpdateID(Action* pAction)
     _ansGetSystemUpdateID(Id);
 }
 
-void 
+void
 CtlContentDirectory::_threadBrowse(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1962,7 +2008,7 @@ CtlContentDirectory::_threadBrowse(Action* pAction)
     _ansBrowse(ObjectID, BrowseFlag, Filter, StartingIndex, RequestedCount, SortCriteria, Result, NumberReturned, TotalMatches, UpdateID);
 }
 
-void 
+void
 CtlContentDirectory::_threadSearch(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1979,7 +2025,7 @@ CtlContentDirectory::_threadSearch(Action* pAction)
     _ansSearch(ContainerID, SearchCriteria, Filter, StartingIndex, RequestedCount, SortCriteria, Result, NumberReturned, TotalMatches, UpdateID);
 }
 
-void 
+void
 CtlContentDirectory::_threadCreateObject(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1990,7 +2036,7 @@ CtlContentDirectory::_threadCreateObject(Action* pAction)
     _ansCreateObject(ContainerID, Elements, ObjectID, Result);
 }
 
-void 
+void
 CtlContentDirectory::_threadDestroyObject(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -1998,7 +2044,7 @@ CtlContentDirectory::_threadDestroyObject(Action* pAction)
     _ansDestroyObject(ObjectID);
 }
 
-void 
+void
 CtlContentDirectory::_threadUpdateObject(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -2008,7 +2054,7 @@ CtlContentDirectory::_threadUpdateObject(Action* pAction)
     _ansUpdateObject(ObjectID, CurrentTagValue, NewTagValue);
 }
 
-void 
+void
 CtlContentDirectory::_threadImportResource(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -2018,7 +2064,7 @@ CtlContentDirectory::_threadImportResource(Action* pAction)
     _ansImportResource(SourceURI, DestinationURI, TransferID);
 }
 
-void 
+void
 CtlContentDirectory::_threadGetTransferProgress(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -2029,7 +2075,7 @@ CtlContentDirectory::_threadGetTransferProgress(Action* pAction)
     _ansGetTransferProgress(TransferID, TransferStatus, TransferLength, TransferTotal);
 }
 
-void 
+void
 CtlContentDirectory::_threadDeleteResource(Action* pAction)
 {
     _pService->sendAction(pAction);
@@ -2037,7 +2083,7 @@ CtlContentDirectory::_threadDeleteResource(Action* pAction)
     _ansDeleteResource(ResourceURI);
 }
 
-void 
+void
 CtlContentDirectory::_threadCreateReference(Action* pAction)
 {
     _pService->sendAction(pAction);

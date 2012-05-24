@@ -175,7 +175,54 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
 
 
 void
+CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::string& protInfo)
+{
+    Log::instance()->upnpav().debug("controller, add connection");
+
+    ConnectionPeer& thisPeer = pConnection->getThisPeer(_pThisDevice->getDeviceType());
+    ConnectionPeer& remotePeer = pConnection->getRemotePeer(_pThisDevice->getDeviceType());
+
+    i4 connectionId;
+    i4 avTransportId;
+    i4 rcId;
+    try {
+        PrepareForConnection(protInfo, remotePeer.getConnectionManagerId().toString(), -1, "Output", connectionId, avTransportId, rcId);
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("action \"PrepareForConnection\" not available on device");
+    }
+
+    thisPeer._connectionId = connectionId;
+    thisPeer._AVTId = avTransportId;
+    thisPeer._RCId = rcId;
+
+    ConnectionManager::addConnection(pConnection, protInfo);
+
+    std::string connectionIds;
+    GetCurrentConnectionIDs(connectionIds);
+    Log::instance()->upnpav().debug("connection ids: " + connectionIds);
+    i4 RcsID;
+    i4 AVTransportID;
+    std::string ProtocolInfo;
+    std::string PeerConnectionManager;
+    i4 PeerConnectionID;
+    std::string Direction;
+    std::string Status;
+    GetCurrentConnectionInfo(connectionId, RcsID, AVTransportID, ProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, Status);
+}
+
+
+void
 CtlConnectionManagerImpl::_ansGetProtocolInfo(const std::string& Source, const std::string& Sink)
+{
+// begin of your own code
+
+// end of your own code
+}
+
+
+void
+CtlConnectionManagerImpl::_ansPrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, const i4& ConnectionID, const i4& AVTransportID, const i4& RcsID)
 {
 // begin of your own code
 

@@ -50,6 +50,9 @@ public:
 //protected:
     void browseRootObject();
 
+    ConnectionManager* getConnectionManager();
+
+
 private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
     CtlMediaObject2*      _pRoot;

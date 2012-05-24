@@ -23,6 +23,7 @@
 #define MEDIASERVER_IMPLEMENTATION_H
 
 #include "Upnp.h"
+#include "UpnpAvPrivate.h"
 #include "UpnpAvObject.h"
 #include "UpnpAvServer.h"
 #include "UpnpAvDevices.h"
@@ -52,15 +53,24 @@ private:
 };
 
 
-class DevConnectionManagerServerImpl : public DevConnectionManager
+class DevConnectionManagerServerImpl : public DevConnectionManager, public ConnectionManager
 {
+    friend class MediaServer;
+
+public:
+    DevConnectionManagerServerImpl(Device* pThisDevice) : ConnectionManager(pThisDevice), _pThisDevice(pThisDevice) {}
+
 private:
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink);
+    virtual void PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID);
     virtual void ConnectionComplete(const i4& ConnectionID);
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs);
     virtual void GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status);
 
     virtual void initStateVars();
+
+    Device*                             _pThisDevice;
+    CsvList                             _connectionIds;
 };
 
 

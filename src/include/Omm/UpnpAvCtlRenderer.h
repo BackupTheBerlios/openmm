@@ -41,6 +41,7 @@ class CtlMediaObject;
 class CtlMediaObject2;
 class MediaItemNotification;
 class MediaObjectSelectedNotification;
+class ConnectionManager;
 
 
 class CtlMediaRenderer : public Device
@@ -61,6 +62,8 @@ public:
     void positionMoved(int position);
     void volumeChanged(int value);
     ui2 getVolume();
+
+    ConnectionManager* getConnectionManager();
 
     virtual void newPosition(int duration, int position) {}
     virtual void newUri(const std::string& uri) {}

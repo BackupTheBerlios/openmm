@@ -166,6 +166,7 @@ protected:
     virtual ~DevConnectionManager() {}
 
     virtual void GetProtocolInfo(std::string& Source, std::string& Sink) = 0;
+    virtual void PrepareForConnection(const std::string& RemoteProtocolInfo, const std::string& PeerConnectionManager, const i4& PeerConnectionID, const std::string& Direction, i4& ConnectionID, i4& AVTransportID, i4& RcsID) = 0;
     virtual void ConnectionComplete(const i4& ConnectionID) = 0;
     virtual void GetCurrentConnectionIDs(std::string& ConnectionIDs) = 0;
     virtual void GetCurrentConnectionInfo(const i4& ConnectionID, i4& RcsID, i4& AVTransportID, std::string& ProtocolInfo, std::string& PeerConnectionManager, i4& PeerConnectionID, std::string& Direction, std::string& Status) = 0;
@@ -230,7 +231,7 @@ class DevRenderingControl
 
 protected:
     virtual ~DevRenderingControl() {}
-    
+
     virtual void ListPresets(const ui4& InstanceID, std::string& CurrentPresetNameList) = 0;
     virtual void SelectPreset(const ui4& InstanceID, const std::string& PresetName) = 0;
     virtual void GetBrightness(const ui4& InstanceID, ui2& CurrentBrightness) = 0;

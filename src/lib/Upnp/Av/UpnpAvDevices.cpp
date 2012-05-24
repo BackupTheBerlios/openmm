@@ -628,6 +628,19 @@ DevConnectionManager::actionHandler(Action* pAction)
         pAction->setArgument<std::string>("Source", Source);
         pAction->setArgument<std::string>("Sink", Sink);
     }
+    else if (actionName == "PrepareForConnection") {
+        std::string RemoteProtocolInfo = pAction->getArgument<std::string>("RemoteProtocolInfo");
+        std::string PeerConnectionManager = pAction->getArgument<std::string>("PeerConnectionManager");
+        i4 PeerConnectionID = pAction->getArgument<i4>("PeerConnectionID");
+        std::string Direction = pAction->getArgument<std::string>("Direction");
+        i4 ConnectionID;
+        i4 AVTransportID;
+        i4 RcsID;
+        PrepareForConnection(RemoteProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, ConnectionID, AVTransportID, RcsID);
+        pAction->setArgument<i4>("ConnectionID", ConnectionID);
+        pAction->setArgument<i4>("AVTransportID", AVTransportID);
+        pAction->setArgument<i4>("RcsID", RcsID);
+    }
     else if (actionName == "ConnectionComplete") {
         i4 ConnectionID = pAction->getArgument<i4>("ConnectionID");
         ConnectionComplete(ConnectionID);

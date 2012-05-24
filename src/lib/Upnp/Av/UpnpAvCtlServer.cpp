@@ -36,7 +36,7 @@ CtlMediaServer::addCtlDeviceCode()
     // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaServerCode = new CtlMediaServerCode(this,
         new CtlContentDirectoryImpl(0),
-        new CtlConnectionManagerImpl(0),
+        new CtlConnectionManagerImpl(this),
         new CtlAVTransportImpl(0));
     setCtlDeviceCode(_pCtlMediaServerCode);
 }
@@ -85,6 +85,13 @@ CtlMediaServer::browseRootObject()
         _pRoot->getChildForRow(0);
     }
     Log::instance()->upnpav().debug("browse root object finished.");
+}
+
+
+ConnectionManager*
+CtlMediaServer::getConnectionManager()
+{
+    return static_cast<CtlConnectionManagerImpl*>(_pCtlMediaServerCode->ConnectionManager());
 }
 
 

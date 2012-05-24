@@ -68,7 +68,7 @@ _socket(Poco::Net::ServerSocket(port))
 
     setDevDeviceCode(new DevMediaServer(
         _pDevContentDirectoryServerImpl,
-        new DevConnectionManagerServerImpl,
+        new DevConnectionManagerServerImpl(this),
         new DevAVTransportServerImpl)
     );
 }

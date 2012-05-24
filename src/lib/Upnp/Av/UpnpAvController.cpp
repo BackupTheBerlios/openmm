@@ -155,7 +155,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             CtlMediaRendererCode* pRendererImpl = new CtlMediaRendererCode(
                 pDevice,
                 new CtlRenderingControlImpl(pUserInterface),
-                new CtlConnectionManagerImpl(pUserInterface),
+                new CtlConnectionManagerImpl(0),
                 new CtlAVTransportImpl(pUserInterface));
             pDevice->setCtlDeviceCode(pRendererImpl);
             AvRendererView* pRendererView = new AvRendererView(pRendererImpl);
@@ -168,7 +168,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             CtlMediaServerCode* pServerImpl = new CtlMediaServerCode(
                 pDevice,
                 new CtlContentDirectoryImpl(pUserInterface),
-                new CtlConnectionManagerImpl(pUserInterface),
+                new CtlConnectionManagerImpl(0),
                 new CtlAVTransportImpl(pUserInterface));
             pDevice->setCtlDeviceCode(pServerImpl);
             AvServerView* pServer = new AvServerView(pServerImpl);

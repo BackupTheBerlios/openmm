@@ -241,7 +241,7 @@ MediaRenderer::MediaRenderer()
     _pRenderingControlImpl = new DevRenderingControlRendererImpl;
     setDevDeviceCode(new DevMediaRenderer(
               _pRenderingControlImpl,
-              new DevConnectionManagerRendererImpl,
+              new DevConnectionManagerRendererImpl(this),
               _pAVTransportImpl));
 }
 
