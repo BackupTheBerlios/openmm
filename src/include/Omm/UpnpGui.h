@@ -66,6 +66,7 @@ class ControllerWidget;
 class MediaObjectModel;
 class GuiVisual;
 class MediaServerGroupWidget;
+class MediaServerDevice;
 class MediaRendererGroupWidget;
 class MediaRendererView;
 class MediaObjectView;
@@ -219,6 +220,7 @@ public:
     virtual void signalNetworkActivity(bool on);
 
     virtual std::stringstream* getPlaylistResource();
+    MediaServerDevice* getServer(const std::string& uuid);
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
@@ -315,7 +317,7 @@ class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
     friend class MediaRendererView;
 
 public:
-    MediaRendererDevice() : _transportState(""), _volume(-1) {}
+    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _volume(-1), _pControllerWidget(pControllerWidget) {}
 
     std::string getTransportState();
     ui2 getVolume();
@@ -333,6 +335,7 @@ private:
     Gui::LabelModel     _rendererName;
     Gui::LabelModel     _trackName;
     int                 _volume;
+    ControllerWidget*   _pControllerWidget;
 };
 
 

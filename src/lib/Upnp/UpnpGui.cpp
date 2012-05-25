@@ -909,6 +909,13 @@ ControllerWidget::getPlaylistResource()
 }
 
 
+MediaServerDevice*
+ControllerWidget::getServer(const std::string& uuid)
+{
+    return static_cast<MediaServerDevice*>(_pMediaServerGroupWidget->getDevice(uuid));
+}
+
+
 void
 KeyController::keyPressed(KeyCode key)
 {
@@ -1033,7 +1040,7 @@ Device*
 MediaRendererGroupWidget::createDevice()
 {
 //    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
-    return new MediaRendererDevice;
+    return new MediaRendererDevice(_pControllerWidget);
 }
 
 
@@ -1072,6 +1079,14 @@ MediaRendererDevice::newUri(const std::string& uri)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
     _trackName.setLabel(uri);
+    Av::Connection* pConnection = getConnectionManager()->getConnection(0);
+    if (pConnection) {
+        std::string serverUuid = pConnection->getServer().getConnectionManagerId().getUuid();
+        MediaServerDevice* pServer = _pControllerWidget->getServer(serverUuid);
+        if (pServer) {
+            Gui::Log::instance()->gui().debug("media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
+        }
+    }
     syncViews();
 }
 
