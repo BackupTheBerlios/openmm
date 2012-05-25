@@ -51,7 +51,7 @@ public:
     void browseRootObject();
 
     ConnectionManager* getConnectionManager();
-
+    CtlMediaObject2* getMediaObjectFromResource(const std::string& resource);
 
 private:
     CtlMediaServerCode*   _pCtlMediaServerCode;

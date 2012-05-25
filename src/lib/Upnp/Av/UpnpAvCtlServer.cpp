@@ -95,6 +95,32 @@ CtlMediaServer::getConnectionManager()
 }
 
 
+CtlMediaObject2*
+CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
+{
+    std::string result;
+    ui4 numberReturned;
+    ui4 totalMatches;
+    ui4 updateId;
+    _pCtlMediaServerCode->ContentDirectory()->Search("0", "res = \"" + resource + "\"", "*", 0, 1, "", result, numberReturned, totalMatches, updateId);
+    if (numberReturned != 1) {
+        Log::instance()->upnpav().error("get media object from resource failed: 0 or more than one object found.");
+        return 0;
+    }
+
+    CtlMediaObject2* pObject = createMediaObject();
+    MediaObjectReader reader;
+    try {
+        reader.read(pObject, result);
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("get media object from resource failed: " + e.displayText());
+        return 0;
+    }
+    return pObject;
+}
+
+
 void
 CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
 {

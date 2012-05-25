@@ -39,6 +39,7 @@
 #include <Poco/LineEndingConverter.h>
 #include <Poco/UTF8Encoding.h>
 #include <Poco/TextConverter.h>
+#include <Poco/URI.h>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
@@ -1143,8 +1144,10 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 
     ui4 childCount = 0;
     // TODO: better criteria for blending in user objects at beginning of list (depending on number of user objects)
-    if (getId() == "0" && offset == 0 && _pUserObjectCache) {
+    if (getId() == "0" && offset == 0 && _pUserObjectCache && (search == "" || search == "*")) {
+        // TODO: get max count user objects
         childCount += _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
+        count -= childCount;
     }
 
     bool updateCache = cacheNeedsUpdate();
@@ -1557,7 +1560,31 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             whereClause += searchCrit.parse(search);
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().debug("database cache search error parsing search criteria: " + e.displayText());
+            Omm::Av::Log::instance()->upnpav().error("database cache search error parsing search criteria: " + e.displayText());
+        }
+        // special case: searching for a resource string
+        // TODO: this is just the special case of simpy "res = <string>", handle subexpressions etc.
+        if (whereClause.substr(0, 5) == "res =") {
+            std::string res = whereClause.substr(6, whereClause.length() - 1);
+            Omm::Av::Log::instance()->upnpav().debug("database cache get object for resource: " + res);
+            Poco::URI resUri(res);
+            std::string resPath = resUri.getPath();
+            Omm::Av::Log::instance()->upnpav().debug("path: " + resPath);
+            Poco::StringTokenizer uri(resPath, "$");
+            std::string objectId = uri[0].substr(1);
+            Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
+            ui4 index = Poco::NumberParser::parse(objectId);
+            ServerObject* pObject = getMediaObjectForIndex(index);
+            if (pObject) {
+                pObject->setIndex(index);
+                pObject->_indexNamespace = ServerObject::User;
+                Log::instance()->upnpav().debug("found object with title: " + pObject->getTitle());
+                block.push_back(pObject);
+                return 1;
+            }
+            else {
+                return 0;
+            }
         }
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {

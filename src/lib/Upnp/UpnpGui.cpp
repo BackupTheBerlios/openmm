@@ -1085,6 +1085,11 @@ MediaRendererDevice::newUri(const std::string& uri)
         MediaServerDevice* pServer = _pControllerWidget->getServer(serverUuid);
         if (pServer) {
             Gui::Log::instance()->gui().debug("media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
+            Av::CtlMediaObject2* pObject = pServer->getMediaObjectFromResource(uri);
+            if (pObject) {
+                Gui::Log::instance()->gui().debug("media renderer device playing object with title: \"" + pObject->getTitle() + "\"");
+                _trackName.setLabel(pObject->getTitle());
+            }
         }
     }
     syncViews();
