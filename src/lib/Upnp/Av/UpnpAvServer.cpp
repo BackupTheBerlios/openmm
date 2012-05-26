@@ -1562,30 +1562,6 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         catch (Poco::Exception& e) {
             Omm::Av::Log::instance()->upnpav().error("database cache search error parsing search criteria: " + e.displayText());
         }
-        // special case: searching for a resource string
-        // TODO: this is just the special case of simpy "res = <string>", handle subexpressions etc.
-        if (whereClause.substr(0, 5) == "res =") {
-            std::string res = whereClause.substr(6, whereClause.length() - 1);
-            Omm::Av::Log::instance()->upnpav().debug("database cache get object for resource: " + res);
-            Poco::URI resUri(res);
-            std::string resPath = resUri.getPath();
-            Omm::Av::Log::instance()->upnpav().debug("path: " + resPath);
-            Poco::StringTokenizer uri(resPath, "$");
-            std::string objectId = uri[0].substr(1);
-            Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
-            ui4 index = Poco::NumberParser::parse(objectId);
-            ServerObject* pObject = getMediaObjectForIndex(index);
-            if (pObject) {
-                pObject->setIndex(index);
-                pObject->_indexNamespace = ServerObject::User;
-                Log::instance()->upnpav().debug("found object with title: " + pObject->getTitle());
-                block.push_back(pObject);
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        }
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
         Log::instance()->upnpav().debug("database cache server container layout: Flat");
@@ -1852,6 +1828,26 @@ std::string
 DatabaseCacheSearchCriteria::translateProperty(const std::string& property)
 {
     return _pDatabaseCache->getColumnName(property);
+}
+
+
+std::string
+DatabaseCacheSearchCriteria::translateCompareExp(const std::string& property, const std::string& op, const std::string& val)
+{
+    if (property == Omm::Av::AvProperty::RES) {
+        Omm::Av::Log::instance()->upnpav().debug("database cache get object for resource: " + val);
+        Poco::URI resUri(val);
+        std::string resPath = resUri.getPath();
+        Omm::Av::Log::instance()->upnpav().debug("path: " + resPath);
+        Poco::StringTokenizer uri(resPath, "$");
+        std::string index = uri[0].substr(1);
+        Log::instance()->upnpav().debug("index: " + index);
+        const std::string indexCol("idx"); // funny, using "idx" in the return statement gives a random string (compiler bug?)
+        return indexCol + space + op + space + index;
+    }
+    else {
+        return SqlSearchCriteria::translateCompareExp(property, op, val);
+    }
 }
 
 
