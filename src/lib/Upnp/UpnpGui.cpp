@@ -1393,7 +1393,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     attachController(new DeviceGroupNavigatorController(this));
 
     // TODO: get search capabilities
-    _searchString = Poco::Util::Application::instance().config().getString("controller.searchString", "dc:title contains \"%s\"");
+    _searchString = Poco::Util::Application::instance().config().getString("controller.searchString", "dc:title contains %s");
 }
 
 
