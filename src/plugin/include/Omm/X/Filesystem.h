@@ -37,7 +37,6 @@ public:
     virtual Omm::Av::CsvList getQueryProperties();
     virtual void scan(bool recurse = true);
     virtual bool preserveIndexCache() { return true; }
-    virtual bool useObjectCache() { return true; }
 
     virtual std::string getParentPath(const std::string& path);
 

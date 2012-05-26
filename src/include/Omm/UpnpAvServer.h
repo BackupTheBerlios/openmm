@@ -407,7 +407,7 @@ public:
     // index and path
     virtual void scan(bool recurse = true) {}
     virtual bool preserveIndexCache() { return false; }
-    virtual bool useObjectCache() { return false; }
+    virtual bool useObjectCache() { return true; }
     // decide if to use index cache, if no, implement next four methods
     // depending on the data domain, the bijective mapping between index and path
     // can be trivial and should override getIndex(), getPath(), and hasIndex().
