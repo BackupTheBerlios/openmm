@@ -315,9 +315,10 @@ private:
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
     friend class MediaRendererView;
+    friend class SeekSlider;
 
 public:
-    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _pControllerWidget(pControllerWidget) {}
+    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _duration(0), _pControllerWidget(pControllerWidget) {}
 
     std::string getTransportState();
 
@@ -331,6 +332,7 @@ private:
     virtual void newTransportState(const std::string& transportState);
 
     std::string         _transportState;
+    int                 _duration;
     Gui::LabelModel     _rendererName;
     Gui::LabelModel     _trackName;
     Gui::SliderModel    _position;

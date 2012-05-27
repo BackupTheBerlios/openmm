@@ -173,8 +173,10 @@ class AvTypeConverter
 public:
     static r8 readDuration(const std::string& duration);
     static std::string writeDuration(const r8& duration);
+    /// duration in seconds
     static time readTime(const std::string& timeString);
     static std::string writeTime(const time& timeVal);
+    /// timeVal in micro seconds
 };
 
 

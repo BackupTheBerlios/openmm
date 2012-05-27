@@ -201,6 +201,7 @@ CtlMediaRenderer::positionMoved(int position)
     Log::instance()->upnpav().debug("position moved to: " + Poco::NumberFormatter::format(position));
     try {
         _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position * 1000000));
+//        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position));
     }
     catch (Poco::Exception& e){
 //        error(e.message());

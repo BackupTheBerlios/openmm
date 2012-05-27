@@ -1110,6 +1110,7 @@ MediaRendererDevice::newPosition(int duration, int position)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((float)position / duration) * 100.0));
+    _duration = duration;
     if (duration == 0) {
         _position.setValue(0);
     }
@@ -1318,9 +1319,8 @@ public:
     virtual void valueChanged(int value)
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-//        pRenderer->positionMoved(value);
+        pRenderer->positionMoved(value / 100.0 * pRenderer->_duration);
         // TODO: seek position value should be multiplied with lenght of track
-        pRenderer->positionMoved(value*2);
     }
 };
 
