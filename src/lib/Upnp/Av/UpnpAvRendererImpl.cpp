@@ -153,7 +153,7 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
 
     if (transportState != AvTransportArgument::TRANSPORT_STATE_PLAYING && transportState != AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
-        // TODO: return an UPnP error
+        // TODO: return an UPnP error? (better return current values, which may not be 0 in case of paused stream)
         return;
     }
 //    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
@@ -179,13 +179,20 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
 //    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
-    _setRelativeTimePosition(timePosition);
-    _setAbsoluteTimePosition(timePosition);
-    RelTime = _getRelativeTimePosition();
-    AbsTime = _getAbsoluteTimePosition();
 
-    RelCount = _getRelativeCounterPosition();
-    AbsCount = _getAbsoluteCounterPosition();
+    RelTime = timePosition;
+    AbsTime = timePosition;
+
+    RelCount = enginePosition;
+    AbsCount = enginePosition;
+
+//    _setRelativeTimePosition(timePosition);
+//    _setAbsoluteTimePosition(timePosition);
+//    RelTime = _getRelativeTimePosition();
+//    AbsTime = _getAbsoluteTimePosition();
+//
+//    RelCount = _getRelativeCounterPosition();
+//    AbsCount = _getAbsoluteCounterPosition();
 }
 
 

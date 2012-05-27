@@ -37,7 +37,9 @@ namespace Av {
 CtlMediaRenderer::CtlMediaRenderer() :
 _pCurrentMediaObject(0),
 //_usePlaylistResource(false)
-_usePlaylistResource(true)
+_usePlaylistResource(true),
+_pPositionTimer(0),
+_positionTimerIntervall(1000)
 {
 }
 
@@ -236,6 +238,69 @@ ConnectionManager*
 CtlMediaRenderer::getConnectionManager()
 {
     return static_cast<CtlConnectionManagerImpl*>(_pCtlMediaRendererCode->ConnectionManager());
+}
+
+
+void
+CtlMediaRenderer::startPositionTimer(bool start)
+{
+    if (_pPositionTimer) {
+        Log::instance()->upnpav().debug("stop position timer ...");
+        _pPositionTimer->stop();
+        delete _pPositionTimer;
+        _pPositionTimer = 0;
+    }
+    if (start) {
+        Log::instance()->upnpav().debug("start position timer ...");
+        _pPositionTimer = new Poco::Timer(0, _positionTimerIntervall);
+        Poco::TimerCallback<CtlMediaRenderer> callback(*this, &CtlMediaRenderer::pollPositionInfo);
+        _pPositionTimer->start(callback);
+    }
+}
+
+
+void
+CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
+{
+    Log::instance()->upnpav().debug("poll position info");
+    // TODO: get TransportState and poll position info only, if it is PLAYING, RECORDING or TRANSITIONING
+    ui4 Track;
+    std::string TrackDuration;
+    std::string TrackMetaData;
+    std::string TrackURI;
+    std::string RelTime;
+    std::string AbsTime;
+    i4 RelCount;
+    i4 AbsCount;
+    _pCtlMediaRendererCode->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
+//    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
+
+    try {
+        r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
+        r8 absTime = AvTypeConverter::readDuration(AbsTime);
+        newPosition(trackDuration, absTime);
+    }
+    catch (Poco::Exception& e) {
+        //Log::instance()->upnpav().warning("could not read current track position: " + e.displayText());
+    }
+
+//    if (TrackMetaData == "") {
+//        newTrack("", "", "");
+//    }
+//    else {
+//        CtlMediaObject object;
+//        try {
+//            object.readMetaData(TrackMetaData);
+////            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
+////            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
+////            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+//            newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
+//        }
+//        catch (Poco::Exception& e) {
+//            newTrack("", "", "");
+//            Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+//        }
+//    }
 }
 
 

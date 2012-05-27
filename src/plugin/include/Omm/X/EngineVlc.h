@@ -82,7 +82,6 @@ public:
 
 private:
     void handleException();
-    void analyzeStream();
 
     static void eventHandler(const struct libvlc_event_t* pEvent, void* pUserData);
 
@@ -96,7 +95,6 @@ private:
     std::string             _uri;
     Omm::Av::Mime           _mime;
 //     int                     _fd;
-    long long               _startTime;
     float                   _length; // length of media in seconds
     const int               _maxMediaConnect;
 };

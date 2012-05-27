@@ -39,11 +39,6 @@ _maxMediaConnect(5)
 VlcEngine::~VlcEngine()
 {
     libvlc_release(_pVlcInstance);
-
-//    if (_pVisual) {
-//        _pVisual->hide();
-//        delete _pVisual;
-//    }
 }
 
 
@@ -166,151 +161,37 @@ VlcEngine::play()
         _pVisual->renderImage(image.getBuffer());
     }
     else {
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: play ...");
-//    int tryMediaConnect = _maxMediaConnect;
-//    while (tryMediaConnect-- && !_pVlcMedia) {
-//#if LIBVLC_VERSION_INT < 0x110
-//        _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), _pException);
-//#else
-//        _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
-//#endif
-//        handleException();
-//        if (!_pVlcMedia) {
-//            Poco::Thread::sleep(100);
-//        }
-//    }
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: play ...");
 
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: create new media with uri: " + _uri + " ...");
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: create new media with uri: " + _uri + " ...");
 #if LIBVLC_VERSION_INT < 0x110
-    _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), _pException);
+        _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), _pException);
 #else
-    _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
+        _pVlcMedia = libvlc_media_new_location(_pVlcInstance, _uri.c_str());
 #endif
-    handleException();
+        handleException();
 
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: player set media ...");
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: player set media ...");
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, _pException);
+        libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, _pException);
 #else
-    libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia);
+        libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia);
 #endif
-    handleException();
+        handleException();
 
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: release media ...");
-    libvlc_media_release(_pVlcMedia);
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: release media ...");
+        libvlc_media_release(_pVlcMedia);
 
-    Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media ...");
+        Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media ...");
 #if LIBVLC_VERSION_INT < 0x110
-    libvlc_media_player_play(_pVlcPlayer, _pException);
+        libvlc_media_player_play(_pVlcPlayer, _pException);
 #else
-    libvlc_media_player_play(_pVlcPlayer);
+        libvlc_media_player_play(_pVlcPlayer);
 #endif
-    handleException();
+        handleException();
     }
-
-//    if (!_mime.isAudio()) {
-//        _pVisual->show();
-//    }
 
     Omm::Av::Log::instance()->upnpav().debug("vlc engine: play media finished.");
-}
-
-
-void
-VlcEngine::analyzeStream()
-{
-    _startTime = 0;
-    _length = 0.0;
-
-    // settle to a defined state
-    libvlc_state_t state;
-    do {
-        Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
-#if LIBVLC_VERSION_INT < 0x110
-        state = libvlc_media_player_get_state(_pVlcPlayer, _pException);
-#else
-        state = libvlc_media_player_get_state(_pVlcPlayer);
-#endif
-        handleException();
-    } while(state != libvlc_Playing && state != libvlc_Error /*&& state != libvlc_MediaPlayerEndReached*/ );
-
-    int hasVideo = 0;
-    int trackCount = 0;
-    do {
-        Poco::Thread::sleep(100); // limit the cpu-load while loading the media and sleep for 100ms
-#if LIBVLC_VERSION_INT < 0x110
-        hasVideo = libvlc_media_player_has_vout(_pVlcPlayer, _pException);
-        handleException();
-        trackCount = libvlc_audio_get_track_count(_pVlcPlayer, _pException);
-        handleException();
-#else
-        hasVideo = libvlc_media_player_has_vout(_pVlcPlayer);
-        handleException();
-        trackCount = libvlc_audio_get_track_count(_pVlcPlayer);
-        handleException();
-#endif
-    } while(state == libvlc_Playing && !hasVideo && !trackCount);
-//     TRACE("VlcEngine::load() hasVideo: %i, trackCount: %i", hasVideo, trackCount);
-#if LIBVLC_VERSION_INT < 0x110
-    _length = (libvlc_media_player_get_length(_pVlcPlayer, _pException) - _startTime) / 1000.0;
-    libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia, _pException);
-    //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
-
-    _startTime = libvlc_media_player_get_time(_pVlcPlayer, _pException);
-    handleException();
-//     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
-
-    if(!libvlc_media_player_is_seekable(_pVlcPlayer, _pException)) {
-//         TRACE("VlcEngine::load() media is not seekable");
-    }
-    handleException();
-    if(!libvlc_media_player_can_pause(_pVlcPlayer, _pException)) {
-//         TRACE("VlcEngine::load() pause not possible on media");
-    }
-    handleException();
-
-    // TODO: receive video size changed - events and adjust display size
-//    int videoWidth = libvlc_video_get_width(_pVlcPlayer, _pException);
-//    handleException();
-//    int videoHeight = libvlc_video_get_height(_pVlcPlayer, _pException);
-//    handleException();
-//     TRACE("VlcEngine::load() videoWidth: %i, videoHeight: %i", videoWidth, videoHeight);
-/*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight, _pException);
-    handleException();*/
-
-    // TODO: fullscreen could initially be set at start
-//     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0), _pException);
-//     handleException();
-#else
-    _length = (libvlc_media_player_get_length(_pVlcPlayer) - _startTime) / 1000.0;
-    libvlc_time_t d = libvlc_media_get_duration(_pVlcMedia);
-    //     TRACE("VlcEngine::load() _length: %f, duration: %lli", _length, d);
-
-    _startTime = libvlc_media_player_get_time(_pVlcPlayer);
-    handleException();
-//     TRACE("VlcEngine::load() _startTime [ms]: %lli", _startTime);
-
-    if(!libvlc_media_player_is_seekable(_pVlcPlayer)) {
-//         TRACE("VlcEngine::load() media is not seekable");
-    }
-    handleException();
-    if(!libvlc_media_player_can_pause(_pVlcPlayer)) {
-//         TRACE("VlcEngine::load() pause not possible on media");
-    }
-    handleException();
-
-    unsigned int videoWidth;
-    unsigned int videoHeight;
-    int success = libvlc_video_get_size(_pVlcPlayer, 0, &videoWidth, &videoHeight);
-    handleException();
-    // TODO: receive video size changed - events and adjust display size
-/*    libvlc_video_resize(_pVlcPlayer, videoWidth, videoHeight);
-    handleException();*/
-
-    // TODO: fullscreen could initially be set at start
-//     libvlc_set_fullscreen(_pVlcPlayer, (_fullscreen ? 1 : 0));
-//     handleException();
-#endif
 }
 
 
@@ -350,18 +231,19 @@ VlcEngine::stop()
     libvlc_media_player_stop(_pVlcPlayer);
 #endif
     handleException();
-
-//    if (!_mime.isAudio()) {
-//        _pVisual->blank();
-//        _pVisual->hide();
-//    }
 }
 
 
 void
 VlcEngine::seekByte(Poco::UInt64 byte)
 {
-
+    // TODO: implement size based seeking (not time based).
+    // try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
+    // mediacontrol API seems to be deprecated, it is not present in vlc 1.1
+    //
+    // try libvlc_vlm API (present in all versions of vlc)
+    //
+    // use size in bytes from meta data or http get request answer
 }
 
 
@@ -392,42 +274,25 @@ VlcEngine::seekSecond(float second)
 Poco::UInt64
 VlcEngine::getPositionByte()
 {
+    Poco::UInt64 res = 0;
+
 #if LIBVLC_VERSION_INT < 0x110
     // TODO: implement getPositionByte() for vlc version 1.0
 #else
     libvlc_media_stats_t stats;
     int success = libvlc_media_get_stats(_pVlcMedia, &stats);
-    return stats.i_read_bytes;
+    res =  stats.i_read_bytes;
 #endif
     handleException();
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine position [b]: " + Poco::NumberFormatter::format(res, 2));
+    return res;
 }
 
 
 float
 VlcEngine::getPositionPercentage()
 {
-    // TODO: implement size based seeking (not time based).
-    // try mediacontrol_get_media_position() and mediacontrol_set_media_position() for seek control
-    // mediacontrol API seems to be deprecated, it is not present in vlc 1.1
-    //
-    // try libvlc_vlm API (present in all versions of vlc)
-    //
-    // use size in bytes from meta data or http get request answer
-    float res;
-
-    libvlc_state_t state;
-#if LIBVLC_VERSION_INT < 0x110
-    state = libvlc_media_player_get_state(_pVlcPlayer, _pException);
-#else
-    state = libvlc_media_player_get_state(_pVlcPlayer);
-#endif
-    handleException();
-    // TODO: catch vlc event at end of track, don't poll it
-    if (state == libvlc_Ended) {
-//        endOfStream();
-        res = 0.0;
-        return res;
-    }
+    float res = 0.0;
 
 #if LIBVLC_VERSION_INT < 0x110
     res = _length * libvlc_media_player_get_position(_pVlcPlayer, _pException);
@@ -435,38 +300,24 @@ VlcEngine::getPositionPercentage()
     res = _length * libvlc_media_player_get_position(_pVlcPlayer);
 #endif
     handleException();
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine position [%]: " + Poco::NumberFormatter::format(res, 2));
     return res;
-//     Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(seconds, 2));
 }
 
 
 float
 VlcEngine::getPositionSecond()
 {
-    float res;
-
-    libvlc_state_t state;
-#if LIBVLC_VERSION_INT < 0x110
-    state = libvlc_media_player_get_state(_pVlcPlayer, _pException);
-#else
-    state = libvlc_media_player_get_state(_pVlcPlayer);
-#endif
-    handleException();
-    // TODO: catch vlc event at end of track, don't poll it
-    if (state == libvlc_Ended) {
-//        endOfStream();
-        res = 0.0;
-        return res;
-    }
+    float res = 0.0;
 
 #if LIBVLC_VERSION_INT < 0x110
-    res = (libvlc_media_player_get_time(_pVlcPlayer, _pException) - _startTime) / 1000.0;
+    res = libvlc_media_player_get_time(_pVlcPlayer, _pException) / 1000.0;
 #else
-    res = (libvlc_media_player_get_time(_pVlcPlayer) - _startTime) / 1000.0;
+    res = libvlc_media_player_get_time(_pVlcPlayer) / 1000.0;
 #endif
     handleException();
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine position [s]: " + Poco::NumberFormatter::format(res, 2));
     return res;
-//     Omm::Av::Log::instance()->upnpav().debug("engine position: " + Poco::NumberFormatter::format(seconds, 2));
 }
 
 
@@ -475,24 +326,19 @@ VlcEngine::getLengthSeconds()
 {
     // libvlc_media_player_get_length() sometimes fetches the last position of the stream, and not the length
 #if LIBVLC_VERSION_INT < 0x110
-    _length = (libvlc_media_player_get_length(_pVlcPlayer, _pException) - _startTime) / 1000.0;
+    _length = libvlc_media_player_get_length(_pVlcPlayer, _pException) / 1000.0;
 #else
-    _length = (libvlc_media_player_get_length(_pVlcPlayer) - _startTime) / 1000.0;
+    _length = libvlc_media_player_get_length(_pVlcPlayer) / 1000.0;
 #endif
     handleException();
+    Omm::Av::Log::instance()->upnpav().debug("vlc engine length [s]: " + Poco::NumberFormatter::format(_length, 2));
     return _length;
-//     TRACE("VlcEngine::getLength() seconds: %f", seconds);
 
     /* use instead?:
     libvlc_time_t
     libvlc_media_get_duration( libvlc_media_t * p_md,
                                libvlc_exception_t * p_e )
     */
-
-/*    seconds = libvlc_media_player_get_length(_pVlcPlayer, _pException) / 1000.0;
-    handleException();
-    seconds = 100.0;
-    TRACE("VlcEngine::getLength() seconds: %f", seconds);*/
 }
 
 

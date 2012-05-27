@@ -1120,6 +1120,7 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
     _transportState = transportState;
     syncViews();
+    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
 }
 

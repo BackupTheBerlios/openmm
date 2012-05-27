@@ -63,6 +63,7 @@ public:
     void volumeChanged(int value);
     ui2 getVolume();
 
+    void startPositionTimer(bool start = true);
     ConnectionManager* getConnectionManager();
 
     virtual void newPosition(int duration, int position) {}
@@ -71,11 +72,16 @@ public:
     virtual void newVolume(const int volume) {}
     virtual void newTransportState(const std::string& transportState) {}
 
+
 private:
+    void pollPositionInfo(Poco::Timer& timer);
+
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
     CtlMediaObject2*        _pCurrentMediaObject;
     bool                    _usePlaylistResource;
+    Poco::Timer*            _pPositionTimer;
+    long                    _positionTimerIntervall;
 };
 
 
