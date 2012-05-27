@@ -317,24 +317,24 @@ class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
     friend class MediaRendererView;
 
 public:
-    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _volume(-1), _pControllerWidget(pControllerWidget) {}
+    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _pControllerWidget(pControllerWidget) {}
 
     std::string getTransportState();
-    ui2 getVolume();
 
 private:
     virtual void initController();
 
-    virtual void newPosition(int duration, int position) {}
     virtual void newUri(const std::string& uri);
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
+    virtual void newPosition(int duration, int position);
     virtual void newVolume(const int volume);
     virtual void newTransportState(const std::string& transportState);
 
     std::string         _transportState;
     Gui::LabelModel     _rendererName;
     Gui::LabelModel     _trackName;
-    int                 _volume;
+    Gui::SliderModel    _position;
+    Gui::SliderModel    _volume;
     ControllerWidget*   _pControllerWidget;
 };
 

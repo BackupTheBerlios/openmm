@@ -230,10 +230,13 @@ AvTypeConverter::writeDuration(const r8& duration)
     int hours = duration / 3600.0;
     int minutes = (duration - hours * 3600) / 60.0;
     r8 seconds = duration - hours * 3600 - minutes * 60;
+    int secondsInt = floor(seconds);
+    int secondsFract = (seconds - secondsInt) * 100;
     return
         Poco::NumberFormatter::format(hours) + ":" +
         Poco::NumberFormatter::format0(minutes, 2) + ":" +
-        Poco::NumberFormatter::format(seconds, 2);
+        Poco::NumberFormatter::format0(secondsInt, 2) + "." +
+        Poco::NumberFormatter::format(secondsFract);
 }
 
 

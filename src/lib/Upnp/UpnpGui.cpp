@@ -1106,10 +1106,26 @@ MediaRendererDevice::newTrack(const std::string& title, const std::string& artis
 
 
 void
+MediaRendererDevice::newPosition(int duration, int position)
+{
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
+    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((float)position / duration) * 100.0));
+    if (duration == 0) {
+        _position.setValue(0);
+    }
+    else {
+        _position.setValue(((float)position / duration) * 100);
+    }
+    syncViews();
+}
+
+
+void
 MediaRendererDevice::newVolume(const int volume)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
-    _volume = volume;
+//    _volume = volume;
+    _volume.setValue(volume);
     syncViews();
 }
 
@@ -1131,18 +1147,6 @@ MediaRendererDevice::getTransportState()
     // FIXME: track name should be retrieved from CtlService::TransportState of the corresponding AVTransport instance.
     //        Don't store it in a separate class member.
     return _transportState;
-}
-
-
-ui2
-MediaRendererDevice::getVolume()
-{
-    if (_volume == -1) {
-        return Av::CtlMediaRenderer::getVolume();
-    }
-    else {
-        return _volume;
-    }
 }
 
 
@@ -1291,12 +1295,6 @@ public:
         pRenderer->volumeChanged(value);
     }
 
-    virtual const int getValue() const
-    {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(static_cast<MediaRendererView*>(_pParent)->getModel());
-        return pRenderer->getVolume();
-    }
-
     virtual bool getEnabled()
     {
         if (_pModel) {
@@ -1357,6 +1355,8 @@ MediaRendererView::setModel(Gui::Model* pModel)
 {
     _pRendererName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_rendererName);
     _pTrackName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_trackName);
+    _pSeekSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_position);
+    _pVolSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_volume);
     Gui::View::setModel(pModel);
 }
 
@@ -1376,6 +1376,7 @@ MediaRendererView::syncViewImpl()
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();
+    _pSeekSlider->syncViewImpl();
     _pVolSlider->syncViewImpl();
     _pTrackName->syncViewImpl();
 }

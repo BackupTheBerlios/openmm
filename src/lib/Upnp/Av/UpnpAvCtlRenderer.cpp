@@ -281,7 +281,7 @@ CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
         newPosition(trackDuration, absTime);
     }
     catch (Poco::Exception& e) {
-        //Log::instance()->upnpav().warning("could not read current track position: " + e.displayText());
+        Log::instance()->upnpav().warning("could not parse current track duration: " + TrackDuration + ", " + e.displayText());
     }
 
 //    if (TrackMetaData == "") {
