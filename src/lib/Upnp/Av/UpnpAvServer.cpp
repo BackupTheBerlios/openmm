@@ -912,15 +912,15 @@ void
 ServerContainer::setBasePath(const std::string& basePath)
 {
     Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
-    _pDataModel->setBasePath(basePath);
     if (_pObjectCache) {
         std::string cacheFilePath = Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
         _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
         std::string metaFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
         _pUserObjectCache->setCacheFilePath(metaFilePath);
-        updateCache();
+//        updateCache();
     }
+    _pDataModel->setBasePath(basePath);
 }
 
 
@@ -947,13 +947,22 @@ ServerContainer::updateCacheThread()
         Log::instance()->upnpav().debug("database cache is current, nothing to do");
     }
     else {
-        for (AbstractDataModel::IndexIterator it = _pDataModel->beginIndex(); it != _pDataModel->endIndex(); ++it) {
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
             if (!updateCacheThreadIsRunning()) {
                 Log::instance()->upnpav().debug("stopping scan thread");
                 break;
             }
-            _pObjectCache->insertMediaObject(ServerContainer::getChildForIndex((*it).first, false));
+            _pObjectCache->insertMediaObject(ServerContainer::getChildForIndex(*it, false));
         }
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginRemovedIndex(); it != _pDataModel->endRemovedIndex(); ++it) {
+            if (!updateCacheThreadIsRunning()) {
+                Log::instance()->upnpav().debug("stopping scan thread");
+                break;
+            }
+            _pObjectCache->removeMediaObjectForIndex(*it);
+        }
+        // TODO: also update user objects.
+        // TODO: does virtual object update really do a sync?
         _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
     }
     _updateCacheThreadLock.lock();
@@ -978,6 +987,7 @@ ServerContainer::cacheNeedsUpdate()
     if (!_pObjectCache) {
         return false;
     }
+
     ui4 rows = _pObjectCache->rowCount();
     if (rows > _pDataModel->getIndexCount()) {
         Log::instance()->upnpav().error("server container, database cache not coherent.");
@@ -1858,7 +1868,8 @@ _pServerContainer(0),
 _maxIndex(1),
 //_indexBufferSize(50),
 _pSourceEncoding(0),
-_pTextConverter(0)
+_pTextConverter(0),
+_cacheUpdateId(0)
 {
 }
 
@@ -1881,10 +1892,23 @@ void
 AbstractDataModel::setBasePath(const std::string& basePath)
 {
     _basePath = basePath;
+
+    // TODO: avoid long and hidden paths in meta directory
+//    Poco::Path path(basePath);
+//    if (path.parent().toString() == Poco::Path(Util::Home::instance()->getConfigDirPath()).toString()) {
+//        // if basePath points to a file in omm's config directory, don't repeat the config path
+//        _basePath = path.getFileName();
+//    }
+//    else {
+//        _basePath = basePath;
+//    }
+
+    // index cache is in meta directory, because var directory should be deletable at any time
+    // without loosing information. Indices must be persistant information, because object ids
+    // are derived from them (playlists must be removed also, if index cache is rebuild entirely)
     _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(getModelClass() + "/" + basePath), "index");
-    Omm::Av::Log::instance()->upnpav().debug("data model scan ...");
-    scan(true);
-    Omm::Av::Log::instance()->upnpav().debug("data model scan finished.");
+    readIndexCache();
+    updateIndexCache(getUpdateId());
 }
 
 
@@ -1938,42 +1962,68 @@ AbstractDataModel::getPath(ui4 index)
 }
 
 
-AbstractDataModel::IndexIterator
+AbstractDataModel::IndexCacheIterator
 AbstractDataModel::beginIndex()
 {
     return _indexMap.begin();
 }
 
 
-AbstractDataModel::IndexIterator
+AbstractDataModel::IndexCacheIterator
 AbstractDataModel::endIndex()
 {
     return _indexMap.end();
 }
 
 
+AbstractDataModel::IndexIterator
+AbstractDataModel::beginAddedIndex()
+{
+    return _addedIndices.begin();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::endAddedIndex()
+{
+    return _addedIndices.end();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::beginRemovedIndex()
+{
+    return _removedIndices.begin();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::endRemovedIndex()
+{
+    return _removedIndices.end();
+}
+
+
 void
 AbstractDataModel::addPath(const std::string& path, const std::string& resourcePath)
 {
-    ui4 index;
-    // got a free index lying around?
-    if (!_freeIndices.empty()) {
-        index = _freeIndices.top();
-        _freeIndices.pop();
-    }
-    else {
-        index = _maxIndex++;
+//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+    std::map<std::string, ui4>::iterator it = _pathMap.find(path);
+    if (it == _pathMap.end()) {
+        ui4 index = getNewIndex();
         if (index == INVALID_INDEX) {
             Log::instance()->upnpav().error("abstract data model max index reached, can not add path: " + path);
             return;
         }
-//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+        _pathMap[path] = index;
+        _indexMap[index] = path;
+        if (resourcePath != "") {
+            _resourceMap.insert(std::pair<ui4, std::string>(index, resourcePath));
+        }
+        _addedIndices.push_back(index);
     }
-    // create a new index
-    _pathMap[path] = index;
-    _indexMap[index] = path;
-    if (resourcePath != "") {
-        _resourceMap.insert(std::pair<ui4, std::string>(index, resourcePath));
+    else {
+        _commonIndices.push_back((*it).second);
     }
 }
 
@@ -1993,6 +2043,21 @@ AbstractDataModel::removePath(const std::string& path)
 }
 
 
+void
+AbstractDataModel::removeIndex(ui4 index)
+{
+    std::map<ui4, std::string>::iterator pos = _indexMap.find(index);
+    if (pos  != _indexMap.end()) {
+        _indexMap.erase(pos);
+        _pathMap.erase((*pos).second);
+        _resourceMap.erase((*pos).first);
+    }
+    else {
+        Log::instance()->upnpav().error("abstract data model, could not erase index from index cache: " + Poco::NumberFormatter::format(index));
+    }
+}
+
+
 ui4
 AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
@@ -2006,7 +2071,7 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, 
         // UPnP AV CDS specs, count == 0 then request all children
         count = getIndexCount();
     }
-    for (IndexIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
+    for (IndexCacheIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
         if (r >= offset) {
             ServerObject* pObject = getMediaObject((*it).second);
             pObject->setIndex((*it).first);
@@ -2050,7 +2115,11 @@ AbstractDataModel::readIndexCache()
     Omm::Av::Log::instance()->upnpav().debug("index cache present, reading ...");
     std::ifstream indexCache(_indexFilePath.toString().c_str());
     std::string line;
-    ui4 index = 0;
+
+    getline(indexCache, line);
+    setIndexCacheUpdateId(Poco::NumberParser::parse(line));
+
+            ui4 index = 0;
     ui4 lastIndex = 0;
     _maxIndex = 0;
     std::string path;
@@ -2067,25 +2136,106 @@ AbstractDataModel::readIndexCache()
     }
     _maxIndex = index;
     // TODO: read resource map
-    Omm::Av::Log::instance()->upnpav().debug("index cache reading finished.");
+    Omm::Av::Log::instance()->upnpav().debug("index cache read finished.");
 }
 
 
 void
 AbstractDataModel::writeIndexCache()
 {
-    if (Poco::File(_indexFilePath).exists()) {
-        // TODO: check if index cache needs update
-        return;
-    }
-    Log::instance()->upnpav().debug("abstract data model write index cache to: " + _indexFilePath.toString() + " ...");
+    Log::instance()->upnpav().debug("index cache writing to: " + _indexFilePath.toString() + " ...");
     std::ofstream indexCache(_indexFilePath.toString().c_str());
+    indexCache << getIndexCacheUpdateId() << std::endl;
+
     for (std::map<ui4, std::string>::iterator it = _indexMap.begin(); it != _indexMap.end(); ++it) {
 //        Log::instance()->upnpav().debug("abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
         indexCache << (*it).first << ' ' << (*it).second << std::endl;
     }
     // TODO: write resource map
-    Log::instance()->upnpav().debug("abstract data model write index cache finished.");
+    Log::instance()->upnpav().debug("index cache write finished.");
+}
+
+
+ui4
+AbstractDataModel::getIndexCacheUpdateId()
+{
+    return _cacheUpdateId;
+}
+
+
+void
+AbstractDataModel::setIndexCacheUpdateId(ui4 id)
+{
+    _cacheUpdateId = id;
+}
+
+
+void
+AbstractDataModel::updateIndexCache(ui4 toUpdateId)
+{
+    Omm::Av::Log::instance()->upnpav().debug("update index cache ...");
+    if (getIndexCacheUpdateId() == toUpdateId) {
+        Omm::Av::Log::instance()->upnpav().debug("index cache is current, nothing to do.");
+        return;
+    }
+
+    // save last index list
+    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
+    for (IndexCacheIterator it = beginIndex(); it != endIndex(); ++it) {
+        _lastIndices.push_back((*it).first);
+    }
+
+    // when scanning the data model, addPath() is called.
+    scan(true);
+
+    // calculate indices to be removed
+    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
+    for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
+        IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
+        if (pos == _commonIndices.end()) {
+            _removedIndices.push_back(*it);
+        }
+    }
+    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
+                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
+                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
+                                            ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
+    // remove index maps
+    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
+    for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
+        removeIndex(*it);
+    }
+    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
+
+    // save updated index cache
+    setIndexCacheUpdateId(toUpdateId);
+    writeIndexCache();
+
+    // clear temporary index lists
+    _lastIndices.clear();
+    _commonIndices.clear();
+    _addedIndices.clear();
+    _removedIndices.clear();
+
+    // trigger database cache update
+//    _pServerContainer->updateCache();
+
+    Omm::Av::Log::instance()->upnpav().debug("update index cache finished.");
+}
+
+
+ui4
+AbstractDataModel::getNewIndex()
+{
+    ui4 index;
+    if (!_freeIndices.empty()) {
+        index = _freeIndices.top();
+        _freeIndices.pop();
+    }
+    else {
+        index = _maxIndex++;
+    }
+    return index;
 }
 
 

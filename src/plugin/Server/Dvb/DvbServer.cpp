@@ -21,6 +21,7 @@
 #include <Poco/ClassLibrary.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/Timer.h>
+#include <Poco/File.h>
 #include <fstream>
 
 
@@ -38,6 +39,13 @@ std::string
 DvbModel::getModelClass()
 {
     return "DvbModel";
+}
+
+
+Omm::ui4
+DvbModel::getUpdateId(bool recurse)
+{
+    return Poco::File(getBasePath()).getLastModified().epochTime();
 }
 
 

@@ -31,6 +31,7 @@ public:
     WebradioModel();
 
     virtual std::string getModelClass();
+    virtual Omm::ui4 getUpdateId(bool recurse = true);
     virtual void scan(bool recurse = true);
 
     virtual std::string getClass(const std::string& path);

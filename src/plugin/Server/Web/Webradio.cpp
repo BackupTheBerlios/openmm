@@ -31,6 +31,7 @@
 
 
 #include <Omm/UpnpAvObject.h>
+#include <Poco/File.h>
 
 #include "Webradio.h"
 
@@ -44,6 +45,13 @@ std::string
 WebradioModel::getModelClass()
 {
     return "WebradioModel";
+}
+
+
+Omm::ui4
+WebradioModel::getUpdateId(bool recurse)
+{
+    return Poco::File(getBasePath()).getLastModified().epochTime();
 }
 
 

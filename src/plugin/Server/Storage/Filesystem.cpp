@@ -49,6 +49,14 @@ FileModel::getModelClass()
 }
 
 
+Omm::ui4
+FileModel::getUpdateId(bool recurse)
+{
+    Poco::File baseDir(getBasePath());
+    return getUpdateId(baseDir, recurse);
+}
+
+
 Omm::Av::CsvList
 FileModel::getQueryProperties()
 {
@@ -185,6 +193,27 @@ FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFo
             pItem->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::PLAYLIST_ITEM));
             break;
     }
+}
+
+
+Omm::ui4
+FileModel::getUpdateId(Poco::File& directory, bool recurse)
+{
+    Poco::DirectoryIterator dir(directory);
+    Poco::DirectoryIterator end;
+    Omm::ui4 res = 0;
+    while(dir != end) {
+        try {
+            if (recurse && dir->isDirectory()) {
+                res = std::max(res, getUpdateId(*dir));
+            }
+        }
+        catch(...) {
+            Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
+        }
+        ++dir;
+    }
+    return res;
 }
 
 

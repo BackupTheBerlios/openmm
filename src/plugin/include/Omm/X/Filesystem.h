@@ -34,6 +34,7 @@ public:
     ~FileModel();
 
     virtual std::string getModelClass();
+    virtual Omm::ui4 getUpdateId(bool recurse = true);
     virtual Omm::Av::CsvList getQueryProperties();
     virtual void scan(bool recurse = true);
     virtual bool preserveIndexCache() { return true; }
@@ -47,6 +48,7 @@ public:
     virtual void freeStream(std::istream* pIstream);
 
 private:
+    Omm::ui4 getUpdateId(Poco::File& directory, bool recurse = true);
     void scanDirectory(Poco::File& directory, bool recurse = true);
     void loadTagger();
     void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);

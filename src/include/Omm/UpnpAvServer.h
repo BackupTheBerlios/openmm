@@ -263,6 +263,7 @@ public:
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true);
+    // FIXME: cache update should be triggered by data model
     bool cacheNeedsUpdate();
 
     // appendChild*() methods are only needed for server containers without data model (not supported right now)
@@ -325,6 +326,7 @@ public:
 
     virtual void insertMediaObject(ServerObject* pObject) {}
     virtual void insertBlock(std::vector<ServerObject*>& block) {}
+    virtual void removeMediaObjectForIndex(ui4 index) {}
 
     virtual void addPropertiesForQuery(CsvList propertyList) {}
     virtual void updateVirtualObjects(ServerObjectCache* pVirtualObjectCache) {}
@@ -400,6 +402,7 @@ public:
     std::string getBasePath();
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
+    virtual ui4 getUpdateId(bool recurse = true) { return 0; }
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
@@ -417,14 +420,21 @@ public:
     virtual ui4 getIndex(const std::string& path);
     virtual std::string getPath(ui4 index);
 
-    typedef std::map<ui4, std::string>::const_iterator IndexIterator;
-    IndexIterator beginIndex();
-    IndexIterator endIndex();
+    typedef std::map<ui4, std::string>::const_iterator IndexCacheIterator;
+    IndexCacheIterator beginIndex();
+    IndexCacheIterator endIndex();
+
+    typedef std::vector<ui4>::const_iterator IndexIterator;
+    IndexIterator beginAddedIndex();
+    IndexIterator endAddedIndex();
+    IndexIterator beginRemovedIndex();
+    IndexIterator endRemovedIndex();
 
     // add / remove path tells server about existence of objects
     // any change is propagated via moderated event mechanism to controller
     void addPath(const std::string& path, const std::string& resourcePath = "");
     void removePath(const std::string& path);
+    void removeIndex(ui4 index);
 
     virtual std::string getParentPath(const std::string& path) { return ""; }
 
@@ -446,6 +456,10 @@ public:
 protected:
     void readIndexCache();
     void writeIndexCache();
+    ui4 getIndexCacheUpdateId();
+    void setIndexCacheUpdateId(ui4 id);
+    void updateIndexCache(ui4 toUpdateId);
+    ui4 getNewIndex();
 
     Poco::Path                                  _basePath;
     Poco::Path                                  _cacheDirPath;
@@ -460,6 +474,12 @@ private:
     std::multimap<ui4, std::string>             _resourceMap;
     std::stack<ui4>                             _freeIndices;
     ui4                                         _maxIndex;
+    ui4                                         _cacheUpdateId;
+
+    std::vector<ui4>                            _lastIndices;
+    std::vector<ui4>                            _commonIndices;
+    std::vector<ui4>                            _addedIndices;
+    std::vector<ui4>                            _removedIndices;
 
     Poco::TextEncoding::Ptr                     _pSourceEncoding;
     Poco::UTF8Encoding                          _targetEncoding;

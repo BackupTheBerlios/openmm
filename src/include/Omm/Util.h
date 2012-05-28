@@ -62,9 +62,9 @@ public:
     static Home* instance();
 
     const std::string getHomeDirPath();
-    const std::string getCacheDirPath(const std::string& relPath);
-    const std::string getConfigDirPath(const std::string& relPath);
-    const std::string getMetaDirPath(const std::string& relPath);
+    const std::string getCacheDirPath(const std::string& relPath = "");
+    const std::string getConfigDirPath(const std::string& relPath = "");
+    const std::string getMetaDirPath(const std::string& relPath = "");
 
 private:
     Home();
