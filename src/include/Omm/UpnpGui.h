@@ -109,6 +109,7 @@ public:
 
     UpnpApplication(int argc, char** argv);
 
+    void setLockInstance(bool lock = true);
     void setIgnoreConfig(bool ignore = true);
     void enableController(bool enable = true);
     void showRendererVisualOnly(bool show = true);
@@ -151,6 +152,7 @@ private:
     int                                         _argc;
     char**                                      _argv;
     bool                                        _helpRequested;
+    bool                                        _lockInstance;
     bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;

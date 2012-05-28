@@ -94,6 +94,7 @@ UpnpApplication::UpnpApplication(int argc, char** argv) :
 _argc(argc),
 _argv(argv),
 _helpRequested(false),
+_lockInstance(true),
 _ignoreConfig(false),
 //#ifdef __IPHONE__
 //    _rendererName("iPhone Renderer"),
@@ -216,6 +217,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
         Poco::Util::Application::init(_argc, _argv);
 
         if (instanceRunning()) {
+            Log::instance()->upnp().information("omm application instance running, starting in controller mode");
             setIgnoreConfig(true);
         }
 
@@ -293,6 +295,13 @@ UpnpApplication::displayHelp()
     helpFormatter.setUsage("OPTIONS");
     helpFormatter.setHeader("OMM application running a UPnP controller, renderer and servers.");
     helpFormatter.format(std::cout);
+}
+
+
+void
+UpnpApplication::setLockInstance(bool lock)
+{
+    _lockInstance = lock;
 }
 
 
@@ -741,9 +750,14 @@ UpnpApplication::stopAppHttpServer()
 bool
 UpnpApplication::instanceRunning()
 {
-    Poco::NamedMutex mutex(_instanceMutexName);
+    if (_lockInstance) {
+        Poco::NamedMutex mutex(_instanceMutexName);
 
-    return !mutex.tryLock();
+        return !mutex.tryLock();
+    }
+    else {
+        return false;
+    }
 }
 
 

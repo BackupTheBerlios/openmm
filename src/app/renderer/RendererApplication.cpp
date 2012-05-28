@@ -25,7 +25,8 @@
 int main(int argc, char** argv)
 {
     Omm::UpnpApplication app(argc, argv);
-    app.setIgnoreConfig();
+    app.setLockInstance(false);
+    app.setIgnoreConfig(true);
     app.enableController(false);
     app.showRendererVisualOnly(true);
     return app.run();
