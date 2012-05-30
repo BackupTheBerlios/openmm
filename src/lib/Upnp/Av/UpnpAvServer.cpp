@@ -943,10 +943,10 @@ void
 ServerContainer::updateCacheThread()
 {
     Log::instance()->upnpav().debug("server container, update cache thread started ...");
-    if (!cacheNeedsUpdate()) {
-        Log::instance()->upnpav().debug("database cache is current, nothing to do");
-    }
-    else {
+//    if (!cacheNeedsUpdate()) {
+//        Log::instance()->upnpav().debug("database cache is current, nothing to do");
+//    }
+//    else {
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
             if (!updateCacheThreadIsRunning()) {
                 Log::instance()->upnpav().debug("stopping scan thread");
@@ -964,7 +964,7 @@ ServerContainer::updateCacheThread()
         // TODO: also update user objects.
         // TODO: does virtual object update really do a sync?
         _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
-    }
+//    }
     _updateCacheThreadLock.lock();
     _updateCacheThreadRunning = false;
     _updateCacheThreadLock.unlock();
@@ -1123,7 +1123,8 @@ ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexName
         pObject = _pUserObjectCache->getMediaObjectForIndex(index);
 //        pObject->_indexNamespace = User;
     }
-    else if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
+//    else if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
+    else if (_pObjectCache && !updateCacheThreadIsRunning()) {
         // get media object out of data base cache (column xml)
         pObject = _pObjectCache->getMediaObjectForIndex(index);
 //        pObject->_indexNamespace = Virtual;
@@ -1160,12 +1161,13 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
         count -= childCount;
     }
 
-    bool updateCache = cacheNeedsUpdate();
+//    bool updateCache = cacheNeedsUpdate();
     if (_index == AbstractDataModel::INVALID_INDEX && _layout == PropertyGroups && _pVirtualContainerCache) {
         // parent container is root and we want to browse virtual child containers
         childCount += _pVirtualContainerCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
-    else if (_pObjectCache && !updateCache) {
+//    else if (_pObjectCache && !updateCache) {
+    else if (_pObjectCache) {
         childCount += _pObjectCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
     else {
@@ -1892,6 +1894,7 @@ void
 AbstractDataModel::setBasePath(const std::string& basePath)
 {
     _basePath = basePath;
+    init();
 
     // TODO: avoid long and hidden paths in meta directory
 //    Poco::Path path(basePath);
@@ -2028,19 +2031,24 @@ AbstractDataModel::addPath(const std::string& path, const std::string& resourceP
 }
 
 
-void
-AbstractDataModel::removePath(const std::string& path)
-{
-    std::map<std::string, ui4>::iterator pos = _pathMap.find(path);
-    if (pos  != _pathMap.end()) {
-        _indexMap.erase((*pos).second);
-        _pathMap.erase(pos);
-        _resourceMap.erase((*pos).second);
-    }
-    else {
-        Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
-    }
-}
+//void
+//AbstractDataModel::removePath(const std::string& path)
+//{
+//    std::map<std::string, ui4>::iterator pos = _pathMap.find(path);
+//    if (pos  != _pathMap.end()) {
+//        ui4 freeIndex = (*pos).second;
+//        _indexMap.erase(freeIndex);
+//        _pathMap.erase(pos);
+//        _resourceMap.erase(freeIndex);
+//        _freeIndices.push(freeIndex);
+//        if (freeIndex == _maxIndex && !_pServerContainer->updateCacheThreadIsRunning()) {
+//            _maxIndex--;
+//        }
+//    }
+//    else {
+//        Log::instance()->upnpav().error("abstract data model, could not erase path from index cache: " + path);
+//    }
+//}
 
 
 void
@@ -2051,6 +2059,10 @@ AbstractDataModel::removeIndex(ui4 index)
         _indexMap.erase(pos);
         _pathMap.erase((*pos).second);
         _resourceMap.erase((*pos).first);
+        _freeIndices.push(index);
+        if (index == _maxIndex && !_pServerContainer->updateCacheThreadIsRunning()) {
+            _maxIndex--;
+        }
     }
     else {
         Log::instance()->upnpav().error("abstract data model, could not erase index from index cache: " + Poco::NumberFormatter::format(index));
@@ -2228,7 +2240,7 @@ ui4
 AbstractDataModel::getNewIndex()
 {
     ui4 index;
-    if (!_freeIndices.empty()) {
+    if (!_freeIndices.empty() && !_pServerContainer->updateCacheThreadIsRunning()) {
         index = _freeIndices.top();
         _freeIndices.pop();
     }

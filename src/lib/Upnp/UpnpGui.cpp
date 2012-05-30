@@ -1085,6 +1085,8 @@ void
 MediaRendererDevice::initController()
 {
     _rendererName.setLabel(getFriendlyName());
+    _volume.setValue(getVolume());
+    _position.setValue(0);
 }
 
 

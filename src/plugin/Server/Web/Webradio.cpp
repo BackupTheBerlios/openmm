@@ -41,6 +41,13 @@ WebradioModel::WebradioModel()
 }
 
 
+void
+WebradioModel::init()
+{
+    scanStationConfig(getBasePath());
+}
+
+
 std::string
 WebradioModel::getModelClass()
 {
@@ -51,6 +58,9 @@ WebradioModel::getModelClass()
 Omm::ui4
 WebradioModel::getUpdateId(bool recurse)
 {
+    // FIXME: if cache is current, xml config file is not parsed
+    // and _stationNames not initialized. When using no database
+    // cache, we get no meta data out of the model.
     return Poco::File(getBasePath()).getLastModified().epochTime();
 }
 
@@ -59,6 +69,9 @@ void
 WebradioModel::scan(bool recurse)
 {
     scanStationConfig(getBasePath());
+    for (std::map<std::string, std::string>::iterator it = _stationNames.begin(); it != _stationNames.end(); ++it) {
+        addPath(it->first);
+    }
 }
 
 
@@ -197,6 +210,9 @@ void
 WebradioModel::scanStationConfig(const std::string& stationConfig)
 {
     Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file: " + stationConfig + " ...");
+
+    _stationNames.clear();
+
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
     parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
@@ -234,7 +250,6 @@ WebradioModel::scanStationConfig(const std::string& stationConfig)
                     Omm::Av::Log::instance()->upnpav().debug("added web radio station with name: " + pProp->innerText());
                 }
                 else if (pProp->nodeName() == "uri") {
-                    addPath(pProp->innerText());
                     _stationNames[pProp->innerText()] = currentStationName;
                     Omm::Av::Log::instance()->upnpav().debug("added web radio station with uri: " + pProp->innerText());
                 }

@@ -263,6 +263,7 @@ public:
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true);
+    bool updateCacheThreadIsRunning();
     // FIXME: cache update should be triggered by data model
     bool cacheNeedsUpdate();
 
@@ -282,7 +283,6 @@ private:
     virtual ServerObject* initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
 
     void updateCacheThread();
-    bool updateCacheThreadIsRunning();
 
 //    AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
@@ -400,6 +400,7 @@ public:
 
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
+    virtual void init() {}
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
     virtual ui4 getUpdateId(bool recurse = true) { return 0; }
@@ -433,7 +434,7 @@ public:
     // add / remove path tells server about existence of objects
     // any change is propagated via moderated event mechanism to controller
     void addPath(const std::string& path, const std::string& resourcePath = "");
-    void removePath(const std::string& path);
+//    void removePath(const std::string& path);
     void removeIndex(ui4 index);
 
     virtual std::string getParentPath(const std::string& path) { return ""; }

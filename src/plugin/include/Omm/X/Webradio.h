@@ -30,9 +30,11 @@ class WebradioModel : public Omm::Av::SimpleDataModel
 public:
     WebradioModel();
 
+    virtual void init();
     virtual std::string getModelClass();
     virtual Omm::ui4 getUpdateId(bool recurse = true);
     virtual void scan(bool recurse = true);
+    virtual bool useObjectCache() { return false; }
 
     virtual std::string getClass(const std::string& path);
     virtual std::string getTitle(const std::string& path);
@@ -45,6 +47,7 @@ public:
 
 private:
     void scanStationConfig(const std::string& stationConfig);
+    /// parse station config and read in uri (path) and station name into _stationNames map.
 
     std::map<std::string, std::string>     _stationNames;
 };

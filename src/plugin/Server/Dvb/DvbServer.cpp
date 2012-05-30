@@ -35,6 +35,15 @@ _pRecDevice(new std::ifstream("/dev/dvb/adapter0/dvr0"))
 }
 
 
+void
+DvbModel::init()
+{
+    scanChannelConfig(getBasePath(), false);
+    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
+    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
+}
+
+
 std::string
 DvbModel::getModelClass()
 {
@@ -53,8 +62,6 @@ void
 DvbModel::scan(bool recurse)
 {
     scanChannelConfig(getBasePath());
-    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
-    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
 }
 
 
@@ -134,8 +141,12 @@ DvbModel::getDlna(const std::string& path)
 
 
 void
-DvbModel::scanChannelConfig(const std::string& channelConfig)
+DvbModel::scanChannelConfig(const std::string& channelConfig, bool addPaths)
 {
+    Omm::Dvb::Log::instance()->dvb().debug("scan channel config ...");
+
+    clearMaps();
+
     std::ifstream channels(channelConfig.c_str());
     std::string line;
     while (getline(channels, line)) {
@@ -156,8 +167,22 @@ DvbModel::scanChannelConfig(const std::string& channelConfig)
         unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
         _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid);
-        addPath(line);
+        if (addPaths) {
+            addPath(line);
+        }
     }
+    Omm::Dvb::Log::instance()->dvb().debug("scan channel config finished.");
+}
+
+
+void
+DvbModel::clearMaps()
+{
+    _channelNames.clear();
+    for (std::map<std::string, Omm::Dvb::DvbChannel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+        delete it->second;
+    }
+    _channels.clear();
 }
 
 

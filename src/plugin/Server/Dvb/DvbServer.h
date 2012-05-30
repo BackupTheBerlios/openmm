@@ -35,6 +35,7 @@ class DvbModel : public Omm::Av::SimpleDataModel
 public:
     DvbModel();
 
+    virtual void init();
     virtual std::string getModelClass();
     virtual Omm::ui4 getUpdateId(bool recurse = true);
     virtual void scan(bool recurse = true);
@@ -48,7 +49,8 @@ public:
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
 
 private:
-    void scanChannelConfig(const std::string& channelConfig);
+    void scanChannelConfig(const std::string& channelConfig, bool addPaths = true);
+    void clearMaps();
 
     std::map<std::string, std::string>                  _channelNames;
     std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
