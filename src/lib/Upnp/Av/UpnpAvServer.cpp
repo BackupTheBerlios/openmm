@@ -1967,6 +1967,7 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
 
     // save updated index cache
+    setSystemCacheUpdateId(getSystemCacheUpdateId() + 1);
     setIndexCacheUpdateId(id);
     writeIndexCache();
 
