@@ -56,7 +56,7 @@ WebradioModel::getModelClass()
 
 
 Omm::ui4
-WebradioModel::getSystemUpdateId(bool recurse)
+WebradioModel::getSystemUpdateId()
 {
     // FIXME: if cache is current, xml config file is not parsed
     // and _stationNames not initialized. When using no database
@@ -66,7 +66,7 @@ WebradioModel::getSystemUpdateId(bool recurse)
 
 
 void
-WebradioModel::scan(bool recurse)
+WebradioModel::scan()
 {
     scanStationConfig(getBasePath());
     for (std::map<std::string, std::string>::iterator it = _stationNames.begin(); it != _stationNames.end(); ++it) {

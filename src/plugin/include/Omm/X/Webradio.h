@@ -32,8 +32,8 @@ public:
 
     virtual void init();
     virtual std::string getModelClass();
-    virtual Omm::ui4 getSystemUpdateId(bool recurse = true);
-    virtual void scan(bool recurse = true);
+    virtual Omm::ui4 getSystemUpdateId();
+    virtual void scan();
     virtual bool useObjectCache() { return false; }
 
     virtual std::string getClass(const std::string& path);

@@ -405,7 +405,7 @@ public:
     virtual CsvList getQueryProperties() { return CsvList(""); }
     virtual ui4 getSystemUpdateId() { return 0; }
     virtual ui4 getUpdateId(const std::string& path) { return getSystemUpdateId(); }
-    void newSystemUpdateId(ui4 toUpdateId);
+    void newSystemUpdateId(ui4 id);
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
@@ -460,6 +460,8 @@ protected:
     void writeIndexCache();
     ui4 getIndexCacheUpdateId();
     void setIndexCacheUpdateId(ui4 id);
+    ui4 getSystemCacheUpdateId();
+    void setSystemCacheUpdateId(ui4 id);
     ui4 getNewIndex();
 
     Poco::Path                                  _basePath;
@@ -476,6 +478,7 @@ private:
     std::stack<ui4>                             _freeIndices;
     ui4                                         _maxIndex;
     ui4                                         _cacheUpdateId;
+    ui4                                         _systemUpdateId;
 
     std::vector<ui4>                            _lastIndices;
     std::vector<ui4>                            _commonIndices;

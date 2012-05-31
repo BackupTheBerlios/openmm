@@ -1871,7 +1871,8 @@ _maxIndex(1),
 //_indexBufferSize(50),
 _pSourceEncoding(0),
 _pTextConverter(0),
-_cacheUpdateId(0)
+_cacheUpdateId(0),
+_systemUpdateId(0)
 {
 }
 
@@ -1923,13 +1924,19 @@ AbstractDataModel::getBasePath()
 
 
 void
-AbstractDataModel::newSystemUpdateId(ui4 toUpdateId)
+AbstractDataModel::newSystemUpdateId(ui4 id)
 {
     Omm::Av::Log::instance()->upnpav().debug("update index cache ...");
-    if (getIndexCacheUpdateId() == toUpdateId) {
+    if (getIndexCacheUpdateId() == id) {
         Omm::Av::Log::instance()->upnpav().debug("index cache is current, nothing to do.");
         return;
     }
+
+    // clear temporary index lists
+    _lastIndices.clear();
+    _commonIndices.clear();
+    _addedIndices.clear();
+    _removedIndices.clear();
 
     // save last index list
     Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
@@ -1960,14 +1967,8 @@ AbstractDataModel::newSystemUpdateId(ui4 toUpdateId)
     Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
 
     // save updated index cache
-    setIndexCacheUpdateId(toUpdateId);
+    setIndexCacheUpdateId(id);
     writeIndexCache();
-
-    // clear temporary index lists
-    _lastIndices.clear();
-    _commonIndices.clear();
-    _addedIndices.clear();
-    _removedIndices.clear();
 
     // trigger database cache update
 //    _pServerContainer->updateCache();
@@ -2183,9 +2184,21 @@ AbstractDataModel::readIndexCache()
     std::string line;
 
     getline(indexCache, line);
-    setIndexCacheUpdateId(Poco::NumberParser::parse(line));
+    try {
+        setSystemCacheUpdateId(Poco::NumberParser::parse(line));
+    }
+    catch (Poco::Exception& e) {
+        Omm::Av::Log::instance()->upnpav().debug("could not parse system update id: " + e.displayText());
+    }
+    getline(indexCache, line);
+    try {
+        setIndexCacheUpdateId(Poco::NumberParser::parse(line));
+    }
+    catch (Poco::Exception& e) {
+        Omm::Av::Log::instance()->upnpav().debug("could not parse index cache update id: " + e.displayText());
+    }
 
-            ui4 index = 0;
+    ui4 index = 0;
     ui4 lastIndex = 0;
     _maxIndex = 0;
     std::string path;
@@ -2211,6 +2224,7 @@ AbstractDataModel::writeIndexCache()
 {
     Log::instance()->upnpav().debug("index cache writing to: " + _indexFilePath.toString() + " ...");
     std::ofstream indexCache(_indexFilePath.toString().c_str());
+    indexCache << getSystemCacheUpdateId() << std::endl;
     indexCache << getIndexCacheUpdateId() << std::endl;
 
     for (std::map<ui4, std::string>::iterator it = _indexMap.begin(); it != _indexMap.end(); ++it) {
@@ -2233,6 +2247,20 @@ void
 AbstractDataModel::setIndexCacheUpdateId(ui4 id)
 {
     _cacheUpdateId = id;
+}
+
+
+ui4
+AbstractDataModel::getSystemCacheUpdateId()
+{
+    return _systemUpdateId;
+}
+
+
+void
+AbstractDataModel::setSystemCacheUpdateId(ui4 id)
+{
+    _systemUpdateId = id;
 }
 
 
