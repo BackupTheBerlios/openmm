@@ -50,13 +50,21 @@ FileModel::getModelClass()
 
 
 Omm::ui4
-FileModel::getUpdateId(bool recurse)
+FileModel::getSystemUpdateId()
 {
     Poco::File baseDir(getBasePath());
-    Omm::ui4 id = getUpdateId(baseDir, recurse);
+    Omm::ui4 id = getUpdateId(baseDir);
     Omm::Av::Log::instance()->upnpav().debug("file data model get update id returns: " + Poco::NumberFormatter::format(id));
 
     return id;
+}
+
+
+Omm::ui4
+FileModel::getUpdateId(const std::string& path)
+{
+    Poco::File file(Poco::Path(getBasePath(), path));
+    return file.getLastModified().epochTime();
 }
 
 
@@ -68,10 +76,10 @@ FileModel::getQueryProperties()
 
 
 void
-FileModel::scan(bool recurse)
+FileModel::scan()
 {
     Poco::File baseDir(getBasePath());
-    scanDirectory(baseDir, recurse);
+    scanDirectory(baseDir);
 }
 
 
@@ -200,15 +208,15 @@ FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFo
 
 
 Omm::ui4
-FileModel::getUpdateId(Poco::File& directory, bool recurse)
+FileModel::getUpdateId(Poco::File& directory)
 {
     Omm::ui4 res = directory.getLastModified().epochTime();
-    
+
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
-            if (recurse && dir->isDirectory()) {
+            if (dir->isDirectory()) {
                 res = std::max(res, getUpdateId(*dir));
             }
         }
@@ -222,14 +230,14 @@ FileModel::getUpdateId(Poco::File& directory, bool recurse)
 
 
 void
-FileModel::scanDirectory(Poco::File& directory, bool recurse)
+FileModel::scanDirectory(Poco::File& directory)
 {
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
     while(dir != end) {
         try {
             addPath(dir->path().substr(getBasePath().length()));
-            if (recurse && dir->isDirectory()) {
+            if (dir->isDirectory()) {
                 scanDirectory(*dir);
             }
         }

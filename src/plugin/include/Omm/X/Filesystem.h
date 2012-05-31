@@ -34,9 +34,10 @@ public:
     ~FileModel();
 
     virtual std::string getModelClass();
-    virtual Omm::ui4 getUpdateId(bool recurse = true);
+    virtual Omm::ui4 getSystemUpdateId();
+    virtual Omm::ui4 getUpdateId(const std::string& path);
     virtual Omm::Av::CsvList getQueryProperties();
-    virtual void scan(bool recurse = true);
+    virtual void scan();
     virtual bool preserveIndexCache() { return true; }
 
     virtual std::string getParentPath(const std::string& path);
@@ -48,8 +49,8 @@ public:
     virtual void freeStream(std::istream* pIstream);
 
 private:
-    Omm::ui4 getUpdateId(Poco::File& directory, bool recurse = true);
-    void scanDirectory(Poco::File& directory, bool recurse = true);
+    Omm::ui4 getUpdateId(Poco::File& directory);
+    void scanDirectory(Poco::File& directory);
     void loadTagger();
     void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);
 

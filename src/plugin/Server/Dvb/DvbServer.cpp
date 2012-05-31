@@ -52,14 +52,14 @@ DvbModel::getModelClass()
 
 
 Omm::ui4
-DvbModel::getUpdateId(bool recurse)
+DvbModel::getSystemUpdateId()
 {
     return Poco::File(getBasePath()).getLastModified().epochTime();
 }
 
 
 void
-DvbModel::scan(bool recurse)
+DvbModel::scan()
 {
     scanChannelConfig(getBasePath());
 }

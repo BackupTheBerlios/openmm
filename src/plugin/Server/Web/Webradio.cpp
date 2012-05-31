@@ -56,7 +56,7 @@ WebradioModel::getModelClass()
 
 
 Omm::ui4
-WebradioModel::getUpdateId(bool recurse)
+WebradioModel::getSystemUpdateId(bool recurse)
 {
     // FIXME: if cache is current, xml config file is not parsed
     // and _stationNames not initialized. When using no database

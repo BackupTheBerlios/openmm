@@ -1911,7 +1911,7 @@ AbstractDataModel::setBasePath(const std::string& basePath)
     // are derived from them (playlists must be removed also, if index cache is rebuild entirely)
     _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(getModelClass() + "/" + basePath), "index");
     readIndexCache();
-    updateIndexCache(getUpdateId());
+    newSystemUpdateId(getSystemUpdateId());
 }
 
 
@@ -1919,6 +1919,60 @@ std::string
 AbstractDataModel::getBasePath()
 {
     return _basePath.toString();
+}
+
+
+void
+AbstractDataModel::newSystemUpdateId(ui4 toUpdateId)
+{
+    Omm::Av::Log::instance()->upnpav().debug("update index cache ...");
+    if (getIndexCacheUpdateId() == toUpdateId) {
+        Omm::Av::Log::instance()->upnpav().debug("index cache is current, nothing to do.");
+        return;
+    }
+
+    // save last index list
+    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
+    for (IndexCacheIterator it = beginIndex(); it != endIndex(); ++it) {
+        _lastIndices.push_back((*it).first);
+    }
+
+    // when scanning the data model, addPath() is called.
+    scan();
+
+    // calculate indices to be removed
+    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
+    for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
+        IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
+        if (pos == _commonIndices.end()) {
+            _removedIndices.push_back(*it);
+        }
+    }
+    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
+                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
+                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
+                                            ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
+    // remove index maps
+    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
+    for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
+        removeIndex(*it);
+    }
+    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
+
+    // save updated index cache
+    setIndexCacheUpdateId(toUpdateId);
+    writeIndexCache();
+
+    // clear temporary index lists
+    _lastIndices.clear();
+    _commonIndices.clear();
+    _addedIndices.clear();
+    _removedIndices.clear();
+
+    // trigger database cache update
+//    _pServerContainer->updateCache();
+
+    Omm::Av::Log::instance()->upnpav().debug("update index cache finished.");
 }
 
 
@@ -2179,60 +2233,6 @@ void
 AbstractDataModel::setIndexCacheUpdateId(ui4 id)
 {
     _cacheUpdateId = id;
-}
-
-
-void
-AbstractDataModel::updateIndexCache(ui4 toUpdateId)
-{
-    Omm::Av::Log::instance()->upnpav().debug("update index cache ...");
-    if (getIndexCacheUpdateId() == toUpdateId) {
-        Omm::Av::Log::instance()->upnpav().debug("index cache is current, nothing to do.");
-        return;
-    }
-
-    // save last index list
-    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
-    for (IndexCacheIterator it = beginIndex(); it != endIndex(); ++it) {
-        _lastIndices.push_back((*it).first);
-    }
-
-    // when scanning the data model, addPath() is called.
-    scan(true);
-
-    // calculate indices to be removed
-    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
-    for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
-        IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
-        if (pos == _commonIndices.end()) {
-            _removedIndices.push_back(*it);
-        }
-    }
-    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
-                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
-                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
-                                            ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
-    // remove index maps
-    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
-    for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
-        removeIndex(*it);
-    }
-    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
-
-    // save updated index cache
-    setIndexCacheUpdateId(toUpdateId);
-    writeIndexCache();
-
-    // clear temporary index lists
-    _lastIndices.clear();
-    _commonIndices.clear();
-    _addedIndices.clear();
-    _removedIndices.clear();
-
-    // trigger database cache update
-//    _pServerContainer->updateCache();
-
-    Omm::Av::Log::instance()->upnpav().debug("update index cache finished.");
 }
 
 

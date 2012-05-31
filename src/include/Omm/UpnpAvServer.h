@@ -403,14 +403,15 @@ public:
     virtual void init() {}
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
-    virtual ui4 getUpdateId(bool recurse = true) { return 0; }
+    virtual ui4 getSystemUpdateId() { return 0; }
+    virtual ui4 getUpdateId(const std::string& path) { return getSystemUpdateId(); }
+    void newSystemUpdateId(ui4 toUpdateId);
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
     // child media object creation / deletion
     // index and path
-    virtual void scan(bool recurse = true) {}
-    virtual bool preserveIndexCache() { return false; }
+    virtual void scan() {}
     virtual bool useObjectCache() { return true; }
     // decide if to use index cache, if no, implement next four methods
     // depending on the data domain, the bijective mapping between index and path
@@ -459,7 +460,6 @@ protected:
     void writeIndexCache();
     ui4 getIndexCacheUpdateId();
     void setIndexCacheUpdateId(ui4 id);
-    void updateIndexCache(ui4 toUpdateId);
     ui4 getNewIndex();
 
     Poco::Path                                  _basePath;

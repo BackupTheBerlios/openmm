@@ -37,8 +37,8 @@ public:
 
     virtual void init();
     virtual std::string getModelClass();
-    virtual Omm::ui4 getUpdateId(bool recurse = true);
-    virtual void scan(bool recurse = true);
+    virtual Omm::ui4 getSystemUpdateId();
+    virtual void scan();
 
     virtual std::string getClass(const std::string& path);
     virtual std::string getTitle(const std::string& path);
