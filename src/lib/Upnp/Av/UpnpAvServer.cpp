@@ -565,9 +565,20 @@ ServerObject::~ServerObject()
 void
 ServerObject::setUniqueProperty(const std::string& name, const std::string& value)
 {
-    if (_pDataModel && _pDataModel->getTextConverter()) {
+//    Log::instance()->upnpav().debug("server container set unique property: " + name);
+//    Log::instance()->upnpav().debug("server container data model: " + Poco::NumberFormatter::format(_pDataModel));
+
+    if (_pDataModel) {
+        Log::instance()->upnpav().debug("server container text converter: " + Poco::NumberFormatter::format(_pDataModel->getTextConverter()));
         std::string recodedValue;
-        _pDataModel->getTextConverter()->convert(value, recodedValue);
+        // convert encodings, if necessary
+        if (_pDataModel->getTextConverter()) {
+            Log::instance()->upnpav().debug("server container convert character encoding");
+            _pDataModel->getTextConverter()->convert(value, recodedValue);
+        }
+        else {
+            recodedValue = value;
+        }
         // replace control characters (ASCII < 32) with space to prevent Poco::XMLWriter throwing
         // Poco::XMLException("invalid character token")
         for (std::string::iterator it = recodedValue.begin(); it != recodedValue.end(); ++it) {
@@ -576,7 +587,7 @@ ServerObject::setUniqueProperty(const std::string& name, const std::string& valu
             }
         }
         MemoryMediaObject::setUniqueProperty(name, recodedValue);
-    }
+     }
     else {
         MemoryMediaObject::setUniqueProperty(name, value);
     }
@@ -983,15 +994,17 @@ ServerContainer::setBasePath(const std::string& basePath)
 void
 ServerContainer::updateCache(bool on)
 {
-    _updateCacheThreadLock.lock();
-    _updateCacheThreadRunning = on;
-    _updateCacheThreadLock.unlock();
-    if (on) {
-        _updateCacheThread.start(_updateCacheThreadRunnable);
-    }
-    else {
-        _updateCacheThread.join();
-    }
+//    _updateCacheThreadLock.lock();
+//    _updateCacheThreadRunning = on;
+//    _updateCacheThreadLock.unlock();
+//    if (on) {
+//        _updateCacheThread.start(_updateCacheThreadRunnable);
+//    }
+//    else {
+//        _updateCacheThread.join();
+//    }
+
+    updateCacheThread();
 }
 
 
@@ -999,42 +1012,40 @@ void
 ServerContainer::updateCacheThread()
 {
     Log::instance()->upnpav().debug("server container, update cache thread started ...");
-//    if (!cacheNeedsUpdate()) {
-//        Log::instance()->upnpav().debug("database cache is current, nothing to do");
-//    }
-//    else {
-        for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
-            if (!updateCacheThreadIsRunning()) {
-                Log::instance()->upnpav().debug("stopping scan thread");
-                break;
-            }
-            _pObjectCache->insertMediaObject(ServerContainer::getChildForIndex(*it, false));
-        }
+    if (_pObjectCache) {
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginRemovedIndex(); it != _pDataModel->endRemovedIndex(); ++it) {
-            if (!updateCacheThreadIsRunning()) {
-                Log::instance()->upnpav().debug("stopping scan thread");
-                break;
-            }
+            Log::instance()->upnpav().debug("remove object from cache with index: " + Poco::NumberFormatter::format(*it));
             _pObjectCache->removeMediaObjectForIndex(*it);
         }
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
+            Log::instance()->upnpav().debug("add object to cache with index: " + Poco::NumberFormatter::format(*it));
+            ServerObject* pObject = _pDataModel->getMediaObject(_pDataModel->getPath(*it));
+            if (pObject) {
+                pObject->setIndex(*it);
+                _pObjectCache->insertMediaObject(pObject);
+            }
+            else {
+                Log::instance()->upnpav().error("could not retrieve media object from data model");
+            }
+        }
         // TODO: also update user objects.
-        // TODO: does virtual object update really do a sync?
-        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
-//    }
-    _updateCacheThreadLock.lock();
-    _updateCacheThreadRunning = false;
-    _updateCacheThreadLock.unlock();
+        // TODO: virtual object update does not sync but rewrites everything
+//        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
+    }
+    else {
+        Log::instance()->upnpav().debug("no object cache, no update.");
+    }
     Log::instance()->upnpav().debug("server container, update cache thread finished.");
 }
 
 
-bool
-ServerContainer::updateCacheThreadIsRunning()
-{
-    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
-    Log::instance()->upnpav().debug("server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
-    return _updateCacheThreadRunning;
-}
+//bool
+//ServerContainer::updateCacheThreadIsRunning()
+//{
+//    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
+//    Log::instance()->upnpav().debug("server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
+//    return _updateCacheThreadRunning;
+//}
 
 
 bool
@@ -1180,7 +1191,8 @@ ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexName
 //        pObject->_indexNamespace = User;
     }
 //    else if (_pObjectCache && !updateCacheThreadIsRunning() && !cacheNeedsUpdate()) {
-    else if (_pObjectCache && !updateCacheThreadIsRunning()) {
+//    else if (_pObjectCache && !updateCacheThreadIsRunning()) {
+    else if (_pObjectCache) {
         // get media object out of data base cache (column xml)
         pObject = _pObjectCache->getMediaObjectForIndex(index);
 //        pObject->_indexNamespace = Virtual;
@@ -1783,7 +1795,20 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
         }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().debug("database cache inserting media object failed: " + e.displayText());
+        Log::instance()->upnpav().error("database cache inserting media object failed: " + e.displayText());
+    }
+}
+
+
+void
+DatabaseCache::removeMediaObjectForIndex(ui4 index)
+{
+    Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(index));
+    try {
+        *_pSession << "DELETE FROM " + _cacheTableName + " WHERE idx = " + Poco::NumberFormatter::format(index), Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("database cache removing media object failed: " + e.displayText());
     }
 }
 
@@ -1984,7 +2009,7 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     // index diff calculation looks like an overkill, but indices have to be preserved
     // as they are meta data and identify a media object within a CDS over time.
 
-    Omm::Av::Log::instance()->upnpav().debug("new system update id ...");
+    Omm::Av::Log::instance()->upnpav().debug("new system update id: " + Poco::NumberFormatter::format(id));
     if (getIndexCacheUpdateId() == id) {
         Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
         return;
@@ -1997,7 +2022,7 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     _removedIndices.clear();
 
     // save last index list
-    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
+//    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
     for (IndexCacheIterator it = beginIndex(); it != endIndex(); ++it) {
         _lastIndices.push_back((*it).first);
     }
@@ -2006,7 +2031,7 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     scan();
 
     // calculate indices to be removed
-    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
+//    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
     for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
         IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
         if (pos == _commonIndices.end()) {
@@ -2018,11 +2043,11 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
                                             ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
                                             ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
     // remove index maps
-    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
+//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
     for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
         removeIndex(*it);
     }
-    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
+//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
 
     // save updated index cache
     incSystemCacheUpdateId();
@@ -2030,7 +2055,7 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     writeIndexCache();
 
     // update database cache (if available)
-//    _pServerContainer->updateCache();
+    _pServerContainer->updateCache();
 
     // trigger evented state variable SystemUpdateID
     _pServerContainer->getServer()->setSystemUpdateId(getSystemCacheUpdateId());

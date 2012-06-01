@@ -1533,7 +1533,7 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 
     // get (object id of) container, that is on top of navigator
     MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
-    if (pContainer) {
+    if (pContainer && _pServerGroupWidget->getSelectedDevice() && _pServerGroupWidget->getSelectedDevice()->getUuid() == getUuid()) {
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
         if (pObject) {
             // clear cache (reset data model)

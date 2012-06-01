@@ -272,7 +272,7 @@ public:
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true);
-    bool updateCacheThreadIsRunning();
+//    bool updateCacheThreadIsRunning();
     // FIXME: cache update should be triggered by data model
     bool cacheNeedsUpdate();
 
@@ -365,6 +365,7 @@ public:
     virtual void getIndices(std::vector<ui4>& indices, const std::string& sort = "");
 
     virtual void insertMediaObject(ServerObject* pObject);
+    virtual void removeMediaObjectForIndex(ui4 index);
 
     virtual void addPropertiesForQuery(CsvList propertyList);
     virtual void updateVirtualObjects(ServerObjectCache* pVirtualObjectCache);
