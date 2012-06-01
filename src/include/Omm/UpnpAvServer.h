@@ -29,6 +29,7 @@
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include <Poco/Thread.h>
+#include <Poco/Timer.h>
 #include <Poco/RunnableAdapter.h>
 #include <Poco/TextEncoding.h>
 #include <Poco/UTF8Encoding.h>
@@ -73,12 +74,20 @@ public:
     std::string getServerAddress();
     std::string getServerProtocol();
 
+    void setSystemUpdateId(ui4 id);
+    void setPollSystemUpdateIdTimer(long msec);
+
 private:
+    void startPollSystemUpdateId(bool start = true);
+    void pollSystemUpdateId(Poco::Timer& timer);
+
     DevContentDirectoryServerImpl*              _pDevContentDirectoryServerImpl;
 
     ServerContainer*                            _pServerContainer;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;
+    Poco::Timer*                                _pSystemUpdateIdTimer;
+    long                                        _systemUpdateIdTimerInterval;
 };
 
 
@@ -196,7 +205,7 @@ public:
     // this really is createChildItem(), not createChildObject()
 //    virtual AbstractMediaObject* createChildObject();
 
-
+    MediaServer* getServer();
 
 protected:
     virtual std::istream* getIconStream() {}
@@ -462,6 +471,7 @@ protected:
     void setIndexCacheUpdateId(ui4 id);
     ui4 getSystemCacheUpdateId();
     void setSystemCacheUpdateId(ui4 id);
+    void incSystemCacheUpdateId();
     ui4 getNewIndex();
 
     Poco::Path                                  _basePath;

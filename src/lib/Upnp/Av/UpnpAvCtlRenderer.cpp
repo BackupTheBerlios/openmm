@@ -39,7 +39,7 @@ _pCurrentMediaObject(0),
 //_usePlaylistResource(false)
 _usePlaylistResource(true),
 _pPositionTimer(0),
-_positionTimerIntervall(1000)
+_positionTimerInterval(1000)
 {
 }
 
@@ -253,7 +253,7 @@ CtlMediaRenderer::startPositionTimer(bool start)
     }
     if (start) {
         Log::instance()->upnpav().debug("start position timer ...");
-        _pPositionTimer = new Poco::Timer(0, _positionTimerIntervall);
+        _pPositionTimer = new Poco::Timer(0, _positionTimerInterval);
         Poco::TimerCallback<CtlMediaRenderer> callback(*this, &CtlMediaRenderer::pollPositionInfo);
         _pPositionTimer->start(callback);
     }

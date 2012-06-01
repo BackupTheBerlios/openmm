@@ -53,7 +53,9 @@ namespace Av {
 
 
 MediaServer::MediaServer(int port) :
-_socket(Poco::Net::ServerSocket(port))
+_socket(Poco::Net::ServerSocket(port)),
+_pSystemUpdateIdTimer(0),
+_systemUpdateIdTimerInterval(0)
 {
     MediaServerDescriptions mediaServerDescriptions;
     MemoryDescriptionReader descriptionReader(mediaServerDescriptions);
@@ -88,7 +90,6 @@ void
 MediaServer::setRoot(ServerContainer* pRoot)
 {
     _pDevContentDirectoryServerImpl->_pRoot = pRoot;
-    start();
 }
 
 
@@ -99,12 +100,14 @@ MediaServer::start()
     _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
     Log::instance()->upnpav().information("media server listening on: " + _socket.address().toString());
+    startPollSystemUpdateId(true);
 }
 
 
 void
 MediaServer::stop()
 {
+    startPollSystemUpdateId(false);
     _pHttpServer->stop();
 }
 
@@ -128,6 +131,52 @@ std::string
 MediaServer::getServerProtocol()
 {
     return "http-get:*";
+}
+
+
+void
+MediaServer::setSystemUpdateId(ui4 id)
+{
+    _pDevContentDirectoryServerImpl->_setSystemUpdateID(id);
+}
+
+
+void
+MediaServer::setPollSystemUpdateIdTimer(long msec)
+{
+    Log::instance()->upnpav().debug("set poll system update id timer interval to: " + Poco::NumberFormatter::format(msec));
+
+    _systemUpdateIdTimerInterval = msec;
+}
+
+
+void
+MediaServer::startPollSystemUpdateId(bool start)
+{
+    if (_pSystemUpdateIdTimer) {
+        Log::instance()->upnpav().debug("stop poll system update id timer ...");
+        _pSystemUpdateIdTimer->stop();
+        delete _pSystemUpdateIdTimer;
+        _pSystemUpdateIdTimer = 0;
+    }
+    if (start && _systemUpdateIdTimerInterval) {
+        Log::instance()->upnpav().debug("start poll system update id timer, polling every " + Poco::NumberFormatter::format(_systemUpdateIdTimerInterval) + " msec");
+        _pSystemUpdateIdTimer = new Poco::Timer(0, _systemUpdateIdTimerInterval);
+        Poco::TimerCallback<MediaServer> callback(*this, &MediaServer::pollSystemUpdateId);
+        _pSystemUpdateIdTimer->start(callback);
+    }
+}
+
+
+void
+MediaServer::pollSystemUpdateId(Poco::Timer& timer)
+{
+    Log::instance()->upnpav().debug("poll system update id of server: \"" + getFriendlyName() + "\"");
+
+    AbstractDataModel* pDataModel = _pServerContainer->getDataModel();
+    if (pDataModel) {
+        pDataModel->newSystemUpdateId(pDataModel->getSystemUpdateId());
+    }
 }
 
 
@@ -715,6 +764,13 @@ ServerObject::setParent(ServerObject* pParent)
 //    pObject->setParent(this);
 //    return pObject;
 //}
+
+
+MediaServer*
+ServerObject::getServer()
+{
+    return _pServer;
+}
 
 
 ServerItem::ServerItem(MediaServer* pServer) :
@@ -1926,9 +1982,12 @@ AbstractDataModel::getBasePath()
 void
 AbstractDataModel::newSystemUpdateId(ui4 id)
 {
-    Omm::Av::Log::instance()->upnpav().debug("update index cache ...");
+    // index diff calculation looks like an overkill, but indices have to be preserved
+    // as they are meta data and identify a media object within a CDS over time.
+
+    Omm::Av::Log::instance()->upnpav().debug("new system update id ...");
     if (getIndexCacheUpdateId() == id) {
-        Omm::Av::Log::instance()->upnpav().debug("index cache is current, nothing to do.");
+        Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
         return;
     }
 
@@ -1967,14 +2026,17 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
     Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
 
     // save updated index cache
-    setSystemCacheUpdateId(getSystemCacheUpdateId() + 1);
+    incSystemCacheUpdateId();
     setIndexCacheUpdateId(id);
     writeIndexCache();
 
-    // trigger database cache update
+    // update database cache (if available)
 //    _pServerContainer->updateCache();
 
-    Omm::Av::Log::instance()->upnpav().debug("update index cache finished.");
+    // trigger evented state variable SystemUpdateID
+    _pServerContainer->getServer()->setSystemUpdateId(getSystemCacheUpdateId());
+
+    Omm::Av::Log::instance()->upnpav().debug("new system update id finished.");
 }
 
 
@@ -2262,6 +2324,13 @@ void
 AbstractDataModel::setSystemCacheUpdateId(ui4 id)
 {
     _systemUpdateId = id;
+}
+
+
+void
+AbstractDataModel::incSystemCacheUpdateId()
+{
+    _systemUpdateId++;
 }
 
 

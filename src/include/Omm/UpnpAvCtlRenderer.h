@@ -81,7 +81,7 @@ private:
     CtlMediaObject2*        _pCurrentMediaObject;
     bool                    _usePlaylistResource;
     Poco::Timer*            _pPositionTimer;
-    long                    _positionTimerIntervall;
+    long                    _positionTimerInterval;
 };
 
 

@@ -399,7 +399,8 @@ UpnpApplication::initConfig()
                     config().getString("server." + *it + ".plugin", "model-webradio"),
                     config().getString("server." + *it + ".basePath", "webradio.conf"),
                     config().getString("server." + *it + ".layout", "Flat"),
-                    config().getString("server." + *it + ".textEncoding", "UTF8"));
+                    config().getString("server." + *it + ".textEncoding", "UTF8"),
+                    config().getInt("server." + *it + ".pollUpdateId", 0));
         }
     }
 
@@ -681,7 +682,7 @@ UpnpApplication::setLocalRenderer()
 
 void
 UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath,
-        const std::string& layout, const std::string& textEncoding)
+        const std::string& layout, const std::string& textEncoding, long pollUpdateId)
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
 
@@ -718,6 +719,8 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     pMediaServer->setUuid(uuid);
     Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
     pMediaServer->addIcon(pIcon);
+    pMediaServer->setPollSystemUpdateIdTimer(pollUpdateId);
+    pMediaServer->start();
 
     _pLocalDeviceContainer->addDevice(pMediaServer);
     if (!_enableRenderer) {
