@@ -53,9 +53,16 @@ Omm::ui4
 FileModel::getSystemUpdateId()
 {
     Poco::File baseDir(getBasePath());
-    Omm::ui4 id = getUpdateId(baseDir);
-    Omm::Av::Log::instance()->upnpav().debug("file data model get update id returns: " + Poco::NumberFormatter::format(id));
+    Omm::ui4 id = 0;
 
+    if (_directories.size()) {
+        id = checkDirectories();
+    }
+    else {
+        id = getUpdateId(baseDir);
+    }
+
+    Omm::Av::Log::instance()->upnpav().debug("file data model get update id returns: " + Poco::NumberFormatter::format(id));
     return id;
 }
 
@@ -211,6 +218,7 @@ Omm::ui4
 FileModel::getUpdateId(Poco::File& directory)
 {
     Omm::ui4 res = directory.getLastModified().epochTime();
+    _directories[directory.path()] = res;
 
     Poco::DirectoryIterator dir(directory);
     Poco::DirectoryIterator end;
@@ -224,6 +232,26 @@ FileModel::getUpdateId(Poco::File& directory)
             Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
         }
         ++dir;
+    }
+    return res;
+}
+
+
+Omm::ui4
+FileModel::checkDirectories()
+{
+    std::time_t res = 0;
+    bool dirty = false;
+    for (std::map<std::string, std::time_t>::iterator it = _directories.begin(); it != _directories.end(); ++it) {
+        std::time_t mod = Poco::File(it->first).getLastModified().epochTime();
+        if (mod != it->second) {
+            mod = it->second;
+            dirty = true;
+        }
+        res = std::max(res, mod);
+    }
+    if (dirty) {
+        _directories.clear();
     }
     return res;
 }

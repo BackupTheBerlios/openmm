@@ -50,6 +50,7 @@ public:
 
 private:
     Omm::ui4 getUpdateId(Poco::File& directory);
+    Omm::ui4 checkDirectories();
     void scanDirectory(Poco::File& directory);
     void loadTagger();
     void setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFormat format);
@@ -57,6 +58,7 @@ private:
     std::string                         _cachePath;
     std::string                         _containerClass;
     Omm::AvStream::Tagger*              _pTagger;
+    std::map<std::string, std::time_t>  _directories;
 };
 
 

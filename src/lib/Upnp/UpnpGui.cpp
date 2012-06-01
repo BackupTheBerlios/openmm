@@ -1532,7 +1532,8 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
     Gui::Log::instance()->gui().debug("media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
 
     // get (object id of) container, that is on top of navigator
-    MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
+    // can also be a MediaServerGroupWidget, thus the dynamic_cast
+    MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
     if (pContainer && _pServerGroupWidget->getSelectedDevice() && _pServerGroupWidget->getSelectedDevice()->getUuid() == getUuid()) {
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
         if (pObject) {
