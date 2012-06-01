@@ -53,6 +53,8 @@ public:
     ConnectionManager* getConnectionManager();
     CtlMediaObject2* getMediaObjectFromResource(const std::string& resource);
 
+    virtual void newSystemUpdateId(ui4 id) {}
+
 private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
     CtlMediaObject2*      _pRoot;

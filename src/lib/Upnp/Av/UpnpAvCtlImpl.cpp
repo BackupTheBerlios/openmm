@@ -750,9 +750,8 @@ CtlContentDirectoryImpl::_changedTransferIDs(const std::string& val)
 void
 CtlContentDirectoryImpl::_changedSystemUpdateID(const ui4& val)
 {
-// begin of your own code
     Log::instance()->upnpav().debug("event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
-// end of your own code
+    _pMediaServer->newSystemUpdateId(val);
 }
 
 

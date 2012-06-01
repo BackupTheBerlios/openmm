@@ -25,6 +25,7 @@
 #include "UpnpAvController.h"
 #include "UpnpAvCtlDevices.h"
 #include "UpnpAvCtlRenderer.h"
+#include "UpnpAvCtlServer.h"
 
 namespace Omm {
 namespace Av {
@@ -130,7 +131,7 @@ private:
 class CtlContentDirectoryImpl : public CtlContentDirectory
 {
 public:
-    CtlContentDirectoryImpl(AvUserInterface* pAvUserInterface) : _pAvUserInterface(pAvUserInterface) {}
+    CtlContentDirectoryImpl(AvUserInterface* pAvUserInterface, CtlMediaServer* pMediaServer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaServer(pMediaServer)  {}
 
 private:
     virtual void _ansGetSearchCapabilities(const std::string& SearchCaps);
@@ -151,6 +152,7 @@ private:
     virtual void _changedContainerUpdateIDs(const std::string& val);
 
     AvUserInterface*    _pAvUserInterface;
+    CtlMediaServer*     _pMediaServer;
 };
 
 } // namespace Av

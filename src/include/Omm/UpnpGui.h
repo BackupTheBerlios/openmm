@@ -395,7 +395,10 @@ class MediaServerDevice : public Av::CtlMediaServer, public Gui::ListItemModel
 {
 public:
     virtual void initController();
+    
     virtual Av::CtlMediaObject2* createMediaObject();
+
+    virtual void newSystemUpdateId(ui4 id);
 };
 
 

@@ -1526,6 +1526,14 @@ MediaServerDevice::createMediaObject()
 }
 
 
+void
+MediaServerDevice::newSystemUpdateId(ui4 id)
+{
+    Gui::Log::instance()->gui().debug("media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
+
+}
+
+
 MediaContainerWidget::MediaContainerWidget(View* pParent) :
 ListView(pParent)
 {
