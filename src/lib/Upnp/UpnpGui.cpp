@@ -1422,7 +1422,7 @@ Device*
 MediaServerGroupWidget::createDevice()
 {
     Gui::Log::instance()->gui().debug("media server group widget create server device.");
-    return new MediaServerDevice;
+    return new MediaServerDevice(this);
 }
 
 
@@ -1531,6 +1531,21 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 {
     Gui::Log::instance()->gui().debug("media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
 
+    // get (object id of) container, that is on top of navigator
+    MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
+    if (pContainer) {
+        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
+        if (pObject) {
+            // clear cache (reset data model)
+            pObject->clear();
+            // if total item count of list model is 0, no items are fetched and thus total item count is not updated
+            // so we need to fetch first child in the current search context
+            pObject->getChildForRow(0);
+            pContainer->resetListView();
+            // sync view
+            pContainer->syncView();
+        }
+    }
 }
 
 

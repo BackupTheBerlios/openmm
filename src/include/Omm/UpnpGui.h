@@ -394,11 +394,16 @@ private:
 class MediaServerDevice : public Av::CtlMediaServer, public Gui::ListItemModel
 {
 public:
+    MediaServerDevice(MediaServerGroupWidget* pServerGroupWidget) : _pServerGroupWidget(pServerGroupWidget) {}
+
     virtual void initController();
-    
+
     virtual Av::CtlMediaObject2* createMediaObject();
 
     virtual void newSystemUpdateId(ui4 id);
+
+private:
+    MediaServerGroupWidget*     _pServerGroupWidget;
 };
 
 
@@ -411,6 +416,7 @@ class MediaServerView : public Gui::ListItemView
 class MediaContainerWidget : public Gui::ListView, Gui::ListModel, Gui::ListController
 {
     friend class MediaServerGroupWidget;
+    friend class MediaServerDevice;
 
 public:
     MediaContainerWidget(View* pParent = 0);
