@@ -486,7 +486,6 @@ private:
     std::map<std::string, ui4>                  _pathMap;
     std::multimap<ui4, std::string>             _resourceMap;
     std::stack<ui4>                             _freeIndices;
-    ui4                                         _maxIndex;
     ui4                                         _cacheUpdateId;
     ui4                                         _systemUpdateId;
 

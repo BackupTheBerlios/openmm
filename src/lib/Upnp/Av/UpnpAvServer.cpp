@@ -1923,7 +1923,6 @@ const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
 
 AbstractDataModel::AbstractDataModel() :
 _pServerContainer(0),
-_maxIndex(1),
 //_indexBufferSize(50),
 _pSourceEncoding(0),
 _pTextConverter(0),
@@ -2178,9 +2177,6 @@ AbstractDataModel::removeIndex(ui4 index)
         _pathMap.erase((*pos).second);
         _resourceMap.erase((*pos).first);
         _freeIndices.push(index);
-        if (index == _maxIndex && !_pServerContainer->updateCacheThreadIsRunning()) {
-            _maxIndex--;
-        }
     }
     else {
         Log::instance()->upnpav().error("abstract data model, could not erase index from index cache: " + Poco::NumberFormatter::format(index));
@@ -2263,7 +2259,6 @@ AbstractDataModel::readIndexCache()
 
     ui4 index = 0;
     ui4 lastIndex = 0;
-    _maxIndex = 0;
     std::string path;
     while(getline(indexCache, line)) {
         std::string::size_type pos = line.find(' ');
@@ -2276,7 +2271,6 @@ AbstractDataModel::readIndexCache()
         }
         lastIndex = index;
     }
-    _maxIndex = index;
     // TODO: read resource map
     Omm::Av::Log::instance()->upnpav().debug("index cache read finished.");
 }
@@ -2338,12 +2332,16 @@ ui4
 AbstractDataModel::getNewIndex()
 {
     ui4 index;
-    if (!_freeIndices.empty() && !_pServerContainer->updateCacheThreadIsRunning()) {
+//    if (!_freeIndices.empty() && !_pServerContainer->updateCacheThreadIsRunning()) {
+    if (!_freeIndices.empty()) {
         index = _freeIndices.top();
         _freeIndices.pop();
     }
+    else if (_indexMap.size() == 0) {
+        index = 1;
+    }
     else {
-        index = _maxIndex++;
+        index = _indexMap.rbegin()->first + 1;
     }
     return index;
 }
