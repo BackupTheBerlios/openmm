@@ -1048,27 +1048,27 @@ ServerContainer::updateCacheThread()
 //}
 
 
-bool
-ServerContainer::cacheNeedsUpdate()
-{
-    if (!_pObjectCache) {
-        return false;
-    }
-
-    ui4 rows = _pObjectCache->rowCount();
-    if (rows > _pDataModel->getIndexCount()) {
-        Log::instance()->upnpav().error("server container, database cache not coherent.");
-        return true;
-    }
-    else if (rows == _pDataModel->getIndexCount()) {
-        Log::instance()->upnpav().debug("server container, database cache is current.");
-        return false;
-    }
-    else {
-        Log::instance()->upnpav().debug("server container, database cache needs update.");
-        return true;
-    }
-}
+//bool
+//ServerContainer::cacheNeedsUpdate()
+//{
+//    if (!_pObjectCache) {
+//        return false;
+//    }
+//
+//    ui4 rows = _pObjectCache->rowCount();
+//    if (rows > _pDataModel->getIndexCount()) {
+//        Log::instance()->upnpav().error("server container, database cache not coherent.");
+//        return true;
+//    }
+//    else if (rows == _pDataModel->getIndexCount()) {
+//        Log::instance()->upnpav().debug("server container, database cache is current.");
+//        return false;
+//    }
+//    else {
+//        Log::instance()->upnpav().debug("server container, database cache needs update.");
+//        return true;
+//    }
+//}
 
 
 void
@@ -1512,7 +1512,7 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
 
     // FIXME: UNSIGNED INT(4) for index and parent index doesn't work with SQLite.
-    std::string createTableString = "CREATE TABLE " + _cacheTableName + " (" + "idx INTEGER(8), paridx INTEGER(8)";
+    std::string createTableString = "CREATE TABLE " + _cacheTableName + " (" + "idx INTEGER(8), paridx INTEGER(8), updid INTEGER(8)";
     for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         createTableString += ", " + getColumnName(*it) + " " + getColumnType(*it);
     }
@@ -1760,8 +1760,8 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     xml = xml.substr(MediaObjectWriter2::getXmlProlog().size());
 
     std::string insertString = "INSERT INTO " + _cacheTableName + " (";
-    std::string propColString = "idx, paridx";
-    std::string propValString = ":idx, :paridx";
+    std::string propColString = "idx, paridx, updid";
+    std::string propValString = ":idx, :paridx, :updid";
     std::vector<std::string> props;
     for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         propColString += ", " + getColumnName(*it);
@@ -1771,24 +1771,29 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
     }
     insertString += propColString + ", xml) VALUES(" + propValString + ", :xml)";
 
+    ui4 index = pObject->getIndex();
+    ui4 parIndex = pObject->getParentIndex();
+    AbstractDataModel* pDataModel = _pServerContainer->getDataModel();
+    ui4 mod = pDataModel->getUpdateId(pDataModel->getPath(index));
+
     // this is somehow ugly and limits the number of properties, that can be queried.
     try {
         switch (props.size()) {
             case 2:
-                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                *_pSession << insertString, Poco::Data::use(index), Poco::Data::use(parIndex), Poco::Data::use(mod),
                         Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(xml), Poco::Data::now;
                 break;
             case 3:
-                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                *_pSession << insertString, Poco::Data::use(index), Poco::Data::use(parIndex), Poco::Data::use(mod),
                         Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(xml), Poco::Data::now;
                 break;
             case 4:
-                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                *_pSession << insertString, Poco::Data::use(index), Poco::Data::use(parIndex), Poco::Data::use(mod),
                         Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(props[3]),
                         Poco::Data::use(xml), Poco::Data::now;
                 break;
             case 5:
-                *_pSession << insertString, Poco::Data::use(pObject->getIndex()), Poco::Data::use(pObject->getParentIndex()),
+                *_pSession << insertString, Poco::Data::use(index), Poco::Data::use(parIndex), Poco::Data::use(mod),
                         Poco::Data::use(props[0]), Poco::Data::use(props[1]), Poco::Data::use(props[2]), Poco::Data::use(props[3]),
                         Poco::Data::use(props[4]), Poco::Data::use(xml), Poco::Data::now;
                 break;

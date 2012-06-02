@@ -53,17 +53,12 @@ Omm::ui4
 FileModel::getSystemUpdateId()
 {
     Poco::File baseDir(getBasePath());
-    Omm::ui4 id = 0;
-
     if (_directories.size()) {
-        id = checkDirectories();
+        return checkDirectories();
     }
     else {
-        id = getUpdateId(baseDir);
+        return getUpdateId(baseDir);
     }
-
-    Omm::Av::Log::instance()->upnpav().debug("file data model get update id returns: " + Poco::NumberFormatter::format(id));
-    return id;
 }
 
 

@@ -273,8 +273,7 @@ public:
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache(bool on = true);
 //    bool updateCacheThreadIsRunning();
-    // FIXME: cache update should be triggered by data model
-    bool cacheNeedsUpdate();
+//    bool cacheNeedsUpdate();
 
     // appendChild*() methods are only needed for server containers without data model (not supported right now)
     void appendChild(AbstractMediaObject* pChild);
@@ -411,6 +410,9 @@ public:
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
     virtual void init() {}
+    virtual bool preserveIndices() { return false; }
+    /// keep index of a removed path (in seperate index cache)
+    /// this can be usefull for a DVD server with resume functionality
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
     virtual ui4 getSystemUpdateId() { return 0; }
