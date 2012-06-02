@@ -52,7 +52,7 @@ DvbModel::getModelClass()
 
 
 Omm::ui4
-DvbModel::getSystemUpdateId()
+DvbModel::getSystemUpdateId(bool checkMod)
 {
     return Poco::File(getBasePath()).getLastModified().epochTime();
 }

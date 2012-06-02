@@ -34,7 +34,7 @@ public:
     ~FileModel();
 
     virtual std::string getModelClass();
-    virtual Omm::ui4 getSystemUpdateId();
+    virtual Omm::ui4 getSystemUpdateId(bool checkMod);
     virtual Omm::ui4 getUpdateId(const std::string& path);
     virtual Omm::Av::CsvList getQueryProperties();
     virtual void scan();
@@ -49,7 +49,7 @@ public:
     virtual void freeStream(std::istream* pIstream);
 
 private:
-    Omm::ui4 getUpdateId(Poco::File& directory);
+    Omm::ui4 getUpdateId(Poco::File& directory, bool checkMod);
     Omm::ui4 checkDirectories();
     void scanDirectory(Poco::File& directory);
     void loadTagger();

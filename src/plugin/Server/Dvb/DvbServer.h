@@ -37,7 +37,7 @@ public:
 
     virtual void init();
     virtual std::string getModelClass();
-    virtual Omm::ui4 getSystemUpdateId();
+    virtual Omm::ui4 getSystemUpdateId(bool checkMod);
     virtual void scan();
 
     virtual std::string getClass(const std::string& path);

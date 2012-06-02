@@ -175,7 +175,7 @@ MediaServer::pollSystemUpdateId(Poco::Timer& timer)
 
     AbstractDataModel* pDataModel = _pServerContainer->getDataModel();
     if (pDataModel) {
-        pDataModel->newSystemUpdateId(pDataModel->getSystemUpdateId());
+        pDataModel->checkSystemUpdateId();
     }
 }
 
@@ -2001,8 +2001,10 @@ _pServerContainer(0),
 //_indexBufferSize(50),
 _pSourceEncoding(0),
 _pTextConverter(0),
-_cacheUpdateId(0),
-_systemUpdateId(0)
+_publicSystemUpdateId(0),
+_cacheSystemUpdateId(0),
+_cacheSystemModId(0),
+_checkMod(false)
 {
 }
 
@@ -2042,7 +2044,7 @@ AbstractDataModel::setBasePath(const std::string& basePath)
     // are derived from them (playlists must be removed also, if index cache is rebuild entirely)
     _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(getModelClass() + "/" + basePath), "index");
     readIndexCache();
-    newSystemUpdateId(getSystemUpdateId());
+    checkSystemUpdateId();
 }
 
 
@@ -2054,16 +2056,17 @@ AbstractDataModel::getBasePath()
 
 
 void
-AbstractDataModel::newSystemUpdateId(ui4 id)
+AbstractDataModel::checkSystemUpdateId()
 {
     // index diff calculation looks like an overkill, but indices have to be preserved
     // as they are meta data and identify a media object within a CDS over time.
 
-    Omm::Av::Log::instance()->upnpav().debug("new system update id: " + Poco::NumberFormatter::format(id));
-    if (getIndexCacheUpdateId() == id) {
+    ui4 id = getSystemUpdateId(_checkMod);
+    if (getCacheSystemUpdateId(_checkMod) == id) {
         Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
         return;
     }
+    Omm::Av::Log::instance()->upnpav().debug("data model got new system update id: " + Poco::NumberFormatter::format(id));
 
     // clear temporary index lists
     _lastIndices.clear();
@@ -2100,17 +2103,24 @@ AbstractDataModel::newSystemUpdateId(ui4 id)
 //    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index cache updated.");
 
     // save updated index cache
-    incSystemCacheUpdateId();
-    setIndexCacheUpdateId(id);
+    incPublicSystemUpdateId();
+    setCacheSystemUpdateId(id, _checkMod);
     writeIndexCache();
 
     // update database cache (if available)
     _pServerContainer->updateCache();
 
     // trigger evented state variable SystemUpdateID
-    _pServerContainer->getServer()->setSystemUpdateId(getSystemCacheUpdateId());
+    _pServerContainer->getServer()->setSystemUpdateId(getPublicSystemUpdateId());
 
     Omm::Av::Log::instance()->upnpav().debug("new system update id finished.");
+}
+
+
+void
+AbstractDataModel::setCheckObjectModifications(bool check)
+{
+    _checkMod = check;
 }
 
 
@@ -2331,19 +2341,16 @@ AbstractDataModel::readIndexCache()
     std::ifstream indexCache(_indexFilePath.toString().c_str());
     std::string line;
 
-    getline(indexCache, line);
     try {
-        setSystemCacheUpdateId(Poco::NumberParser::parse(line));
+        getline(indexCache, line);
+        setPublicSystemUpdateId(Poco::NumberParser::parse(line));
+        getline(indexCache, line);
+        setCacheSystemUpdateId(Poco::NumberParser::parse(line), false);
+        getline(indexCache, line);
+        setCacheSystemUpdateId(Poco::NumberParser::parse(line), true);
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().debug("could not parse system update id: " + e.displayText());
-    }
-    getline(indexCache, line);
-    try {
-        setIndexCacheUpdateId(Poco::NumberParser::parse(line));
-    }
-    catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().debug("could not parse index cache update id: " + e.displayText());
+        Omm::Av::Log::instance()->upnpav().debug("could not parse update ids: " + e.displayText());
     }
 
     ui4 index = 0;
@@ -2370,8 +2377,9 @@ AbstractDataModel::writeIndexCache()
 {
     Log::instance()->upnpav().debug("index cache writing to: " + _indexFilePath.toString() + " ...");
     std::ofstream indexCache(_indexFilePath.toString().c_str());
-    indexCache << getSystemCacheUpdateId() << std::endl;
-    indexCache << getIndexCacheUpdateId() << std::endl;
+    indexCache << getPublicSystemUpdateId() << std::endl;
+    indexCache << getCacheSystemUpdateId(false) << std::endl;
+    indexCache << getCacheSystemUpdateId(true) << std::endl;
 
     for (std::map<ui4, std::string>::iterator it = _indexMap.begin(); it != _indexMap.end(); ++it) {
 //        Log::instance()->upnpav().debug("abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
@@ -2383,37 +2391,47 @@ AbstractDataModel::writeIndexCache()
 
 
 ui4
-AbstractDataModel::getIndexCacheUpdateId()
+AbstractDataModel::getPublicSystemUpdateId()
 {
-    return _cacheUpdateId;
+    return _publicSystemUpdateId;
 }
 
 
 void
-AbstractDataModel::setIndexCacheUpdateId(ui4 id)
+AbstractDataModel::setPublicSystemUpdateId(ui4 id)
 {
-    _cacheUpdateId = id;
+    _publicSystemUpdateId = id;
+}
+
+
+void
+AbstractDataModel::incPublicSystemUpdateId()
+{
+    _publicSystemUpdateId++;
 }
 
 
 ui4
-AbstractDataModel::getSystemCacheUpdateId()
+AbstractDataModel::getCacheSystemUpdateId(bool mod)
 {
-    return _systemUpdateId;
+    if (mod) {
+        return _cacheSystemModId;
+    }
+    else {
+        return _cacheSystemUpdateId;
+    }
 }
 
 
 void
-AbstractDataModel::setSystemCacheUpdateId(ui4 id)
+AbstractDataModel::setCacheSystemUpdateId(ui4 id, bool mod)
 {
-    _systemUpdateId = id;
-}
-
-
-void
-AbstractDataModel::incSystemCacheUpdateId()
-{
-    _systemUpdateId++;
+    if (mod) {
+        _cacheSystemModId = id;
+    }
+    else {
+        _cacheSystemUpdateId = id;
+    }
 }
 
 

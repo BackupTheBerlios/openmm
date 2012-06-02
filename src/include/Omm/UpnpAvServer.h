@@ -419,9 +419,13 @@ public:
     /// this can be usefull for a DVD server with resume functionality
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
-    virtual ui4 getSystemUpdateId() { return 0; }
-    virtual ui4 getUpdateId(const std::string& path) { return getSystemUpdateId(); }
-    void newSystemUpdateId(ui4 id);
+
+    virtual ui4 getSystemUpdateId(bool checkMod) { return 0; }
+    virtual ui4 getUpdateId(const std::string& path) { return getSystemUpdateId(false); }
+    /// get update id of particular object in data model, identified by path
+    /// if not implemented by data model, one single update id for the whole model is assumed
+    void checkSystemUpdateId();
+    void setCheckObjectModifications(bool check = true);
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
@@ -476,11 +480,14 @@ public:
 protected:
     void readIndexCache();
     void writeIndexCache();
-    ui4 getIndexCacheUpdateId();
-    void setIndexCacheUpdateId(ui4 id);
-    ui4 getSystemCacheUpdateId();
-    void setSystemCacheUpdateId(ui4 id);
-    void incSystemCacheUpdateId();
+
+    ui4 getPublicSystemUpdateId();
+    void setPublicSystemUpdateId(ui4 id);
+    void incPublicSystemUpdateId();
+
+    ui4 getCacheSystemUpdateId(bool mod = false);
+    void setCacheSystemUpdateId(ui4 id, bool mod = false);
+
     ui4 getNewIndex();
 
     Poco::Path                                  _basePath;
@@ -495,8 +502,11 @@ private:
     std::map<std::string, ui4>                  _pathMap;
     std::multimap<ui4, std::string>             _resourceMap;
     std::stack<ui4>                             _freeIndices;
-    ui4                                         _cacheUpdateId;
-    ui4                                         _systemUpdateId;
+
+    ui4                                         _publicSystemUpdateId;
+    ui4                                         _cacheSystemUpdateId;
+    ui4                                         _cacheSystemModId;
+    bool                                        _checkMod;
 
     std::vector<ui4>                            _lastIndices;
     std::vector<ui4>                            _commonIndices;

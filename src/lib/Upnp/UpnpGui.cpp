@@ -400,7 +400,8 @@ UpnpApplication::initConfig()
                     config().getString("server." + *it + ".basePath", "webradio.conf"),
                     config().getString("server." + *it + ".layout", "Flat"),
                     config().getString("server." + *it + ".textEncoding", "UTF8"),
-                    config().getInt("server." + *it + ".pollUpdateId", 0));
+                    config().getInt("server." + *it + ".pollUpdateId", 0),
+                    config().getBool("server." + *it + ".checkMod", false));
         }
     }
 
@@ -682,7 +683,7 @@ UpnpApplication::setLocalRenderer()
 
 void
 UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath,
-        const std::string& layout, const std::string& textEncoding, long pollUpdateId)
+        const std::string& layout, const std::string& textEncoding, long pollUpdateId, bool checkMod)
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
 
@@ -713,6 +714,7 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
     pContainer->setBasePath(path);
     pContainer->setLayout(layout);
     pContainer->getDataModel()->setTextEncoding(textEncoding);
+    pContainer->getDataModel()->setCheckObjectModifications(checkMod);
 
     pMediaServer->setRoot(pContainer);
     pMediaServer->setFriendlyName(name);

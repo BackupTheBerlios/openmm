@@ -50,14 +50,14 @@ FileModel::getModelClass()
 
 
 Omm::ui4
-FileModel::getSystemUpdateId()
+FileModel::getSystemUpdateId(bool checkMod)
 {
     Poco::File baseDir(getBasePath());
-    if (_directories.size()) {
+    if (!checkMod && _directories.size()) {
         return checkDirectories();
     }
     else {
-        return getUpdateId(baseDir);
+        return getUpdateId(baseDir, checkMod);
     }
 }
 
@@ -210,7 +210,7 @@ FileModel::setClass(Omm::Av::ServerItem* pItem, Omm::AvStream::Meta::ContainerFo
 
 
 Omm::ui4
-FileModel::getUpdateId(Poco::File& directory)
+FileModel::getUpdateId(Poco::File& directory, bool checkMod)
 {
     Omm::ui4 res = directory.getLastModified().epochTime();
     _directories[directory.path()] = res;
@@ -220,7 +220,10 @@ FileModel::getUpdateId(Poco::File& directory)
     while(dir != end) {
         try {
             if (dir->isDirectory()) {
-                res = std::max(res, getUpdateId(*dir));
+                res = std::max(res, getUpdateId(*dir, checkMod));
+            }
+            else if (checkMod) {
+                res = std::max(res, (Omm::ui4)(dir->getLastModified().epochTime()));
             }
         }
         catch(...) {
