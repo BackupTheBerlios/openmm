@@ -1013,10 +1013,12 @@ ServerContainer::updateCacheThread()
 {
     Log::instance()->upnpav().debug("server container, update cache thread started ...");
     if (_pObjectCache) {
+        // removed objects
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginRemovedIndex(); it != _pDataModel->endRemovedIndex(); ++it) {
             Log::instance()->upnpav().debug("remove object from cache with index: " + Poco::NumberFormatter::format(*it));
             _pObjectCache->removeMediaObjectForIndex(*it);
         }
+        // added objects
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
             Log::instance()->upnpav().debug("add object to cache with index: " + Poco::NumberFormatter::format(*it));
             ServerObject* pObject = _pDataModel->getMediaObject(_pDataModel->getPath(*it));
@@ -1026,6 +1028,24 @@ ServerContainer::updateCacheThread()
             }
             else {
                 Log::instance()->upnpav().error("could not retrieve media object from data model");
+            }
+        }
+        // modified objects
+        std::map<ui4, ui4> cacheUpdateIds;
+        if (_pDataModel->endCommonIndex() - _pDataModel->beginCommonIndex() > 1) {
+            _pObjectCache->getUpdateIds(cacheUpdateIds);
+        }
+
+        for (AbstractDataModel::IndexIterator it = _pDataModel->beginCommonIndex(); it != _pDataModel->endCommonIndex(); ++it) {
+            ui4 updateId = _pDataModel->getUpdateId(_pDataModel->getPath(*it));
+            ui4 cacheUpdateId = cacheUpdateIds[*it];
+            if (updateId != cacheUpdateId) {
+                Log::instance()->upnpav().debug("update object in cache with index: " + Poco::NumberFormatter::format(*it));
+                ServerObject* pObject = _pDataModel->getMediaObject(_pDataModel->getPath(*it));
+                if (pObject) {
+                    pObject->setIndex(*it);
+                    _pObjectCache->updateMediaObject(pObject);
+                }
             }
         }
         // TODO: also update user objects.
@@ -1750,9 +1770,25 @@ DatabaseCache::getIndices(std::vector<ui4>& indices, const std::string& sort)
 
 
 void
+DatabaseCache::getUpdateIds(std::map<ui4, ui4>& updateIds)
+{
+    std::vector< Poco::Tuple<ui4, ui4> > ids;
+    try {
+        *_pSession << "SELECT idx, updid FROM " + _cacheTableName, Poco::Data::into(ids), Poco::Data::now;
+        for (std::vector< Poco::Tuple<ui4, ui4> >::const_iterator it = ids.begin(); it != ids.end(); ++it) {
+            updateIds[it->get<0>()] = it->get<1>();
+        }
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("database cache get update ids failed: " + e.displayText());
+    }
+}
+
+
+void
 DatabaseCache::insertMediaObject(ServerObject* pObject)
 {
-    Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
+    Log::instance()->upnpav().debug("database cache insert media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
     std::string xml;
     MediaObjectWriter2 xmlWriter(false);
     xmlWriter.write(xml, pObject);
@@ -1800,20 +1836,29 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
         }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache inserting media object failed: " + e.displayText());
+        Log::instance()->upnpav().error("database cache insert media object failed: " + e.displayText());
     }
+}
+
+
+void
+DatabaseCache::updateMediaObject(ServerObject* pObject)
+{
+    // TODO: implement update media object with sql update.
+    removeMediaObjectForIndex(pObject->getIndex());
+    insertMediaObject(pObject);
 }
 
 
 void
 DatabaseCache::removeMediaObjectForIndex(ui4 index)
 {
-    Log::instance()->upnpav().debug("database cache inserting media object with index: " + Poco::NumberFormatter::format(index));
+    Log::instance()->upnpav().debug("database cache remove media object with index: " + Poco::NumberFormatter::format(index));
     try {
         *_pSession << "DELETE FROM " + _cacheTableName + " WHERE idx = " + Poco::NumberFormatter::format(index), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache removing media object failed: " + e.displayText());
+        Log::instance()->upnpav().error("database cache remove media object failed: " + e.displayText());
     }
 }
 
@@ -2123,6 +2168,20 @@ AbstractDataModel::IndexCacheIterator
 AbstractDataModel::endIndex()
 {
     return _indexMap.end();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::beginCommonIndex()
+{
+    return _commonIndices.begin();
+}
+
+
+AbstractDataModel::IndexIterator
+AbstractDataModel::endCommonIndex()
+{
+    return _commonIndices.end();
 }
 
 

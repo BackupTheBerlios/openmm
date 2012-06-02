@@ -331,8 +331,10 @@ public:
     virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false) { return 0; }
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*") { return 0; }
     virtual void getIndices(std::vector<ui4>& indices, const std::string& sort = "") {}
+    virtual void getUpdateIds(std::map<ui4, ui4>& updateIds) {}
 
     virtual void insertMediaObject(ServerObject* pObject) {}
+    virtual void updateMediaObject(ServerObject* pObject) {}
     virtual void insertBlock(std::vector<ServerObject*>& block) {}
     virtual void removeMediaObjectForIndex(ui4 index) {}
 
@@ -362,8 +364,10 @@ public:
     virtual ServerObject* getMediaObjectForIndex(ui4 index, bool isVirtual = false);
     virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
     virtual void getIndices(std::vector<ui4>& indices, const std::string& sort = "");
+    virtual void getUpdateIds(std::map<ui4, ui4>& updateIds);
 
     virtual void insertMediaObject(ServerObject* pObject);
+    virtual void updateMediaObject(ServerObject* pObject);
     virtual void removeMediaObjectForIndex(ui4 index);
 
     virtual void addPropertiesForQuery(CsvList propertyList);
@@ -439,6 +443,8 @@ public:
     IndexCacheIterator endIndex();
 
     typedef std::vector<ui4>::const_iterator IndexIterator;
+    IndexIterator beginCommonIndex();
+    IndexIterator endCommonIndex();
     IndexIterator beginAddedIndex();
     IndexIterator endAddedIndex();
     IndexIterator beginRemovedIndex();
