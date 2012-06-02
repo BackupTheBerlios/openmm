@@ -821,9 +821,7 @@ _pUserObjectCache(0),
 _layout(Flat),
 //_groupPropertyName(AvProperty::CLASS),
 _groupPropertyName(AvProperty::ARTIST),
-_childrenPlaylistSize(0),
-_updateCacheThreadRunnable(*this, &ServerContainer::updateCacheThread),
-_updateCacheThreadRunning(false)
+_childrenPlaylistSize(0)
 {
     setIsContainer(true);
     _pServer->_pServerContainer = this;
@@ -992,26 +990,9 @@ ServerContainer::setBasePath(const std::string& basePath)
 
 
 void
-ServerContainer::updateCache(bool on)
+ServerContainer::updateCache()
 {
-//    _updateCacheThreadLock.lock();
-//    _updateCacheThreadRunning = on;
-//    _updateCacheThreadLock.unlock();
-//    if (on) {
-//        _updateCacheThread.start(_updateCacheThreadRunnable);
-//    }
-//    else {
-//        _updateCacheThread.join();
-//    }
-
-    updateCacheThread();
-}
-
-
-void
-ServerContainer::updateCacheThread()
-{
-    Log::instance()->upnpav().debug("server container, update cache thread started ...");
+    Log::instance()->upnpav().debug("server container, update cache started ...");
     if (_pObjectCache) {
         // removed objects
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginRemovedIndex(); it != _pDataModel->endRemovedIndex(); ++it) {
@@ -1055,40 +1036,8 @@ ServerContainer::updateCacheThread()
     else {
         Log::instance()->upnpav().debug("no object cache, no update.");
     }
-    Log::instance()->upnpav().debug("server container, update cache thread finished.");
+    Log::instance()->upnpav().debug("server container, update cache finished.");
 }
-
-
-//bool
-//ServerContainer::updateCacheThreadIsRunning()
-//{
-//    Poco::ScopedLock<Poco::FastMutex> lock(_updateCacheThreadLock);
-//    Log::instance()->upnpav().debug("server container, update cache thread is running: " + std::string(_updateCacheThreadRunning ? "yes" : "no"));
-//    return _updateCacheThreadRunning;
-//}
-
-
-//bool
-//ServerContainer::cacheNeedsUpdate()
-//{
-//    if (!_pObjectCache) {
-//        return false;
-//    }
-//
-//    ui4 rows = _pObjectCache->rowCount();
-//    if (rows > _pDataModel->getIndexCount()) {
-//        Log::instance()->upnpav().error("server container, database cache not coherent.");
-//        return true;
-//    }
-//    else if (rows == _pDataModel->getIndexCount()) {
-//        Log::instance()->upnpav().debug("server container, database cache is current.");
-//        return false;
-//    }
-//    else {
-//        Log::instance()->upnpav().debug("server container, database cache needs update.");
-//        return true;
-//    }
-//}
 
 
 void
@@ -1997,6 +1946,8 @@ DatabaseCacheSearchCriteria::translateCompareExp(const std::string& property, co
 const ui4 AbstractDataModel::INVALID_INDEX = 0xffffffff;
 
 AbstractDataModel::AbstractDataModel() :
+_updateThreadRunnable(*this, &AbstractDataModel::updateThread),
+_updateThreadRunning(false),
 _pServerContainer(0),
 //_indexBufferSize(50),
 _pSourceEncoding(0),
@@ -2056,71 +2007,31 @@ AbstractDataModel::getBasePath()
 
 
 void
-AbstractDataModel::checkSystemUpdateId()
+AbstractDataModel::setCheckObjectModifications(bool check)
 {
-    // index diff calculation looks like an overkill, but indices have to be preserved
-    // as they are meta data and identify a media object within a CDS over time.
-
-    ui4 id = getSystemUpdateId(_checkMod);
-    if (getCacheSystemUpdateId(_checkMod) == id) {
-        Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
-        return;
-    }
-    Omm::Av::Log::instance()->upnpav().debug("data model got new system update id: " + Poco::NumberFormatter::format(id));
-
-    // clear temporary index lists
-    _lastIndices.clear();
-    _commonIndices.clear();
-    _addedIndices.clear();
-    _removedIndices.clear();
-
-    // save last index list
-//    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
-    for (IndexMapIterator it = beginIndex(); it != endIndex(); ++it) {
-        _lastIndices.push_back((*it).first);
-    }
-
-    // when scanning the data model, addPath() is called.
-    scan();
-
-    // calculate indices to be removed
-//    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
-    for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
-        IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
-        if (pos == _commonIndices.end()) {
-            _removedIndices.push_back(*it);
-        }
-    }
-    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
-                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
-                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
-                                            ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
-    // remove index maps
-//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
-    for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
-        removeIndex(*it);
-    }
-//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index map updated.");
-
-    // save updated index map
-    incPublicSystemUpdateId();
-    setCacheSystemUpdateId(id, _checkMod);
-    writeIndexMap();
-
-    // update database cache (if available)
-    _pServerContainer->updateCache();
-
-    // trigger evented state variable SystemUpdateID
-    _pServerContainer->getServer()->setSystemUpdateId(getPublicSystemUpdateId());
-
-    Omm::Av::Log::instance()->upnpav().debug("new system update id finished.");
+    _checkMod = check;
 }
 
 
 void
-AbstractDataModel::setCheckObjectModifications(bool check)
+AbstractDataModel::checkSystemUpdateId()
 {
-    _checkMod = check;
+    if (updateThreadIsRunning()) {
+        Omm::Av::Log::instance()->upnpav().debug("update thread still running, don't check for data model changes.");
+        return;
+    }
+
+    ui4 id = getSystemUpdateId(_checkMod);
+    if (getCacheSystemUpdateId(_checkMod) == id) {
+        Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().debug("data model got new system update id: " + Poco::NumberFormatter::format(id));
+        incPublicSystemUpdateId();
+        setCacheSystemUpdateId(id, _checkMod);
+        _updateThread.start(_updateThreadRunnable);
+//        updateThread();
+    }
 }
 
 
@@ -2245,26 +2156,6 @@ AbstractDataModel::addPath(const std::string& path, const std::string& resourceP
         _commonIndices.push_back((*it).second);
     }
 }
-
-
-//void
-//AbstractDataModel::removePath(const std::string& path)
-//{
-//    std::map<std::string, ui4>::iterator pos = _pathMap.find(path);
-//    if (pos  != _pathMap.end()) {
-//        ui4 freeIndex = (*pos).second;
-//        _indexMap.erase(freeIndex);
-//        _pathMap.erase(pos);
-//        _resourceMap.erase(freeIndex);
-//        _freeIndices.push(freeIndex);
-//        if (freeIndex == _maxIndex && !_pServerContainer->updateCacheThreadIsRunning()) {
-//            _maxIndex--;
-//        }
-//    }
-//    else {
-//        Log::instance()->upnpav().error("abstract data model, could not erase path from index map: " + path);
-//    }
-//}
 
 
 void
@@ -2451,6 +2342,77 @@ AbstractDataModel::getNewIndex()
         index = _indexMap.rbegin()->first + 1;
     }
     return index;
+}
+
+
+void
+AbstractDataModel::updateThread()
+{
+    _updateThreadLock.lock();
+    _updateThreadRunning = true;
+    _updateThreadLock.unlock();
+
+    Omm::Av::Log::instance()->upnpav().debug("update thread start ...");
+    // clear temporary index lists
+    _lastIndices.clear();
+    _commonIndices.clear();
+    _addedIndices.clear();
+    _removedIndices.clear();
+
+    // index diff calculation looks like an overkill, but indices have to be preserved
+    // as they are meta data and identify a media object within a CDS over time.
+
+    // save last index list
+//    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
+    for (IndexMapIterator it = beginIndex(); it != endIndex(); ++it) {
+        _lastIndices.push_back((*it).first);
+    }
+
+    // when scanning the data model, addPath() is called.
+    scan();
+
+    // calculate indices to be removed
+//    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
+    for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
+        IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
+        if (pos == _commonIndices.end()) {
+            _removedIndices.push_back(*it);
+        }
+    }
+    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
+                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
+                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
+                                            ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
+    // remove index maps
+//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
+    for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
+        removeIndex(*it);
+    }
+//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index map updated.");
+
+    // save updated index map
+    writeIndexMap();
+
+    // update database cache (if available)
+    _pServerContainer->updateCache();
+
+    // trigger evented state variable SystemUpdateID
+    _pServerContainer->getServer()->setSystemUpdateId(getPublicSystemUpdateId());
+
+    Omm::Av::Log::instance()->upnpav().debug("update thread finished.");
+
+    _updateThreadLock.lock();
+    _updateThreadRunning = false;
+    _updateThreadLock.unlock();
+}
+
+
+bool
+AbstractDataModel::updateThreadIsRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_updateThreadLock);
+    Log::instance()->upnpav().debug("update thread is running: " + std::string(_updateThreadRunning ? "yes" : "no"));
+    return _updateThreadRunning;
 }
 
 

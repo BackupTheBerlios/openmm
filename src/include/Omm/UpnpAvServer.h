@@ -271,9 +271,7 @@ public:
     virtual CsvList* getSearchCaps();
 
     virtual void setBasePath(const std::string& basePath);
-    virtual void updateCache(bool on = true);
-//    bool updateCacheThreadIsRunning();
-//    bool cacheNeedsUpdate();
+    virtual void updateCache();
 
     // appendChild*() methods are only needed for server containers without data model (not supported right now)
     void appendChild(AbstractMediaObject* pChild);
@@ -290,8 +288,6 @@ public:
 private:
     virtual ServerObject* initChild(ServerObject* pObject, ui4 index, bool fullInit = true);
 
-    void updateCacheThread();
-
 //    AbstractDataModel*                                  _pDataModel;
     ServerObjectCache*                                  _pObjectCache;
     ServerObjectCache*                                  _pVirtualContainerCache;
@@ -304,11 +300,6 @@ private:
     Poco::FastMutex                                     _serverLock;
     CsvList                                             _searchCaps;
     CsvList                                             _sortCaps;
-
-    Poco::Thread                                        _updateCacheThread;
-    Poco::RunnableAdapter<ServerContainer>              _updateCacheThreadRunnable;
-    bool                                                _updateCacheThreadRunning;
-    Poco::FastMutex                                     _updateCacheThreadLock;
 };
 
 
@@ -421,8 +412,8 @@ public:
     virtual ui4 getUpdateId(const std::string& path) { return getSystemUpdateId(false); }
     /// get update id of particular object in data model, identified by path
     /// if not implemented by data model, one single update id for the whole model is assumed
-    void checkSystemUpdateId();
     void setCheckObjectModifications(bool check = true);
+    void checkSystemUpdateId();
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
@@ -457,7 +448,6 @@ public:
     // add / remove path tells server about existence of objects
     // any change is propagated via moderated event mechanism to controller
     void addPath(const std::string& path, const std::string& resourcePath = "");
-//    void removePath(const std::string& path);
     void removeIndex(ui4 index);
 
     virtual std::string getParentPath(const std::string& path) { return ""; }
@@ -497,6 +487,9 @@ protected:
     Poco::Path                                  _indexFilePath;
 
 private:
+    void updateThread();
+    bool updateThreadIsRunning();
+
     ServerContainer*                            _pServerContainer;
     std::map<ui4, std::string>                  _indexMap;
     std::map<std::string, ui4>                  _pathMap;
@@ -512,6 +505,11 @@ private:
     std::vector<ui4>                            _commonIndices;
     std::vector<ui4>                            _addedIndices;
     std::vector<ui4>                            _removedIndices;
+
+    Poco::Thread                                _updateThread;
+    Poco::RunnableAdapter<AbstractDataModel>    _updateThreadRunnable;
+    bool                                        _updateThreadRunning;
+    Poco::FastMutex                             _updateThreadLock;
 
     Poco::TextEncoding::Ptr                     _pSourceEncoding;
     Poco::UTF8Encoding                          _targetEncoding;
