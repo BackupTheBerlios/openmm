@@ -38,7 +38,6 @@ public:
     virtual Omm::ui4 getUpdateId(const std::string& path);
     virtual Omm::Av::CsvList getQueryProperties();
     virtual void scan();
-    virtual bool preserveIndexCache() { return true; }
 
     virtual std::string getParentPath(const std::string& path);
 

@@ -414,9 +414,6 @@ public:
     void setBasePath(const std::string& basePath);
     std::string getBasePath();
     virtual void init() {}
-    virtual bool preserveIndices() { return false; }
-    /// keep index of a removed path (in seperate index cache)
-    /// this can be usefull for a DVD server with resume functionality
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
 
@@ -432,8 +429,11 @@ public:
     // child media object creation / deletion
     // index and path
     virtual void scan() {}
+    virtual bool preserveIndices() { return false; }
+    /// keep index of a removed path (in seperate index map)
+    /// this can be usefull for a DVD server with resume functionality
     virtual bool useObjectCache() { return true; }
-    // decide if to use index cache, if no, implement next four methods
+    // decide if to use object cache, if no, implement next four methods
     // depending on the data domain, the bijective mapping between index and path
     // can be trivial and should override getIndex(), getPath(), and hasIndex().
     // otherwise a standard mapping is implemented here.
@@ -442,9 +442,9 @@ public:
     virtual ui4 getIndex(const std::string& path);
     virtual std::string getPath(ui4 index);
 
-    typedef std::map<ui4, std::string>::const_iterator IndexCacheIterator;
-    IndexCacheIterator beginIndex();
-    IndexCacheIterator endIndex();
+    typedef std::map<ui4, std::string>::const_iterator IndexMapIterator;
+    IndexMapIterator beginIndex();
+    IndexMapIterator endIndex();
 
     typedef std::vector<ui4>::const_iterator IndexIterator;
     IndexIterator beginCommonIndex();
@@ -478,8 +478,8 @@ public:
     Poco::TextConverter* getTextConverter();
 
 protected:
-    void readIndexCache();
-    void writeIndexCache();
+    void readIndexMap();
+    void writeIndexMap();
 
     ui4 getPublicSystemUpdateId();
     void setPublicSystemUpdateId(ui4 id);
