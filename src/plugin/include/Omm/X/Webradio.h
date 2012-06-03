@@ -34,7 +34,6 @@ public:
     virtual std::string getModelClass();
     virtual Omm::ui4 getSystemUpdateId(bool checkMod);
     virtual void scan();
-    virtual bool useObjectCache() { return false; }
 
     virtual std::string getClass(const std::string& path);
     virtual std::string getTitle(const std::string& path);

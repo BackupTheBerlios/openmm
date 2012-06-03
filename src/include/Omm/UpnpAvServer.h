@@ -424,7 +424,7 @@ public:
     virtual bool preserveIndices() { return false; }
     /// keep index of a removed path (in seperate index map)
     /// this can be usefull for a DVD server with resume functionality
-    virtual bool useObjectCache() { return true; }
+    virtual bool useObjectCache() { return false; }
     /// decide if to use object cache
 
     // next four methods can optionally be implemented to provide a different mapping
