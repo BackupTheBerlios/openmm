@@ -394,14 +394,7 @@ UpnpApplication::initConfig()
     for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
         Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
         if (config().getBool("server." + *it + ".enable", false)) {
-            addLocalServer(config().getString("server." + *it + ".friendlyName", "OMM Server"),
-                    config().getString("server." + *it + ".uuid", ""),
-                    config().getString("server." + *it + ".plugin", "model-webradio"),
-                    config().getString("server." + *it + ".basePath", "webradio.conf"),
-                    config().getString("server." + *it + ".layout", "Flat"),
-                    config().getString("server." + *it + ".textEncoding", "UTF8"),
-                    config().getInt("server." + *it + ".pollUpdateId", 0),
-                    config().getBool("server." + *it + ".checkMod", false));
+            addLocalServer(*it);
         }
     }
 
@@ -682,11 +675,11 @@ UpnpApplication::setLocalRenderer()
 
 
 void
-UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath,
-        const std::string& layout, const std::string& textEncoding, long pollUpdateId, bool checkMod)
+UpnpApplication::addLocalServer(const std::string& id)
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
 
+    std::string pluginName = config().getString("server." + id + ".plugin", "model-webradio");
     Omm::Av::AbstractDataModel* pDataModel;
     Omm::Util::PluginLoader<Omm::Av::AbstractDataModel> pluginLoader;
     try {
@@ -700,28 +693,29 @@ UpnpApplication::addLocalServer(const std::string& name, const std::string& uuid
 
     _enableServer = true;
     Omm::Av::MediaServer* pMediaServer = new Av::MediaServer;
-//    _mediaServers[uuid] = pMediaServer;
 
+    std::string name = config().getString("server." + id + ".friendlyName", "OMM Server");
     Omm::Av::ServerContainer* pContainer = new Av::ServerContainer(pMediaServer);
     pContainer->setTitle(name);
     pContainer->setClass(Omm::Av::AvClass::className(Omm::Av::AvClass::CONTAINER));
     pContainer->setDataModel(pDataModel);
+    std::string basePath = config().getString("server." + id + ".basePath", "webradio.conf");
     std::string path = basePath;
     // if relative path then search file in config directory
     if (basePath[0] != '/') {
         path = Omm::Util::Home::instance()->getConfigDirPath("/") + basePath;
     }
     pContainer->setBasePath(path);
-    pContainer->setLayout(layout);
-    pContainer->getDataModel()->setTextEncoding(textEncoding);
-    pContainer->getDataModel()->setCheckObjectModifications(checkMod);
+    pContainer->setLayout(config().getString("server." + id + ".layout", "Flat"));
+    pContainer->getDataModel()->setTextEncoding(config().getString("server." + id + ".textEncoding", "UTF8"));
+    pContainer->getDataModel()->setCheckObjectModifications(config().getBool("server." + id + ".checkMod", false));
 
     pMediaServer->setRoot(pContainer);
     pMediaServer->setFriendlyName(name);
-    pMediaServer->setUuid(uuid);
+    pMediaServer->setUuid(config().getString("server." + id + ".uuid", ""));
     Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
     pMediaServer->addIcon(pIcon);
-    pMediaServer->setPollSystemUpdateIdTimer(pollUpdateId);
+    pMediaServer->setPollSystemUpdateIdTimer(config().getInt("server." + id + ".pollUpdateId", 0));
     pMediaServer->start();
 
     _pLocalDeviceContainer->addDevice(pMediaServer);

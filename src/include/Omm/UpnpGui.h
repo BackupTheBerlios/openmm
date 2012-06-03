@@ -141,8 +141,7 @@ private:
     void initLocalDevices();
     void setLocalRenderer(const std::string& name, const std::string& uuid, const std::string& pluginName);
     void setLocalRenderer();
-    void addLocalServer(const std::string& name, const std::string& uuid, const std::string& pluginName, const std::string& basePath,
-        const std::string& layout, const std::string& textEncoding, long pollUpdateId, bool checkMod);
+    void addLocalServer(const std::string& id);
 
     // other stuff
     void startAppHttpServer();
