@@ -1040,6 +1040,30 @@ ServerContainer::updateCache()
 }
 
 
+bool
+ServerContainer::cacheConsistent()
+{
+    Log::instance()->upnpav().debug("server container, check cache for consistency with data model ...");
+    if (_pObjectCache) {
+        std::vector<ui4> cacheIndices;
+        _pObjectCache->getIndices(cacheIndices);
+        if (cacheIndices.size() != getDataModel()->getIndexCount()) {
+            Log::instance()->upnpav().error("cache size mismatch, object cache: " + Poco::NumberFormatter::format(cacheIndices.size()) + ", data model: " + Poco::NumberFormatter::format(getDataModel()->getIndexCount()));
+            return false;
+        }
+
+        for (std::vector<ui4>::const_iterator it = cacheIndices.begin(); it != cacheIndices.end(); ++it) {
+            if (!getDataModel()->hasIndex(*it)) {
+                Log::instance()->upnpav().error("data model missing index: " + Poco::NumberFormatter::format(*it));
+                return false;
+            }
+        }
+    }
+    Log::instance()->upnpav().debug("server container, cache and data model are consistent.");
+    return true;
+}
+
+
 void
 ServerContainer::appendChild(AbstractMediaObject* pChild)
 {
@@ -1710,7 +1734,8 @@ DatabaseCache::getIndices(std::vector<ui4>& indices, const std::string& sort)
 {
     // TODO: execute same query as in getBlockAtRow(), depending on _layout and sort.
     try {
-        *_pSession << "SELECT idx FROM " + _cacheTableName + " WHERE class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"", Poco::Data::into(indices), Poco::Data::now;
+//        *_pSession << "SELECT idx FROM " + _cacheTableName + " WHERE class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"", Poco::Data::into(indices), Poco::Data::now;
+        *_pSession << "SELECT idx FROM " + _cacheTableName, Poco::Data::into(indices), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         Log::instance()->upnpav().error("database cache get indices failed: " + e.displayText());
@@ -2016,6 +2041,8 @@ AbstractDataModel::setCheckObjectModifications(bool check)
 void
 AbstractDataModel::checkSystemUpdateId()
 {
+//    getServerContainer()->cacheConsistent();
+
     if (updateThreadIsRunning()) {
         Omm::Av::Log::instance()->upnpav().debug("update thread still running, don't check for data model changes.");
         return;
@@ -2030,7 +2057,6 @@ AbstractDataModel::checkSystemUpdateId()
         incPublicSystemUpdateId();
         setCacheSystemUpdateId(id, _checkMod);
         _updateThread.start(_updateThreadRunnable);
-//        updateThread();
     }
 }
 

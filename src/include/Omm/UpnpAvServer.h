@@ -272,6 +272,7 @@ public:
 
     virtual void setBasePath(const std::string& basePath);
     virtual void updateCache();
+    bool cacheConsistent();
 
     // appendChild*() methods are only needed for server containers without data model (not supported right now)
     void appendChild(AbstractMediaObject* pChild);
@@ -424,7 +425,10 @@ public:
     /// keep index of a removed path (in seperate index map)
     /// this can be usefull for a DVD server with resume functionality
     virtual bool useObjectCache() { return true; }
-    // decide if to use object cache, if no, implement next four methods
+    /// decide if to use object cache
+
+    // next four methods can optionally be implemented to provide a different mapping
+    // between index and path (TODO: try this ... what about newIndex() call in addPath()).
     // depending on the data domain, the bijective mapping between index and path
     // can be trivial and should override getIndex(), getPath(), and hasIndex().
     // otherwise a standard mapping is implemented here.
