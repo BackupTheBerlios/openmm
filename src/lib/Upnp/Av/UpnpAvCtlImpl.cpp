@@ -166,7 +166,9 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 MediaObjectReader reader;
                 reader.read(&object, val);
                 if (_pMediaRenderer) {
-                    _pMediaRenderer->newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST)->getValue(), object.getProperty(AvProperty::ALBUM)->getValue());
+                    AbstractProperty* pArtist = object.getProperty(AvProperty::ARTIST);
+                    AbstractProperty* pAlbum = object.getProperty(AvProperty::ALBUM);
+                    _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "");
                 }
             }
         }

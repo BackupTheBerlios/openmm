@@ -1093,7 +1093,7 @@ void
 MediaRendererDevice::newUri(const std::string& uri)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
-    _trackName.setLabel(uri);
+//    _trackName.setLabel(uri);
     Av::Connection* pConnection = getConnectionManager()->getConnection(0);
     if (pConnection) {
         std::string serverUuid = pConnection->getServer().getConnectionManagerId().getUuid();
@@ -1115,7 +1115,7 @@ void
 MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album)
 {
     Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
-    _trackName.setLabel(artist + " - " + title);
+    _trackName.setLabel(artist == "" ? title : artist + " - " + title);
     syncViews();
 }
 

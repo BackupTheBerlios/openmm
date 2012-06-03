@@ -95,6 +95,11 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
     _setCurrentTrackMetaData(CurrentURIMetaData);
     _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
 
+    if (CurrentURIMetaData != "") {
+        Variant metaData(CurrentURIMetaData);
+        _pLastChange->setStateVar(InstanceID, AvTransportEventedStateVar::CURRENT_TRACK_META_DATA, metaData);
+    }
+
     std::string protInfoString;
     try {
         MemoryMediaObject obj;
