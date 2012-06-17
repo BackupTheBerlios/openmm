@@ -19,46 +19,40 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ApplicationImpl_INCLUDED
-#define ApplicationImpl_INCLUDED
+#import <UIKit/UIKit.h>
 
-#include "ViewImpl.h"
+#include "WebBrowserImpl.h"
+#include "Gui/WebBrowser.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-class Application;
 
-
-class ApplicationImpl
+WebBrowserViewImpl::WebBrowserViewImpl(View* pView)
 {
-public:
-    friend class Application;
+//    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
+    UIWebView* pNativeView = [[UIWebView alloc] init];
+//    pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
+//    [pNativeView setTextColor:[UIColor blackColor]];
+//    [pNativeView setImpl:this];
 
-    ApplicationImpl(Application* pApplication);
-    virtual ~ApplicationImpl();
+    initViewImpl(pView, pNativeView);
+}
 
-    void show(bool show) {} // does nothing on iOS, main window is always visible.
-    void resize(int width, int height);
-    int width();
-    int height();
-    void setFullscreen(bool fullscreen);
-    void setToolBar(View* pView);
-    void showToolBar(bool show);
-    void setStatusBar(View* pView);
-    void showStatusBar(bool show);
-    int run(int argc, char** argv);
-    void quit() {}
 
-    static Application*    _pApplication;
-    static View*           _pToolBar;
-    int                    _width;
-    int                    _height;
-};
+WebBrowserViewImpl::~WebBrowserViewImpl()
+{
+}
+
+
+void
+WebBrowserViewImpl::setUri(const std::string& uri)
+{
+    NSString* pUrl = [[NSString alloc] initWithUTF8String:uri.c_str()];
+    [static_cast<UIWebView*>(_pNativeView) loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:pUrl]]];
+}
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif
-

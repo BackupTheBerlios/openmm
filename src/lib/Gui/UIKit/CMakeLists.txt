@@ -13,6 +13,7 @@ TabImpl.mm
 NavigatorImpl.mm
 SliderImpl.mm
 ImageImpl.mm
+WebBrowserImpl.mm
 )
 
 

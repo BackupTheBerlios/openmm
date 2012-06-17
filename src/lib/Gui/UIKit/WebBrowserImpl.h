@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2012                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,41 +19,25 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ApplicationImpl_INCLUDED
-#define ApplicationImpl_INCLUDED
+#ifndef WebBrowserImpl_INCLUDED
+#define WebBrowserImpl_INCLUDED
 
 #include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class Application;
+class View;
 
-
-class ApplicationImpl
+class WebBrowserViewImpl : public ViewImpl
 {
-public:
-    friend class Application;
+    friend class WebBrowserView;
 
-    ApplicationImpl(Application* pApplication);
-    virtual ~ApplicationImpl();
+private:
+    WebBrowserViewImpl(View* pView);
+    ~WebBrowserViewImpl();
 
-    void show(bool show) {} // does nothing on iOS, main window is always visible.
-    void resize(int width, int height);
-    int width();
-    int height();
-    void setFullscreen(bool fullscreen);
-    void setToolBar(View* pView);
-    void showToolBar(bool show);
-    void setStatusBar(View* pView);
-    void showStatusBar(bool show);
-    int run(int argc, char** argv);
-    void quit() {}
-
-    static Application*    _pApplication;
-    static View*           _pToolBar;
-    int                    _width;
-    int                    _height;
+    void setUri(const std::string& uri);
 };
 
 
