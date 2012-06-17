@@ -218,6 +218,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
 
         if (instanceAlreadyRunning()) {
             Log::instance()->upnp().information("omm application instance running, starting in controller mode");
+            setLockInstance(false);
             setIgnoreConfig(true);
         }
 
@@ -772,6 +773,10 @@ UpnpApplication::stopAppHttpServer()
 bool
 UpnpApplication::instanceAlreadyRunning()
 {
+#ifdef __IPHONE__
+    return false;
+#endif
+    
     if (_lockInstance) {
         _lockInstance = false;
         Poco::NamedMutex mutex(_instanceMutexName);
