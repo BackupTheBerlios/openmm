@@ -146,7 +146,7 @@ private:
     // other stuff
     void startAppHttpServer();
     void stopAppHttpServer();
-    bool instanceRunning();
+    bool instanceAlreadyRunning();
 
     int                                         _argc;
     char**                                      _argv;

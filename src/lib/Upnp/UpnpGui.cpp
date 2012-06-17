@@ -216,7 +216,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     {
         Poco::Util::Application::init(_argc, _argv);
 
-        if (instanceRunning()) {
+        if (instanceAlreadyRunning()) {
             Log::instance()->upnp().information("omm application instance running, starting in controller mode");
             setIgnoreConfig(true);
         }
@@ -433,6 +433,11 @@ UpnpApplication::generateConfigForm()
                     "<h1>OMM Configuration</h1>\n";
 
     *pOutStream << "Address of this page is " << getAppHttpUri() << "/Config<br>\n";
+
+    if (!_pConf) {
+        *pOutStream << "config file not editable<br>\n";
+        return pOutStream;
+    }
 
     bool rendererEnable = _pConf->getBool("renderer.enable", false);
     std::string rendererName = _pConf->getString("renderer.friendlyName", "");
@@ -730,7 +735,25 @@ UpnpApplication::addLocalServer(const std::string& id)
 void
 UpnpApplication::startAppHttpServer()
 {
-    _socket = Poco::Net::ServerSocket(config().getInt("application.configPort", 0));
+    int port = config().getInt("application.configPort", _appStandardPort);
+    bool useRandomPort = true;
+    if (!instanceAlreadyRunning()) {
+        try {
+            _socket = Poco::Net::ServerSocket(port);
+            useRandomPort = false;
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnp().error("failed to start application http server on port " + Poco::NumberFormatter::format(port) + "(" + e.displayText() + ") , using random port.");
+        }
+    }
+    if (useRandomPort) {
+        try {
+            _socket = Poco::Net::ServerSocket(0);
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->upnp().error("failed to start application http server: " + e.displayText());
+        }
+    }
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
@@ -747,11 +770,11 @@ UpnpApplication::stopAppHttpServer()
 
 
 bool
-UpnpApplication::instanceRunning()
+UpnpApplication::instanceAlreadyRunning()
 {
     if (_lockInstance) {
+        _lockInstance = false;
         Poco::NamedMutex mutex(_instanceMutexName);
-
         return !mutex.tryLock();
     }
     else {

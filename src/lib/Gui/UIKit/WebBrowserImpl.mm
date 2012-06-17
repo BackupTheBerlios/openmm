@@ -31,12 +31,7 @@ namespace Gui {
 
 WebBrowserViewImpl::WebBrowserViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
     UIWebView* pNativeView = [[UIWebView alloc] init];
-//    pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
-//    [pNativeView setTextColor:[UIColor blackColor]];
-//    [pNativeView setImpl:this];
-
     initViewImpl(pView, pNativeView);
 }
 
@@ -49,8 +44,11 @@ WebBrowserViewImpl::~WebBrowserViewImpl()
 void
 WebBrowserViewImpl::setUri(const std::string& uri)
 {
-    NSString* pUrl = [[NSString alloc] initWithUTF8String:uri.c_str()];
-    [static_cast<UIWebView*>(_pNativeView) loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:pUrl]]];
+    NSString* pUrlString = [[NSString alloc] initWithUTF8String:uri.c_str()];
+//    NSURL* pUrl = [NSURL URLWithString:pUrlString];
+//    NSURLRequest* pUrlRequest = [NSURLRequest requestWithURL:pUrl];
+//    [static_cast<UIWebView*>(_pNativeView) loadRequest:pUrlRequest];
+    [static_cast<UIWebView*>(_pNativeView) loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:pUrlString]]];
 }
 
 
