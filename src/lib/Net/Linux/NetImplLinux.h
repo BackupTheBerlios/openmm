@@ -18,17 +18,16 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#ifndef SysImplLinux_INCLUDED
-#define SysImplLinux_INCLUDED
+#ifndef NetImplLinux_INCLUDED
+#define NetImplLinux_INCLUDED
 
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
-#ifdef __SYS_NETMAN_PLATFORM__
 class NetworkInterfaceManagerImpl : Poco::Runnable
 {
 public:
@@ -46,33 +45,9 @@ private:
     Private*                _p;
     Poco::Thread            _monitorThread;
 };
-#endif
 
 
-#ifdef __SYS_VISUAL_PLATFORM__
-class VisualImpl
-{
-public:
-    VisualImpl();
-    ~VisualImpl();
-    
-    void* getWindow();
-    void show();
-    void hide();
-    int getWidth();
-    int getHeight();
-    Visual::VisualType getType();
-
-private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
-    Poco::UInt32*   _pX11Window;
-};
-#endif
-
-
-}  // namespace Sys
+}  // namespace Net
 }  // namespace Omm
 
 #endif

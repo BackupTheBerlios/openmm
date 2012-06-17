@@ -32,9 +32,9 @@
 #ifdef __NET_GENERIC_PLATFORM__
 #include "NetImpl.h"
 #elif __LINUX__
-#include "Net/Linux/NetImplLinux.h"
+#include "Linux/NetImplLinux.h"
 #elif __DARWIN__
-#include "Net/Darwin/NetImplDarwin.h"
+#include "Darwin/NetImplDarwin.h"
 #else
 #include "NetImpl.h"
 #endif

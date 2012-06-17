@@ -5,7 +5,7 @@ if(DBUS_FOUND AND NETMAN_FOUND)
 
 add_library(ommnet-linux
 #STATIC    # doesn't work on all linux versions of the linker
-NetworkInterfaceMangerImpl.cpp
+NetworkInterfaceManagerImpl.cpp
 NetworkDevice.cpp
 )
 

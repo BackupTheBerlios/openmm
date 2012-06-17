@@ -18,12 +18,12 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#include "Sys.h"
+#include "Net.h"
 #include "NetworkDevice.h"
 
 
 namespace Omm {
-namespace Sys {
+namespace Net {
 
 
 NetworkDeviceProperties::NetworkDeviceProperties(DBus::Connection& connection, DBus::Path& udi) :
@@ -61,7 +61,7 @@ NetworkDeviceProperties::getProperty(const std::string property)
     DBus::Variant res;
     it >> res;
     return res;
-    
+
 }
 
 
@@ -72,7 +72,7 @@ NetworkDevice::NetworkDevice(DBus::Connection& connection, DBus::Path& udi) :
 {
     connect_signal(NetworkDevice, StateChanged, stateChangedCb);
     _deviceName = _deviceProperties.getDeviceName();
-    Log::instance()->sys().debug("found network device: " + _deviceName);
+    Log::instance()->net().debug("found network device: " + _deviceName);
 }
 
 
@@ -80,20 +80,20 @@ void
 NetworkDevice::stateChangedCb(const DBus::SignalMessage& sig)
 {
     DBus::MessageIter it = sig.reader();
-    
+
     uint32_t newState;
     uint32_t oldState;
     uint32_t reason;
-    
+
     it >> newState;
     it >> oldState;
     it >> reason;
-    
-    Log::instance()->sys().debug("network device " + _deviceName + " changes state from: " 
+
+    Log::instance()->net().debug("network device " + _deviceName + " changes state from: "
         + stateName(static_cast<NMDeviceState>(oldState))
-        + " to: " + stateName(static_cast<NMDeviceState>(newState)) 
+        + " to: " + stateName(static_cast<NMDeviceState>(newState))
         + ", reason: " + reasonName(static_cast<NMDeviceStateReason>(reason)));
-    
+
     if (newState == NM_DEVICE_STATE_ACTIVATED) {
         NetworkInterfaceManager::instance()->addInterface(_deviceName);
     }
@@ -255,7 +255,7 @@ NetworkManager::NetworkManager(DBus::Connection& connection)
 std::vector<DBus::Path>
 NetworkManager::getDevices()
 {
-    Log::instance()->sys().debug("getting network device list ...");
+    Log::instance()->net().debug("getting network device list ...");
     std::vector<DBus::Path> paths;
     DBus::CallMessage call;
 
@@ -275,7 +275,7 @@ NetworkManager::deviceAddedCb(const DBus::SignalMessage& sig)
     DBus::MessageIter it = sig.reader();
     DBus::Path udi;
     it >> udi;
-    Log::instance()->sys().debug("added device: " + udi);
+    Log::instance()->net().debug("added device: " + udi);
     m_devices[udi] = new NetworkDevice(conn(), udi);
 }
 
@@ -286,7 +286,7 @@ NetworkManager::deviceRemovedCb(const DBus::SignalMessage& sig)
     DBus::MessageIter it = sig.reader();
     DBus::Path udi;
     it >> udi;
-    Log::instance()->sys().debug("removed device: " + udi);
+    Log::instance()->net().debug("removed device: " + udi);
     m_devices.erase(udi);
 }
 
@@ -295,10 +295,10 @@ void
 NetworkManager::stateChangedCb(const DBus::SignalMessage& sig)
 {
     DBus::MessageIter it = sig.reader();
-    
+
     uint32_t newState;
     it >> newState;
-    Log::instance()->sys().debug("network state changed to: " + stateName(static_cast<NMState>(newState)));
+    Log::instance()->net().debug("network state changed to: " + stateName(static_cast<NMState>(newState)));
 }
 
 
@@ -320,5 +320,5 @@ NetworkManager::stateName(NMState state)
 }
 
 
-}  // namespace Sys
+}  // namespace Net
 } // namespace Omm

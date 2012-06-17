@@ -14,5 +14,5 @@ message(STATUS "Network Manager headers not found")
 endif(NetMan_INCLUDE_DIR)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(NetMan DEFAULT_MSG NetMan_LIBRARY NetMan_INCLUDE_DIR)
+find_package_handle_standard_args(NetMan DEFAULT_MSG NetMan_INCLUDE_DIR)
 mark_as_advanced(NetMan_INCLUDE_DIR)
