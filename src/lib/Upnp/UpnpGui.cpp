@@ -456,6 +456,8 @@ UpnpApplication::generateConfigForm()
         std::string serverUuid = _pConf->getString(serverKey + ".uuid", "");
         std::string serverPlugin = _pConf->getString(serverKey + ".plugin", "");
         std::string basePath = _pConf->getString(serverKey + ".basePath", "");
+        std::string pollUpdateId = _pConf->getString(serverKey + ".pollUpdateId", "0");
+        bool checkMod = _pConf->getBool(serverKey + ".checkMod", false);
         std::string layout = _pConf->getString(serverKey + ".layout", "");
 
         *pOutStream << "<fieldset><legend>" + serverName + "</legend>"
@@ -464,6 +466,8 @@ UpnpApplication::generateConfigForm()
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + serverUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
+            "<tr><td>poll</td><td><input type=\"text\" name=\"" + serverKey + ".pollUpdateId\" size=\"10\" value=\"" + pollUpdateId +  "\"></td></tr>\n"
+            "<tr><td>check mod</td><td><input type=\"checkbox\" name=\"" + serverKey + ".checkMod\" value=\"true\"" +  (checkMod ? "checked" : "") + " ></td></tr>\n"
             "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\"> <option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_DIR_STRUCT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
@@ -480,6 +484,8 @@ UpnpApplication::generateConfigForm()
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + _newServerUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + newServerKey + ".plugin\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + newServerKey + ".basePath\" size=\"32\" value=\"\"></td></tr>\n"
+            "<tr><td>poll</td><td><input type=\"text\" name=\"" + newServerKey + ".pollUpdateId\" size=\"10\" value=\"0\"></td></tr>\n"
+            "<tr><td>check mod</td><td><input type=\"checkbox\" name=\"" + newServerKey + ".checkMod\" value=\"true\"></td></tr>\n"
             "<tr><td>layout</td><td><select name=\"" + newServerKey + ".layout\" size=\"1\"> <option>" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
@@ -518,22 +524,27 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
         }
 
         // save keys that are not handled by the form
-        Av::Log::instance()->upnpav().debug("omm config save application keys ...");
+        Av::Log::instance()->upnpav().debug("omm config save non mutable keys ...");
+
+//        std::map<std::string, std::string> configCopy;
+
+
         std::map<std::string, std::string> nonMutableConfig;
-        std::vector<std::string> nonMutableKeys;
-        _pConf->keys("application", nonMutableKeys);
-        for (std::vector<std::string>::iterator it = nonMutableKeys.begin(); it != nonMutableKeys.end(); ++it) {
-            nonMutableConfig["application." + *it] = _pConf->getString("application." + *it);
-        }
+        nonMutableConfig["application.configPort"] = _pConf->getString("application.configPort", "");
+        nonMutableConfig["application.width"] = _pConf->getString("application.width", "");
+        nonMutableConfig["application.height"] = _pConf->getString("application.height", "");
+        nonMutableConfig["controller.searchString"] = _pConf->getString("controller.searchString", "");
 
         // clear file config
         Av::Log::instance()->upnpav().debug("omm config clear file config ...");
         _pConf->clear();
 
         // write back keys that are not handled by the form
-        Av::Log::instance()->upnpav().debug("omm config write back application keys ...");
+        Av::Log::instance()->upnpav().debug("omm config write back non mutable keys ...");
         for (std::map<std::string, std::string>::iterator it = nonMutableConfig.begin(); it != nonMutableConfig.end(); ++it) {
-            _pConf->setString(it->first, it->second);
+            if (it->second != "") {
+                _pConf->setString(it->first, it->second);
+            }
         }
 
         // read in form config

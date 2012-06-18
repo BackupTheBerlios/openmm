@@ -43,8 +43,8 @@ Av::Log::Log()
 #ifdef NDEBUG
     _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, 0);
 #else
-//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_ERROR);
 #endif
 }
 
