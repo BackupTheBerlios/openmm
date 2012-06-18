@@ -270,9 +270,11 @@ UpnpApplication::start()
     initLocalDevices();
 
     if (_enableController) {
-        _pControllerWidget->start();
+//        _pControllerWidget->start();
+        _pControllerWidget->setState(DeviceManager::Started);
     }
-    _pLocalDeviceServer->start();
+//    _pLocalDeviceServer->start();
+    _pLocalDeviceServer->setState(DeviceManager::Started);
 }
 
 
@@ -280,9 +282,11 @@ void
 UpnpApplication::stop()
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
-    _pLocalDeviceServer->stop();
+//    _pLocalDeviceServer->stop();
+    _pLocalDeviceServer->setState(DeviceManager::Stopped);
     if (_enableController) {
-        _pControllerWidget->stop();
+//        _pControllerWidget->stop();
+        _pControllerWidget->setState(DeviceManager::Stopped);
     }
     Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
@@ -384,21 +388,6 @@ UpnpApplication::loadConfig()
 void
 UpnpApplication::initConfig()
 {
-    if (config().getBool("renderer.enable", false)) {
-        setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
-                config().getString("renderer.uuid", ""),
-                config().getString("renderer.plugin", ""));
-    }
-
-    std::vector<std::string> servers;
-    config().keys("server", servers);
-    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
-        if (config().getBool("server." + *it + ".enable", false)) {
-            addLocalServer(*it);
-        }
-    }
-
     setFullscreen(config().getBool("application.fullscreen", false));
     resizeMainView(config().getInt("application.width", 800), config().getInt("application.height", 480));
     scaleMainView(config().getDouble("application.scale", 1.0));
@@ -512,7 +501,7 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
 {
     if (!form.empty()) {
         Av::Log::instance()->upnpav().debug("omm config update ...");
-        _pLocalDeviceServer->stop();
+        _pLocalDeviceServer->setState(DeviceManager::Stopped);
         _pLocalDeviceServer = new DeviceServer;
 //        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);
         // delete local devices
@@ -575,7 +564,7 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
         Av::Log::instance()->upnpav().debug("omm config update local devices ...");
         initConfig();
         initLocalDevices();
-        _pLocalDeviceServer->start();
+        _pLocalDeviceServer->setState(DeviceManager::Started);
         Av::Log::instance()->upnpav().debug("omm config update done.");
     }
 
@@ -607,7 +596,22 @@ UpnpApplication::showRendererVisualOnly(bool show)
 void
 UpnpApplication::initLocalDevices()
 {
-   Omm::Av::Log::instance()->upnpav().debug("omm application init local devices ...");
+    Omm::Av::Log::instance()->upnpav().debug("omm application init local devices ...");
+    if (config().getBool("renderer.enable", false)) {
+        setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
+                config().getString("renderer.uuid", ""),
+                config().getString("renderer.plugin", ""));
+    }
+
+    std::vector<std::string> servers;
+    config().keys("server", servers);
+    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+        Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+        if (config().getBool("server." + *it + ".enable", false)) {
+            addLocalServer(*it);
+        }
+    }
+
 //#ifndef __IPHONE__
     if (_enableRenderer) {
         setLocalRenderer();
@@ -776,7 +780,7 @@ UpnpApplication::instanceAlreadyRunning()
 #ifdef __IPHONE__
     return false;
 #endif
-    
+
     if (_lockInstance) {
         _lockInstance = false;
         Poco::NamedMutex mutex(_instanceMutexName);

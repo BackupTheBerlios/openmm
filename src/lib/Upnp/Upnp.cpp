@@ -77,13 +77,13 @@ Log::Log()
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
 #else
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
@@ -2863,7 +2863,8 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 
 
 DeviceManager::DeviceManager(Socket* pSocket) :
-_pSocket(pSocket)
+_pSocket(pSocket),
+_state(Stopped)
 {
 }
 
@@ -2950,18 +2951,23 @@ DeviceManager::init()
 
 
 void
-DeviceManager::start()
+DeviceManager::setState(State newState)
 {
-    startHttp();
-    startSsdp();
-}
-
-
-void
-DeviceManager::stop()
-{
-    stopSsdp();
-    stopHttp();
+    Log::instance()->upnp().debug("device manager state change: " + stateString(_state) + " -> " + stateString(newState));
+    if (_state == newState) {
+        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        return;
+    }
+    if (newState == Started) {
+        startHttp();
+        startSsdp();
+    }
+    else if (newState = Stopped) {
+        stopSsdp();
+        stopHttp();
+    }
+    _state = newState;
+    Log::instance()->upnp().debug("device manager state change finished");
 }
 
 
@@ -3005,6 +3011,22 @@ DeviceManager::stopHttp()
     Log::instance()->http().information("stopping socket...");
     _pSocket->stopHttp();
     Log::instance()->http().information("socket stopped.");
+}
+
+
+std::string
+DeviceManager::stateString(State state)
+{
+    switch (state) {
+        case Stopped:
+            return "stopped";
+        case Local:
+            return "local";
+        case Started:
+            return "started";
+        default:
+            return "";
+    }
 }
 
 
@@ -3835,37 +3857,33 @@ Controller::~Controller()
 
 
 void
-Controller::start()
+Controller::setState(State newState)
 {
-    Log::instance()->upnp().debug("starting controller ...");
-
-    DeviceManager::start();
-    sendMSearch();
-
-    Log::instance()->upnp().debug("controller started.");
-}
-
-
-void
-Controller::stop()
-{
-    Log::instance()->upnp().debug("stopping controller ...");
-
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-            for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-                try {
-                    (*s)->sendCancelSubscriptionRequest();
-                }
-                catch (...) {
-                    Log::instance()->upnp().error("controller failed to cancel event subscriptions, ignoring.");
+    Log::instance()->upnp().debug("controller state change: " + stateString(_state) + " -> " + stateString(newState));
+    if (_state == newState) {
+        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        return;
+    }
+    if (newState == Started) {
+        DeviceManager::setState(Started);
+        sendMSearch();
+    }
+    else if (newState == Stopped) {
+        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
+                    try {
+                        (*s)->sendCancelSubscriptionRequest();
+                    }
+                    catch (...) {
+                        Log::instance()->upnp().error("controller failed to cancel event subscriptions, ignoring.");
+                    }
                 }
             }
         }
+        DeviceManager::setState(Stopped);
     }
-    DeviceManager::stop();
-
-    Log::instance()->upnp().debug("controller stopped.");
+    Log::instance()->upnp().debug("controller state change finished");
 }
 
 

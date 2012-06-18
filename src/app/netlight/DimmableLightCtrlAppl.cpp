@@ -44,7 +44,7 @@ class MyController : public Omm::Controller
         std::cout << "uuid: " << pDeviceContainer->getRootDevice()->getUuid() << std::endl;
         std::cout << "type: " << pDeviceContainer->getRootDevice()->getDeviceType() << std::endl;
 //         std::cout << "friendly name: " << pDeviceContainer->getRootDevice()->getFriendlyName() << std::endl;
-        
+
         // NOTE: could write a DeviceFactory here ...
         // NOTE: could iterate through all devices of DeviceContainer here ...
         if (pDeviceContainer->getRootDevice()->getDeviceType() == "urn:schemas-upnp-org:device:DimmableLight:1") {
@@ -54,7 +54,7 @@ class MyController : public Omm::Controller
                 pDeviceContainer->getRootDevice(),
                 new SwitchPowerControllerImpl,
                 new DimmingControllerImpl);
-            
+
             bool status;
             std::cout << "sync call of GetStatus() started" << std::endl;
             std::cout << "TIME: " << t.elapsed() << std::endl;
@@ -72,7 +72,7 @@ class MyController : public Omm::Controller
             std::cout << "state variable Status value: " << status << std::endl;
         }
     }
-    
+
     virtual void deviceRemoved(Omm::DeviceContainer* pDeviceContainer)
     {
         std::cerr << "MyController::deviceRemoved() uuid: " << pDeviceContainer->getRootDevice()->getUuid() << std::endl;
@@ -86,41 +86,41 @@ public:
     ControllerTest(): _helpRequested(false)
     {
     }
-    
+
     ~ControllerTest()
     {
     }
-    
+
 protected:
     void initialize(Application& self)
     {
         loadConfiguration(); // load default configuration files, if present
         ServerApplication::initialize(self);
     }
-    
+
     void uninitialize()
     {
         ServerApplication::uninitialize();
     }
-    
+
     void defineOptions(OptionSet& options)
     {
         ServerApplication::defineOptions(options);
-        
+
         options.addOption(
                            Option("help", "h", "display help information on command line arguments")
                            .required(false)
                            .repeatable(false));
     }
-    
+
     void handleOption(const std::string& name, const std::string& value)
     {
         ServerApplication::handleOption(name, value);
-        
+
         if (name == "help")
             _helpRequested = true;
     }
-    
+
     void displayHelp()
     {
         HelpFormatter helpFormatter(options());
@@ -129,7 +129,7 @@ protected:
         helpFormatter.setHeader("A simple UPnP Controller.");
         helpFormatter.format(std::cout);
     }
-    
+
     int main(const std::vector<std::string>& args)
     {
         if (_helpRequested)
@@ -140,16 +140,16 @@ protected:
         {
         // get parameters from configuration file
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
-            
+
             MyController controller;
-            controller.start();
+            controller.setState(Omm::DeviceManager::Started);
 
             std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;
             waitForTerminationRequest();
         }
         return Application::EXIT_OK;
     }
-    
+
 private:
     bool _helpRequested;
 };

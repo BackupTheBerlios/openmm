@@ -368,13 +368,15 @@ private:
 };
 
 
-class DeviceManager : public Util::Startable
+class DeviceManager //: public Util::Startable
 {
     friend class ControlRequestHandler;
     friend class DeviceContainer;
     friend class Device;
 
 public:
+    enum State {Stopped, Local, Started};
+
     DeviceManager(Socket* pNetworkListener);
     virtual ~DeviceManager();
 
@@ -387,8 +389,7 @@ public:
     int getDeviceContainerCount();
 
     void init();
-    void start();
-    void stop();
+    void setState(State newState);
 
     std::string getHttpServerUri();
 
@@ -406,9 +407,12 @@ protected:
     void startHttp();
     void stopHttp();
 
-    Container<DeviceContainer> _deviceContainers;
-    Poco::NotificationCenter   _deviceNotificationCenter;
-    Socket*                    _pSocket;
+    std::string stateString(State state);
+
+    State                                      _state;
+    Container<DeviceContainer>                 _deviceContainers;
+    Poco::NotificationCenter                   _deviceNotificationCenter;
+    Socket*                                    _pSocket;
 };
 
 
@@ -418,8 +422,7 @@ public:
     Controller();
     virtual ~Controller();
 
-    void start();
-    void stop();
+    void setState(State newState);
 
     void registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show = true);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
