@@ -106,6 +106,8 @@ class UpnpApplication :  public Poco::Util::Application, public Gui::Application
 public:
     static const std::string PLAYLIST_URI;
     static const std::string CONFIG_URI;
+    static const std::string CONFIG_APP_QUERY;
+    static const std::string CONFIG_DEV_QUERY;
 
     UpnpApplication(int argc, char** argv);
 
@@ -131,10 +133,12 @@ private:
     // application configuration
     void displayHelp();
     void printConfig();
+    void printForm(const Poco::Net::HTMLForm& form);
     void loadConfig();
     void initConfig();
     void saveConfig();
-    std::stringstream* generateConfigForm();
+    std::stringstream* generateConfigPage();
+    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
     void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
 
     // local devices

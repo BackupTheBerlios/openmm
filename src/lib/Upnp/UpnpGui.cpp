@@ -68,18 +68,18 @@ ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
 //        response.setChunkedTransferEncoding(true);
         response.setContentType("text/html");
 
-        Poco::Net::HTMLForm htmlForm(request, request.stream());
-        if (requestUri.getQuery() == "form=app") {
-
+        Poco::Net::HTMLForm form(request, request.stream());
+        if (requestUri.getQuery() == UpnpApplication::CONFIG_APP_QUERY) {
+            _pApp->handleAppConfigRequest(form);
         }
-        else if (requestUri.getQuery() == "form=dev") {
-            _pApp->handleDevConfigRequest(htmlForm);
+        else if (requestUri.getQuery() == UpnpApplication::CONFIG_DEV_QUERY) {
+            _pApp->handleDevConfigRequest(form);
         }
 
         std::ostream& outStream = response.send();
-        std::istream* pConfigForm = _pApp->generateConfigForm();
-        Poco::StreamCopier::copyStream(*pConfigForm, outStream);
-        delete pConfigForm;
+        std::istream* pConfigPage = _pApp->generateConfigPage();
+        Poco::StreamCopier::copyStream(*pConfigPage, outStream);
+        delete pConfigPage;
     }
     else {
         response.send();
@@ -96,6 +96,8 @@ ConfigRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReq
 
 const std::string UpnpApplication::PLAYLIST_URI = "/Playlist";
 const std::string UpnpApplication::CONFIG_URI = "/Config";
+const std::string UpnpApplication::CONFIG_APP_QUERY = "saveForm=app";
+const std::string UpnpApplication::CONFIG_DEV_QUERY = "saveForm=dev";
 
 UpnpApplication::UpnpApplication(int argc, char** argv) :
 //Poco::Util::Application(argc, argv),
@@ -373,6 +375,16 @@ UpnpApplication::printConfig()
 
 
 void
+UpnpApplication::printForm(const Poco::Net::HTMLForm& form)
+{
+    for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
+    {
+        Av::Log::instance()->upnpav().debug("form " + it->first + ": " + it->second);
+    }
+}
+
+
+void
 UpnpApplication::loadConfig()
 {
     if (!_ignoreConfig) {
@@ -420,7 +432,7 @@ UpnpApplication::saveConfig()
 
 
 std::stringstream*
-UpnpApplication::generateConfigForm()
+UpnpApplication::generateConfigPage()
 {
     std::stringstream* pOutStream = new std::stringstream;
     *pOutStream << "<html>\n"
@@ -430,22 +442,29 @@ UpnpApplication::generateConfigForm()
                     "<body>\n"
                     "<h1>OMM Configuration</h1>\n";
 
-    *pOutStream << "Address of this page is " << getAppHttpUri() << "/Config<br>\n";
+    *pOutStream << "Address of this page is " << getAppHttpUri() << CONFIG_URI << "<br>\n";
 
     if (!_pConf) {
-        *pOutStream << "config file not editable<br>\n";
+        *pOutStream << "configuration file not found<br>\n";
         return pOutStream;
     }
 
-    *pOutStream << "<form method=\"POST\" action=\"/Config?form=app\"><br>\n";
+    *pOutStream << "<form method=\"POST\" action=\"" + CONFIG_URI + "?" + CONFIG_APP_QUERY + "\"><br>\n";
 
-    bool appStarted = (_pConf->getString("application.state", "Started") == "Started");
-    *pOutStream << std::string("start<input type=\"checkbox\" name=\"application.state\" value=\"true\"") +  (appStarted ? "checked" : "") + " ><br>\n";
+//    bool appStarted = (_pConf->getString("application.state", "Started") == "Started");
+//    *pOutStream << std::string("start<input type=\"checkbox\" name=\"application.state\" value=\"true\"") +  (appStarted ? "checked" : "") + " ><br>\n";
+
+    std::string appState = _pConf->getString("application.state", "Started");
+    *pOutStream << std::string("state<select name=\"application.state\" size=\"1\">") +
+                "<option " + (appState == DeviceManager::stateString(DeviceManager::Started) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Started) + "</option>" +
+                "<option " + (appState == DeviceManager::stateString(DeviceManager::Local) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Local) + "</option>" +
+                "<option " + (appState == DeviceManager::stateString(DeviceManager::Stopped) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Stopped) + "</option>" +
+                "</select><br>\n";
 
     *pOutStream << "<input type=\"submit\" value=\"Save\">\n";
     *pOutStream << "</form>\n";
 
-    *pOutStream << "<form method=\"POST\" action=\"/Config?form=dev\">\n";
+    *pOutStream << "<form method=\"POST\" action=\"" + CONFIG_URI + "?" + CONFIG_DEV_QUERY + "\">\n";
 
     *pOutStream << "<h2>Media Renderer</h2>\n";
     bool rendererEnable = _pConf->getBool("renderer.enable", false);
@@ -483,9 +502,11 @@ UpnpApplication::generateConfigForm()
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
             "<tr><td>poll</td><td><input type=\"text\" name=\"" + serverKey + ".pollUpdateId\" size=\"10\" value=\"" + pollUpdateId +  "\"></td></tr>\n"
             "<tr><td>check mod</td><td><input type=\"checkbox\" name=\"" + serverKey + ".checkMod\" value=\"true\"" +  (checkMod ? "checked" : "") + " ></td></tr>\n"
-            "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\"> <option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
+            "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\">"
+                "<option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_DIR_STRUCT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
-                "<option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
+                "<option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option>"
+                "</select></td></tr>\n"
             "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"delete." + *it + "\" value=\"Delete\"></td></tr>\n"
             "</table>"
@@ -518,10 +539,22 @@ UpnpApplication::generateConfigForm()
 
 
 void
+UpnpApplication::handleAppConfigRequest(const Poco::Net::HTMLForm& form)
+{
+    if (!form.empty()) {
+        printForm(form);
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
+            _pConf->setString(it->first, it->second);
+        }
+    }
+}
+
+
+void
 UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 {
     if (!form.empty()) {
-        Av::Log::instance()->upnpav().debug("omm config update ...");
+        Av::Log::instance()->upnpav().debug("omm local devices config update ...");
         _pLocalDeviceServer->setState(DeviceManager::Stopped);
         _pLocalDeviceServer = new DeviceServer;
 //        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);
@@ -530,13 +563,8 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         _pLocalDeviceContainer = new DeviceContainer;
 
         // synchronize config with form data
-        // config data:
         printConfig();
-        // form data:
-        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
-        {
-            Av::Log::instance()->upnpav().debug("form " + it->first + ": " + it->second);
-        }
+        printForm(form);
 
         // save keys that are not handled by the form
         Av::Log::instance()->upnpav().debug("omm config save non mutable keys ...");
@@ -567,8 +595,7 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         Av::Log::instance()->upnpav().debug("omm config read in form config ...");
         std::string deleteUuid;
         bool newServer = false;
-        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
-        {
+        for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
             Poco::StringTokenizer keyParts(it->first, ".");
             // NOTE: deleteUuid must be found before the server config entry that will be deleted.
             //       This relies on the form list being sorted.
@@ -588,11 +615,10 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         }
 
         // update local device container and all devices contained
-        Av::Log::instance()->upnpav().debug("omm config update local devices ...");
         initConfig();
         initLocalDevices();
         _pLocalDeviceServer->setState(DeviceManager::Started);
-        Av::Log::instance()->upnpav().debug("omm config update done.");
+        Av::Log::instance()->upnpav().debug("omm local devices config update done.");
     }
 }
 

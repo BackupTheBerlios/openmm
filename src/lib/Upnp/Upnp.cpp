@@ -2972,6 +2972,22 @@ DeviceManager::setState(State newState)
 
 
 std::string
+DeviceManager::stateString(State state)
+{
+    switch (state) {
+        case Stopped:
+            return "stopped";
+        case Local:
+            return "local";
+        case Started:
+            return "started";
+        default:
+            return "";
+    }
+}
+
+
+std::string
 DeviceManager::getHttpServerUri()
 {
     return _pSocket->getHttpServerUri();
@@ -3011,22 +3027,6 @@ DeviceManager::stopHttp()
     Log::instance()->http().information("stopping socket...");
     _pSocket->stopHttp();
     Log::instance()->http().information("socket stopped.");
-}
-
-
-std::string
-DeviceManager::stateString(State state)
-{
-    switch (state) {
-        case Stopped:
-            return "stopped";
-        case Local:
-            return "local";
-        case Started:
-            return "started";
-        default:
-            return "";
-    }
 }
 
 

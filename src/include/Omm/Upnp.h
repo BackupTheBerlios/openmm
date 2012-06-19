@@ -390,11 +390,13 @@ public:
 
     void init();
     void setState(State newState);
+    static std::string stateString(State state);
 
     std::string getHttpServerUri();
 
     void postDeviceNotification(Poco::Notification* pNotification);
     void registerDeviceNotificationHandler(const Poco::AbstractObserver& observer);
+
 
 protected:
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
@@ -406,8 +408,6 @@ protected:
 
     void startHttp();
     void stopHttp();
-
-    std::string stateString(State state);
 
     State                                      _state;
     Container<DeviceContainer>                 _deviceContainers;
