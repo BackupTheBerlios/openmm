@@ -375,7 +375,10 @@ class DeviceManager //: public Util::Startable
     friend class Device;
 
 public:
-    enum State {Stopped, Local, Started};
+    typedef std::string State;
+    static const std::string Stopped;
+    static const std::string Local;
+    static const std::string Started;
 
     DeviceManager(Socket* pNetworkListener);
     virtual ~DeviceManager();
@@ -390,7 +393,6 @@ public:
 
     void init();
     void setState(State newState);
-    static std::string stateString(State state);
 
     std::string getHttpServerUri();
 

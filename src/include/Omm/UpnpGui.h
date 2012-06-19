@@ -175,10 +175,9 @@ private:
     std::string                                 _newServerUuid;
     std::string                                 _instanceMutexName;
 
-    // socket is needed for
+    // _socket is needed for
     // 1. playlist editor resource imports
     // 2. configuration of app
-    // and in the future for playing partial playlist from the editor?
     int                                         _appStandardPort;
     Poco::Net::ServerSocket                     _socket;
     Poco::Net::HTTPServer*                      _pHttpServer;

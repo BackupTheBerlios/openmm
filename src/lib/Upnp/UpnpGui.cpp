@@ -451,14 +451,11 @@ UpnpApplication::generateConfigPage()
 
     *pOutStream << "<form method=\"POST\" action=\"" + CONFIG_URI + "?" + CONFIG_APP_QUERY + "\"><br>\n";
 
-//    bool appStarted = (_pConf->getString("application.state", "Started") == "Started");
-//    *pOutStream << std::string("start<input type=\"checkbox\" name=\"application.state\" value=\"true\"") +  (appStarted ? "checked" : "") + " ><br>\n";
-
     std::string appState = _pConf->getString("application.state", "Started");
     *pOutStream << std::string("state<select name=\"application.state\" size=\"1\">") +
-                "<option " + (appState == DeviceManager::stateString(DeviceManager::Started) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Started) + "</option>" +
-                "<option " + (appState == DeviceManager::stateString(DeviceManager::Local) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Local) + "</option>" +
-                "<option " + (appState == DeviceManager::stateString(DeviceManager::Stopped) ? "selected" : "") + ">" + DeviceManager::stateString(DeviceManager::Stopped) + "</option>" +
+                "<option " + (appState == DeviceManager::Started ? "selected" : "") + ">" + DeviceManager::Started + "</option>" +
+                "<option " + (appState == DeviceManager::Local ? "selected" : "") + ">" + DeviceManager::Local + "</option>" +
+                "<option " + (appState == DeviceManager::Stopped ? "selected" : "") + ">" + DeviceManager::Stopped + "</option>" +
                 "</select><br>\n";
 
     *pOutStream << "<input type=\"submit\" value=\"Save\">\n";
@@ -545,6 +542,9 @@ UpnpApplication::handleAppConfigRequest(const Poco::Net::HTMLForm& form)
         printForm(form);
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
             _pConf->setString(it->first, it->second);
+            if (it->first == "application.state") {
+                _pLocalDeviceServer->setState(it->second);
+            }
         }
     }
 }
@@ -555,23 +555,13 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 {
     if (!form.empty()) {
         Av::Log::instance()->upnpav().debug("omm local devices config update ...");
-        _pLocalDeviceServer->setState(DeviceManager::Stopped);
-        _pLocalDeviceServer = new DeviceServer;
-//        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);
-        // delete local devices
-//        delete _pLocalDeviceContainer;
-        _pLocalDeviceContainer = new DeviceContainer;
-
-        // synchronize config with form data
         printConfig();
         printForm(form);
 
+        // synchronize config with form data
         // save keys that are not handled by the form
         Av::Log::instance()->upnpav().debug("omm config save non mutable keys ...");
-
 //        std::map<std::string, std::string> configCopy;
-
-
         std::map<std::string, std::string> nonMutableConfig;
         nonMutableConfig["application.configPort"] = _pConf->getString("application.configPort", "");
         nonMutableConfig["application.state"] = _pConf->getString("application.state", "");
@@ -615,6 +605,12 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         }
 
         // update local device container and all devices contained
+        _pLocalDeviceServer->setState(DeviceManager::Stopped);
+        _pLocalDeviceServer = new DeviceServer;
+//        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);
+        // delete local devices
+//        delete _pLocalDeviceContainer;
+        _pLocalDeviceContainer = new DeviceContainer;
         initConfig();
         initLocalDevices();
         _pLocalDeviceServer->setState(DeviceManager::Started);

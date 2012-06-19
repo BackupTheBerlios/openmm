@@ -2862,6 +2862,10 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 }
 
 
+const std::string DeviceManager::Stopped = "stopped";
+const std::string DeviceManager::Local = "local";
+const std::string DeviceManager::Started = "started";
+
 DeviceManager::DeviceManager(Socket* pSocket) :
 _pSocket(pSocket),
 _state(Stopped)
@@ -2953,7 +2957,7 @@ DeviceManager::init()
 void
 DeviceManager::setState(State newState)
 {
-    Log::instance()->upnp().debug("device manager state change: " + stateString(_state) + " -> " + stateString(newState));
+    Log::instance()->upnp().debug("device manager state change: " + _state + " -> " + newState);
     if (_state == newState) {
         Log::instance()->upnp().debug("new state equal to old state, ignoring");
         return;
@@ -2962,28 +2966,12 @@ DeviceManager::setState(State newState)
         startHttp();
         startSsdp();
     }
-    else if (newState = Stopped) {
+    else if (newState == Stopped) {
         stopSsdp();
         stopHttp();
     }
     _state = newState;
     Log::instance()->upnp().debug("device manager state change finished");
-}
-
-
-std::string
-DeviceManager::stateString(State state)
-{
-    switch (state) {
-        case Stopped:
-            return "stopped";
-        case Local:
-            return "local";
-        case Started:
-            return "started";
-        default:
-            return "";
-    }
 }
 
 
@@ -3859,7 +3847,7 @@ Controller::~Controller()
 void
 Controller::setState(State newState)
 {
-    Log::instance()->upnp().debug("controller state change: " + stateString(_state) + " -> " + stateString(newState));
+    Log::instance()->upnp().debug("controller state change: " + _state + " -> " + newState);
     if (_state == newState) {
         Log::instance()->upnp().debug("new state equal to old state, ignoring");
         return;
