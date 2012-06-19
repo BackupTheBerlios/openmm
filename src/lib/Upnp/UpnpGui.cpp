@@ -478,9 +478,9 @@ UpnpApplication::generateConfigPage()
         "</fieldset>";
 
     *pOutStream << "<h2>Media Servers</h2>\n";
-    std::vector<std::string> servers;
-    _pConf->keys("server", servers);
-    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+    std::string serversString = _pConf->getString("servers", "");
+    Poco::StringTokenizer servers(serversString, ",");
+    for (Poco::StringTokenizer::Iterator it = servers.begin(); it != servers.end(); ++it) {
         std::string serverKey = "server." + *it;
         bool serverEnable = _pConf->getBool(serverKey + ".enable", false);
         std::string serverName = _pConf->getString(serverKey + ".friendlyName", "");
@@ -493,36 +493,36 @@ UpnpApplication::generateConfigPage()
 
         *pOutStream << "<fieldset><legend>" + serverName + "</legend>"
             "<table>"
+            "<tr><td>enable</td><td><input type=\"hidden\" name=\"" + serverKey + ".enable\" value=\"false\"/><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\" " +  (serverEnable ? "checked" : "") + "></td></tr>\n"
             "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + serverKey + ".friendlyName\" size=\"32\" value=\"" + serverName +  "\"></td></tr>\n"
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + serverKey + ".uuid\" size=\"32\" value=\"" + serverUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + serverKey + ".plugin\" size=\"32\" value=\"" + serverPlugin +  "\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + serverKey + ".basePath\" size=\"32\" value=\"" + basePath +  "\"></td></tr>\n"
             "<tr><td>poll</td><td><input type=\"text\" name=\"" + serverKey + ".pollUpdateId\" size=\"10\" value=\"" + pollUpdateId +  "\"></td></tr>\n"
-            "<tr><td>check mod</td><td><input type=\"checkbox\" name=\"" + serverKey + ".checkMod\" value=\"true\"" +  (checkMod ? "checked" : "") + " ></td></tr>\n"
+            "<tr><td>check mod</td><td><input type=\"hidden\" name=\"" + serverKey + ".checkMod\" value=\"false\"/><input type=\"checkbox\" name=\"" + serverKey + ".checkMod\" value=\"true\" " +  (checkMod ? "checked" : "") + "></td></tr>\n"
             "<tr><td>layout</td><td><select name=\"" + serverKey + ".layout\" size=\"1\">"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_FLAT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_DIR_STRUCT ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
                 "<option " + (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS ? "selected" : "") + ">" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option>"
                 "</select></td></tr>\n"
-            "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + serverKey + ".enable\" value=\"true\"" +  (serverEnable ? "checked" : "") + " ></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"delete." + *it + "\" value=\"Delete\"></td></tr>\n"
             "</table>"
             "</fieldset><br>";
     }
 
-    std::string newServerKey = "server." + _newServerUuid;
+    std::string newServerKey = "server.new";
     *pOutStream << "<fieldset><legend>New Server</legend>"
             "<table>"
+            "<tr><td>enable</td><td><input type=\"hidden\" name=\"" + newServerKey + ".enable\" value=\"false\"/><input type=\"checkbox\" name=\"" + newServerKey + ".enable\" value=\"true\"></td></tr>\n"
             "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + newServerKey + ".friendlyName\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + _newServerUuid +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + newServerKey + ".plugin\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + newServerKey + ".basePath\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>poll</td><td><input type=\"text\" name=\"" + newServerKey + ".pollUpdateId\" size=\"10\" value=\"0\"></td></tr>\n"
-            "<tr><td>check mod</td><td><input type=\"checkbox\" name=\"" + newServerKey + ".checkMod\" value=\"true\"></td></tr>\n"
+            "<tr><td>check mod</td><td><input type=\"hidden\" name=\"" + newServerKey + ".checkMod\" value=\"false\"/><input type=\"checkbox\" name=\"" + newServerKey + ".checkMod\" value=\"true\"></td></tr>\n"
             "<tr><td>layout</td><td><select name=\"" + newServerKey + ".layout\" size=\"1\"> <option>" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
-            "<tr><td>enable</td><td><input type=\"checkbox\" name=\"" + newServerKey + ".enable\" value=\"true\"></td></tr>\n"
             "<tr><td><input type=\"submit\" name=\"create." + _newServerUuid + "\" value=\"New\"></td></tr>\n"
             "</table>"
             "</fieldset><br>";
@@ -558,51 +558,50 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         printConfig();
         printForm(form);
 
-        // synchronize config with form data
-        // save keys that are not handled by the form
-        Av::Log::instance()->upnpav().debug("omm config save non mutable keys ...");
-//        std::map<std::string, std::string> configCopy;
-        std::map<std::string, std::string> nonMutableConfig;
-        nonMutableConfig["application.configPort"] = _pConf->getString("application.configPort", "");
-        nonMutableConfig["application.state"] = _pConf->getString("application.state", "");
-        nonMutableConfig["application.width"] = _pConf->getString("application.width", "");
-        nonMutableConfig["application.height"] = _pConf->getString("application.height", "");
-        nonMutableConfig["controller.searchString"] = _pConf->getString("controller.searchString", "");
-
-        // clear file config
-        Av::Log::instance()->upnpav().debug("omm config clear file config ...");
-        _pConf->clear();
-
-        // write back keys that are not handled by the form
-        Av::Log::instance()->upnpav().debug("omm config write back non mutable keys ...");
-        for (std::map<std::string, std::string>::iterator it = nonMutableConfig.begin(); it != nonMutableConfig.end(); ++it) {
-            if (it->second != "") {
-                _pConf->setString(it->first, it->second);
-            }
-        }
-
-        // read in form config
-        Av::Log::instance()->upnpav().debug("omm config read in form config ...");
+        // read form data and write all entries to file configuration
+        Av::Log::instance()->upnpav().debug("omm config read in devices form config ...");
+        std::set<std::string> serverUuids;
         std::string deleteUuid;
-        bool newServer = false;
+        std::string createUuid;
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
             Poco::StringTokenizer keyParts(it->first, ".");
-            // NOTE: deleteUuid must be found before the server config entry that will be deleted.
-            //       This relies on the form list being sorted.
-            if (keyParts[0] == "delete") {
-                deleteUuid = keyParts[1];
-                Av::Log::instance()->upnpav().debug("omm config delete uuid: " + deleteUuid);
+            // NOTE: When delete is pressed, an additional form entry is generated: delete.<uuid>.
+            //       Same holds for create.
+            std::string key = keyParts[0];
+            std::string uuid = keyParts[1];
+            if (key == "delete") {
+                deleteUuid = uuid;
             }
-            else if (keyParts[0] == "create") {
-                newServer = true;
+            else if (key == "create") {
+                createUuid = uuid;
             }
-            if ((keyParts[1] != deleteUuid && keyParts[1] != _newServerUuid) || (newServer && keyParts[1] == _newServerUuid))  {
+            else {
                 _pConf->setString(it->first, it->second);
             }
-            if (newServer) {
-                _newServerUuid = Poco::UUIDGenerator().createRandom().toString();
+            if (key == "server") {
+                serverUuids.insert(uuid);
             }
         }
+        serverUuids.erase(deleteUuid);
+        serverUuids.erase("new");
+
+        if (createUuid != "") {
+            Av::Log::instance()->upnpav().debug("omm config create new local device with uuid: " + createUuid);
+            std::vector<std::string> newServerKeys;
+            _pConf->keys("server.new", newServerKeys);
+            for (std::vector<std::string>::iterator it = newServerKeys.begin(); it != newServerKeys.end(); ++it) {
+                Av::Log::instance()->upnpav().debug(std::string("add config entry ") + "server." + createUuid + "." + *it + ": " + _pConf->getString(*it, ""));
+                _pConf->setString("server." + createUuid + "." + *it, _pConf->getString("server.new." + *it, ""));
+            }
+            serverUuids.insert(createUuid);
+            _newServerUuid = Poco::UUIDGenerator().createRandom().toString();
+        }
+
+        std::string servers;
+        for (std::set<std::string>::const_iterator it = serverUuids.begin(); it != serverUuids.end(); ++it) {
+            servers += *it + ",";
+        }
+        _pConf->setString("servers", servers.substr(0, servers.length() - 1));
 
         // update local device container and all devices contained
         _pLocalDeviceServer->setState(DeviceManager::Stopped);
@@ -650,9 +649,9 @@ UpnpApplication::initLocalDevices()
                 config().getString("renderer.plugin", ""));
     }
 
-    std::vector<std::string> servers;
-    config().keys("server", servers);
-    for (std::vector<std::string>::iterator it = servers.begin(); it != servers.end(); ++it) {
+    std::string serversString = config().getString("servers", "");
+    Poco::StringTokenizer servers(serversString, ",");
+    for (Poco::StringTokenizer::Iterator it = servers.begin(); it != servers.end(); ++it) {
         Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
         if (config().getBool("server." + *it + ".enable", false)) {
             addLocalServer(*it);
