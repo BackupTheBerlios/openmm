@@ -120,7 +120,6 @@ _pLocalDeviceServer(new DeviceServer),
 _pLocalDeviceContainer(new DeviceContainer),
 _pLocalMediaRenderer(0),
 _pConf(0),
-_newServerUuid(Poco::UUIDGenerator().createRandom().toString()),
 _instanceMutexName("OmmApplicationMutex"),
 _appStandardPort(4009)
 {
@@ -515,7 +514,7 @@ UpnpApplication::generateConfigPage()
             "<table>"
             "<tr><td>enable</td><td><input type=\"hidden\" name=\"" + newServerKey + ".enable\" value=\"false\"/><input type=\"checkbox\" name=\"" + newServerKey + ".enable\" value=\"true\"></td></tr>\n"
             "<tr><td>friendly name</td><td><input type=\"text\" name=\"" + newServerKey + ".friendlyName\" size=\"32\" value=\"\"></td></tr>\n"
-            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + _newServerUuid +  "\"></td></tr>\n"
+            "<tr><td>uuid</td><td><input type=\"text\" name=\"" + newServerKey + ".uuid\" size=\"32\" value=\"" + Poco::UUIDGenerator().createRandom().toString() +  "\"></td></tr>\n"
             "<tr><td>plugin</td><td><input type=\"text\" name=\"" + newServerKey + ".plugin\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>base path</td><td><input type=\"text\" name=\"" + newServerKey + ".basePath\" size=\"32\" value=\"\"></td></tr>\n"
             "<tr><td>poll</td><td><input type=\"text\" name=\"" + newServerKey + ".pollUpdateId\" size=\"10\" value=\"0\"></td></tr>\n"
@@ -523,7 +522,7 @@ UpnpApplication::generateConfigPage()
             "<tr><td>layout</td><td><select name=\"" + newServerKey + ".layout\" size=\"1\"> <option>" + Av::ServerContainer::LAYOUT_FLAT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_DIR_STRUCT + "</option>"
                 "<option>" + Av::ServerContainer::LAYOUT_PROPERTY_GROUPS + "</option></select></td></tr>\n"
-            "<tr><td><input type=\"submit\" name=\"create." + _newServerUuid + "\" value=\"New\"></td></tr>\n"
+            "<tr><td><input type=\"submit\" name=\"create\" value=\"New\"></td></tr>\n"
             "</table>"
             "</fieldset><br>";
 
@@ -560,50 +559,54 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 
         // read form data and write all entries to file configuration
         Av::Log::instance()->upnpav().debug("omm config read in devices form config ...");
-        std::set<std::string> serverUuids;
+        std::set<std::string> serverIds;
         std::string deleteUuid;
-        std::string createUuid;
+        bool createServer = false;
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
-            Poco::StringTokenizer keyParts(it->first, ".");
-            // NOTE: When delete is pressed, an additional form entry is generated: delete.<uuid>.
-            //       Same holds for create.
-            std::string key = keyParts[0];
-            std::string uuid = keyParts[1];
-            if (key == "delete") {
-                deleteUuid = uuid;
+            // NOTE: When delete is pressed, an additional form entry is generated: delete.uuid (same for create w/o uuid)
+            Poco::StringTokenizer key(it->first, ".");
+            if (key[0] == "delete") {
+                deleteUuid = key[1];
             }
-            else if (key == "create") {
-                createUuid = uuid;
+            else if (it->first == "create") {
+                createServer = true;
             }
             else {
                 _pConf->setString(it->first, it->second);
             }
-            if (key == "server") {
-                serverUuids.insert(uuid);
+            if (key[0] == "server") {
+                serverIds.insert(key[1]);
             }
         }
-        serverUuids.erase(deleteUuid);
-        serverUuids.erase("new");
+        serverIds.erase(deleteUuid);
+        serverIds.erase("new");
 
-        if (createUuid != "") {
-            Av::Log::instance()->upnpav().debug("omm config create new local device with uuid: " + createUuid);
+        if (createServer) {
+            // find new or deleted config file id for local server.
+            int id = 0;
+            std::string newId = "0";
+            while (serverIds.find(newId) != serverIds.end()) {
+                id++;
+                newId = Poco::NumberFormatter::format(id);
+            }
+            // copy data of new server into new server entry.
+            Av::Log::instance()->upnpav().debug("omm config create new local device with id: " + newId);
             std::vector<std::string> newServerKeys;
             _pConf->keys("server.new", newServerKeys);
             for (std::vector<std::string>::iterator it = newServerKeys.begin(); it != newServerKeys.end(); ++it) {
-                Av::Log::instance()->upnpav().debug(std::string("add config entry ") + "server." + createUuid + "." + *it + ": " + _pConf->getString(*it, ""));
-                _pConf->setString("server." + createUuid + "." + *it, _pConf->getString("server.new." + *it, ""));
+                Av::Log::instance()->upnpav().debug(std::string("add config entry ") + "server." + newId + "." + *it + ": " + _pConf->getString(*it, ""));
+                _pConf->setString("server." + newId + "." + *it, _pConf->getString("server.new." + *it, ""));
             }
-            serverUuids.insert(createUuid);
-            _newServerUuid = Poco::UUIDGenerator().createRandom().toString();
+            serverIds.insert(newId);
         }
 
         std::string servers;
-        for (std::set<std::string>::const_iterator it = serverUuids.begin(); it != serverUuids.end(); ++it) {
+        for (std::set<std::string>::const_iterator it = serverIds.begin(); it != serverIds.end(); ++it) {
             servers += *it + ",";
         }
         _pConf->setString("servers", servers.substr(0, servers.length() - 1));
 
-        // update local device container and all devices contained
+        // restart local device container and all devices contained
         _pLocalDeviceServer->setState(DeviceManager::Stopped);
         _pLocalDeviceServer = new DeviceServer;
 //        _pLocalDeviceServer->removeDeviceContainer(_pLocalDeviceContainer);

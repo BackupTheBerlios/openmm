@@ -172,7 +172,6 @@ private:
     std::string                                 _rendererPlugin;
     bool                                        _showRendererVisualOnly;
     bool                                        _enableServer;
-    std::string                                 _newServerUuid;
     std::string                                 _instanceMutexName;
 
     // _socket is needed for
