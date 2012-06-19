@@ -52,9 +52,11 @@ namespace Omm {
 void
 ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnp().debug("config request from: " + request.getHost());
+    Log::instance()->upnp().debug("omm application http request \"" + request.getURI() + "\" from " + request.getHost());
 
-    if (request.getURI() == UpnpApplication::PLAYLIST_URI) {
+    Poco::URI requestUri(request.getURI());
+
+    if (requestUri.getPath() == UpnpApplication::PLAYLIST_URI) {
         std::stringstream* pPlaylistResource = _pApp->_pControllerWidget->getPlaylistResource();
         if (pPlaylistResource) {
             std::ostream& outStream = response.send();
@@ -62,16 +64,22 @@ ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco:
             delete pPlaylistResource;
         }
     }
-    else if (request.getURI() == UpnpApplication::CONFIG_URI) {
+    else if (requestUri.getPath() == UpnpApplication::CONFIG_URI) {
 //        response.setChunkedTransferEncoding(true);
-        Poco::Net::HTMLForm htmlForm(request, request.stream());
         response.setContentType("text/html");
-        std::stringstream* pConfigForm = _pApp->handleConfigRequest(htmlForm);
-        if (pConfigForm) {
-            std::ostream& outStream = response.send();
-            Poco::StreamCopier::copyStream(*pConfigForm, outStream);
-            delete pConfigForm;
+
+        Poco::Net::HTMLForm htmlForm(request, request.stream());
+        if (requestUri.getQuery() == "form=app") {
+
         }
+        else if (requestUri.getQuery() == "form=dev") {
+            _pApp->handleDevConfigRequest(htmlForm);
+        }
+
+        std::ostream& outStream = response.send();
+        std::istream* pConfigForm = _pApp->generateConfigForm();
+        Poco::StreamCopier::copyStream(*pConfigForm, outStream);
+        delete pConfigForm;
     }
     else {
         response.send();
@@ -429,14 +437,21 @@ UpnpApplication::generateConfigForm()
         return pOutStream;
     }
 
+    *pOutStream << "<form method=\"POST\" action=\"/Config?form=app\"><br>\n";
+
+    bool appStarted = (_pConf->getString("application.state", "Started") == "Started");
+    *pOutStream << std::string("start<input type=\"checkbox\" name=\"application.state\" value=\"true\"") +  (appStarted ? "checked" : "") + " ><br>\n";
+
+    *pOutStream << "<input type=\"submit\" value=\"Save\">\n";
+    *pOutStream << "</form>\n";
+
+    *pOutStream << "<form method=\"POST\" action=\"/Config?form=dev\">\n";
+
+    *pOutStream << "<h2>Media Renderer</h2>\n";
     bool rendererEnable = _pConf->getBool("renderer.enable", false);
     std::string rendererName = _pConf->getString("renderer.friendlyName", "");
     std::string rendererUuid = _pConf->getString("renderer.uuid", "");
     std::string rendererPlugin = _pConf->getString("renderer.plugin", "");
-
-    *pOutStream << "<form method=\"POST\" action=\"/Config\">\n";
-
-    *pOutStream << "<h2>Media Renderer</h2>\n";
     *pOutStream << "<fieldset><legend>" + rendererName + "</legend>"
         "<table>"
         "<tr><td>friendly name</td><td><input type=\"text\" name=\"renderer.friendlyName\" size=\"32\" value=\"" + rendererName +  "\"></td></tr>\n"
@@ -502,8 +517,8 @@ UpnpApplication::generateConfigForm()
 }
 
 
-std::stringstream*
-UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
+void
+UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 {
     if (!form.empty()) {
         Av::Log::instance()->upnpav().debug("omm config update ...");
@@ -531,6 +546,7 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
 
         std::map<std::string, std::string> nonMutableConfig;
         nonMutableConfig["application.configPort"] = _pConf->getString("application.configPort", "");
+        nonMutableConfig["application.state"] = _pConf->getString("application.state", "");
         nonMutableConfig["application.width"] = _pConf->getString("application.width", "");
         nonMutableConfig["application.height"] = _pConf->getString("application.height", "");
         nonMutableConfig["controller.searchString"] = _pConf->getString("controller.searchString", "");
@@ -578,8 +594,6 @@ UpnpApplication::handleConfigRequest(const Poco::Net::HTMLForm& form)
         _pLocalDeviceServer->setState(DeviceManager::Started);
         Av::Log::instance()->upnpav().debug("omm config update done.");
     }
-
-    return generateConfigForm();
 }
 
 

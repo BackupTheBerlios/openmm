@@ -135,7 +135,7 @@ private:
     void initConfig();
     void saveConfig();
     std::stringstream* generateConfigForm();
-    std::stringstream* handleConfigRequest(const Poco::Net::HTMLForm& form);
+    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
 
     // local devices
     void initLocalDevices();
