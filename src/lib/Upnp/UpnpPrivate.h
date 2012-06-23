@@ -97,11 +97,11 @@ private:
     static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
                  // Note that each SSDP message must fit into one UDP Packet.
 
-    Poco::Net::SocketReactor                        _multicastReactor;
-    Poco::Net::SocketReactor                        _broadcastReactor;
-    Poco::Thread                                    _multicastListenerThread;
-    Poco::Thread                                    _broadcastListenerThread;
-    Poco::NotificationCenter                        _notificationCenter;
+    Poco::Net::SocketReactor*       _pMulticastReactor;
+    Poco::Net::SocketReactor*       _pBroadcastReactor;
+    Poco::Thread*                   _pMulticastListenerThread;
+    Poco::Thread*                   _pBroadcastListenerThread;
+    Poco::NotificationCenter        _notificationCenter;
 };
 
 

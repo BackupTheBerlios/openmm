@@ -209,6 +209,8 @@ friend class PlaylistEditor;
 public:
     ControllerWidget(UpnpApplication* pApplication);
 
+    void setState(State newState);
+
     GuiVisual* getLocalRendererVisual();
     MediaRendererView* getControlPanel();
     Gui::View* getStatusBar();

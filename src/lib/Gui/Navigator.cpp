@@ -64,6 +64,16 @@ NavigatorView::pop()
 }
 
 
+//void
+//NavigatorView::popAll()
+//{
+//    // TODO: NavigatorView popAll() crashes ...
+//    while (getVisibleView()) {
+//        pop();
+//    }
+//}
+
+
 View*
 NavigatorView::getVisibleView()
 {

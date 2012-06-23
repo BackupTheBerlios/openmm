@@ -279,11 +279,11 @@ UpnpApplication::start()
     initLocalDevices();
 
     if (_enableController) {
-//        _pControllerWidget->start();
-        _pControllerWidget->setState(DeviceManager::Started);
+        _pControllerWidget->setState(config().getString("application.state", DeviceManager::Started));
+//        _pControllerWidget->setState(DeviceManager::Started);
     }
-//    _pLocalDeviceServer->start();
-    _pLocalDeviceServer->setState(DeviceManager::Started);
+    _pLocalDeviceServer->setState(config().getString("application.state", DeviceManager::Started));
+//    _pLocalDeviceServer->setState(DeviceManager::Started);
 }
 
 
@@ -291,10 +291,8 @@ void
 UpnpApplication::stop()
 {
     Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
-//    _pLocalDeviceServer->stop();
     _pLocalDeviceServer->setState(DeviceManager::Stopped);
     if (_enableController) {
-//        _pControllerWidget->stop();
         _pControllerWidget->setState(DeviceManager::Stopped);
     }
     Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
@@ -542,6 +540,9 @@ UpnpApplication::handleAppConfigRequest(const Poco::Net::HTMLForm& form)
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
             _pConf->setString(it->first, it->second);
             if (it->first == "application.state") {
+                if (_enableController) {
+                    _pControllerWidget->setState(it->second);
+                }
                 _pLocalDeviceServer->setState(it->second);
             }
         }
@@ -884,6 +885,29 @@ _pApplication(pApplication)
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
+}
+
+
+void
+ControllerWidget::setState(State newState)
+{
+    Log::instance()->upnp().debug("controller widget state change: " + _state + " -> " + newState);
+    if (_state == newState) {
+        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        return;
+    }
+    if (newState == Started) {
+        Controller::setState(Started);
+    }
+    else if (newState == Stopped) {
+        Controller::setState(Stopped);
+//        _pMediaServerGroupWidget->popAll();
+        _pMediaServerGroupWidget->clearDevices();
+        _pMediaServerGroupWidget->syncView();
+        _pMediaRendererGroupWidget->clearDevices();
+        _pMediaRendererGroupWidget->syncView();
+    }
+    Log::instance()->upnp().debug("controller widget state change finished");
 }
 
 

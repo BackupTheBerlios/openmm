@@ -312,22 +312,12 @@ SsdpSocket::init()
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
     _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
 //    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true);
-
-    _multicastReactor.addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _broadcastReactor.addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _multicastReactor.addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _broadcastReactor.addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
 }
 
 
 void
 SsdpSocket::deinit()
 {
-    _multicastReactor.removeEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _broadcastReactor.removeEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _multicastReactor.removeEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    _broadcastReactor.removeEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-    delete _pSsdpSenderSocket;
     delete _pSsdpListenerSocket;
     delete _pSsdpLocalSenderSocket;
     delete _pSsdpLocalListenerSocket;
@@ -371,9 +361,17 @@ SsdpSocket::startListen()
     }
     else {
         Log::instance()->ssdp().information("starting SSDP multicast listener ...");
-        _multicastListenerThread.start(_multicastReactor);
+        _pMulticastListenerThread = new Poco::Thread;
+        _pMulticastReactor = new Poco::Net::SocketReactor;
+        _pMulticastReactor->addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pMulticastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pMulticastListenerThread->start(*_pMulticastReactor);
         Log::instance()->ssdp().information("starting SSDP broadcast listener ...");
-        _broadcastListenerThread.start(_broadcastReactor);
+        _pBroadcastListenerThread = new Poco::Thread;
+        _pBroadcastReactor = new Poco::Net::SocketReactor;
+        _pBroadcastReactor->addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pBroadcastReactor->addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pBroadcastListenerThread->start(*_pBroadcastReactor);
     }
     Log::instance()->ssdp().information("SSDP listener started.");
 }
@@ -388,11 +386,15 @@ SsdpSocket::stopListen()
     }
     else {
         Log::instance()->ssdp().information("stopping SSDP multicast listener ...");
-        _multicastReactor.stop();
-        _multicastListenerThread.join();
+        _pMulticastReactor->stop();
+        _pMulticastListenerThread->join();
+        delete _pMulticastReactor;
+        delete _pMulticastListenerThread;
         Log::instance()->ssdp().information("stopping SSDP broadcast listener ...");
-        _broadcastReactor.stop();
-        _broadcastListenerThread.join();
+        _pBroadcastReactor->stop();
+        _pBroadcastListenerThread->join();
+        delete _pBroadcastReactor;
+        delete _pBroadcastListenerThread;
     }
 //    resetSockets();
     Log::instance()->ssdp().information("SSDP listener stopped.");
@@ -3019,6 +3021,15 @@ DeviceManager::stopHttp()
 
 
 void
+DeviceManager::clear()
+{
+    // TODO: also delete device containers and devices. DeviceGroup only clears _devices vector (pointing to same devices)
+    // other possibility: sync device containers with current network status (and for example preserve info in controller about them)
+    _deviceContainers.clear();
+}
+
+
+void
 DeviceManager::postDeviceNotification(Poco::Notification* pNotification)
 {
     Log::instance()->upnp().debug("posting device notification to device manager");
@@ -3081,7 +3092,7 @@ DeviceContainer::clear()
         delete _pDeviceDescription;
         _pDeviceDescription = 0;
     }
-    if (_pSsdpNotifyAliveMessages) {
+    if (_pSsdpNotifyByebyeMessages) {
         delete _pSsdpNotifyByebyeMessages;
         _pSsdpNotifyByebyeMessages = 0;
     }
@@ -3869,6 +3880,7 @@ Controller::setState(State newState)
                 }
             }
         }
+        DeviceManager::clear();
         DeviceManager::setState(Stopped);
     }
     Log::instance()->upnp().debug("controller state change finished");
@@ -4785,6 +4797,14 @@ Device*
 DeviceGroup::getSelectedDevice() const
 {
     return _pSelectedDevice;
+}
+
+
+void
+DeviceGroup::clearDevices()
+{
+    _devices.clear();
+    _pSelectedDevice = 0;
 }
 
 

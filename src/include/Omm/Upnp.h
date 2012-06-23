@@ -411,6 +411,8 @@ protected:
     void startHttp();
     void stopHttp();
 
+    void clear();
+
     State                                      _state;
     Container<DeviceContainer>                 _deviceContainers;
     Poco::NotificationCenter                   _deviceNotificationCenter;
@@ -650,6 +652,7 @@ public:
     Controller* getController() const;
     void selectDevice(Device* pDevice);
     Device* getSelectedDevice() const;
+    void clearDevices();
 
     virtual std::string getDeviceType();
     virtual std::string shortName();
