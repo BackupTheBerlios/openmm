@@ -250,6 +250,7 @@ CtlMediaRenderer::startPositionTimer(bool start)
         _pPositionTimer->stop();
         delete _pPositionTimer;
         _pPositionTimer = 0;
+        Log::instance()->upnpav().debug("position timer stopped.");
     }
     if (start) {
         Log::instance()->upnpav().debug("start position timer ...");

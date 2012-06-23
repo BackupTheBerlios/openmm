@@ -520,6 +520,10 @@ public:
     void initStateVars();
     void initControllerEventing();
 
+    // some devices (e.g. media servers) need some action to be started and stopped
+    virtual void start() {}
+    virtual void stop() {}
+    
     virtual void addCtlDeviceCode() {}
 
 protected:
@@ -550,6 +554,7 @@ public:
     virtual ~DeviceServer();
 
     void init();
+    void setState(State newState);
 
 private:
     virtual void startSsdp();

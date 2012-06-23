@@ -67,8 +67,8 @@ public:
 
     void setRoot(ServerContainer* pRoot);
 
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
 
     Poco::UInt16 getServerPort() const;
     std::string getServerAddress();

@@ -776,7 +776,6 @@ UpnpApplication::addLocalServer(const std::string& id)
     Omm::Icon* pIcon = new Omm::Icon(32, 32, 8, "image/png", "server.png");
     pMediaServer->addIcon(pIcon);
     pMediaServer->setPollSystemUpdateIdTimer(config().getInt("server." + id + ".pollUpdateId", 0));
-    pMediaServer->start();
 
     _pLocalDeviceContainer->addDevice(pMediaServer);
     if (!_enableRenderer) {
@@ -901,6 +900,17 @@ ControllerWidget::setState(State newState)
     }
     else if (newState == Stopped) {
         Controller::setState(Stopped);
+        // don't stop selected renderer, it should continue playing though the controller is stopped
+//        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pMediaRendererGroupWidget->getSelectedDevice());
+//        if (pRenderer) {
+//            pRenderer->stopPressed();
+//        }
+        // stop position info timer for all renderer devices that controller knows of (renderers continue to play)
+        for (int r = 0; r < _pMediaRendererGroupWidget->getDeviceCount(); r++) {
+            MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pMediaRendererGroupWidget->getDevice(r));
+            pRenderer->startPositionTimer(false);
+        }
+        // clear device views and remove controller's device containers
 //        _pMediaServerGroupWidget->popAll();
         _pMediaServerGroupWidget->clearDevices();
         _pMediaServerGroupWidget->syncView();

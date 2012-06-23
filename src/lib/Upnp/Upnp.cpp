@@ -4110,6 +4110,34 @@ DeviceServer::init()
 
 
 void
+DeviceServer::setState(State newState)
+{
+    Log::instance()->upnp().debug("device server state change: " + _state + " -> " + newState);
+    if (_state == newState) {
+        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        return;
+    }
+    if (newState == Started) {
+        DeviceManager::setState(Started);
+        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                (*d)->start();
+            }
+        }
+    }
+    else if (newState == Stopped) {
+        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                (*d)->stop();
+            }
+        }
+        DeviceManager::setState(Stopped);
+    }
+    Log::instance()->upnp().debug("device server state change finished");
+}
+
+
+void
 DeviceServer::startSsdp()
 {
     DeviceManager::startSsdp();
