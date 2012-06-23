@@ -603,9 +603,12 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 
         std::string servers;
         for (std::set<std::string>::const_iterator it = serverIds.begin(); it != serverIds.end(); ++it) {
-            servers += *it + ",";
+            servers.append(*it);
+            if (it != --serverIds.end()) {
+                servers.append(",");
+            }
         }
-        _pConf->setString("servers", servers.substr(0, servers.length() - 1));
+        _pConf->setString("servers", servers);
 
         // restart local device container and all devices contained
         _pLocalDeviceServer->setState(DeviceManager::Stopped);

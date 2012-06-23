@@ -308,9 +308,12 @@ CsvList::toString()
 {
     std::string res;
     for (std::list<std::string>::iterator it = _items.begin(); it != _items.end(); ++it) {
-        res.append(*it + ",");
+        res.append(*it);
+        if (it != --_items.end()) {
+            res.append(",");
+        }
     }
-    return res.substr(0, res.length() - 1);
+    return res;
 }
 
 
