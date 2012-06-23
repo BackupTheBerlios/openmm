@@ -87,7 +87,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/img/omm.ico
 #)
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-"libc6 (>= 2.13), libgcc1 (>= 1:4.5.2), libstdc++6 (>= 4.5.2), libpocofoundation9 (>= 1.3.6), libpoconet9 (>= 1.3.6), libpocoutil9 (>= 1.3.6), libpocoxml9 (>= 1.3.6), vlc (>= 1.1.0), libqtcore4 (>= 4:4.7.2), libqtgui4 (>= 4:4.7.2), libqt4-svg (>= 4:4.7.2), libqt4-xml (>= 4:4.7.2)"
+"libc6 (>= 2.13), libgcc1 (>= 1:4.5.2), libstdc++6 (>= 4.5.2), libpocofoundation9 (>= 1.3.6), libpoconet9 (>= 1.3.6), libpocoutil9 (>= 1.3.6), libpocoxml9 (>= 1.3.6), libdbus-c++-1-0, vlc (>= 1.1.0), libqtcore4 (>= 4:4.7.2), libqtgui4 (>= 4:4.7.2), libqt4-svg (>= 4:4.7.2), libqt4-xml (>= 4:4.7.2)"
 )
 
 set(CPACK_DEBIAN_PACKAGE_SECTION

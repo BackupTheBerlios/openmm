@@ -646,6 +646,7 @@ UpnpApplication::showRendererVisualOnly(bool show)
 void
 UpnpApplication::initLocalDevices()
 {
+    // add local renderer
     Omm::Av::Log::instance()->upnpav().debug("omm application init local devices ...");
     if (config().getBool("renderer.enable", false)) {
         setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
@@ -653,12 +654,27 @@ UpnpApplication::initLocalDevices()
                 config().getString("renderer.plugin", ""));
     }
 
-    std::string serversString = config().getString("servers", "");
+    // add local servers from config file
+    std::string serversString;
+    if (_pConf) {
+        serversString = _pConf->getString("servers", "");
+    }
     Poco::StringTokenizer servers(serversString, ",");
     for (Poco::StringTokenizer::Iterator it = servers.begin(); it != servers.end(); ++it) {
         Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
-        if (config().getBool("server." + *it + ".enable", false)) {
+        if (_pConf->getBool("server." + *it + ".enable", false)) {
             addLocalServer(*it);
+        }
+    }
+    // add local servers from command line
+    std::vector<std::string> serverKeys;
+    config().keys("server", serverKeys);
+    for (std::vector<std::string>::iterator it = serverKeys.begin(); it != serverKeys.end(); ++it) {
+        if (!(_pConf && _pConf->hasProperty("server." + *it + ".enable"))) {
+            Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+            if (config().getBool("server." + *it + ".enable", false)) {
+                addLocalServer(*it);
+            }
         }
     }
 
@@ -737,7 +753,7 @@ UpnpApplication::setLocalRenderer()
 void
 UpnpApplication::addLocalServer(const std::string& id)
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application add local server ...");
+    Omm::Av::Log::instance()->upnpav().debug("omm application add local server with id: " + id + " ...");
 
     std::string pluginName = config().getString("server." + id + ".plugin", "model-webradio");
     Omm::Av::AbstractDataModel* pDataModel;
