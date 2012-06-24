@@ -147,7 +147,6 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
     _pNavigatorLayout->setContentsMargins(0, 0, 0, 0);
     _pNavigatorLayout->addWidget(_pNavigatorPanel);
     _pNavigatorLayout->addWidget(_pStackedWidget);
-
 }
 
 
@@ -175,7 +174,7 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
 void
 NavigatorViewImpl::popView()
 {
-    _pNavigatorPanel->pop();
+    emit _pNavigatorPanel->pop();
 }
 
 

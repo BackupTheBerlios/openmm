@@ -46,7 +46,7 @@ public:
 
     void push(View* pView, const std::string& name = "");
     void pop();
-//    void popAll();
+    void popToRoot();
     View* getVisibleView();
     void showSearchBox(bool show = true);
 

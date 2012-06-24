@@ -53,9 +53,12 @@ public:
 
     void push(View* pView, const std::string name);
     void pop(View* pView);
-    void pop();
+
+signals:
+    void popSignal();
 
 private slots:
+    void pop();
     void buttonPushed();
     void textEdited(const QString& text);
 

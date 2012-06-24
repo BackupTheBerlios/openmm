@@ -55,6 +55,12 @@
     [searchBar resignFirstResponder];
 }
 
+
+- (void)popView
+{
+    [self popViewControllerAnimated:YES];
+}
+
 @end
 
 
@@ -95,8 +101,8 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
 void
 NavigatorViewImpl::popView()
 {
-    UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
-    [pNativeViewController popViewControllerAnimated:YES];
+    OmmNavigationController* pNativeViewController = static_cast<OmmNavigationController*>(getNativeViewController());
+    [pNativeViewController performSelectorOnMainThread:@selector(popView) withObject:nil waitUntilDone:YES];
 }
 
 

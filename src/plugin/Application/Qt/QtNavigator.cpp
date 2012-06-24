@@ -48,6 +48,7 @@ QWidget(pParent)
 {
     _pButtonLayout = new QHBoxLayout(this);
     _pSignalMapper = new QSignalMapper(this);
+    connect(this, SIGNAL(popSignal()), this, SLOT(pop()));
 //    connect(_pSignalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonPushed()));
 }
 

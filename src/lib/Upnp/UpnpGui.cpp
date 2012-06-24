@@ -930,7 +930,7 @@ ControllerWidget::setState(State newState)
             pRenderer->startPositionTimer(false);
         }
         // clear device views and remove controller's device containers
-//        _pMediaServerGroupWidget->popAll();
+        _pMediaServerGroupWidget->popToRoot();
         _pMediaServerGroupWidget->clearDevices();
         _pMediaServerGroupWidget->syncView();
         _pMediaRendererGroupWidget->clearDevices();
@@ -1117,6 +1117,9 @@ void
 DeviceGroupWidget::removeDevice(Device* pDevice, int index, bool begin)
 {
     if (!begin) {
+        if (getSelectedDevice() && pDevice->getUuid() == getSelectedDevice()->getUuid()) {
+            popToRoot();
+        }
         syncViews();
     }
 }

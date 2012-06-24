@@ -58,20 +58,20 @@ void
 NavigatorView::pop()
 {
     if (_pViewStack.size() > 1) {
+        // NOTE: NavigatorView popView() needs to be callable from non-gui thread
         static_cast<NavigatorViewImpl*>(_pImpl)->popView();
         _pViewStack.pop();
     }
 }
 
 
-//void
-//NavigatorView::popAll()
-//{
-//    // TODO: NavigatorView popAll() crashes ...
-//    while (getVisibleView()) {
-//        pop();
-//    }
-//}
+void
+NavigatorView::popToRoot()
+{
+    while (_pViewStack.size() > 1) {
+        pop();
+    }
+}
 
 
 View*
