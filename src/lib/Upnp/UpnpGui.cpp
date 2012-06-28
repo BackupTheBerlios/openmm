@@ -932,9 +932,11 @@ ControllerWidget::setState(State newState)
         // clear device views and remove controller's device containers
         _pMediaServerGroupWidget->popToRoot();
         _pMediaServerGroupWidget->clearDevices();
-        _pMediaServerGroupWidget->syncView();
+//        _pMediaServerGroupWidget->getVisibleView()->syncView();
+        _pMediaServerGroupWidget->getDeviceGroupView().syncView();
         _pMediaRendererGroupWidget->clearDevices();
-        _pMediaRendererGroupWidget->syncView();
+//        _pMediaRendererGroupWidget->getVisibleView()->syncView();
+        _pMediaRendererGroupWidget->getDeviceGroupView().syncView();
     }
     Log::instance()->upnp().debug("controller widget state change finished");
 }
@@ -1155,6 +1157,13 @@ void
 DeviceGroupWidget::setDefaultDevice(Device* pDevice)
 {
     _defaultDeviceUuid = pDevice->getUuid();
+}
+
+
+Gui::ListView&
+DeviceGroupWidget::getDeviceGroupView()
+{
+    return _deviceGroupListView;
 }
 
 

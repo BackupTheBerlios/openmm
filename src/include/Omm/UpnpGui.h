@@ -278,6 +278,7 @@ public:
     virtual void changedSearchText(const std::string& searchText) {}
 
     void setDefaultDevice(Device* pDevice);
+    Gui::ListView& getDeviceGroupView();
 
 protected:
     virtual void init() {}
