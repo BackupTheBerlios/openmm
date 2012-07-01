@@ -40,12 +40,12 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& net();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pNetLogger;
 };
@@ -74,7 +74,7 @@ private:
 
     void findValidIpAddress();
     static bool isLoopback(const Poco::Net::NetworkInterface& interface);
-    
+
     static NetworkInterfaceManager*             _pInstance;
     static Poco::FastMutex                      _instanceLock;
 
@@ -91,7 +91,7 @@ class NetworkInterfaceNotification : public Poco::Notification
 {
 public:
     NetworkInterfaceNotification(const std::string& interfaceName, bool added);
-    
+
     std::string     _interfaceName;
     bool            _added;
 };

@@ -402,6 +402,7 @@ public:
 
 protected:
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
+    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
 
     virtual void handleSsdpMessage(SsdpMessage* pMessage) {}
 
@@ -459,11 +460,12 @@ protected:
     ControllerUserInterface*                      _pUserInterface;
 
 private:
+    virtual void startSsdp();
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDevice(const std::string& location);
-    void update();
+//    void update();
 
     std::map<std::string, DeviceGroup*>        _deviceGroups;
 };
@@ -523,7 +525,7 @@ public:
     // some devices (e.g. media servers) need some action to be started and stopped
     virtual void start() {}
     virtual void stop() {}
-    
+
     virtual void addCtlDeviceCode() {}
 
 protected:

@@ -914,11 +914,9 @@ ControllerWidget::setState(State newState)
         Log::instance()->upnp().debug("new state equal to old state, ignoring");
         return;
     }
-    if (newState == Started) {
-        Controller::setState(Started);
-    }
-    else if (newState == Stopped) {
-        Controller::setState(Stopped);
+    Controller::setState(newState);
+    if (newState == Stopped) {
+
         // don't stop selected renderer, it should continue playing though the controller is stopped
 //        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pMediaRendererGroupWidget->getSelectedDevice());
 //        if (pRenderer) {

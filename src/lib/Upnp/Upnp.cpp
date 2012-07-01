@@ -287,7 +287,15 @@ _urn(urn)
 
 
 SsdpSocket::SsdpSocket() :
-_mode(NotConfigured)
+_mode(NotConfigured),
+_pSsdpListenerSocket(0),
+_pSsdpSenderSocket(0),
+_pSsdpLocalListenerSocket(0),
+_pSsdpLocalSenderSocket(0),
+_pMulticastReactor(0),
+_pBroadcastReactor(0),
+_pMulticastListenerThread(0),
+_pBroadcastListenerThread(0)
 {
 }
 
@@ -310,39 +318,38 @@ SsdpSocket::init()
     // listen to UDP multicast
     Log::instance()->ssdp().debug("create listener socket ...");
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.255.255.255", SSDP_PORT), true);
+    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true);
 }
 
 
-void
-SsdpSocket::deinit()
-{
-    delete _pSsdpListenerSocket;
-    delete _pSsdpLocalSenderSocket;
-    delete _pSsdpLocalListenerSocket;
-    delete _pBuffer;
-    _mode = NotConfigured;
-}
+//void
+//SsdpSocket::deinit()
+//{
+//    delete _pSsdpListenerSocket;
+//    delete _pSsdpLocalSenderSocket;
+//    delete _pSsdpLocalListenerSocket;
+//    delete _pBuffer;
+//    _mode = NotConfigured;
+//}
 
 
-void
-SsdpSocket::addInterface(const std::string& name)
-{
-    Log::instance()->ssdp().information("add interface: " + name);
-    setupSockets();
-}
+//void
+//SsdpSocket::addInterface(const std::string& name)
+//{
+//    Log::instance()->ssdp().information("add interface: " + name);
+////    setupSockets();
+//}
 
 
-void
-SsdpSocket::removeInterface(const std::string& name)
-{
-    Log::instance()->ssdp().information("remove interface: " + name);
-//    resetSockets();
-//    deinit();
-//    init();
-    setupSockets();
-}
+//void
+//SsdpSocket::removeInterface(const std::string& name)
+//{
+//    Log::instance()->ssdp().information("remove interface: " + name);
+////    resetSockets();
+////    deinit();
+////    init();
+////    setupSockets();
+//}
 
 
 void
@@ -359,17 +366,19 @@ SsdpSocket::startListen()
         Log::instance()->ssdp().error("failed to start SSDP socket, not configured.");
         return;
     }
-    else {
+    else if (_mode == Multicast && !_pMulticastListenerThread) {
         Log::instance()->ssdp().information("starting SSDP multicast listener ...");
         _pMulticastListenerThread = new Poco::Thread;
         _pMulticastReactor = new Poco::Net::SocketReactor;
         _pMulticastReactor->addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-        _pMulticastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pMulticastReactor->addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
         _pMulticastListenerThread->start(*_pMulticastReactor);
+    }
+    else if (_mode == Broadcast && !_pBroadcastListenerThread) {
         Log::instance()->ssdp().information("starting SSDP broadcast listener ...");
         _pBroadcastListenerThread = new Poco::Thread;
         _pBroadcastReactor = new Poco::Net::SocketReactor;
-        _pBroadcastReactor->addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pBroadcastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
         _pBroadcastReactor->addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
         _pBroadcastListenerThread->start(*_pBroadcastReactor);
     }
@@ -384,19 +393,24 @@ SsdpSocket::stopListen()
         Log::instance()->ssdp().error("failed to stop SSDP socket, not configured.");
         return;
     }
-    else {
+    if (_pMulticastListenerThread) {
         Log::instance()->ssdp().information("stopping SSDP multicast listener ...");
         _pMulticastReactor->stop();
         _pMulticastListenerThread->join();
         delete _pMulticastReactor;
+        _pMulticastReactor = 0;
         delete _pMulticastListenerThread;
+        _pMulticastListenerThread = 0;
+    }
+    if (_pBroadcastListenerThread) {
         Log::instance()->ssdp().information("stopping SSDP broadcast listener ...");
         _pBroadcastReactor->stop();
         _pBroadcastListenerThread->join();
         delete _pBroadcastReactor;
+        _pBroadcastReactor = 0;
         delete _pBroadcastListenerThread;
+        _pBroadcastListenerThread = 0;
     }
-//    resetSockets();
     Log::instance()->ssdp().information("SSDP listener stopped.");
 }
 
@@ -2665,9 +2679,8 @@ IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 }
 
 
-HttpSocket::HttpSocket()
-//:
-//_isRunning(false)
+HttpSocket::HttpSocket() :
+_isRunning(false)
 {
 }
 
@@ -2694,18 +2707,22 @@ HttpSocket::init()
 void
 HttpSocket::startServer()
 {
-    _pHttpServer->start();
-//    _isRunning = true;
-    Log::instance()->http().information("server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    if (!_isRunning) {
+        _pHttpServer->start();
+        _isRunning = true;
+        Log::instance()->http().information("server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    }
 }
 
 
 void
 HttpSocket::stopServer()
 {
-    _pHttpServer->stop();
-//    _isRunning = false;
-    Log::instance()->http().information("server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    if (_isRunning) {
+        _pHttpServer->stop();
+        _isRunning = false;
+        Log::instance()->http().information("server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
+    }
 }
 
 
@@ -2725,6 +2742,10 @@ HttpSocket::getServerUri()
 //    }
 }
 
+
+const std::string Socket::Null = "null";
+const std::string Socket::Local = "local";
+const std::string Socket::Public = "public";
 
 Socket::Socket()
 {
@@ -2759,6 +2780,21 @@ void
 Socket::registerSsdpMessageHandler(const Poco::AbstractObserver& observer)
 {
     _ssdpSocket.addObserver(observer);
+}
+
+
+void
+Socket::setMode(Mode mode)
+{
+    if (mode == Null) {
+        _ssdpSocket.setMode(SsdpSocket::NotConfigured);
+    }
+    else if (mode == Local) {
+        _ssdpSocket.setMode(SsdpSocket::Broadcast);
+    }
+    else if (mode == Public) {
+        _ssdpSocket.setMode(SsdpSocket::Multicast);
+    }
 }
 
 
@@ -2825,29 +2861,33 @@ Socket::stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet)
 }
 
 
-void
-Socket::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
-{
-    Log::instance()->upnp().debug("network listener receives network interface change notification");
-    handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
-}
+//void
+//Socket::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
+//{
+//    Log::instance()->upnp().debug("socket receives network interface change notification");
+//    Mode mode = getMode();
+//    if (mode == Null) {
+//        _ssdpSocket.setMode(SsdpSocket::Broadcast);
+//    }
+////    handleNetworkInterfaceChange(pNotification->_interfaceName, pNotification->_added);
+//}
 
 
-void
-Socket::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
-{
-    Log::instance()->upnp().debug("network listener adds network interface: " + interfaceName);
-//    writeSsdpMessages();
-    if (added) {
-        _ssdpSocket.addInterface(interfaceName);
-        // TODO: send alive messages only once at startup of server
-        // (now triggered by loopback device and real network device)
-//        sendSsdpAliveMessages();
-    }
-    else {
-        _ssdpSocket.removeInterface(interfaceName);
-    }
-}
+//void
+//Socket::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
+//{
+//    Log::instance()->upnp().debug("network listener adds network interface: " + interfaceName);
+////    writeSsdpMessages();
+//    if (added) {
+//        _ssdpSocket.addInterface(interfaceName);
+//        // TODO: send alive messages only once at startup of server
+//        // (now triggered by loopback device and real network device)
+////        sendSsdpAliveMessages();
+//    }
+//    else {
+//        _ssdpSocket.removeInterface(interfaceName);
+//    }
+//}
 
 
 std::string&
@@ -2892,6 +2932,26 @@ void
 DeviceManager::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler)
 {
     _pSocket->registerHttpRequestHandler(path, requestHandler);
+}
+
+
+void
+DeviceManager::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
+{
+    Log::instance()->upnp().debug("device manager receives network interface change notification");
+
+    if (Net::NetworkInterfaceManager::instance()->loopbackOnly()) {
+        _pSocket->setMode(Socket::Local);
+        startSsdp();
+    }
+    else if (Net::NetworkInterfaceManager::instance()->interfaceCount() == 0) {
+        _pSocket->setMode(Socket::Null);
+        stopSsdp();
+    }
+    else {
+        _pSocket->setMode(Socket::Public);
+        startSsdp();
+    }
 }
 
 
@@ -2953,6 +3013,7 @@ DeviceManager::init()
 
     _pSocket->initSockets();
     _pSocket->registerSsdpMessageHandler(Poco::Observer<DeviceManager, SsdpMessage>(*this, &DeviceManager::handleSsdpMessage));
+    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler(Poco::Observer<DeviceManager, Net::NetworkInterfaceNotification>(*this, &DeviceManager::handleNetworkInterfaceChangedNotification));
 }
 
 
@@ -2965,12 +3026,27 @@ DeviceManager::setState(State newState)
         return;
     }
     if (newState == Started) {
+        if (_state != Stopped) {
+            stopSsdp();
+            stopHttp();
+        }
+        _pSocket->setMode(Socket::Public);
         startHttp();
         startSsdp();
     }
     else if (newState == Stopped) {
         stopSsdp();
         stopHttp();
+        _pSocket->setMode(Socket::Null);
+    }
+    else if (newState == Local) {
+        if (_state != Stopped) {
+            stopSsdp();
+            stopHttp();
+        }
+        _pSocket->setMode(Socket::Local);
+        startHttp();
+        startSsdp();
     }
     _state = newState;
     Log::instance()->upnp().debug("device manager state change finished");
@@ -3863,9 +3939,9 @@ Controller::setState(State newState)
         Log::instance()->upnp().debug("new state equal to old state, ignoring");
         return;
     }
-    if (newState == Started) {
-        DeviceManager::setState(Started);
-        sendMSearch();
+    if (newState == Started || newState == Local) {
+        DeviceManager::setState(newState);
+//        sendMSearch();
     }
     else if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
@@ -3926,6 +4002,14 @@ ControllerUserInterface*
 Controller::getUserInterface()
 {
     return _pUserInterface;
+}
+
+
+void
+Controller::startSsdp()
+{
+    DeviceManager::startSsdp();
+    sendMSearch();
 }
 
 
@@ -4077,15 +4161,15 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 }
 
 
-void
-Controller::update()
-{
-    // TODO: do a more carefull controller update and don't remove servers that are still active.
-    for (Container<DeviceContainer>::KeyIterator it = _deviceContainers.beginKey(); it != _deviceContainers.endKey(); ++it) {
-//        removeDeviceContainer((*it).first);
-    }
-    sendMSearch();
-}
+//void
+//Controller::update()
+//{
+//    // TODO: do a more carefull controller update and don't remove servers that are still active.
+//    for (Container<DeviceContainer>::KeyIterator it = _deviceContainers.beginKey(); it != _deviceContainers.endKey(); ++it) {
+////        removeDeviceContainer((*it).first);
+//    }
+//    sendMSearch();
+//}
 
 
 DeviceServer::DeviceServer() :
@@ -4132,6 +4216,21 @@ DeviceServer::setState(State newState)
             }
         }
         DeviceManager::setState(Stopped);
+    }
+    else if (newState == Local) {
+        if (_state != Stopped) {
+            for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+                for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                    (*d)->stop();
+                }
+            }
+        }
+        DeviceManager::setState(Local);
+        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                (*d)->start();
+            }
+        }
     }
     Log::instance()->upnp().debug("device server state change finished");
 }

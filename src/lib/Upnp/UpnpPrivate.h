@@ -65,25 +65,26 @@ class SsdpSocket
     friend class Socket;
 
 public:
+    enum SocketMode {NotConfigured, Broadcast, Multicast};
+
     SsdpSocket();
     ~SsdpSocket();
 
-    void addInterface(const std::string& name);
-    void removeInterface(const std::string& name);
+//    void addInterface(const std::string& name);
+//    void removeInterface(const std::string& name);
     void addObserver(const Poco::AbstractObserver& observer);
     void startListen();
     void stopListen();
+    void setMode(SocketMode mode = NotConfigured);
 
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
 
 private:
-    enum SocketMode {NotConfigured, Broadcast, Multicast};
 
     void init();
-    void deinit();
+//    void deinit();
     void setupSockets();
 //    void resetSockets();
-    void setMode(SocketMode mode = NotConfigured);
 
     void onReadable(Poco::Net::ReadableNotification* pNotification);
 
@@ -122,23 +123,30 @@ private:
     Poco::Net::HTTPServer*                _pHttpServer;
     Poco::UInt16                          _httpServerPort;
     UpnpRequestHandlerFactory*            _pDeviceRequestHandlerFactory;
+    bool                                  _isRunning;
 };
 
 
 class Socket
 {
 public:
+    typedef std::string Mode;
+    static const std::string Null;
+    static const std::string Local;
+    static const std::string Public;
+
     Socket();
     virtual ~Socket();
 
     void initSockets();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     void registerSsdpMessageHandler(const Poco::AbstractObserver& observer);
+    void setMode(Mode mode);
 
     void startSsdp();
-    void startHttp();
-
     void stopSsdp();
+
+    void startHttp();
     void stopHttp();
 
     std::string getHttpServerUri();
@@ -148,8 +156,8 @@ public:
     void stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet);
 
 private:
-    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
+//    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
+//    void handleNetworkInterfaceChange(const std::string& interfaceName, bool added);
 
     SsdpSocket                      _ssdpSocket;
     HttpSocket                      _httpSocket;
