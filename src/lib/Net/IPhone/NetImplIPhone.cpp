@@ -24,6 +24,7 @@
 
 #include <SystemConfiguration.h>
 #include <CoreFoundation.h>
+#include <Poco/Thread.h>
 
 
 namespace Omm {
@@ -59,6 +60,7 @@ public:
     static void callback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void* info)
     {
         if ((flags & kSCNetworkReachabilityFlagsReachable) && (flags & kSCNetworkReachabilityFlagsIsDirect)) {
+            Poco::Thread::sleep(1000);
             NetworkInterfaceManager::instance()->addInterface("en0");
         }
         else {
@@ -66,7 +68,7 @@ public:
         }
     }
 
-    
+
     SCNetworkReachabilityRef _reachabilityRef;
 };
 
