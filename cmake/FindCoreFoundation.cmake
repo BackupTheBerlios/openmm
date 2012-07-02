@@ -1,15 +1,23 @@
+set(CMAKE_FIND_FRAMEWORK
+"FIRST"
+)
+
 find_path(CoreFoundation_INCLUDE_DIR
 CoreFoundation.h
-PATHS ${CMAKE_INCLUDE_PATH}
+PATHS ${SDKROOT}/System/Library/Frameworks/CoreFoundation.framework/Headers
+#PATHS ${CMAKE_INCLUDE_PATH}
 )
 
 find_library(CoreFoundation
 NAME CoreFoundation
-PATHS ${CMAKE_LIBRARY_PATH}
+#PATHS ${CMAKE_LIBRARY_PATH}
+PATHS ${SDKROOT}/System/Library ${SDKROOT}/System/Library/Frameworks/CoreFoundation.framework
+CMAKE_FRAMEWORK_PATH ${SDKROOT}/System/Library
+PATH_SUFFIXES Frameworks
 )
 
 set(CoreFoundation_LIBRARY
-${CoreFoundation}
+${CoreFoundation}/CoreFoundation
 )
 
 set(CoreFoundation_INCLUDE_DIRS
