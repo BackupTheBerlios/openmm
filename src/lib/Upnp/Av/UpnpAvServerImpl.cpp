@@ -311,9 +311,39 @@ DevContentDirectoryServerImpl::Search(const std::string& ContainerID, const std:
 void
 DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, const std::string& Elements, std::string& ObjectID, std::string& Result)
 {
-// begin of your own code
-
-// end of your own code
+    ServerContainer* pContainer;
+    if (ContainerID == "0") {
+        pContainer = _pRoot;
+    }
+    else {
+        ServerObject* pObject = _pRoot->getDescendant(ContainerID);
+        if (pObject->isContainer()) {
+            pContainer = static_cast<ServerContainer*>(pObject);
+        }
+        else {
+            Log::instance()->upnpav().error("parent object is not a container, cannot create child object");
+            return;
+        }
+    }
+//    if (pContainer->isRestricted()) {
+//        Log::instance()->upnpav().error("parent object restricted, cannot create child object");
+//        return;
+//    }
+    ServerObject* pChildObject = _pRoot->createChildObject();
+    MediaObjectReader reader;
+    try {
+        reader.read(pChildObject, Elements);
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().error("cannot read elements while creating child object: " + e.message());
+        delete pChildObject;
+        return;
+    }
+    pContainer->addUserObject(pChildObject);
+    
+    ObjectID = pChildObject->getId();
+    ServerObjectWriter writer;
+    writer.write(Result, pChildObject);
 }
 
 

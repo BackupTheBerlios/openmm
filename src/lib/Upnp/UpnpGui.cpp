@@ -1779,6 +1779,23 @@ MediaContainerWidget::selectedItem(int row)
 }
 
 
+void
+MediaContainerWidget::createPlaylist(const std::string& playlistName)
+{
+    if (!_pObjectModel) {
+        return;
+    }
+//    if (!_pObjectModel->isRestricted()) {
+        Gui::Log::instance()->gui().debug("media server group widget create playlist");
+        Av::CtlMediaObject2* pObject = new Av::CtlMediaObject2;
+        pObject->setTitle(playlistName);
+        pObject->setIsContainer(false);
+        pObject->setClass(Av::AvClass::className(Av::AvClass::ITEM, Av::AvClass::PLAYLIST_ITEM));
+        _pObjectModel->createChildObject(pObject);
+//    }
+}
+
+
 Gui::ImageModel*   MediaObjectModel::_pContainerImageModel = 0;
 Gui::ImageModel*   MediaObjectModel::_pItemImageModel = 0;
 Gui::ImageModel*   MediaObjectModel::_pItemAudioItemModel = 0;

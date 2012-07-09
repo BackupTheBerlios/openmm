@@ -154,6 +154,19 @@ CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
 
 
 void
+CtlMediaObject2::createChildObject(CtlMediaObject2* pObject)
+{
+    Log::instance()->upnpav().debug("add child media object: " + pObject->getTitle());
+    MediaObjectWriter2 writer;
+    std::string elements;
+    writer.write(elements, pObject);
+    std::string objectId;
+    std::string result;
+    _pServerCode->ContentDirectory()->CreateObject(getId(), elements, objectId, result);
+}
+
+
+void
 CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size)
 {
     std::string objectId = getId();

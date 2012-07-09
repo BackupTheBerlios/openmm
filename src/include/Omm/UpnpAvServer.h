@@ -254,6 +254,7 @@ public:
     virtual ServerItem* createMediaItem();
 
     void addPlaylistResource();
+    void addUserObject(ServerObject* pChildObject);
 
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);

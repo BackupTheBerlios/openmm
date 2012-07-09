@@ -60,6 +60,11 @@ public:
     static void callback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void* info)
     {
         if ((flags & kSCNetworkReachabilityFlagsReachable) && (flags & kSCNetworkReachabilityFlagsIsDirect)) {
+//          FIXME: MSearch packet is lost when iphone wifi is reachable but network not. As a workaround
+//          introduced a delay of 1000ms after iphone tells that wifi is reachable. Without that
+//          the msearch udp packet is lost. This should be replaced by a safer method, as it may
+//          take longer until the connection to the router is established. Reachability framework
+//          only tells availability of connection ... the Darwin backend uses another framework.
             Poco::Thread::sleep(1000);
             NetworkInterfaceManager::instance()->addInterface("en0");
         }

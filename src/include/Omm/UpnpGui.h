@@ -433,6 +433,8 @@ public:
     // ListController interface
     virtual void selectedItem(int row);
 
+    void createPlaylist(const std::string& playlistName);
+
 private:
     MediaObjectModel*           _pObjectModel;
     MediaServerGroupWidget*     _pServerGroup;

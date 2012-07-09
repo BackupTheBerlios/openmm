@@ -40,6 +40,7 @@
 #include <Poco/UTF8Encoding.h>
 #include <Poco/TextConverter.h>
 #include <Poco/URI.h>
+#include <Poco/UUIDGenerator.h>
 
 #include "UpnpAvServer.h"
 #include "UpnpInternal.h"
@@ -824,6 +825,7 @@ _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0)
 {
     setIsContainer(true);
+    this->setIsRestricted(false);
     _pServer->_pServerContainer = this;
 }
 
@@ -836,6 +838,34 @@ ServerContainer::addPlaylistResource()
     pResource->setUri(resourceUri + "$0");
     pResource->setProtInfo("http-get:*:audio/m3u:*");
     addResource(pResource);
+}
+
+
+void
+ServerContainer::addUserObject(ServerObject* pChildObject)
+{
+    std::vector<ui4> indices;
+    _pUserObjectCache->getIndices(indices);
+    // TODO: don't use max + 1 as new free index
+    ui4 maxIndex = 0;
+    for (std::vector<ui4>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+        maxIndex = std::max(maxIndex, *it);
+    }
+    pChildObject->setIndex(maxIndex + 1);
+    pChildObject->setParent(this);
+    pChildObject->setParentIndex(getIndex());
+    // set resource uri of user object
+    ServerObjectResource* pResource = new ServerObjectResource(pChildObject, getDataModel());
+    // touch a resource file with a unique random filename.
+    std::string resourceFileName = Poco::UUIDGenerator::defaultGenerator().createOne().toString();
+    std::string resourceFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath());
+    std::ofstream resourceFile((resourceFilePath + "/" + resourceFileName).c_str());
+    resourceFile.close();
+    pResource->setUri(resourceFileName);
+    // FIXME: only valid for playlists
+    pResource->setProtInfo("http-get:*:audio/m3u:*");
+    pChildObject->addResource(pResource);
+    _pUserObjectCache->insertMediaObject(pChildObject);
 }
 
 
