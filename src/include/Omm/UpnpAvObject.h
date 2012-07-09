@@ -436,6 +436,7 @@ public:
     // attributes
     virtual bool isRestricted();
     virtual bool isSearchable();
+    void setIsRestricted(bool restricted = true);
     void setIsSearchable(bool searchable = true);
 
     // properties

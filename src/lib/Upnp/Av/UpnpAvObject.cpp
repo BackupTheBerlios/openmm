@@ -1052,6 +1052,13 @@ MemoryMediaObject::isSearchable()
 
 
 void
+MemoryMediaObject::setIsRestricted(bool restricted)
+{
+    _restricted = restricted;
+}
+
+
+void
 MemoryMediaObject::setIsSearchable(bool searchable)
 {
     _searchable = searchable;

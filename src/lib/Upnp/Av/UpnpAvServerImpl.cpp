@@ -325,10 +325,10 @@ DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, cons
             return;
         }
     }
-//    if (pContainer->isRestricted()) {
-//        Log::instance()->upnpav().error("parent object restricted, cannot create child object");
-//        return;
-//    }
+    if (pContainer->isRestricted()) {
+        Log::instance()->upnpav().error("parent object restricted, cannot create child object");
+        return;
+    }
     ServerObject* pChildObject = _pRoot->createChildObject();
     MediaObjectReader reader;
     try {
@@ -340,7 +340,7 @@ DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, cons
         return;
     }
     pContainer->addUserObject(pChildObject);
-    
+
     ObjectID = pChildObject->getId();
     ServerObjectWriter writer;
     writer.write(Result, pChildObject);

@@ -825,7 +825,7 @@ _groupPropertyName(AvProperty::ARTIST),
 _childrenPlaylistSize(0)
 {
     setIsContainer(true);
-    this->setIsRestricted(false);
+    setIsRestricted(false);
     _pServer->_pServerContainer = this;
 }
 
