@@ -95,6 +95,10 @@ class Application : public Omm::Gui::Application
         ItemListModel* pListModel = new ItemListModel(10000);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setModel(pListModel);
+        Omm::Gui::Label* pHeaderView = new Omm::Gui::Label;
+        pHeaderView->setLabel("header view");
+        pHeaderView->setAlignment(Omm::Gui::View::AlignCenter);
+        pList->addHeaderView(pHeaderView);
         resizeMainView(800, 480);
         return pList;
     }

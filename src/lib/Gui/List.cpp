@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
+#include <vector>
 
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
@@ -117,7 +118,8 @@ _itemViewHeight(50),
 _rowOffset(0),
 _bottomRows(2),
 _pHighlightedView(0),
-_highlightedRow(-1)
+_highlightedRow(-1),
+_pHeaderView(0)
 {
     attachController(new ListScrollAreaController(this));
 }
@@ -157,6 +159,15 @@ ListView::resetListView()
 }
 
 
+void
+ListView::addHeaderView(View* pView)
+{
+    _pHeaderView = pView;
+    addItemView(pView);
+    _visibleViews.push_back(pView);
+}
+
+
 int
 ListView::viewPortHeightInRows()
 {
@@ -191,11 +202,7 @@ ListView::getOffset()
 void
 ListView::updateScrollWidgetSize()
 {
-    ListModel* pModel = static_cast<ListModel*>(_pModel);
-    if (!_pModel) {
-        return;
-    }
-    resizeScrollArea(getViewportWidth(), pModel->totalItemCount() * getItemViewHeight());
+    resizeScrollArea(getViewportWidth(), itemCount() * getItemViewHeight());
 }
 
 
@@ -205,22 +212,26 @@ ListView::scrollOneRow(int direction)
     Log::instance()->gui().debug("list view scroll direction: " + Poco::NumberFormatter::format(direction) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    Log::instance()->gui().debug("total item count: " + Poco::NumberFormatter::format(pModel->totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
+    Log::instance()->gui().debug("item count: " + Poco::NumberFormatter::format(itemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
     if (direction > 0) {
-        if (pModel->totalItemCount() <= lastVisibleRow()) {
+        if (itemCount() <= lastVisibleRow()) {
             return;
         }
         // detach model from first visible view
         View* pView = _visibleViews.front();
-        pView->hide(false);
-        pModel->getItemModel(_rowOffset)->detachView(pView);
+        if (pView == _pHeaderView) {
+            pView = getFreeView();
+        }
+        else {
+            pView->hide(false);
+            pModel->getItemModel(_rowOffset)->detachView(pView);
+        }
         // move first view to the end
         moveItemView(lastVisibleRow(), pView);
         // attach model
         pView->setModel(pModel->getItemModel(lastVisibleRow()));
         pView->show(false);
         _itemControllers[pView]->setRow(lastVisibleRow());
-        // move view to end of visible rows
         _visibleViews.erase(_visibleViews.begin());
         _visibleViews.push_back(pView);
         _rowOffset++;
@@ -230,12 +241,18 @@ ListView::scrollOneRow(int direction)
         View* pView = _visibleViews.back();
         pView->hide(false);
         pModel->getItemModel(lastVisibleRow() - 1)->detachView(pView);
-        // move last view to the beginning
-        moveItemView(_rowOffset - 1, pView);
-        // attach model
-        pView->setModel(pModel->getItemModel(_rowOffset - 1));
-        pView->show(false);
-        _itemControllers[pView]->setRow(_rowOffset - 1);
+        if (_pHeaderView && _rowOffset == 1) {
+            pView = _pHeaderView;
+            putFreeView(_visibleViews.back());
+        }
+        else {
+            // move last view to the beginning
+            moveItemView(_rowOffset - 1, pView);
+            // attach model
+            pView->setModel(pModel->getItemModel(_rowOffset - 1));
+            pView->show(false);
+            _itemControllers[pView]->setRow(_rowOffset - 1);
+        }
         // move view to beginning of visible rows
         _visibleViews.erase(_visibleViews.end() - 1);
         _visibleViews.insert(_visibleViews.begin(), pView);
@@ -253,7 +270,7 @@ ListView::scrollToRowOffset(int rowOffset)
         return;
     }
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    if (pModel->totalItemCount() < viewPortHeightInRows()) {
+    if (itemCount() < viewPortHeightInRows()) {
         return;
     }
     if (rowOffset > pModel->totalItemCount() - viewPortHeightInRows()) {
@@ -269,8 +286,10 @@ ListView::scrollToRowOffset(int rowOffset)
         // far jump
         _rowOffset = rowOffset;
         for (int i = 0; i < countVisibleViews(); i++) {
-            _visibleViews[i]->hide();
-            _visibleViews[i]->detachModel();
+            if (_visibleViews[i] != _pHeaderView) {
+                _visibleViews[i]->hide();
+                _visibleViews[i]->detachModel();
+            }
         }
         syncViewImpl();
     }
@@ -399,6 +418,17 @@ ListView::visibleIndex(int row)
 
 
 int
+ListView::itemCount()
+{
+    ListModel* pModel = static_cast<ListModel*>(_pModel);
+    if (!_pModel) {
+        return 0;
+    }
+    return (_pHeaderView ? 1 : 0) + pModel->totalItemCount();
+}
+
+
+int
 ListView::countVisibleViews()
 {
     return _visibleViews.size();
@@ -437,8 +467,10 @@ ListView::clearVisibleViews()
 {
     int visibleViewCount = _visibleViews.size();
     for (int i = 0; i < visibleViewCount; i++) {
-        _visibleViews.back()->hide();
-        putFreeView(_visibleViews.back());
+        if (_visibleViews.back() != _pHeaderView) {
+            _visibleViews.back()->hide();
+            putFreeView(_visibleViews.back());
+        }
         _visibleViews.pop_back();
     }
 }
@@ -537,8 +569,15 @@ ListView::syncViewImpl()
     ListModel* pModel = static_cast<ListModel*>(_pModel);
 
     clearVisibleViews();
-    int lastRow = std::min(pModel->totalItemCount(), _rowOffset + viewPortHeightInRows()) - 1;
+    int lastRow = std::min(itemCount(), _rowOffset + viewPortHeightInRows()) - 1;
     for (int row = _rowOffset; row <= lastRow; row++) {
+        if (row == 0 && _pHeaderView) {
+            _visibleViews.push_back(_pHeaderView);
+            moveItemView(row, _pHeaderView);
+            _pHeaderView->show();
+            continue;
+        }
+
         View* pView = getFreeView();
         if (!pView) {
             return;

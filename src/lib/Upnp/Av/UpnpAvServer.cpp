@@ -865,6 +865,8 @@ ServerContainer::addUserObject(ServerObject* pChildObject)
     // FIXME: only valid for playlists
     pResource->setProtInfo("http-get:*:audio/m3u:*");
     pChildObject->addResource(pResource);
+    // FIXME: insertMediaObject() gets update id from data model, but for user objects, update id
+    //        should be set to current timestamp or 0.
     _pUserObjectCache->insertMediaObject(pChildObject);
 }
 

@@ -63,6 +63,7 @@ public:
     void selectRow(int row);
 
     void resetListView();
+    void addHeaderView(View* pView);
 
 protected:
     virtual void syncViewImpl();
@@ -83,6 +84,7 @@ protected:
     void putFreeView(View* pView);
 
     int visibleIndex(int row);
+    int itemCount();
     int countVisibleViews();
     int viewPortHeightInRows();
     View* visibleView(int index);
@@ -99,6 +101,7 @@ protected:
     int                                 _itemViewHeight;
     View*                               _pHighlightedView;
     int                                 _highlightedRow;
+    View*                               _pHeaderView;
 
 private:
     void selectedItem(int row);

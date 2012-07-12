@@ -50,8 +50,8 @@ Log::Log()
 #ifdef NDEBUG
     _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, 0);
 #else
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_ERROR);
-//    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
