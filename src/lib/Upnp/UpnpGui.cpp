@@ -1592,6 +1592,14 @@ MediaServerGroupWidget::selectedItem(int row)
     if (pRootObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
+        pContainer->setName(pServer->getFriendlyName() + " root container");
+        if (!pRootObject->isRestricted()) {
+            Gui::Label* pTopView = new Gui::Label;
+            pTopView->setLabel("new playlist");
+            pTopView->setName("top view");
+            pTopView->setAlignment(Gui::View::AlignCenter);
+            pContainer->addTopView(pTopView);
+        }
         pContainer->_pObjectModel = pRootObject;
         pContainer->_pServerGroup = this;
         pContainer->attachController(pContainer);
@@ -1689,8 +1697,16 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 }
 
 
+MediaServerView::MediaServerView()
+{
+    setName("media server view");
+}
+
+
 MediaContainerWidget::MediaContainerWidget(View* pParent) :
-ListView(pParent)
+ListView(pParent),
+_pObjectModel(0),
+_pServerGroup(0)
 {
 //    setItemViewHeight(30);
 }
@@ -1770,6 +1786,13 @@ MediaContainerWidget::selectedItem(int row)
         pContainer->setModel(pContainer);
         // don't rely on childCount attribute being present and fetch first children to get total child count
         pChildObject->getChildForRow(0);
+        if (!pChildObject->isRestricted()) {
+            Gui::Label* pTopView = new Gui::Label;
+            pTopView->setLabel("new playlist");
+            pTopView->setName("top view");
+            pTopView->setAlignment(Gui::View::AlignCenter);
+            pContainer->addTopView(pTopView);
+        }
         _pServerGroup->push(pContainer, pChildObject->getTitle());
     }
     else {
@@ -1884,6 +1907,7 @@ MediaObjectViewPlaylistButtonController::pushed()
 
 MediaObjectView::MediaObjectView(View* pParent)
 {
+    setName("media object view");
     _pPlaylistButton = new Gui::Button(this);
     _pPlaylistButton->setLabel("P");
     _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));

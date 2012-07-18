@@ -413,6 +413,8 @@ private:
 
 class MediaServerView : public Gui::ListItemView
 {
+public:
+    MediaServerView();
 
 };
 

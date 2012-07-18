@@ -76,7 +76,7 @@ Omm::Gui::View*
 ItemListModel::createItemView()
 {
     Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
-    pView->setName("item list view item " + Poco::NumberFormatter::format(_viewCount++));
+    pView->setName("list view item " + Poco::NumberFormatter::format(_viewCount++));
     return pView;
 }
 
@@ -93,12 +93,15 @@ class Application : public Omm::Gui::Application
     virtual Omm::Gui::View* createMainView()
     {
         ItemListModel* pListModel = new ItemListModel(10000);
+//        ItemListModel* pListModel = new ItemListModel(20);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
-        pList->setModel(pListModel);
+        pList->setName("sample list view");
         Omm::Gui::Label* pHeaderView = new Omm::Gui::Label;
         pHeaderView->setLabel("header view");
+        pHeaderView->setName("header view");
         pHeaderView->setAlignment(Omm::Gui::View::AlignCenter);
-        pList->addHeaderView(pHeaderView);
+        pList->addTopView(pHeaderView);
+        pList->setModel(pListModel);
         resizeMainView(800, 480);
         return pList;
     }

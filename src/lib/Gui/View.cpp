@@ -129,7 +129,7 @@ View::addSubview(View* pView)
 void
 View::show(bool async)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view show ... " + getName());
+    Omm::Gui::Log::instance()->gui().debug("view show \"" + getName() + "\" ...");
     _pImpl->showView(async);
 //    Omm::Gui::Log::instance()->gui().debug("view show finished.");
 }

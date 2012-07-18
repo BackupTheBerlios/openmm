@@ -56,54 +56,56 @@ class ListView : public ScrollAreaView
 public:
     ListView(View* pParent = 0);
 
-//    virtual void setModel(ListModel* pModel);
     int getItemViewHeight();
     void setItemViewWidth(int width);
     void setItemViewHeight(int height);
     void selectRow(int row);
 
     void resetListView();
-    void addHeaderView(View* pView);
+    void addTopView(View* pView);
 
 protected:
+    // main operations
     virtual void syncViewImpl();
-
-    virtual void addItemView(View* pView);
-    void moveItemView(int row, View* pView);
-
-    int getOffset();
-    void updateScrollWidgetSize();
+    void showItemsAt(int rowOffset, int itemOffset, int countItems);
     void scrollOneRow(int direction);
     virtual void scrollToRowOffset(int rowOffset);
-
     virtual void resize(int width, int height);
     virtual void scale(float factor);
 
+    // item view management
     void extendViewPool();
     View* getFreeView();
     void putFreeView(View* pView);
+    void clearVisibleViews();
 
+    // helper methods
+    virtual void addItemView(View* pView);
+    void moveItemView(int row, View* pView);
+    int getOffset();
+    void updateScrollWidgetSize(int rows);
     int visibleIndex(int row);
-    int itemCount();
-    int countVisibleViews();
+    int modelItemCount();
+    int totalItemCount();
     int viewPortHeightInRows();
     View* visibleView(int index);
     bool itemIsVisible(int row);
     int lastVisibleRow();
-    void clearVisibleViews();
 
     std::vector<View*>                  _viewPool;
     /// The view has a view pool which is large enough to fill the area of the view port
     std::vector<View*>                  _visibleViews;
     std::stack<View*>                   _freeViews;
     int                                 _rowOffset;  // FIXME: int may be not enough for row offset on some platforms
+    /// _rowOffset is view port offset in rows
     int                                 _bottomRows;
     int                                 _itemViewHeight;
     View*                               _pHighlightedView;
     int                                 _highlightedRow;
-    View*                               _pHeaderView;
+    View*                               _pTopView;
 
 private:
+    // item selection
     void selectedItem(int row);
     void highlightItem(int row);
     void selectHighlightedItem();
