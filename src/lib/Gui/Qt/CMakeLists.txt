@@ -29,6 +29,7 @@ NavigatorImpl.cpp
 SliderImpl.cpp
 ImageImpl.cpp
 WebBrowserImpl.cpp
+TextLineImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
@@ -37,6 +38,7 @@ QtButtonImpl.h
 QtScrollAreaImpl.h
 QtNavigatorPanel.h
 QtSliderImpl.h
+QtTextLineImpl.h
 )
 
 QT4_ADD_RESOURCES(

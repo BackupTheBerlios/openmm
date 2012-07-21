@@ -28,6 +28,7 @@
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
 #include <Omm/Gui/ListItem.h>
+#include <Omm/Gui/TextLine.h>
 
 #include "ImageData.h"
 
@@ -96,8 +97,8 @@ class Application : public Omm::Gui::Application
 //        ItemListModel* pListModel = new ItemListModel(20);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setName("sample list view");
-        Omm::Gui::Label* pHeaderView = new Omm::Gui::Label;
-        pHeaderView->setLabel("header view");
+        Omm::Gui::TextLine* pHeaderView = new Omm::Gui::TextLine;
+        pHeaderView->setTextLine("header view");
         pHeaderView->setName("header view");
         pHeaderView->setAlignment(Omm::Gui::View::AlignCenter);
         pList->addTopView(pHeaderView);

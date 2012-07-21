@@ -1594,8 +1594,8 @@ MediaServerGroupWidget::selectedItem(int row)
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->setName(pServer->getFriendlyName() + " root container");
         if (!pRootObject->isRestricted()) {
-            Gui::Label* pTopView = new Gui::Label;
-            pTopView->setLabel("new playlist");
+            MediaContainerPlaylistCreator* pTopView = new MediaContainerPlaylistCreator(pContainer);
+            pTopView->setTextLine("new playlist");
             pTopView->setName("top view");
             pTopView->setAlignment(Gui::View::AlignCenter);
             pContainer->addTopView(pTopView);
@@ -1787,8 +1787,8 @@ MediaContainerWidget::selectedItem(int row)
         // don't rely on childCount attribute being present and fetch first children to get total child count
         pChildObject->getChildForRow(0);
         if (!pChildObject->isRestricted()) {
-            Gui::Label* pTopView = new Gui::Label;
-            pTopView->setLabel("new playlist");
+            MediaContainerPlaylistCreator* pTopView = new MediaContainerPlaylistCreator(pContainer);
+            pTopView->setTextLine("new playlist");
             pTopView->setName("top view");
             pTopView->setAlignment(Gui::View::AlignCenter);
             pContainer->addTopView(pTopView);
@@ -1816,6 +1816,19 @@ MediaContainerWidget::createPlaylist(const std::string& playlistName)
         pObject->setClass(Av::AvClass::className(Av::AvClass::ITEM, Av::AvClass::PLAYLIST_ITEM));
         _pObjectModel->createChildObject(pObject);
     }
+}
+
+
+MediaContainerPlaylistCreator::MediaContainerPlaylistCreator(MediaContainerWidget* pMediaContainer) :
+_pMediaContainer(pMediaContainer)
+{
+}
+
+
+void
+MediaContainerPlaylistCreator::editedText(const std::string& text)
+{
+    _pMediaContainer->createPlaylist(text);
 }
 
 

@@ -53,6 +53,7 @@
 #include "Gui/ListItem.h"
 #include "Gui/Button.h"
 #include "Gui/Label.h"
+#include "Gui/TextLine.h"
 #include "Gui/Slider.h"
 #include "Gui/HorizontalLayout.h"
 #include "Gui/Image.h"
@@ -440,6 +441,18 @@ public:
 private:
     MediaObjectModel*           _pObjectModel;
     MediaServerGroupWidget*     _pServerGroup;
+};
+
+
+class MediaContainerPlaylistCreator : public Gui::TextLine
+{
+public:
+    MediaContainerPlaylistCreator(MediaContainerWidget* pMediaContainer);
+
+private:
+    virtual void editedText(const std::string& text);
+
+    MediaContainerWidget*       _pMediaContainer;
 };
 
 
