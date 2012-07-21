@@ -1396,13 +1396,13 @@ ServerContainer::generateChildrenPlaylist()
 ServerObject*
 ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 {
-    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index));
+    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index) + ", namespace: " + Poco::NumberFormatter::format(pObject->_indexNamespace));
 
     // set index
     pObject->setIndex(index);
 
     // set parent index
-    if (_indexNamespace == Virtual || _indexNamespace == User) {
+    if (pObject->_indexNamespace == Virtual || pObject->_indexNamespace == User) {
         pObject->setParentIndex(_index);
     }
     else {
@@ -1650,7 +1650,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         parentIndexNamespace = pParentContainer->_indexNamespace;
     }
 
-    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
+    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex) + ", parent class: " + pParentContainer->getClass());
 
     Poco::Data::Statement select(*_pSession);
     std::string statement = "SELECT idx, class, xml FROM " + _cacheTableName;
@@ -1659,7 +1659,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     bool virtualChildObjects = false;
 
     // present playlist item as playlist container
-    if (pParentContainer->_childrenPlaylistIndices.size()) {
+    if (AvClass::matchClass(pParentContainer->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
         Log::instance()->upnpav().debug("database cache parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
         for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
             std::vector<std::string> xml;
