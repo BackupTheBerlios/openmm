@@ -72,6 +72,7 @@ public:
 
     void writeResource(const std::string& sourceUri, int index = 0);
     void createChildObject(CtlMediaObject2* pObject);
+    void destroyObject(const std::string& objectId);
 
 private:
     virtual void getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size);

@@ -785,6 +785,15 @@ ServerObject::getServer()
 }
 
 
+void
+ServerObject::destroy()
+{
+    if (_indexNamespace == User) {
+        _pServer->_pServerContainer->removeUserObject(this);
+    }
+}
+
+
 ServerItem::ServerItem(MediaServer* pServer) :
 ServerObject(pServer)
 {
@@ -868,6 +877,25 @@ ServerContainer::addUserObject(ServerObject* pChildObject)
     // FIXME: insertMediaObject() gets update id from data model, but for user objects, update id
     //        should be set to current timestamp or 0.
     _pUserObjectCache->insertMediaObject(pChildObject);
+}
+
+
+void
+ServerContainer::removeUserObject(ServerObject* pChildObject)
+{
+    Log::instance()->upnpav().debug("server container remove user object: " + pChildObject->getTitle());
+    _pUserObjectCache->removeMediaObjectForIndex(pChildObject->getIndex());
+    std::string metaDir = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath());
+    ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pChildObject->getResource());
+    std::string resourceFile = pResource->getPrivateResourceUri();
+    Log::instance()->upnpav().debug("server container remove resource: " + metaDir + "/" + resourceFile);
+    Poco::File resource(metaDir + "/" + resourceFile);
+    try {
+        resource.remove();
+    }
+    catch (Poco::Exception& e) {
+        Log::instance()->upnpav().debug("server container removing resource " + metaDir + "/" + resourceFile + ": " + e.displayText());
+    }
 }
 
 

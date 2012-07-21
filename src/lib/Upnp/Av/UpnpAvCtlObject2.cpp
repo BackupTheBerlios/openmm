@@ -156,13 +156,21 @@ CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
 void
 CtlMediaObject2::createChildObject(CtlMediaObject2* pObject)
 {
-    Log::instance()->upnpav().debug("add child media object: " + pObject->getTitle());
+    Log::instance()->upnpav().debug("create child media object: " + pObject->getTitle());
     MediaObjectWriter2 writer;
     std::string elements;
     writer.write(elements, pObject);
     std::string objectId;
     std::string result;
     _pServerCode->ContentDirectory()->CreateObject(getId(), elements, objectId, result);
+}
+
+
+void
+CtlMediaObject2::destroyObject(const std::string& objectId)
+{
+    Log::instance()->upnpav().debug("distroy child media object with object id: " + objectId);
+    _pServerCode->ContentDirectory()->DestroyObject(objectId);
 }
 
 

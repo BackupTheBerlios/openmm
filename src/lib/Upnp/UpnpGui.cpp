@@ -1918,6 +1918,21 @@ MediaObjectViewPlaylistButtonController::pushed()
 }
 
 
+MediaObjectViewDestroyButtonController::MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView) :
+_pMediaObjectView(pMediaObjectView)
+{
+}
+
+
+void
+MediaObjectViewDestroyButtonController::pushed()
+{
+    Gui::Log::instance()->gui().debug("media object destroy button pushed.");
+    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
+    pModel->destroyObject(pModel->getId());
+}
+
+
 MediaObjectView::MediaObjectView(View* pParent)
 {
     setName("media object view");
@@ -1927,6 +1942,13 @@ MediaObjectView::MediaObjectView(View* pParent)
     _pPlaylistButton->setStretchFactor(-1.0);
     _pPlaylistButton->resize(20, 15);
     _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
+
+    _pDestroyButton = new Gui::Button(this);
+    _pDestroyButton->setLabel("D");
+    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
+    _pDestroyButton->setStretchFactor(-1.0);
+    _pDestroyButton->resize(20, 15);
+    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
 }
 
 

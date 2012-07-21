@@ -206,6 +206,7 @@ public:
 //    virtual AbstractMediaObject* createChildObject();
 
     MediaServer* getServer();
+    void destroy();
 
 protected:
     virtual std::istream* getIconStream() {}
@@ -255,6 +256,7 @@ public:
 
     void addPlaylistResource();
     void addUserObject(ServerObject* pChildObject);
+    void removeUserObject(ServerObject* pChildObject);
 
     AbstractDataModel* getDataModel();
     void setDataModel(AbstractDataModel* pDataModel);

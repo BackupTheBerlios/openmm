@@ -36,6 +36,12 @@ Color::Color(const std::string& colorName)
     if (colorName == "white") {
         _pImpl = new ColorImpl(255, 255, 255, 255);
     }
+    else if (colorName == "red") {
+        _pImpl = new ColorImpl(255, 0, 0, 255);
+    }
+    else if (colorName == "green") {
+        _pImpl = new ColorImpl(0, 255, 0, 255);
+    }
     else if (colorName == "blue") {
         _pImpl = new ColorImpl(0, 0, 255, 255);
     }

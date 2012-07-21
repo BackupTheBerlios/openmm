@@ -499,6 +499,19 @@ private:
 };
 
 
+class MediaObjectViewDestroyButtonController : public Gui::ButtonController
+{
+public:
+    MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView);
+
+private:
+    // ButtonController interface
+    virtual void pushed();
+
+    MediaObjectView*    _pMediaObjectView;
+};
+
+
 class MediaObjectView : public Gui::ListItemView
 {
 public:
@@ -506,6 +519,7 @@ public:
 
 private:
     Gui::Button*         _pPlaylistButton;
+    Gui::Button*         _pDestroyButton;
 };
 
 

@@ -350,9 +350,18 @@ DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, cons
 void
 DevContentDirectoryServerImpl::DestroyObject(const std::string& ObjectID)
 {
-// begin of your own code
-
-// end of your own code
+    ServerObject* pObject;
+    if (ObjectID == "0") {
+        pObject = _pRoot;
+    }
+    else {
+        pObject = _pRoot->getDescendant(ObjectID);
+    }
+//    if (pObject->isRestricted()) {
+//        Log::instance()->upnpav().error("object restricted, cannot destroy");
+//        return;
+//    }
+    pObject->destroy();
 }
 
 
