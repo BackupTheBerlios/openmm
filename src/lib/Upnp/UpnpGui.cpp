@@ -1786,7 +1786,7 @@ MediaContainerWidget::selectedItem(int row)
         pContainer->setModel(pContainer);
         // don't rely on childCount attribute being present and fetch first children to get total child count
         pChildObject->getChildForRow(0);
-        if (!pChildObject->isRestricted()) {
+        if (!pChildObject->isRestricted() && !Av::AvClass::matchClass(pChildObject->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
             MediaContainerPlaylistCreator* pTopView = new MediaContainerPlaylistCreator(pContainer);
             pTopView->setTextLine("new playlist");
             pTopView->setName("top view");

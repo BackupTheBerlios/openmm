@@ -122,6 +122,7 @@ public:
     virtual void syncViewImpl() {}
 
     void triggerKeyEvent(Controller::KeyCode key);
+    void setAcceptDrops(bool accept = true);
 
 protected:
     View(View* pParent, bool createPlainView);

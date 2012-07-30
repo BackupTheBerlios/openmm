@@ -88,6 +88,24 @@ ${OMM_GUI}
 )
 
 
+add_executable(drag
+Drag.cpp
+)
+
+target_link_libraries(drag
+${OMM_GUI}
+)
+
+
+add_executable(draglist
+DragList.cpp
+)
+
+target_link_libraries(draglist
+${OMM_GUI}
+)
+
+
 add_executable(buttonlazylist
 ButtonLazyList.cpp
 )
@@ -158,3 +176,4 @@ Web.cpp
 target_link_libraries(web
 ${OMM_GUI}
 )
+

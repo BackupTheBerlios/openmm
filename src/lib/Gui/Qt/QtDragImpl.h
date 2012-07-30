@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2012                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,59 +19,28 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Controller_INCLUDED
-#define Controller_INCLUDED
+#ifndef QtDragImpl_INCLUDED
+#define QtDragImpl_INCLUDED
 
-#include <vector>
+#include <QtGui>
+
+#include "DragImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class Model;
-class Drag;
 
-#define UPDATE_MODEL(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
-{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
-
-
-class Controller
+class QtMimeData : public QMimeData
 {
-    friend class View;
-    friend class Model;
-    friend class ViewImpl;
-    friend class ButtonViewImpl;
-
 public:
-    typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
-            KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
-            KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
-            KeyPlayPause, KeyMute, KeyRecord,
-            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast,
-            KeyX
-    } KeyCode;
+    QtMimeData(DragImpl* pDragImpl) : _pDragImpl(pDragImpl) {}
 
-    void attachModel(Model* pModel);
-    void detachModel(Model* pModel);
+    const Drag* getDrag() const
+    {
+        return _pDragImpl->getDrag();
+    }
 
-    void syncModelViews();
-
-//protected:
-    virtual void presented() {}
-    virtual void resized(int width, int height) {}
-    virtual void selected() {}
-    virtual void keyPressed(KeyCode key) {}
-    virtual void dragStarted() {}
-    virtual void dragEntered(Drag* pDrag) {}
-    virtual void dragMoved(Drag* pDrag) {}
-    virtual void dragLeft() {}
-    virtual void dropped(Drag* pDrag) {}
-
-    typedef std::vector<Model*>::iterator ModelIterator;
-    ModelIterator beginModel();
-    ModelIterator endModel();
-
-    std::vector<Model*>     _models;
+    const DragImpl*   _pDragImpl;
 };
 
 

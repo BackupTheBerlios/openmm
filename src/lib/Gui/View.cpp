@@ -434,5 +434,12 @@ View::triggerKeyEvent(Controller::KeyCode key)
 }
 
 
+void
+View::setAcceptDrops(bool accept)
+{
+    _pImpl->setAcceptDrops(accept);
+}
+
+
 } // namespace Gui
 } // namespace Omm

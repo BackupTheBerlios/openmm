@@ -43,6 +43,8 @@ class ListController : public Controller
 
 protected:
     virtual void selectedItem(int row) {}
+    virtual void draggedItem(int row) {}
+    virtual void droppedItem(Model* pModel, int row) {}
 };
 
 
@@ -51,9 +53,12 @@ class ListView : public ScrollAreaView
     friend class ListViewImpl;
     friend class ListModel;
     friend class ListItemController;
+    friend class ListDragController;
     friend class ListScrollAreaController;
 
 public:
+    enum DragMode { DragNone = 1, DragSource = 2, DragTarget = 4 };
+
     ListView(View* pParent = 0);
 
     int getItemViewHeight();
@@ -63,6 +68,7 @@ public:
 
     void resetListView();
     void addTopView(View* pView);
+    void setDragMode(int dragMode);
 
 protected:
     // main operations
@@ -91,6 +97,7 @@ protected:
     View* visibleView(int index);
     bool itemIsVisible(int row);
     int lastVisibleRow();
+    int rowFromView(View* pView);
 
     std::vector<View*>                  _viewPool;
     /// The view has a view pool which is large enough to fill the area of the view port
@@ -100,15 +107,23 @@ protected:
     /// _rowOffset is view port offset in rows
     int                                 _bottomRows;
     int                                 _itemViewHeight;
+
     View*                               _pHighlightedView;
     int                                 _highlightedRow;
+
     View*                               _pTopView;
+    int                                 _dragMode;
 
 private:
     // item selection
     void selectedItem(int row);
     void highlightItem(int row);
     void selectHighlightedItem();
+
+    // drag'n drop support
+    void dragView(View* pView);
+    void shiftViews(View* pFirstView, int pixel = 10);
+    void dropView(Model* pSourceModel, View* pTarget);
 
     std::map<View*, ListItemController*>    _itemControllers;
 };

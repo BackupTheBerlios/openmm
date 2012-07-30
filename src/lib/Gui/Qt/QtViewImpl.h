@@ -24,7 +24,8 @@
 
 #include <QtGui>
 #include "ViewImpl.h"
-
+#include "QtDragImpl.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
@@ -78,8 +79,60 @@ public:
 
     void mousePressEvent(QMouseEvent* pMouseEvent)
     {
+        if (pMouseEvent->button() == Qt::LeftButton) {
+            _dragStartPosition = pMouseEvent->pos();
+        }
         _pViewImpl->selected();
 //        W::mousePressEvent(pMouseEvent);
+    }
+
+    void mouseMoveEvent(QMouseEvent* pMouseEvent)
+    {
+        if (!(pMouseEvent->buttons() & Qt::LeftButton)) {
+            return;
+        }
+        if ((pMouseEvent->pos() - _dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
+            return;
+        }
+        _pViewImpl->dragStarted();
+//        W::mouseMoveEvent(pMouseEvent);
+    }
+
+    void dragEnterEvent(QDragEnterEvent* pDragEvent)
+    {
+        Omm::Gui::Log::instance()->gui().debug("DRAG ENTER EVENT");
+        // if dragging started not in an omm application, mime data is not of type QtMimeData and pDrag is set to 0.
+        const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
+        if (pMime) {
+            _pViewImpl->dragEntered(pMime->_pDragImpl->getDrag());
+            pDragEvent->acceptProposedAction();
+        }
+    }
+
+    void dragMoveEvent(QDragMoveEvent* pDragEvent)
+    {
+        Omm::Gui::Log::instance()->gui().debug("DRAG MOVE EVENT");
+        const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
+        if (pMime) {
+            _pViewImpl->dragMoved(pMime->_pDragImpl->getDrag());
+            pDragEvent->acceptProposedAction();
+        }
+    }
+
+    void dragLeaveEvent(QDragLeaveEvent* pDragEvent)
+    {
+        Omm::Gui::Log::instance()->gui().debug("DRAG LEAVE EVENT");
+        _pViewImpl->dragLeft();
+    }
+
+    void dropEvent(QDropEvent* pDropEvent)
+    {
+        Omm::Gui::Log::instance()->gui().debug("DROP EVENT");
+        const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDropEvent->mimeData());
+        if (pMime) {
+            _pViewImpl->dropped(pMime->_pDragImpl->getDrag());
+            pDropEvent->acceptProposedAction();
+        }
     }
 
 //    void keyPressEvent(QKeyEvent* pKeyEvent)
@@ -95,6 +148,7 @@ public:
     }
 
     ViewImpl*   _pViewImpl;
+    QPoint      _dragStartPosition;
 };
 
 

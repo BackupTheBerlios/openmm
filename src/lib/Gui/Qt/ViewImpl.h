@@ -32,6 +32,7 @@ namespace Gui {
 
 class SignalProxy;
 class QtEventFilter;
+class Drag;
 
 class ViewImpl
 {
@@ -63,6 +64,7 @@ public:
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
+    void setAcceptDrops(bool accept);
 
 protected:
     void initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy = 0);
@@ -77,6 +79,11 @@ private:
     void resized(int width, int height);
     void selected();
     void keyPressed(int key);
+    void dragStarted();
+    void dragEntered(Drag* pDrag);
+    void dragMoved(Drag* pDrag);
+    void dragLeft();
+    void dropped(Drag* pDrag);
 
     QtEventFilter*              _pEventFilter;
 };

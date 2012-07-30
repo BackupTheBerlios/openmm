@@ -26,6 +26,7 @@
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
+#include "Gui/Drag.h"
 
 
 namespace Omm {
@@ -41,6 +42,7 @@ public:
 
 private:
     virtual void selected();
+//    virtual void dragStarted();
 
     ListView*     _pListView;
     int           _row;
@@ -53,6 +55,59 @@ ListItemController::selected()
     Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
     _pListView->selectedItem(_row);
 }
+
+
+//void
+//ListItemController::dragStarted()
+//{
+//    if (_pListView->_dragMode & ListView::DragNone) {
+//        return;
+//    }
+//    else {
+//        View* pSource = _pListView->visibleView(_pListView->visibleIndex(_row));
+//        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(pSource, pSource->getModel());
+//        pDrag->start();
+//    }
+//}
+
+
+class ListDragController : public Controller
+{
+public:
+    ListDragController(ListView* pList, View* pItemView) : _pListView(pList), _pItemView(pItemView) {}
+
+    virtual void dragStarted()
+    {
+        Log::instance()->gui().debug("list drag controller drag started");
+        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pItemView, _pItemView->getModel());
+        _pListView->dragView(_pItemView);
+        _pListView->syncViewImpl();
+        pDrag->start();
+    }
+
+    virtual void dragEntered(Drag* pDrag)
+    {
+        _pListView->shiftViews(_pItemView);
+    }
+
+    virtual void dragMoved(Drag* pDrag)
+    {
+    }
+
+    virtual void dragLeft()
+    {
+    }
+
+    virtual void dropped(Drag* pDrag)
+    {
+        _pListView->dropView(pDrag->getModel(), _pItemView);
+        _pListView->syncViewImpl();
+    }
+
+
+    ListView*   _pListView;
+    View*       _pItemView;
+};
 
 
 class ListScrollAreaController : public ScrollAreaController
@@ -120,7 +175,8 @@ _rowOffset(0),
 _bottomRows(2),
 _pHighlightedView(0),
 _highlightedRow(-1),
-_pTopView(0)
+_pTopView(0),
+_dragMode(DragNone)
 {
     attachController(new ListScrollAreaController(this));
 }
@@ -166,6 +222,13 @@ ListView::addTopView(View* pView)
     Log::instance()->gui().debug("list view add top view.");
     _pTopView = pView;
     addItemView(pView);
+}
+
+
+void
+ListView::setDragMode(int dragMode)
+{
+    _dragMode = dragMode;
 }
 
 
@@ -408,6 +471,12 @@ ListView::extendViewPool()
         pItemController->_pListView = this;
         _itemControllers[pView] = pItemController;
         pView->attachController(pItemController);
+        if (!(_dragMode & DragNone)) {
+            pView->attachController(new ListDragController(this, pView));
+        }
+        if (_dragMode & DragTarget) {
+            pView->setAcceptDrops(true);
+        }
 
 //        Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
@@ -540,6 +609,20 @@ ListView::lastVisibleRow()
 }
 
 
+int
+ListView::rowFromView(View* pView)
+{
+    std::vector<View*>::iterator pos = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (pos == _visibleViews.end()) {
+        return -1;
+    }
+    else {
+//        return pos - _visibleViews.begin() + _rowOffset - (_pTopView ? 1 : 0);
+        return pos - _visibleViews.begin() + _rowOffset;
+    }
+}
+
+
 void
 ListView::setItemViewWidth(int width)
 {
@@ -616,6 +699,48 @@ ListView::selectHighlightedItem()
 {
     if (_highlightedRow >= 0) {
         NOTIFY_CONTROLLER(ListController, selectedItem, _highlightedRow);
+    }
+}
+
+
+void
+ListView::dragView(View* pView)
+{
+    Log::instance()->gui().debug("list view drag view: " + pView->getName());
+    Log::instance()->gui().debug("list view drag view in row: " + Poco::NumberFormatter::format(rowFromView(pView)));
+    NOTIFY_CONTROLLER(ListController, draggedItem, rowFromView(pView) - (_pTopView ? 1 : 0));
+}
+
+
+void
+ListView::dropView(Model* pSourceModel, View* pTarget)
+{
+//    Log::instance()->gui().debug("list view drop view source model: " + pSourceModel->getName());
+    Log::instance()->gui().debug("list view drop view target: " + pTarget->getName());
+    int row = rowFromView(pTarget) - (_pTopView ? 1 : 0);
+    Log::instance()->gui().debug("list view drop view in row: " + Poco::NumberFormatter::format(row));
+    NOTIFY_CONTROLLER(ListController, droppedItem, pSourceModel, row);
+}
+
+
+void
+ListView::shiftViews(View* pFirstView, int pixel)
+{
+    // shift pFirstView and all visible views below number of pixel
+    int index = rowFromView(pFirstView) - _rowOffset;
+    for (int i = 0; i < index; i++) {
+        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight);
+    }
+    for (int i = index; i < _visibleViews.size(); i++) {
+        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight + pixel);
+    }
+    if (index == 0) {
+        scrollOneRow(-1);
+        scrollContentsTo(0, (_rowOffset - 1) * _itemViewHeight);
+    }
+    else if (index >= _visibleViews.size() - _bottomRows - 1) {
+        scrollOneRow(1);
+        scrollContentsTo(0, (_rowOffset + 1) * _itemViewHeight);
     }
 }
 

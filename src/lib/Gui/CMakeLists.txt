@@ -31,6 +31,7 @@ Slider.cpp
 Image.cpp
 WebBrowser.cpp
 TextLine.cpp
+Drag.cpp
 )
 
 target_link_libraries(ommgui

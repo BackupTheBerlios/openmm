@@ -219,6 +219,13 @@ ViewImpl::setBackgroundColor(const Color& color)
 
 
 void
+ViewImpl::setAcceptDrops(bool accept)
+{
+    _pNativeView->setAcceptDrops(accept);
+}
+
+
+void
 ViewImpl::presented()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
@@ -238,7 +245,7 @@ ViewImpl::resized(int width, int height)
 void
 ViewImpl::selected()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
+    Omm::Gui::Log::instance()->gui().debug("view impl selected view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
@@ -333,6 +340,46 @@ ViewImpl::keyPressed(int key)
             break;
 #endif
     }
+}
+
+
+void
+ViewImpl::dragStarted()
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag started in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragStarted);
+}
+
+
+void
+ViewImpl::dragEntered(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag entered in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pDrag);
+}
+
+
+void
+ViewImpl::dragMoved(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag moved in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pDrag);
+}
+
+
+void
+ViewImpl::dragLeft()
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag left view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragLeft);
+}
+
+
+void
+ViewImpl::dropped(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drop in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pDrag);
 }
 
 

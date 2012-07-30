@@ -30,6 +30,7 @@ SliderImpl.cpp
 ImageImpl.cpp
 WebBrowserImpl.cpp
 TextLineImpl.cpp
+DragImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

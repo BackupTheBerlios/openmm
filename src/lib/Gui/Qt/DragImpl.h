@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2012                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,59 +19,30 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Controller_INCLUDED
-#define Controller_INCLUDED
+#ifndef DragImpl_INCLUDED
+#define DragImpl_INCLUDED
 
-#include <vector>
+#include "ViewImpl.h"
+
+class QDrag;
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class Model;
 class Drag;
 
-#define UPDATE_MODEL(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
-{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
-
-
-class Controller
+class DragImpl
 {
-    friend class View;
-    friend class Model;
-    friend class ViewImpl;
-    friend class ButtonViewImpl;
-
 public:
-    typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
-            KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
-            KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
-            KeyPlayPause, KeyMute, KeyRecord,
-            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast,
-            KeyX
-    } KeyCode;
+    DragImpl(View* pSource, Drag* pDrag);
 
-    void attachModel(Model* pModel);
-    void detachModel(Model* pModel);
+    void start();
+    Drag* getDrag() const;
+    QDrag* getNativeDrag() const;
 
-    void syncModelViews();
-
-//protected:
-    virtual void presented() {}
-    virtual void resized(int width, int height) {}
-    virtual void selected() {}
-    virtual void keyPressed(KeyCode key) {}
-    virtual void dragStarted() {}
-    virtual void dragEntered(Drag* pDrag) {}
-    virtual void dragMoved(Drag* pDrag) {}
-    virtual void dragLeft() {}
-    virtual void dropped(Drag* pDrag) {}
-
-    typedef std::vector<Model*>::iterator ModelIterator;
-    ModelIterator beginModel();
-    ModelIterator endModel();
-
-    std::vector<Model*>     _models;
+private:
+    Drag*    _pDrag;
+    QDrag*   _pQtDrag;
 };
 
 
@@ -79,3 +50,4 @@ public:
 }  // namespace Gui
 
 #endif
+
