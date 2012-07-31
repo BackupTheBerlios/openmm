@@ -535,11 +535,16 @@ public:
     virtual Gui::View* createItemView();
     virtual Gui::Model* getItemModel(int row);
 
+    // ListController interface
+    virtual void draggedItem(int row);
+    virtual void droppedItem(Gui::Model* pModel, int row);
+
     void playlistNotification(PlaylistNotification* pNotification);
 
     void setPlaylistContainer(MediaObjectModel* pPlaylistContainer);
     std::stringstream* getPlaylistResource();
     std::string getPlaylistResourceUri();
+    void writePlaylistResource();
 
     void deleteItem(MediaObjectModel* pModel);
 

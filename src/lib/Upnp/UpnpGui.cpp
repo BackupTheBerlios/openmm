@@ -1964,6 +1964,7 @@ _pPlaylistContainer(0)
 {
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
             PlaylistNotification>(*this, &PlaylistEditor::playlistNotification));
+    setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
     setModel(this);
     attachController(this);
 }
@@ -1995,6 +1996,22 @@ PlaylistEditor::getItemModel(int row)
 
 
 void
+PlaylistEditor::draggedItem(int row)
+{
+    _playlistItems.erase(_playlistItems.begin() + row);
+    writePlaylistResource();
+}
+
+
+void
+PlaylistEditor::droppedItem(Gui::Model* pModel, int row)
+{
+    _playlistItems.insert(_playlistItems.begin() + row, static_cast<MediaObjectModel*>(pModel));
+    writePlaylistResource();
+}
+
+
+void
 PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
 {
     MediaObjectModel* pModel = pNotification->_pMediaObject;
@@ -2015,7 +2032,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     else if (_pPlaylistContainer) {
         Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
-        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI);
+        writePlaylistResource();
 
         // FIXME: why does this crash?
 //        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
@@ -2051,13 +2068,20 @@ PlaylistEditor::getPlaylistResourceUri()
 
 
 void
+PlaylistEditor::writePlaylistResource()
+{
+    _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI);
+}
+
+
+void
 PlaylistEditor::deleteItem(MediaObjectModel* pModel)
 {
     Gui::Log::instance()->gui().debug("delete media object from playlist with title: " + pModel->getTitle());
     std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
     if (pos != _playlistItems.end()) {
         _playlistItems.erase(pos);
-        _pPlaylistContainer->writeResource(_pControllerWidget->_pApplication->getAppHttpUri() + UpnpApplication::PLAYLIST_URI);
+        writePlaylistResource();
         delete pModel;
         syncViewImpl();
     }
