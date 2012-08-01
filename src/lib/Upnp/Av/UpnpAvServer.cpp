@@ -1276,11 +1276,17 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
     }
 
     ui4 childCount = 0;
-    // TODO: better criteria for blending in user objects at beginning of list (depending on number of user objects)
-    if (getId() == "0" && offset == 0 && _pUserObjectCache && (search == "" || search == "*")) {
-        // TODO: get max count user objects
-        childCount += _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
-        count -= childCount;
+    if (_pUserObjectCache && getId() == "0" && (search == "" || search == "*")) {
+        childCount += _pUserObjectCache->rowCount();
+        // TODO: better criteria for blending in user objects at beginning of list (depending on number of user objects)
+        if (offset == 0) {
+            // FIXME: don't get all user objects but count user objects at maximum
+            _pUserObjectCache->getBlockAtRow(children, this, 0, 0);
+            count -= childCount;
+        }
+        else {
+            offset -= childCount;
+        }
     }
 
 //    bool updateCache = cacheNeedsUpdate();
