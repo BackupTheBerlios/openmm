@@ -853,6 +853,7 @@ ServerContainer::addPlaylistResource()
 void
 ServerContainer::addUserObject(ServerObject* pChildObject)
 {
+    Log::instance()->upnpav().debug("server container add user object: " + pChildObject->getTitle());
     std::vector<ui4> indices;
     _pUserObjectCache->getIndices(indices);
     // TODO: don't use max + 1 as new free index
@@ -923,10 +924,9 @@ ServerContainer::setDataModel(AbstractDataModel* pDataModel)
         _pVirtualContainerCache = new DatabaseCache("vconcache", Virtual);
         _pVirtualContainerCache->_pServerContainer = this;
         _pVirtualContainerCache->addPropertiesForQuery(CsvList(PROPERTY_GROUP_PROPERTY_NAME, PROPERTY_GROUP_PROPERTY_VALUE));
-
-        _pUserObjectCache = new DatabaseCache("usrobj", User);
-        _pUserObjectCache->_pServerContainer = this;
     }
+    _pUserObjectCache = new DatabaseCache("usrobj", User);
+    _pUserObjectCache->_pServerContainer = this;
 }
 
 
@@ -1041,10 +1041,11 @@ ServerContainer::setBasePath(const std::string& basePath)
         std::string cacheFilePath = Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
         _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
-        std::string metaFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
-        _pUserObjectCache->setCacheFilePath(metaFilePath);
 //        updateCache();
     }
+    std::string metaFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
+    _pUserObjectCache->setCacheFilePath(metaFilePath);
+
     _pDataModel->setBasePath(basePath);
 }
 
@@ -1292,7 +1293,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
         childCount += _pObjectCache->getBlockAtRow(children, this, offset, count, sort, search);
     }
     else {
-        childCount += _pDataModel->getBlockAtRow(children, offset, count, sort, search);
+        childCount += _pDataModel->getBlockAtRow(children, this, offset, count, sort, search);
     }
     for (std::vector<ServerObject*>::iterator it = children.begin(); it != children.end(); ++it) {
         *it = initChild(*it, (*it)->getIndex());
@@ -2261,18 +2262,31 @@ AbstractDataModel::removeIndex(ui4 index)
 
 
 ui4
-AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
+AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
     // TODO: should be faster with a method getIndexBlock(), implemented with an additional std::vector<ui4> as a sorted index list
     // TODO: implement building sort indices and row filtering in memory without data base, currently sort and search are ignored
     if (sort != "" || search != "*") {
         return 0;
     }
-    ui4 r = 0;
     if (count == 0) {
         // UPnP AV CDS specs, count == 0 then request all children
         count = getIndexCount();
     }
+
+    // present playlist item as playlist container
+    if (AvClass::matchClass(pParentContainer->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
+        Log::instance()->upnpav().debug("abstract data model parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
+        for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
+            ui4 index = pParentContainer->_childrenPlaylistIndices[r];
+            ServerObject* pObject = getMediaObject(getPath(index));
+            pObject->setIndex(index);
+            block.push_back(pObject);
+        }
+        return pParentContainer->_childrenPlaylistIndices.size();
+    }
+
+    ui4 r = 0;
     for (IndexMapIterator it = beginIndex(); (it != endIndex()) && (r < offset + count); ++it) {
         if (r >= offset) {
             ServerObject* pObject = getMediaObject((*it).second);

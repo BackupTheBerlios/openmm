@@ -129,7 +129,7 @@ WebradioModel::getStream(const std::string& path, const std::string& resourcePat
     Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
 
     std::streamsize bytes;
-    if (proxyResponse.getContentType() == "audio/mpeg" || proxyResponse.getContentType() == "application/ogg") {
+    if (proxyResponse.getContentType() == "audio/mpeg" || proxyResponse.getContentType() == "application/ogg" || proxyResponse.getContentType() == "audio/aac") {
         Omm::Av::Log::instance()->upnpav().debug("web radio detected audio content, streaming directly ...");
         return new Poco::Net::HTTPResponseStream(istr, pSession);
     }

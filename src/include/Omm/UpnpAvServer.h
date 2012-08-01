@@ -237,6 +237,7 @@ public:
 class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
 {
     friend class DatabaseCache;
+    friend class AbstractDataModel;
     friend class ServerObjectResource;
 
 public:
@@ -461,7 +462,7 @@ public:
 
     // meta data of objects
     virtual ServerObject* getMediaObject(const std::string& path) { return 0; }
-    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
+    virtual ui4 getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort = "", const std::string& search = "*");
 
     // stream data of object
     virtual std::streamsize getSize(const std::string& path) { return -1; }
