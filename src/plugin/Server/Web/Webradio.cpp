@@ -97,43 +97,51 @@ WebradioModel::isSeekable(const std::string& path, const std::string& resourcePa
 
 
 std::istream*
-WebradioModel::getStream(const std::string& path, const std::string& resourcePath)
+WebradioModel::getStream(const std::string& uri, const std::string& resourcePath)
 {
-    Poco::URI uri(path);
+    Poco::URI streamUri(uri);
 
-    Poco::Net::HTTPClientSession* pSession = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-    Poco::Net::HTTPRequest proxyRequest("GET", uri.getPath());
-    pSession->sendRequest(proxyRequest);
+    Poco::Net::HTTPClientSession* pSession = new Poco::Net::HTTPClientSession(streamUri.getHost(), streamUri.getPort());
+    std::string path = streamUri.getPath();
+    if (path == "") {
+        path = "/";
+    }
+    Poco::Net::HTTPRequest request("GET", path);
+    pSession->sendRequest(request);
     std::stringstream requestHeader;
-    proxyRequest.write(requestHeader);
+    request.write(requestHeader);
     Omm::Av::Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
 
-    Poco::Net::HTTPResponse proxyResponse;
-    std::istream& istr = pSession->receiveResponse(proxyResponse);
-    if (proxyResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-        Omm::Av::Log::instance()->upnpav().error("error web radio resource not available");
+    Poco::Net::HTTPResponse response;
+    std::istream& istr = pSession->receiveResponse(response);
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
+        Omm::Av::Log::instance()->upnpav().error("web radio resource not available");
         return 0;
+    }
+    else if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_SEE_OTHER) {
+        Omm::Av::Log::instance()->upnpav().information("web radio uri redirected to: " + response.get("Location"));
+        delete pSession;
+        return getStream(response.get("Location"));
     }
 
     if (istr.peek() == EOF) {
-        Omm::Av::Log::instance()->upnpav().error("error web radio reading data from web resource");
+        Omm::Av::Log::instance()->upnpav().error("web radio failed reading data from stream uri: " + uri);
         return 0;
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from web resource");
+        Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from stream uri: " + uri);
     }
 
-    Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(proxyResponse.getStatus()) + " " + proxyResponse.getReason());
+    Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
     std::stringstream responseHeader;
-    proxyResponse.write(responseHeader);
+    response.write(responseHeader);
     Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
 
-    std::streamsize bytes;
-    if (proxyResponse.getContentType() == "audio/mpeg" || proxyResponse.getContentType() == "application/ogg" || proxyResponse.getContentType() == "audio/aac") {
+    if (response.getContentType() == "audio/mpeg" || response.getContentType() == "application/ogg" || response.getContentType() == "audio/aac") {
         Omm::Av::Log::instance()->upnpav().debug("web radio detected audio content, streaming directly ...");
         return new Poco::Net::HTTPResponseStream(istr, pSession);
     }
-    else {
+    else if (response.getContentType() == "audio/x-scpls" || response.getContentType() == "audio/x-mpegurl") {
         std::vector<std::string> uris;
 
         // look for streamable URIs in the downloaded playlist
@@ -150,37 +158,17 @@ WebradioModel::getStream(const std::string& path, const std::string& resourcePat
         }
         // try to stream one of the URIs in the downloaded playlist
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it) {
-            Poco::URI streamUri(*it);
-
-            Poco::Net::HTTPClientSession session(streamUri.getHost(), streamUri.getPort());
-            std::string path = streamUri.getPath();
-            if (path == "") {
-                path = "/";
-            }
-            Poco::Net::HTTPRequest request("GET", path);
-            pSession->sendRequest(request);
-            std::stringstream requestHeader;
-            request.write(requestHeader);
-            Omm::Av::Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
-
-            Poco::Net::HTTPResponse response;
-            std::istream& istr = pSession->receiveResponse(response);
-
-            if (istr.peek() == EOF) {
-                Omm::Av::Log::instance()->upnpav().error("web radio failed reading data from stream uri: " + *it);
-                continue;
+            delete pSession;
+            std::istream* pStream = getStream(*it);
+            if (pStream) {
+                return pStream;
             }
             else {
-                Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from stream uri: " + *it);
+                continue;
             }
-
-            Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
-            std::stringstream responseHeader;
-            response.write(responseHeader);
-            Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
-            return new Poco::Net::HTTPResponseStream(istr, pSession);
         }
     }
+    return 0;
 }
 
 
