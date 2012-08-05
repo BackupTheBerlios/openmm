@@ -273,7 +273,7 @@ ListView::showItemsAt(int rowOffset, int itemOffset, int countItems)
         }
         Model* pItemModel = pModel->getItemModel(itemOffset + index);
         if (!pItemModel) {
-            Log::instance()->gui().warning("list view sync view impl could not get itemm model at index: " + Poco::NumberFormatter::format(itemOffset + index));
+            Log::instance()->gui().warning("list view sync view impl could not get item model at index: " + Poco::NumberFormatter::format(itemOffset + index));
             putFreeView(pView);
             continue;
         }
@@ -317,6 +317,9 @@ ListView::scrollOneRow(int direction)
         _rowOffset++;
     }
     else if (direction < 0) {
+        if (_rowOffset <= 0) {
+            return;
+        }
         // detach model from last visible view
         View* pView = _visibleViews.back();
         pView->hide(false);

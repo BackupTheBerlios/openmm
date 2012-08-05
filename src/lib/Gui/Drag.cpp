@@ -47,11 +47,11 @@ Drag::start()
 }
 
 
-void*
-Drag::getNativeDrag() const
-{
-    return _pImpl->getNativeDrag();
-}
+//void*
+//Drag::getNativeDrag() const
+//{
+//    return _pImpl->getNativeDrag();
+//}
 
 
 View*

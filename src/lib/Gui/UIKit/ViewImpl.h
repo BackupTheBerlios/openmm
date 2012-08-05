@@ -52,10 +52,17 @@ public:
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
     void setBackgroundColor(const Color& color);
+    void setAcceptDrops(bool accept);
 
     void presented();
     void resized(int width, int height);
     void selected();
+    void dragStarted();
+    void dragEntered(Drag* pDrag);
+    void dragMoved(Drag* pDrag);
+    void dragLeft();
+    void dropped(Drag* pDrag);
+
     View*                       _pView;
 protected:
     void initViewImpl(View* pView, void* pNative);
@@ -64,6 +71,7 @@ protected:
     void*                       _pNativeView;
     void*                       _pNativeViewController;
     void*                       _pNativeViewSelectorDispatcher;
+    void*                       _pNativeViewActionTarget;
 };
 
 

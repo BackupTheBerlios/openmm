@@ -19,38 +19,80 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Drag_INCLUDED
-#define Drag_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include "View.h"
-#include "Model.h"
+#include "DragImpl.h"
+#include "Gui/Drag.h"
+#include "Gui/GuiLogger.h"
+#include "Gui/View.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class DragImpl;
 
+UIDrag* UIDrag::_pInstance = 0;
 
-class Drag
+UIDrag*
+UIDrag::instance()
 {
-    friend class ViewImpl;
+    if (!_pInstance) {
+        _pInstance = new UIDrag;
+    }
+    return _pInstance;
+}
 
-public:
-    Drag(View* pSource, Model* pModel);
 
-    void start();
-//    void* getNativeDrag() const;
-    View* getSource();
-    Model* getModel();
+void
+UIDrag::setDrag(Drag* pDrag)
+{
+    _pDrag = pDrag;
+}
 
-private:
-    DragImpl*  _pImpl;
-    View*      _pSource;
-    Model*     _pModel;
-};
+
+Drag*
+UIDrag::getDrag()
+{
+    return _pDrag;
+}
+
+
+UIDrag::UIDrag() :
+_pDrag(0)
+{
+}
+
+
+DragImpl::DragImpl(View* pSource, Drag* pDrag) :
+_pDrag(pDrag)
+{
+//    Omm::Gui::Log::instance()->gui().debug("Drag impl ctor");
+//    _pQtDrag = new QDrag(static_cast<QWidget*>(pSource->getNativeView()));
+//    _pQtDrag->setMimeData(new QtMimeData(this));
+}
+
+
+void
+DragImpl::start()
+{
+    UIDrag::instance()->setDrag(_pDrag);
+//    _pQtDrag->exec();
+}
+
+
+Drag*
+DragImpl::getDrag() const
+{
+    return _pDrag;
+}
+
+
+//QDrag*
+//DragImpl::getNativeDrag() const
+//{
+//    return _pQtDrag;
+//}
 
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif

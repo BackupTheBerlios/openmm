@@ -1777,7 +1777,7 @@ MediaContainerWidget::selectedItem(int row)
 {
     Gui::Log::instance()->gui().debug("media container widget selected media object");
     MediaObjectModel* pChildObject = static_cast<MediaObjectModel*>(getItemModel(row));
-    if (pChildObject->isContainer()) {
+    if (pChildObject && pChildObject->isContainer()) {
         Gui::Log::instance()->gui().debug("media container widget selected media container");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pChildObject;
@@ -1943,12 +1943,12 @@ MediaObjectView::MediaObjectView(View* pParent)
     _pPlaylistButton->resize(20, 15);
     _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
 
-    _pDestroyButton = new Gui::Button(this);
-    _pDestroyButton->setLabel("D");
-    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
-    _pDestroyButton->setStretchFactor(-1.0);
-    _pDestroyButton->resize(20, 15);
-    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
+//    _pDestroyButton = new Gui::Button(this);
+//    _pDestroyButton->setLabel("D");
+//    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
+//    _pDestroyButton->setStretchFactor(-1.0);
+//    _pDestroyButton->resize(20, 15);
+//    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
 }
 
 
@@ -1990,8 +1990,13 @@ Gui::Model*
 PlaylistEditor::getItemModel(int row)
 {
     Gui::Log::instance()->gui().debug("playlist editor get item model in row: " + Poco::NumberFormatter::format(row));
-    Gui::Log::instance()->gui().debug("playlist editor get item with title: " + _playlistItems[row]->getTitle());
-    return _playlistItems[row];
+    if (row >= 0 && row < _playlistItems.size()) {
+        Gui::Log::instance()->gui().debug("playlist editor get item with title: " + _playlistItems[row]->getTitle());
+        return _playlistItems[row];
+    }
+    else {
+        return 0;
+    }
 }
 
 

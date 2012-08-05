@@ -19,34 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Drag_INCLUDED
-#define Drag_INCLUDED
+#ifndef DragImpl_INCLUDED
+#define DragImpl_INCLUDED
 
-#include "View.h"
-#include "Model.h"
+#include "ViewImpl.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class DragImpl;
+class Drag;
 
 
-class Drag
+class UIDrag
 {
-    friend class ViewImpl;
-
 public:
-    Drag(View* pSource, Model* pModel);
+    static UIDrag* instance();
 
-    void start();
-//    void* getNativeDrag() const;
-    View* getSource();
-    Model* getModel();
+    void setDrag(Drag* pDrag);
+    Drag* getDrag();
 
 private:
-    DragImpl*  _pImpl;
-    View*      _pSource;
-    Model*     _pModel;
+    UIDrag();
+
+    static UIDrag*      _pInstance;
+    Drag*               _pDrag;
+};
+
+
+class DragImpl
+{
+public:
+    DragImpl(View* pSource, Drag* pDrag);
+
+    void start();
+    Drag* getDrag() const;
+//    QDrag* getNativeDrag() const;
+
+private:
+    Drag*    _pDrag;
 };
 
 
@@ -54,3 +65,4 @@ private:
 }  // namespace Gui
 
 #endif
+

@@ -114,18 +114,22 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
 
     Poco::Net::HTTPResponse response;
     std::istream& istr = pSession->receiveResponse(response);
-    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND) {
-        Omm::Av::Log::instance()->upnpav().error("web radio resource not available");
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND ||
+        response.getStatus() == Poco::Net::HTTPResponse::HTTP_NO_CONTENT) {
+        Omm::Av::Log::instance()->upnpav().error("web radio stream not available");
         return 0;
     }
-    else if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_SEE_OTHER) {
+    else if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_SEE_OTHER ||
+             response.getStatus() == Poco::Net::HTTPResponse::HTTP_FOUND ||
+             response.getStatus() == Poco::Net::HTTPResponse::HTTP_MOVED_PERMANENTLY ||
+             response.getStatus() == Poco::Net::HTTPResponse::HTTP_TEMPORARY_REDIRECT) {
         Omm::Av::Log::instance()->upnpav().information("web radio uri redirected to: " + response.get("Location"));
         delete pSession;
         return getStream(response.get("Location"));
     }
 
     if (istr.peek() == EOF) {
-        Omm::Av::Log::instance()->upnpav().error("web radio failed reading data from stream uri: " + uri);
+        Omm::Av::Log::instance()->upnpav().error("web radio failed to read data from stream uri: " + uri);
         return 0;
     }
     else {
@@ -143,7 +147,6 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
     }
     else if (response.getContentType() == "audio/x-scpls" || response.getContentType() == "audio/x-mpegurl") {
         std::vector<std::string> uris;
-
         // look for streamable URIs in the downloaded playlist
         Omm::Av::Log::instance()->upnpav().debug("web radio detected playlist, analyzing ...");
         std::string line;
@@ -163,10 +166,10 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
             if (pStream) {
                 return pStream;
             }
-            else {
-                continue;
-            }
         }
+    }
+    else {
+        Omm::Av::Log::instance()->upnpav().error("web radio unknown stream type (no audio or playlist)");
     }
     return 0;
 }

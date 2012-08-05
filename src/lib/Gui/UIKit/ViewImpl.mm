@@ -24,36 +24,80 @@
 #include <Poco/NumberFormatter.h>
 
 #include "ViewImpl.h"
+#include "DragImpl.h"
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 
+// There are three options to intercept user events in UIKit:
+// UIResponder: touchesBegan() ...
+// UIControl: via action -> target
+// UIGestureRecognizer: via action -> target
+//
+// inheritance: UIControl -> UIView -> UIResponder
+// only UIKit widgets with user input are UIControls, e.g. UIButton, UISlider
+// UIGestureRecognizers must be attached to a view (addGestureRecognizer) and does not participate in the responder chain
 
-//@interface OmmGuiViewActionTarget : NSObject
-//{
-//    Omm::Gui::ViewImpl* _pViewImpl;
-//}
-//
-//@end
-//
-//
-//@implementation OmmGuiViewActionTarget
-//
-//- (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
-//{
-//    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget initWithImpl ...");
-//    if (self = [super init]) {
-//        _pViewImpl = pImpl;
-//    }
-//    return self;
-//}
-//
-//
-//-(id)selectedAction
-//{
-//    _pViewImpl->selected();
-//}
-//
-//@end
+@interface OmmGuiViewActionTarget : NSObject
+{
+    Omm::Gui::ViewImpl* _pViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiViewActionTarget
+
+- (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget initWithImpl ...");
+//    if (self = [super initWithTarget:self action:@selector(handleGesture)]) {
+    if (self = [super init]) {
+        _pViewImpl = pImpl;
+
+//        UITapGestureRecognizer* pSingleFingerDTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+//        pSingleFingerDTap.numberOfTapsRequired = 2;
+//        pSingleFingerDTap.cancelsTouchesInView = NO;
+//        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDTap];
+//        [pSingleFingerDTap release];
+
+        UIPanGestureRecognizer* pPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
+        pPanGesture.minimumNumberOfTouches = 2;
+//        pPanGesture.cancelsTouchesInView = NO;
+        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pPanGesture];
+        [pPanGesture release];
+    }
+    return self;
+}
+
+
+- (void)handleDragGesture:(UIGestureRecognizer*) pGestureRecognizer
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget drag gesture");
+    if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        _pViewImpl->dragStarted();
+    }
+    else if (pGestureRecognizer.state == UIGestureRecognizerStateChanged) {
+        _pViewImpl->dragMoved(Omm::Gui::UIDrag::instance()->getDrag());
+    }
+    else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
+        _pViewImpl->dropped(Omm::Gui::UIDrag::instance()->getDrag());
+        Omm::Gui::UIDrag::instance()->setDrag(0);
+    }
+}
+
+
+- (void)handleTapGesture:(UIGestureRecognizer*) pGestureRecognizer
+{
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget single tap gesture");
+}
+
+
+- (id)selectedAction
+{
+    _pViewImpl->selected();
+}
+
+@end
 
 
 @interface OmmGuiPlainView : UIView
@@ -71,6 +115,7 @@
 //    Omm::Gui::Log::instance()->gui().debug("OmmGuiPlainView initWithImpl ...");
     if (self = [super init]) {
         _pViewImpl = pImpl;
+
     }
     return self;
 }
@@ -85,6 +130,8 @@
 @end
 
 
+/// OmmGuiViewSelectorDispatcher is needed to enable asynchronous implementation
+/// of some methods: showView(), hideView(), syncView()
 @interface OmmGuiViewSelectorDispatcher : NSObject
 {
     Omm::Gui::ViewImpl* _pViewImpl;
@@ -163,14 +210,14 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
 //        pNativeView.frame = CGRectMake(0.0, 0.0, 250.0, 400.0);
         pNativeView.frame = CGRectMake(0.0, 0.0, 320.0, 480.0);
     }
+    _pNativeView = pNativeViewController.view;
+    _pNativeViewController = pNativeViewController;
 
 //    OmmGuiViewActionTarget* pActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
 //    [pNativeView addTarget:pActionTarget action:@selector(selectedAction) forControlEvents:UIControlEventTouchUpInside];
 //    _pNativeViewSelectorDispatcher = [[OmmGuiViewSelectorDispatcher alloc] initWithImpl:this];
     _pNativeViewSelectorDispatcher = [[OmmGuiViewSelectorDispatcher alloc] initWithImpl:this];
-
-    _pNativeView = pNativeViewController.view;
-    _pNativeViewController = pNativeViewController;
+    _pNativeViewActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
 
 //    Omm::Gui::Log::instance()->gui().debug("init view impl view finished.");
 }
@@ -337,6 +384,13 @@ ViewImpl::setBackgroundColor(const Color& color)
 
 
 void
+ViewImpl::setAcceptDrops(bool accept)
+{
+//    _pNativeView->setAcceptDrops(accept);
+}
+
+
+void
 ViewImpl::presented()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
@@ -358,6 +412,46 @@ ViewImpl::selected()
 {
 //    Omm::Gui::Log::instance()->gui().debug("view impl selected.");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
+ViewImpl::dragStarted()
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag started in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragStarted);
+}
+
+
+void
+ViewImpl::dragEntered(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag entered in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pDrag);
+}
+
+
+void
+ViewImpl::dragMoved(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag moved in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pDrag);
+}
+
+
+void
+ViewImpl::dragLeft()
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drag left view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dragLeft);
+}
+
+
+void
+ViewImpl::dropped(Drag* pDrag)
+{
+    Omm::Gui::Log::instance()->gui().debug("view impl drop in view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pDrag);
 }
 
 
