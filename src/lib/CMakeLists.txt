@@ -21,6 +21,7 @@ Util/Util.cpp
 )
 
 target_link_libraries(ommutil
+${POCO_NET}
 ${POCO_FOUNDATION}
 )
 

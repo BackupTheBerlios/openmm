@@ -34,6 +34,11 @@
 #include <Poco/Thread.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/Observer.h>
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/SocketStream.h>
+#include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
+#include <Poco/Timestamp.h>
 
 
 namespace Omm {
@@ -53,6 +58,33 @@ private:
     static Log*     _pInstance;
     Poco::Logger*   _pUtilLogger;
     Poco::Logger*   _pPluginLogger;
+};
+
+
+class TCPChannel : public Poco::Channel
+{
+public:
+    TCPChannel();
+
+    virtual void open();
+    virtual void close();
+    virtual void log(const Poco::Message& message);
+
+protected:
+    virtual ~TCPChannel();
+
+private:
+    void connectionThread();
+    void sendMessage(const Poco::Message* pMessage);
+
+    int                                         _port;
+    Poco::Net::ServerSocket*                    _pSocket;
+    Poco::Net::StreamSocket                     _connection;
+    Poco::Thread                                _connectionThread;
+    Poco::RunnableAdapter<TCPChannel>           _connectionThreadRunnable;
+    Poco::FastMutex                             _lock;
+    std::vector<Poco::Message*>                 _buffer;
+    Poco::Timestamp::TimeDiff                   _bufferTime;
 };
 
 

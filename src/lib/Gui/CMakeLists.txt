@@ -36,6 +36,7 @@ Drag.cpp
 
 target_link_libraries(ommgui
 ${OMM_SYS}
+${OMM_UTIL}
 ${LIB_OMMGUI_PLATFORM}
 ${POCO_FOUNDATION}
 )

@@ -27,6 +27,10 @@
 #include <Poco/NumberFormatter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/Thread.h>
+#include <Poco/Net/Socket.h>
+#include <iostream>
+#include <Poco/LineEndingConverter.h>
 
 #include "Util.h"
 
@@ -79,6 +83,92 @@ Poco::Logger&
 Log::plugin()
 {
     return *_pPluginLogger;
+}
+
+
+TCPChannel::TCPChannel() :
+_port(60706),
+_connectionThreadRunnable(*this, &TCPChannel::connectionThread),
+_bufferTime(1000000)  // hold messages in buffer over a time period of one second
+{
+    try {
+        _pSocket = new Poco::Net::ServerSocket(_port);
+    }
+    catch (Poco::Exception& e) {
+//        std::clog << e.displayText() << std::endl;
+    }
+    _connectionThread.start(_connectionThreadRunnable);
+}
+
+
+void
+TCPChannel::open()
+{
+}
+
+
+void
+TCPChannel::close()
+{
+}
+
+
+void
+TCPChannel::log(const Poco::Message& message)
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+    sendMessage(&message);
+    _buffer.push_back(new Poco::Message(message));
+    Poco::Timestamp t = message.getTime();
+    std::vector<Poco::Message*>::iterator pos = _buffer.begin();
+    while (pos != _buffer.end() && t - (*pos)->getTime() > _bufferTime) {
+        ++pos;
+    }
+    for (std::vector<Poco::Message*>::const_iterator it = _buffer.begin(); it != pos; ++it) {
+        delete *it;
+    }
+    _buffer.erase(_buffer.begin(), pos);
+}
+
+
+TCPChannel::~TCPChannel()
+{
+    _pSocket->close();
+    _connectionThread.join();
+    delete _pSocket;
+
+    for (std::vector<Poco::Message*>::const_iterator it = _buffer.begin(); it != _buffer.end(); ++it) {
+        delete *it;
+    }
+    _buffer.clear();
+}
+
+
+void
+TCPChannel::connectionThread()
+{
+//    std::clog << "connection thread start" << std::endl;
+    for (;;) {
+        _connection = _pSocket->acceptConnection();
+        _lock.lock();
+        for (std::vector<Poco::Message*>::const_iterator it = _buffer.begin(); it != _buffer.end(); ++it) {
+            sendMessage(*it);
+        }
+        _lock.unlock();
+    }
+//    std::clog << "connection thread end" << std::endl;
+}
+
+
+void
+TCPChannel::sendMessage(const Poco::Message* pMessage)
+{
+    try {
+        _connection.sendBytes((pMessage->getText() + Poco::LineEnding::NEWLINE_LF).data(), pMessage->getText().length() + 1);
+    }
+    catch (Poco::Exception& e) {
+//        std::clog << e.displayText() << std::endl;
+    }
 }
 
 

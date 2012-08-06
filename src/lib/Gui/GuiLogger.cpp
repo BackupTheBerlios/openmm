@@ -27,6 +27,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/GuiLogger.h"
+#include "Util.h"
 
 
 namespace Omm {
@@ -41,9 +42,11 @@ Log::Log()
 {
     Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
     Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+//    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+    Util::TCPChannel* pTCPChannel = new Util::TCPChannel;
 //     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
+//    pSplitterChannel->addChannel(pConsoleChannel);
+    pSplitterChannel->addChannel(pTCPChannel);
 //     pSplitterChannel->addChannel(pFileChannel);
     pFormatLogger->setChannel(pSplitterChannel);
     pFormatLogger->open();
