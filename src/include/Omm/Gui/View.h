@@ -48,6 +48,7 @@ class Layout;
 #define PROXY_NOTIFY_CONTROLLER(CLASS, METHOD, ...) for (View::ControllerIterator it = _pViewImpl->getView()->beginController(); it != _pViewImpl->getView()->endController(); ++it) \
 { CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
 
+
 class View
 {
     friend class ViewImpl;

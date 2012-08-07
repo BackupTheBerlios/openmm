@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2012                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,63 +19,42 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/FormattingChannel.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/Environment.h>
-#include <Poco/NumberFormatter.h>
-
 #include "Gui/GuiLogger.h"
-#include "Util.h"
+#include "ViewRegistry.h"
 
 
 namespace Omm {
 namespace Gui {
 
+ViewRegistry* ViewRegistry::_pInstance = 0;
 
-Log* Log::_pInstance = 0;
-
-// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
-
-Log::Log()
-{
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-#ifdef __IPHONE__
-    Util::TCPChannel* pTCPChannel = new Util::TCPChannel;
-    pSplitterChannel->addChannel(pTCPChannel);
-#else
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-    pSplitterChannel->addChannel(pConsoleChannel);
-#endif
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
-#ifdef NDEBUG
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, 0);
-#else
-//    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
-#endif
-}
-
-
-Log*
-Log::instance()
+ViewRegistry*
+ViewRegistry::instance()
 {
     if (!_pInstance) {
-        _pInstance = new Log;
+        _pInstance = new ViewRegistry;
     }
     return _pInstance;
 }
 
 
-Poco::Logger&
-Log::gui()
+void
+ViewRegistry::registerView(View* pView, UIView* pNative)
 {
-    return *_pGuiLogger;
+    _views[pNative] = pView;
 }
 
 
-} // namespace Gui
-} // namespace Omm
+View*
+ViewRegistry::getViewForNative(UIView* pNative)
+{
+    return _views[pNative];
+}
+
+
+ViewRegistry::ViewRegistry()
+{
+}
+
+}  // namespace Omm
+}  // namespace Gui

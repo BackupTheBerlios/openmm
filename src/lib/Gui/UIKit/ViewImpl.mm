@@ -25,6 +25,7 @@
 
 #include "ViewImpl.h"
 #include "DragImpl.h"
+#include "ViewRegistry.h"
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
 
@@ -70,23 +71,35 @@
 }
 
 
-- (void)handleDragGesture:(UIGestureRecognizer*) pGestureRecognizer
+- (Omm::Gui::View*)getDropView:(UIGestureRecognizer*)pGestureRecognizer
+{
+    UIView* pMainView = static_cast<UIView*>(Omm::Gui::UIDrag::instance()->getMainView()->getNativeView());
+    CGPoint position = [pGestureRecognizer locationInView:pMainView];
+    Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget drag in point: (" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + ")");
+    UIView* pNativeDropView = [pMainView hitTest:position withEvent:nil];
+    return Omm::Gui::ViewRegistry::instance()->getViewForNative(pNativeDropView);
+}
+
+
+- (void)handleDragGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
     Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget drag gesture");
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         _pViewImpl->dragStarted();
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateChanged) {
-        _pViewImpl->dragMoved(Omm::Gui::UIDrag::instance()->getDrag());
+        Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
+        pDropView->getViewImpl()->dragEntered(Omm::Gui::UIDrag::instance()->getDrag());
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
-        _pViewImpl->dropped(Omm::Gui::UIDrag::instance()->getDrag());
+        Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
+        pDropView->getViewImpl()->dropped(Omm::Gui::UIDrag::instance()->getDrag());
         Omm::Gui::UIDrag::instance()->setDrag(0);
     }
 }
 
 
-- (void)handleTapGesture:(UIGestureRecognizer*) pGestureRecognizer
+- (void)handleTapGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
     Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget single tap gesture");
 }
@@ -219,6 +232,7 @@ ViewImpl::initViewImpl(View* pView, void* pNative)
     _pNativeViewSelectorDispatcher = [[OmmGuiViewSelectorDispatcher alloc] initWithImpl:this];
     _pNativeViewActionTarget = [[OmmGuiViewActionTarget alloc] initWithImpl:this];
 
+    ViewRegistry::instance()->registerView(_pView, pNativeViewController.view);
 //    Omm::Gui::Log::instance()->gui().debug("init view impl view finished.");
 }
 

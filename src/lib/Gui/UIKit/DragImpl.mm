@@ -57,6 +57,20 @@ UIDrag::getDrag()
 }
 
 
+void
+UIDrag::setMainView(View* pView)
+{
+    _pMainView = pView;
+}
+
+
+View*
+UIDrag::getMainView()
+{
+    return _pMainView;
+}
+
+
 UIDrag::UIDrag() :
 _pDrag(0)
 {

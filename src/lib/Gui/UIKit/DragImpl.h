@@ -39,11 +39,15 @@ public:
     void setDrag(Drag* pDrag);
     Drag* getDrag();
 
+    void setMainView(View* pView);
+    View* getMainView();
+
 private:
     UIDrag();
 
     static UIDrag*      _pInstance;
     Drag*               _pDrag;
+    View*               _pMainView;
 };
 
 

@@ -24,6 +24,7 @@
 #import <UIKit/UIKit.h>
 
 #include "ApplicationImpl.h"
+#include "DragImpl.h"
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
 
@@ -51,6 +52,7 @@
     _pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
     _pMainView->resize(appFrame.size.width, appFrame.size.height);
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
+    Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
     if (Omm::Gui::ApplicationImpl::_pToolBar) {
         _pMainView->addSubview(Omm::Gui::ApplicationImpl::_pToolBar);
         int toolBarHeight = _pMainView->height() / 4;

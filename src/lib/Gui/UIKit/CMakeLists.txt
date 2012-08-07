@@ -5,6 +5,7 @@ if(UIKIT_FOUND)
 set(OMMGUI_UIKIT_SRC
 ColorImpl.mm
 ViewImpl.mm
+ViewRegistry.mm
 ApplicationImpl.mm
 LabelImpl.mm
 ButtonImpl.mm
