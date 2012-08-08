@@ -131,7 +131,7 @@ ScrollAreaViewImpl::resizeScrollArea(int width, int height)
 void
 ScrollAreaViewImpl::scrollContentsTo(int x, int y)
 {
-    // TODO: implement UIKit scroll area to point
+    [static_cast<UIScrollView*>(getNativeView()) setContentOffset:CGPointMake(x, y) animated:YES];
 }
 
 
