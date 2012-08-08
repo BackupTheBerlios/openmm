@@ -43,6 +43,13 @@ UIDrag::instance()
 }
 
 
+Drag*
+UIDrag::getDrag()
+{
+    return _pDrag;
+}
+
+
 void
 UIDrag::setDrag(Drag* pDrag)
 {
@@ -50,10 +57,10 @@ UIDrag::setDrag(Drag* pDrag)
 }
 
 
-Drag*
-UIDrag::getDrag()
+View*
+UIDrag::getMainView()
 {
-    return _pDrag;
+    return _pMainView;
 }
 
 
@@ -65,14 +72,22 @@ UIDrag::setMainView(View* pView)
 
 
 View*
-UIDrag::getMainView()
+UIDrag::getDropView()
 {
-    return _pMainView;
+    return _pDropView;
+}
+
+
+void
+UIDrag::setDropView(View* pView)
+{
+    _pDropView = pView;
 }
 
 
 UIDrag::UIDrag() :
-_pDrag(0)
+_pDrag(0),
+_pDropView(0)
 {
 }
 

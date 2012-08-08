@@ -89,7 +89,13 @@
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateChanged) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
-        pDropView->getViewImpl()->dragEntered(Omm::Gui::UIDrag::instance()->getDrag());
+        if (pDropView != Omm::Gui::UIDrag::instance()->getDropView()) {
+            Omm::Gui::UIDrag::instance()->setDropView(pDropView);
+            pDropView->getViewImpl()->dragEntered(Omm::Gui::UIDrag::instance()->getDrag());
+        }
+        else {
+            pDropView->getViewImpl()->dragMoved(Omm::Gui::UIDrag::instance()->getDrag());
+        }
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];

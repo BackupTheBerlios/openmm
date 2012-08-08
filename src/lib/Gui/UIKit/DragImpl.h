@@ -36,11 +36,14 @@ class UIDrag
 public:
     static UIDrag* instance();
 
-    void setDrag(Drag* pDrag);
     Drag* getDrag();
+    void setDrag(Drag* pDrag);
 
-    void setMainView(View* pView);
     View* getMainView();
+    void setMainView(View* pView);
+
+    View* getDropView();
+    void setDropView(View* pView);
 
 private:
     UIDrag();
@@ -48,6 +51,7 @@ private:
     static UIDrag*      _pInstance;
     Drag*               _pDrag;
     View*               _pMainView;
+    View*               _pDropView;
 };
 
 
