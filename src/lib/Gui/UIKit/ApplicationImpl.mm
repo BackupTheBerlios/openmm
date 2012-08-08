@@ -24,7 +24,7 @@
 #import <UIKit/UIKit.h>
 
 #include "ApplicationImpl.h"
-#include "DragImpl.h"
+#include "UIDrag.h"
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
 

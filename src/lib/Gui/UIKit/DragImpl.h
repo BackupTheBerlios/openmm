@@ -30,31 +30,6 @@ namespace Gui {
 
 class Drag;
 
-
-class UIDrag
-{
-public:
-    static UIDrag* instance();
-
-    Drag* getDrag();
-    void setDrag(Drag* pDrag);
-
-    View* getMainView();
-    void setMainView(View* pView);
-
-    View* getDropView();
-    void setDropView(View* pView);
-
-private:
-    UIDrag();
-
-    static UIDrag*      _pInstance;
-    Drag*               _pDrag;
-    View*               _pMainView;
-    View*               _pDropView;
-};
-
-
 class DragImpl
 {
 public:

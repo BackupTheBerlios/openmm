@@ -19,48 +19,95 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/NumberFormatter.h>
-
-#include "DragImpl.h"
-#include "UIDrag.h"
-#include "Gui/Drag.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/View.h"
+#include "Gui/Color.h"
+#include "UIDrag.h"
 
 
 namespace Omm {
 namespace Gui {
 
+UIDrag* UIDrag::_pInstance = 0;
 
-DragImpl::DragImpl(View* pSource, Drag* pDrag) :
-_pDrag(pDrag)
+UIDrag*
+UIDrag::instance()
 {
-//    Omm::Gui::Log::instance()->gui().debug("Drag impl ctor");
-//    _pQtDrag = new QDrag(static_cast<QWidget*>(pSource->getNativeView()));
-//    _pQtDrag->setMimeData(new QtMimeData(this));
-}
-
-
-void
-DragImpl::start()
-{
-    UIDrag::instance()->setDrag(_pDrag);
-//    _pQtDrag->exec();
+    if (!_pInstance) {
+        _pInstance = new UIDrag;
+    }
+    return _pInstance;
 }
 
 
 Drag*
-DragImpl::getDrag() const
+UIDrag::getDrag()
 {
     return _pDrag;
 }
 
 
-//QDrag*
-//DragImpl::getNativeDrag() const
-//{
-//    return _pQtDrag;
-//}
+void
+UIDrag::setDrag(Drag* pDrag)
+{
+    _pDrag = pDrag;
+}
+
+
+View*
+UIDrag::getMainView()
+{
+    return _pMainView;
+}
+
+
+void
+UIDrag::setMainView(View* pView)
+{
+    _pMainView = pView;
+    _pPointerView = new View(_pMainView);
+    _pPointerView->hide();
+    _pPointerView->resize(20, 20);
+    _pPointerView->setBackgroundColor(Color("blue"));
+}
+
+
+View*
+UIDrag::getDropView()
+{
+    return _pDropView;
+}
+
+
+void
+UIDrag::setDropView(View* pView)
+{
+    _pDropView = pView;
+}
+
+
+View*
+UIDrag::getPointerView()
+{
+    return _pPointerView;
+}
+
+
+void
+UIDrag::setPointerView(View* pView)
+{
+    [static_cast<UIView*>(_pPointerView->getNativeView()) removeFromSuperview];
+    _pPointerView = pView;
+    _pMainView->addSubview(_pPointerView);
+    _pPointerView->hide();
+}
+
+
+UIDrag::UIDrag() :
+_pDrag(0),
+_pDropView(0),
+_pPointerView(0)
+{
+}
 
 
 }  // namespace Omm

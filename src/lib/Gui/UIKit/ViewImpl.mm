@@ -24,7 +24,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "ViewImpl.h"
-#include "DragImpl.h"
+#include "UIDrag.h"
 #include "ViewRegistry.h"
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
@@ -76,6 +76,7 @@
     UIView* pMainView = static_cast<UIView*>(Omm::Gui::UIDrag::instance()->getMainView()->getNativeView());
     CGPoint position = [pGestureRecognizer locationInView:pMainView];
     Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget drag in point: (" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + ")");
+    Omm::Gui::UIDrag::instance()->getPointerView()->move(position.x - 70, position.y - 25);
     UIView* pNativeDropView = [pMainView hitTest:position withEvent:nil];
     return Omm::Gui::ViewRegistry::instance()->getViewForNative(pNativeDropView);
 }
@@ -85,6 +86,7 @@
 {
     Omm::Gui::Log::instance()->gui().debug("OmmGuiViewActionTarget drag gesture");
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
+        Omm::Gui::UIDrag::instance()->getPointerView()->show();
         _pViewImpl->dragStarted();
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateChanged) {
@@ -99,6 +101,7 @@
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
+        Omm::Gui::UIDrag::instance()->getPointerView()->hide();
         pDropView->getViewImpl()->dropped(Omm::Gui::UIDrag::instance()->getDrag());
         Omm::Gui::UIDrag::instance()->setDrag(0);
     }
