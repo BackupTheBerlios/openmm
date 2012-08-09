@@ -40,14 +40,13 @@
 - (void)setImpl:(Omm::Gui::SliderViewImpl*)pImpl
 {
     _pSliderViewImpl = pImpl;
+    [self addTarget:self action:@selector(moved) forControlEvents:UIControlEventTouchDragInside];
 }
 
 
-- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
+- (void)moved
 {
-//    Omm::Gui::Log::instance()->gui().debug("Slider view impl touch moved");
     _pSliderViewImpl->valueChanged(self.value);
-    [super touchesMoved:touches withEvent:event];
 }
 
 @end

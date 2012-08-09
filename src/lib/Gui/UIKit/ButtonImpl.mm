@@ -43,14 +43,13 @@
 - (void)setImpl:(Omm::Gui::ButtonViewImpl*)pImpl
 {
     _pButtonViewImpl = pImpl;
+    [self addTarget:self action:@selector(pushed) forControlEvents:UIControlEventTouchUpInside];
 }
 
 
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+- (void)pushed
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view impl touch began");
     _pButtonViewImpl->pushed();
-    [super touchesBegan:touches withEvent:event];
 }
 
 @end
