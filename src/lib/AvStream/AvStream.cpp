@@ -34,6 +34,7 @@
 #include <cmath>
 
 #include "AvStream.h"
+#include "Util.h"
 
 namespace Omm {
 namespace AvStream {
@@ -44,22 +45,15 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("ommavstream.log");
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, 0);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, 0);
 #else
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_TRACE);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_TRACE);
 #endif
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_INFORMATION);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pFormatLogger, Poco::Message::PRIO_ERROR);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_DEBUG);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_INFORMATION);
+//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 

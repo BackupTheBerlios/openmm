@@ -19,10 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/File.h>
-#include <Poco/FormattingChannel.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/ConsoleChannel.h>
 
 #include <stdint.h>
 #include <fcntl.h>
@@ -30,6 +26,7 @@
 #include <cstring>
 
 #include "Dvb.h"
+#include "Util.h"
 
 using namespace Omm;
 using namespace Omm::Dvb;
@@ -40,18 +37,11 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pDvbLogger = &Poco::Logger::create("DVB", pFormatLogger, 0);
+    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, 0);
 #else
-    _pDvbLogger = &Poco::Logger::create("DVB", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_DEBUG);
 #endif
 }
 

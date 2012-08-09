@@ -51,6 +51,7 @@
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
+#include "Util.h"
 
 namespace Omm {
 
@@ -60,34 +61,27 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pUpnpLogger = &Poco::Logger::create("UPNP", pFormatLogger, 0);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, 0);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, 0);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, 0);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, 0);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, 0);
+    _pUpnpLogger = &Poco::Logger::create("UPNP", pChannel, 0);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, 0);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, 0);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, 0);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, 0);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, 0);
 #else
-//    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pFormatLogger, Poco::Message::PRIO_ERROR);
-//    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pFormatLogger, Poco::Message::PRIO_ERROR);
+//    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
+    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
+//    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 #endif
 }
 

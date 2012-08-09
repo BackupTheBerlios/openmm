@@ -26,6 +26,7 @@
 
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
+#include <Poco/FormattingChannel.h>
 #include <Poco/ClassLoader.h>
 #include <Poco/Environment.h>
 #include <Poco/String.h>
@@ -48,6 +49,7 @@ class Log
 {
 public:
     static Log* instance();
+    Poco::Channel* channel();
 
     Poco::Logger& util();
     Poco::Logger& plugin();
@@ -55,9 +57,10 @@ public:
 private:
     Log();
 
-    static Log*     _pInstance;
-    Poco::Logger*   _pUtilLogger;
-    Poco::Logger*   _pPluginLogger;
+    static Log*                         _pInstance;
+    Poco::FormattingChannel*            _pChannel;
+    Poco::Logger*                       _pUtilLogger;
+    Poco::Logger*                       _pPluginLogger;
 };
 
 

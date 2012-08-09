@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "UpnpAvLogger.h"
+#include "Util.h"
 
 
 namespace Omm {
@@ -32,19 +33,12 @@ Av::Log* Av::Log::_pInstance = 0;
 
 Av::Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, 0);
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, 0);
 #else
-    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_DEBUG);
-//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pFormatLogger, Poco::Message::PRIO_ERROR);
+    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_ERROR);
 #endif
 }
 

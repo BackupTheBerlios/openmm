@@ -44,20 +44,23 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
+    _pChannel = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
     Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
-#ifdef NDEBUG
-    _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, 0);
-    _pPluginLogger = &Poco::Logger::create("PLUGIN", pFormatLogger, 0);
+#ifdef __IPHONE__
+    Util::TCPChannel* pTCPChannel = new Util::TCPChannel;
+    pSplitterChannel->addChannel(pTCPChannel);
 #else
-    _pUtilLogger = &Poco::Logger::create("UTIL", pFormatLogger, Poco::Message::PRIO_DEBUG);
-    _pPluginLogger = &Poco::Logger::create("PLUGIN", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
+    pSplitterChannel->addChannel(pConsoleChannel);
+#endif
+    _pChannel->setChannel(pSplitterChannel);
+    _pChannel->open();
+#ifdef NDEBUG
+    _pUtilLogger = &Poco::Logger::create("UTIL", _pChannel, 0);
+    _pPluginLogger = &Poco::Logger::create("PLUGIN", _pChannel, 0);
+#else
+    _pUtilLogger = &Poco::Logger::create("UTIL", _pChannel, Poco::Message::PRIO_DEBUG);
+    _pPluginLogger = &Poco::Logger::create("PLUGIN", _pChannel, Poco::Message::PRIO_DEBUG);
 #endif
 }
 
@@ -69,6 +72,13 @@ Log::instance()
         _pInstance = new Log;
     }
     return _pInstance;
+}
+
+
+Poco::Channel*
+Log::channel()
+{
+    return _pChannel;
 }
 
 

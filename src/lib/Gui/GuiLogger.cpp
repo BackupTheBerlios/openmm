@@ -19,10 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Poco/FormattingChannel.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/ConsoleChannel.h>
 #include <Poco/Environment.h>
 #include <Poco/NumberFormatter.h>
 
@@ -40,22 +36,12 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-#ifdef __IPHONE__
-    Util::TCPChannel* pTCPChannel = new Util::TCPChannel;
-    pSplitterChannel->addChannel(pTCPChannel);
-#else
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-    pSplitterChannel->addChannel(pConsoleChannel);
-#endif
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, 0);
+    _pGuiLogger = &Poco::Logger::create("GUI", pChannel, 0);
 #else
-//    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_ERROR);
-    _pGuiLogger = &Poco::Logger::create("GUI", pFormatLogger, Poco::Message::PRIO_DEBUG);
+//    _pGuiLogger = &Poco::Logger::create("GUI", pChannel, Poco::Message::PRIO_ERROR);
+    _pGuiLogger = &Poco::Logger::create("GUI", pChannel, Poco::Message::PRIO_DEBUG);
 #endif
 }
 

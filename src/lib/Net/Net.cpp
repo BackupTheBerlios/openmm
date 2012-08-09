@@ -20,11 +20,6 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/FormattingChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/FileChannel.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/AbstractObserver.h>
 #include <Poco/Net/NetworkInterface.h>
 
@@ -38,6 +33,7 @@
 #else
 #include "NetImpl.h"
 #endif
+#include "Util.h"
 
 namespace Omm {
 namespace Net {
@@ -48,18 +44,11 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pNetLogger = &Poco::Logger::create("NET", pFormatLogger, 0);
+    _pNetLogger = &Poco::Logger::create("NET", pChannel, 0);
 #else
-    _pNetLogger = &Poco::Logger::create("NET", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pNetLogger = &Poco::Logger::create("NET", pChannel, Poco::Message::PRIO_DEBUG);
 #endif
 }
 

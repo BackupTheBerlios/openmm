@@ -20,13 +20,9 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
-#include <Poco/PatternFormatter.h>
-#include <Poco/FormattingChannel.h>
-#include <Poco/ConsoleChannel.h>
-#include <Poco/FileChannel.h>
-#include <Poco/SplitterChannel.h>
 
 #include "Sys.h"
+#include "Util.h"
 
 namespace Omm {
 namespace Sys {
@@ -37,18 +33,11 @@ Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::FormattingChannel* pFormatLogger = new Poco::FormattingChannel(new Poco::PatternFormatter("%H:%M:%S.%i %N[%P,%I] %q %s %t"));
-    Poco::SplitterChannel* pSplitterChannel = new Poco::SplitterChannel;
-    Poco::ConsoleChannel* pConsoleChannel = new Poco::ConsoleChannel;
-//     Poco::FileChannel* pFileChannel = new Poco::FileChannel("omm.log");
-    pSplitterChannel->addChannel(pConsoleChannel);
-//     pSplitterChannel->addChannel(pFileChannel);
-    pFormatLogger->setChannel(pSplitterChannel);
-    pFormatLogger->open();
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
 #ifdef NDEBUG
-    _pSysLogger = &Poco::Logger::create("SYS", pFormatLogger, 0);
+    _pSysLogger = &Poco::Logger::create("SYS", pChannel, 0);
 #else
-    _pSysLogger = &Poco::Logger::create("SYS", pFormatLogger, Poco::Message::PRIO_DEBUG);
+    _pSysLogger = &Poco::Logger::create("SYS", pChannel, Poco::Message::PRIO_DEBUG);
 #endif
 }
 

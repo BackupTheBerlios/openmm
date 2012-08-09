@@ -115,7 +115,7 @@ Upnp/Av/UpnpAvObject.cpp
 )
 
 target_link_libraries(ommupnpav
-${OMM}
+ommupnp
 ${POCO_SQLITE}
 ${POCO_DATA}
 ${POCO_FOUNDATION}
@@ -132,6 +132,7 @@ AvStream/AvStream.cpp
 )
 
 target_link_libraries(ommavstream
+ommutil
 ${POCO_FOUNDATION}
 )
 
