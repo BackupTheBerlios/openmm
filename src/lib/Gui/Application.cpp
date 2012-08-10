@@ -121,6 +121,15 @@ Application::showStatusBar(bool show)
 }
 
 
+View*
+Application::createAndSetMainView()
+{
+    View* pMainView = createMainView();
+    _pMainView = pMainView;
+    return pMainView;
+}
+
+
 int
 Application::runEventLoop(int argc, char** argv)
 {

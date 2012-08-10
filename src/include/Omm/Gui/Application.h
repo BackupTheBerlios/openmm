@@ -55,6 +55,7 @@ public:
     void setStatusBar(View* pView);
     void showStatusBar(bool show = true);
 
+    View* createAndSetMainView();
     virtual View* createMainView() = 0;
     virtual void presentedMainView() {}
     virtual void finishedEventLoop() {}

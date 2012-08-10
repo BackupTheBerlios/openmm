@@ -223,24 +223,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     }
     else
     {
-        Poco::Util::Application::init(_argc, _argv);
-
-        if (instanceAlreadyRunning()) {
-            Log::instance()->upnp().information("omm application instance running, starting in controller mode");
-            setLockInstance(false);
-            setIgnoreConfig(true);
-        }
-
-        loadConfig();
-        initConfig();
-        startAppHttpServer();
-
         Gui::Application::runEventLoop(_argc, _argv);
-
-        stopAppHttpServer();
-        saveConfig();
-
-        uninitialize();
     }
     return Poco::Util::Application::EXIT_OK;
 }
@@ -276,14 +259,20 @@ UpnpApplication::presentedMainView()
 void
 UpnpApplication::start()
 {
+    Poco::Util::Application::init(_argc, _argv);
+    if (instanceAlreadyRunning()) {
+        Log::instance()->upnp().information("omm application instance running, starting in controller mode");
+        setLockInstance(false);
+        setIgnoreConfig(true);
+    }
+    loadConfig();
+    initConfig();
+    startAppHttpServer();
     initLocalDevices();
-
     if (_enableController) {
         _pControllerWidget->setState(config().getString("application.state", DeviceManager::Started));
-//        _pControllerWidget->setState(DeviceManager::Started);
     }
     _pLocalDeviceServer->setState(config().getString("application.state", DeviceManager::Started));
-//    _pLocalDeviceServer->setState(DeviceManager::Started);
 }
 
 
@@ -295,6 +284,9 @@ UpnpApplication::stop()
     if (_enableController) {
         _pControllerWidget->setState(DeviceManager::Stopped);
     }
+    stopAppHttpServer();
+    saveConfig();
+    Poco::Util::Application::uninitialize();
     Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
 }
 
@@ -391,9 +383,10 @@ UpnpApplication::loadConfig()
         _pConf = new Poco::Util::PropertyFileConfiguration;
         try {
             _pConf->load(_confFilePath);
+            Omm::Av::Log::instance()->upnpav().information("reading config file done.");
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().debug("no config file present");
+            Omm::Av::Log::instance()->upnpav().error("could not read config file: " + e.displayText());
         }
     //        config().addWriteable(_pConf, -200);
         config().addWriteable(_pConf, 0);
@@ -415,14 +408,19 @@ void
 UpnpApplication::saveConfig()
 {
     if (!_ignoreConfig) {
+        Omm::Av::Log::instance()->upnpav().information("saving config file ...");
 //            _pConf->setInt("width", app.width());
 //            _pConf->setInt("height", app.height());
-    // FIXME: main view is smaller than app window
+        // FIXME: main view is smaller than app window
         _pConf->setInt("application.width", getMainView()->width());
         _pConf->setInt("application.height", getMainView()->height());
-//            config().setInt("width", app.getMainView()->width());
-//            config().setInt("height", app.getMainView()->height());
-        _pConf->save(_confFilePath);
+        try {
+            _pConf->save(_confFilePath);
+            Omm::Av::Log::instance()->upnpav().information("saving config file done.");
+        }
+        catch (Poco::Exception& e) {
+            Omm::Av::Log::instance()->upnpav().error("could not write config file present" + e.displayText());
+        }
     }
 }
 

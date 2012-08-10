@@ -49,7 +49,7 @@
     _pWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     _pWindow.backgroundColor = [UIColor whiteColor];
     CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
-    _pMainView = Omm::Gui::ApplicationImpl::_pApplication->createMainView();
+    _pMainView = Omm::Gui::ApplicationImpl::_pApplication->createAndSetMainView();
     _pMainView->resize(appFrame.size.width, appFrame.size.height);
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
     Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
