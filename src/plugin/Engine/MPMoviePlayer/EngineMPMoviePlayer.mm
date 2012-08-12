@@ -47,7 +47,7 @@
 
 - (void)playbackStateChanged:(NSNotification*)notification
 {
-    Omm::Av::Log::instance()->upnpav().debug("ENGINE sending notification playback state did change");
+    LOGNS(Omm::Av, upnpav, debug, "ENGINE sending notification playback state did change");
     _pEngine->transportStateChangedNotification();
 }
 
@@ -121,7 +121,7 @@ MPMoviePlayerEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo&
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
-    Omm::Av::Log::instance()->upnpav().debug("media player engine, set uri");
+    LOGNS(Omm::Av, upnpav, debug, "media player engine, set uri");
 
     _urlString = uri;
     _protInfo = protInfo;
@@ -140,7 +140,7 @@ MPMoviePlayerEngine::play()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
-    Omm::Av::Log::instance()->upnpav().debug("media player engine, play");
+    LOGNS(Omm::Av, upnpav, debug, "media player engine, play");
 
     // NOTE: this is called from another thread, so we need a new memory pool.
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
@@ -159,24 +159,24 @@ MPMoviePlayerEngine::play()
        _startTime = 0;
        _length = 0.0;
 
-       Omm::Av::Log::instance()->upnpav().debug("ENGINE alloc media player ...");
+       LOGNS(Omm::Av, upnpav, debug, "ENGINE alloc media player ...");
        MediaPlayerController* pPlayer = [MediaPlayerController alloc];
        _player = pPlayer;
        [pPlayer setEngine:this];
 
-       Omm::Av::Log::instance()->upnpav().debug("ENGINE init media player ...");
+       LOGNS(Omm::Av, upnpav, debug, "ENGINE init media player ...");
        [pPlayer performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:YES];
 
        if (pPlayer) {
-           Omm::Av::Log::instance()->upnpav().debug("ENGINE playing URL: " + _urlString);
+           LOGNS(Omm::Av, upnpav, debug, "ENGINE playing URL: " + _urlString);
            [pPlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
        }
        if (_mime.isVideo()) {
-           Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view ...");
+           LOGNS(Omm::Av, upnpav, debug, "ENGINE adding media player view ...");
 //           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
            [static_cast<UIView*>(_pVisual->getWindow()) performSelectorOnMainThread:@selector(addSubview:) withObject:pPlayer.view waitUntilDone:YES];
            pPlayer.view.frame = static_cast<UIView*>(_pVisual->getWindow()).frame;
-           Omm::Av::Log::instance()->upnpav().debug("ENGINE adding media player view finished.");
+           LOGNS(Omm::Av, upnpav, debug, "ENGINE adding media player view finished.");
        }
     }
 
@@ -229,14 +229,14 @@ MPMoviePlayerEngine::stop()
 
     if (_mime.isImage()) {
 //        if (_lastImageView != nil) {
-//            Omm::Av::Log::instance()->upnpav().debug("remove image view from super view");
+//            LOGNS(Omm::Av, upnpav, debug, "remove image view from super view");
 //            [_lastImageView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
 //            [_imageBackgroundView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
 //        }
     }
     else {
         // FIXME: after stream finished, player view is removed and clicking stop crashes
-        Omm::Av::Log::instance()->upnpav().debug("ENGINE stopping media player engine ...");
+        LOGNS(Omm::Av, upnpav, debug, "ENGINE stopping media player engine ...");
         MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
         [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
@@ -363,14 +363,14 @@ MPMoviePlayerEngine::transportStateChangedNotification()
 void
 MPMoviePlayerEngine::volumeChangedNotification(float volume)
 {
-    Omm::Av::Log::instance()->upnpav().debug("ENGINE volume changed on media player engine");
+    LOGNS(Omm::Av, upnpav, debug, "ENGINE volume changed on media player engine");
 }
 
 
 //void
 //MPMoviePlayerEngine::downloadImage()
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("download image: " + _urlString);
+//    LOGNS(Omm::Av, upnpav, debug, "download image: " + _urlString);
 //    Poco::Net::HTTPStreamFactory streamOpener;
 //
 //    _imageBuffer.clear();
@@ -381,14 +381,14 @@ MPMoviePlayerEngine::volumeChangedNotification(float volume)
 //        }
 //    }
 //    catch (Poco::Exception& e) {
-//        Omm::Av::Log::instance()->upnpav().error("download failed: " + e.displayText());
+//        LOGNS(Omm::Av, upnpav, error, "download failed: " + e.displayText());
 //    }
 //    if (_imageLength == 0) {
-//        Omm::Av::Log::instance()->upnpav().error("download failed, no bytes received.");
+//        LOGNS(Omm::Av, upnpav, error, "download failed, no bytes received.");
 //        return;
 //    }
 //    else {
-//        Omm::Av::Log::instance()->upnpav().debug("download success, bytes: " + Poco::NumberFormatter::format(_imageLength));
+//        LOGNS(Omm::Av, upnpav, debug, "download success, bytes: " + Poco::NumberFormatter::format(_imageLength));
 //    }
 //}
 
@@ -398,7 +398,7 @@ MPMoviePlayerEngine::volumeChangedNotification(float volume)
 //{
 //    NSData* imageData = [NSData dataWithBytes:_imageBuffer.data() length:_imageLength];
 //    if (imageData == nil) {
-//        Omm::Av::Log::instance()->upnpav().error("no image data");
+//        LOGNS(Omm::Av, upnpav, error, "no image data");
 //        return;
 //    }
 //
@@ -415,7 +415,7 @@ MPMoviePlayerEngine::volumeChangedNotification(float volume)
 //    NSLog(@"last image view: %@", _lastImageView);
 //    _imageBackgroundView.frame = _parentView.frame;
 //    if (_lastImageView != nil) {
-//        Omm::Av::Log::instance()->upnpav().debug("remove image view from super view");
+//        LOGNS(Omm::Av, upnpav, debug, "remove image view from super view");
 //        [_lastImageView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
 //        [_parentView performSelectorOnMainThread:@selector(setNeedsLayout) withObject:nil waitUntilDone:YES];
 //        [UIView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:_lastImageView waitUntilDone:YES];

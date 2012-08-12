@@ -20,7 +20,7 @@
 ***************************************************************************/
 #include "Net.h"
 #include "NetworkDevice.h"
-
+#include "Log.h"
 
 namespace Omm {
 namespace Net {
@@ -72,7 +72,7 @@ NetworkDevice::NetworkDevice(DBus::Connection& connection, DBus::Path& udi) :
 {
     connect_signal(NetworkDevice, StateChanged, stateChangedCb);
     _deviceName = _deviceProperties.getDeviceName();
-    Log::instance()->net().debug("found network device: " + _deviceName);
+    LOG(net, debug, "found network device: " + _deviceName);
 }
 
 
@@ -89,9 +89,9 @@ NetworkDevice::stateChangedCb(const DBus::SignalMessage& sig)
     it >> oldState;
     it >> reason;
 
-    Log::instance()->net().debug("network device " + _deviceName + " changes state from: "
-        + stateName(static_cast<NMDeviceState>(oldState))
-        + " to: " + stateName(static_cast<NMDeviceState>(newState))
+    LOG(net, debug, "network device " + _deviceName + " changes state from: "\
+        + stateName(static_cast<NMDeviceState>(oldState))\
+        + " to: " + stateName(static_cast<NMDeviceState>(newState))\
         + ", reason: " + reasonName(static_cast<NMDeviceStateReason>(reason)));
 
     if (newState == NM_DEVICE_STATE_ACTIVATED) {
@@ -255,7 +255,7 @@ NetworkManager::NetworkManager(DBus::Connection& connection)
 std::vector<DBus::Path>
 NetworkManager::getDevices()
 {
-    Log::instance()->net().debug("getting network device list ...");
+    LOG(net, debug, "getting network device list ...");
     std::vector<DBus::Path> paths;
     DBus::CallMessage call;
 
@@ -275,7 +275,7 @@ NetworkManager::deviceAddedCb(const DBus::SignalMessage& sig)
     DBus::MessageIter it = sig.reader();
     DBus::Path udi;
     it >> udi;
-    Log::instance()->net().debug("added device: " + udi);
+    LOG(net, debug, "added device: " + udi);
     m_devices[udi] = new NetworkDevice(conn(), udi);
 }
 
@@ -286,7 +286,7 @@ NetworkManager::deviceRemovedCb(const DBus::SignalMessage& sig)
     DBus::MessageIter it = sig.reader();
     DBus::Path udi;
     it >> udi;
-    Log::instance()->net().debug("removed device: " + udi);
+    LOG(net, debug, "removed device: " + udi);
     m_devices.erase(udi);
 }
 
@@ -298,7 +298,7 @@ NetworkManager::stateChangedCb(const DBus::SignalMessage& sig)
 
     uint32_t newState;
     it >> newState;
-    Log::instance()->net().debug("network state changed to: " + stateName(static_cast<NMState>(newState)));
+    LOG(net, debug, "network state changed to: " + stateName(static_cast<NMState>(newState)));
 }
 
 

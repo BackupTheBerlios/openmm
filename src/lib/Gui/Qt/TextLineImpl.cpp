@@ -33,7 +33,7 @@ namespace Gui {
 
 TextLineViewImpl::TextLineViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("label view impl ctor");
+//    LOG(gui, debug, "label view impl ctor");
     QLineEdit* pNativeView = new QLineEdit;
     TextLineSignalProxy* pSignalProxy = new TextLineSignalProxy(this);
 
@@ -83,7 +83,7 @@ void
 TextLineSignalProxy::editingFinished()
 {
     std::string text(static_cast<QLineEdit*>(_pViewImpl->getNativeView())->text().toStdString());
-    Omm::Gui::Log::instance()->gui().debug("text line view impl, calling editedText virtual method: " + text);
+    LOG(gui, debug, "text line view impl, calling editedText virtual method: " + text);
     PROXY_NOTIFY_CONTROLLER(TextLineController, editedText, text);
 }
 
@@ -91,7 +91,7 @@ TextLineSignalProxy::editingFinished()
 void
 TextLineSignalProxy::textEdited(const QString& text)
 {
-    Omm::Gui::Log::instance()->gui().debug("text line view impl, calling changedText virtual method: " + text.toStdString());
+    LOG(gui, debug, "text line view impl, calling changedText virtual method: " + text.toStdString());
     PROXY_NOTIFY_CONTROLLER(TextLineController, changedText, text.toStdString());
 }
 

@@ -22,9 +22,11 @@
 #include <string>
 
 #include <Poco/NumberFormatter.h>
+#include <Poco/String.h>
+#include <Poco/LineEndingConverter.h>
 
 #include <Omm/UpnpAvObject.h>
-#include <Poco/LineEndingConverter.h>
+#include <Omm/Log.h>
 
 
 int
@@ -46,15 +48,15 @@ main(int argc, char** argv) {
     }
 
     for (std::vector<std::string>::iterator it = searchStrings.begin(); it != searchStrings.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test search: " + *it);
+        LOGNS(Omm::Av, upnpav, debug, "Upnp-AV search test search: " + *it);
         std::string translatedString;
         try {
             translatedString = search.parse(*it);
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test error parsing search criteria: " + e.displayText());
+            LOGNS(Omm::Av, upnpav, debug, "Upnp-AV search test error parsing search criteria: " + e.displayText());
         }
-        Omm::Av::Log::instance()->upnpav().debug("Upnp-AV search test transl: " + translatedString + Poco::LineEnding::NEWLINE_DEFAULT);
+        LOGNS(Omm::Av, upnpav, debug, "Upnp-AV search test transl: " + translatedString + Poco::LineEnding::NEWLINE_DEFAULT);
     }
 
     return 0;

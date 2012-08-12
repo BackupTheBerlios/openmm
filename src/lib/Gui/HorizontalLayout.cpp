@@ -24,6 +24,7 @@
 #include "Gui/HorizontalLayout.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -33,8 +34,8 @@ namespace Gui {
 void
 HorizontalLayout::layoutView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view ...");
-    
+//    LOG(gui, debug, "horizontal layout, lay out view ...");
+
     int minSubviewWidth = 0;
     int minSubviewHeight = 0;
     int prefSubviewWidth = 0;
@@ -96,7 +97,7 @@ HorizontalLayout::layoutView()
         (*it)->resize(width, subviewHeight);
         subviewWidth += width;
     }
-//    Omm::Gui::Log::instance()->gui().debug("horizontal layout, lay out view finished.");
+//    LOG(gui, debug, "horizontal layout, lay out view finished.");
 }
 
 
@@ -111,7 +112,7 @@ HorizontalLayout::layoutViewEquiDistant()
         (*it)->move((it - _pView->beginSubview()) * (*it)->width(), 0);
     }
 
-    Omm::Gui::Log::instance()->gui().debug("horizontal layout, laying out view finished.");
+    LOG(gui, debug, "horizontal layout, laying out view finished.");
 }
 
 

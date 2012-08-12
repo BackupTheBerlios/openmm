@@ -132,7 +132,7 @@ XineEngine::createPlayer()
 
     if (!_videoDriver)
     {
-        Omm::Av::Log::instance()->upnpav().error("xine engine can't init video driver " + driverName);
+        LOGNS(Omm::Av, upnpav, error, "xine engine can't init video driver " + driverName);
 //        std::cerr << "XineEngine::init() can't init video driver " << _pVideo->driverName() << std::endl;
     }
 

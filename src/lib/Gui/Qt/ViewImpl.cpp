@@ -34,7 +34,7 @@ namespace Gui {
 
 ViewImpl::~ViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl dtor");
+//    LOG(gui, debug, "view impl dtor");
 //    delete _pNativeView;
 }
 
@@ -42,7 +42,7 @@ ViewImpl::~ViewImpl()
 void
 ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl init");
+//    LOG(gui, debug, "view impl init");
 
     _pView = pView;
     _pNativeView = pNative;
@@ -74,7 +74,7 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
 void
 ViewImpl::triggerViewSync()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl trigger view sync");
+//    LOG(gui, debug, "view impl trigger view sync");
     _pSignalProxy->syncView();
 }
 
@@ -82,7 +82,7 @@ ViewImpl::triggerViewSync()
 View*
 ViewImpl::getView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl get view: " + Poco::NumberFormatter::format(_pView));
+//    LOG(gui, debug, "view impl get view: " + Poco::NumberFormatter::format(_pView));
     return _pView;
 }
 
@@ -90,7 +90,7 @@ ViewImpl::getView()
 QWidget*
 ViewImpl::getNativeView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
+//    LOG(gui, debug, "view impl get native view: " + Poco::NumberFormatter::format(_pNativeView));
     return _pNativeView;
 }
 
@@ -102,7 +102,7 @@ ViewImpl::getNativeView()
 #endif
 ViewImpl::getNativeWindowId()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+//    LOG(gui, debug, "view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
     return _pNativeView->winId();
 }
 
@@ -110,7 +110,7 @@ ViewImpl::getNativeWindowId()
 void
 ViewImpl::setNativeView(QWidget* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl set native view: " + Poco::NumberFormatter::format(pView));
+//    LOG(gui, debug, "view impl set native view: " + Poco::NumberFormatter::format(pView));
     _pNativeView = pView;
 }
 
@@ -125,35 +125,35 @@ ViewImpl::addSubview(View* pView)
 void
 ViewImpl::showView(bool async)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+//    LOG(gui, debug, "view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
     if (async) {
         _pSignalProxy->showView();
     }
     else {
         _pNativeView->show();
     }
-//    Omm::Gui::Log::instance()->gui().debug("view impl show finished.");
+//    LOG(gui, debug, "view impl show finished.");
 }
 
 
 void
 ViewImpl::hideView(bool async)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
+//    LOG(gui, debug, "view impl hide _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
     if (async) {
         _pSignalProxy->hideView();
     }
     else {
         _pNativeView->hide();
     }
-//    Omm::Gui::Log::instance()->gui().debug("view impl hide finished.");
+//    LOG(gui, debug, "view impl hide finished.");
 }
 
 
 int
 ViewImpl::widthView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl width.");
+//    LOG(gui, debug, "view impl width.");
     return _pNativeView->width();
 }
 
@@ -161,7 +161,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl height.");
+//    LOG(gui, debug, "view impl height.");
     return _pNativeView->height();
 }
 
@@ -169,7 +169,7 @@ ViewImpl::heightView()
 void
 ViewImpl::resizeView(int width, int height)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl resize.");
+//    LOG(gui, debug, "view impl resize.");
     _pNativeView->resize(width, height);
 }
 
@@ -193,7 +193,7 @@ ViewImpl::setFontSize(float fontSize)
 void
 ViewImpl::moveView(int x, int y)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl move.");
+//    LOG(gui, debug, "view impl move.");
     _pNativeView->move(x, y);
 }
 
@@ -201,7 +201,7 @@ ViewImpl::moveView(int x, int y)
 void
 ViewImpl::setHighlighted(bool highlighted)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
+//    LOG(gui, debug, "view impl set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
     if (highlighted) {
         _pNativeView->setBackgroundRole(QPalette::Highlight);
     }
@@ -228,7 +228,7 @@ ViewImpl::setAcceptDrops(bool accept)
 void
 ViewImpl::presented()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl presented.");
+//    LOG(gui, debug, "view impl presented.");
     IMPL_NOTIFY_CONTROLLER(Controller, presented);
 }
 
@@ -236,7 +236,7 @@ ViewImpl::presented()
 void
 ViewImpl::resized(int width, int height)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view impl resized.");
+//    LOG(gui, debug, "view impl resized.");
     _pView->updateLayout();
     IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
 }
@@ -245,7 +245,7 @@ ViewImpl::resized(int width, int height)
 void
 ViewImpl::selected()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl selected view: " + _pView->getName());
+    LOG(gui, debug, "view impl selected view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 
@@ -253,7 +253,7 @@ ViewImpl::selected()
 void
 ViewImpl::keyPressed(int key)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl key pressed: " + Poco::NumberFormatter::format(key));
+    LOG(gui, debug, "view impl key pressed: " + Poco::NumberFormatter::format(key));
     switch (key) {
         case Qt::Key_M:
         case Qt::Key_Menu:
@@ -346,7 +346,7 @@ ViewImpl::keyPressed(int key)
 void
 ViewImpl::dragStarted()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl drag started in view: " + _pView->getName());
+    LOG(gui, debug, "view impl drag started in view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, dragStarted);
 }
 
@@ -354,7 +354,7 @@ ViewImpl::dragStarted()
 void
 ViewImpl::dragEntered(Drag* pDrag)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl drag entered in view: " + _pView->getName());
+    LOG(gui, debug, "view impl drag entered in view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pDrag);
 }
 
@@ -362,7 +362,7 @@ ViewImpl::dragEntered(Drag* pDrag)
 void
 ViewImpl::dragMoved(Drag* pDrag)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl drag moved in view: " + _pView->getName());
+    LOG(gui, debug, "view impl drag moved in view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pDrag);
 }
 
@@ -370,7 +370,7 @@ ViewImpl::dragMoved(Drag* pDrag)
 void
 ViewImpl::dragLeft()
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl drag left view: " + _pView->getName());
+    LOG(gui, debug, "view impl drag left view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, dragLeft);
 }
 
@@ -378,7 +378,7 @@ ViewImpl::dragLeft()
 void
 ViewImpl::dropped(Drag* pDrag)
 {
-    Omm::Gui::Log::instance()->gui().debug("view impl drop in view: " + _pView->getName());
+    LOG(gui, debug, "view impl drop in view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, dropped, pDrag);
 }
 

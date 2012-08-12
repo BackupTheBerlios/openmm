@@ -138,7 +138,7 @@ CtlAVTransportImpl::_ansPrevious(const ui4& InstanceID)
 void
 CtlAVTransportImpl::_changedLastChange(const std::string& val)
 {
-    Log::instance()->upnpav().debug("controller avtransport got last change: " + val);
+    LOG(upnpav, debug, "controller avtransport got last change: " + val);
 
     LastChangeReader lastChangeReader;
     lastChangeReader.read(val);
@@ -150,13 +150,13 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
             std::string stateVarName = (*it).first;
             std::string val = (*it).second["val"];
             if (stateVarName == AvTransportEventedStateVar::TRANSPORT_STATE) {
-                Log::instance()->upnpav().debug("controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
+                LOG(upnpav, debug, "controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTransportState(val);
                 }
             }
             else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_URI) {
-                Log::instance()->upnpav().debug("controller, current track uri changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
+                LOG(upnpav, debug, "controller, current track uri changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newUri(val);
                 }
@@ -179,7 +179,7 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
 void
 CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::string& protInfo)
 {
-    Log::instance()->upnpav().debug("controller, add connection");
+    LOG(upnpav, debug, "controller, add connection");
 
     ConnectionPeer& thisPeer = pConnection->getThisPeer(_pThisDevice->getDeviceType());
     ConnectionPeer& remotePeer = pConnection->getRemotePeer(_pThisDevice->getDeviceType());
@@ -191,7 +191,7 @@ CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::stri
         PrepareForConnection(protInfo, remotePeer.getConnectionManagerId().toString(), -1, "Output", connectionId, avTransportId, rcId);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("action \"PrepareForConnection\" not available on device");
+        LOG(upnpav, error, "action \"PrepareForConnection\" not available on device");
     }
 
     thisPeer._connectionId = connectionId;
@@ -202,7 +202,7 @@ CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::stri
 
     std::string connectionIds;
     GetCurrentConnectionIDs(connectionIds);
-    Log::instance()->upnpav().debug("connection ids: " + connectionIds);
+    LOG(upnpav, debug, "connection ids: " + connectionIds);
     i4 RcsID;
     i4 AVTransportID;
     std::string ProtocolInfo;
@@ -604,7 +604,7 @@ CtlRenderingControlImpl::_ansSetLoudness(const ui4& InstanceID, const std::strin
 void
 CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 {
-    Log::instance()->upnpav().debug("controller rendering control got last change: " + val);
+    LOG(upnpav, debug, "controller rendering control got last change: " + val);
 
     LastChangeReader lastChangeReader;
     lastChangeReader.read(val);
@@ -618,10 +618,10 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
 //            _pService->setStateVar<std::string>(stateVarName, val);
             if (stateVarName == RenderingControlEventedStateVar::VOLUME) {
                 // set volume only when this renderer is selected.
-                Log::instance()->upnpav().debug("controller, volume changed on device: " + _pService->getDevice()->getUuid());
+                LOG(upnpav, debug, "controller, volume changed on device: " + _pService->getDevice()->getUuid());
                 if (_pAvUserInterface && _pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {
                     _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
-                    Log::instance()->upnpav().debug("user interface, volume changed on device: " + _pService->getDevice()->getUuid());
+                    LOG(upnpav, debug, "user interface, volume changed on device: " + _pService->getDevice()->getUuid());
                 }
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newVolume(Poco::NumberParser::parse(val));
@@ -752,7 +752,7 @@ CtlContentDirectoryImpl::_changedTransferIDs(const std::string& val)
 void
 CtlContentDirectoryImpl::_changedSystemUpdateID(const ui4& val)
 {
-    Log::instance()->upnpav().debug("event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
+    LOG(upnpav, debug, "event handler for ContentDirectory::SystemUpdateID gets: " + Poco::NumberFormatter::format(val));
     _pMediaServer->newSystemUpdateId(val);
 }
 

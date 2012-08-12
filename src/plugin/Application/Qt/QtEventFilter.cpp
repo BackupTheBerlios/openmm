@@ -41,7 +41,7 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
 {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        Omm::Av::Log::instance()->upnpav().debug("key pressed: " + keyEvent->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(keyEvent->key()));
+        LOGNS(Omm::Av, upnpav, debug, "key pressed: " + keyEvent->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(keyEvent->key()));
 //        if (Controler::instance()->getCurrentPage()->hasEventType(m_eventMap.find(k->key())->second)) {
 //            Controler::instance()->queueEvent(new Event(m_eventMap.find(k->key())->second));
 //            // don't forward the event to the Qt event loop.
@@ -63,14 +63,14 @@ QtEventFilter::eventFilter(QObject* object, QEvent* event)
         }
         // vol up
         else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777235) || keyEvent->key() == 16777330) {
-            Omm::Av::Log::instance()->upnpav().debug("vol up key");
+            LOGNS(Omm::Av, upnpav, debug, "vol up key");
 //            int oldValue = _pAvInterface->_pVolumeSlider->value();
 //            _pAvInterface->volumeChanged(++oldValue);
             return true;
         }
         // vol down
         else if (((keyEvent->modifiers() & Qt::AltModifier) && keyEvent->key() == 16777237) || keyEvent->key() == 16777328) {
-            Omm::Av::Log::instance()->upnpav().debug("vol down key");
+            LOGNS(Omm::Av, upnpav, debug, "vol down key");
 //            int oldValue = _pAvInterface->_pVolumeSlider->value();
 //            _pAvInterface->volumeChanged(--oldValue);
             return true;

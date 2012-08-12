@@ -37,9 +37,10 @@ TOOLCHAIN_FILE_DIR=${SRC_DIR}/cmake/platform
 if [ ${RELEASE} ]
 then
     BUILD_TYPE="Release"
+    CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DOMM_RELEASE=1"
+else
+    CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 fi
-
-CMAKE_OPTS="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # setup staging dir
 if [ ${STAGING_DIR} ]

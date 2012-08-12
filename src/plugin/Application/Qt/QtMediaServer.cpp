@@ -68,7 +68,7 @@ QtMediaServer::getBrowserTitle()
 void
 QtMediaServer::initController()
 {
-    Omm::Av::Log::instance()->upnpav().debug("init Qt media server (controller)");
+    LOGNS(Omm::Av, upnpav, debug, "init Qt media server (controller)");
     // TODO: check if root object is an item or container and change the visual appearance accordingly.
     browseRootObject();
 }
@@ -77,11 +77,11 @@ QtMediaServer::initController()
 //void
 //QtMediaServer::selected()
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("Qt media server selected (controller)");
+//    LOGNS(Omm::Av, upnpav, debug, "Qt media server selected (controller)");
 //    Omm::Av::CtlMediaObject* pRootObject = getRootObject();
 //    QtNavigator* pNavigator = getNavigator();
 //    if (pRootObject->isContainer() && pNavigator) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt media server root object is container, creating container widget.");
+//        LOGNS(Omm::Av, upnpav, debug, "Qt media server root object is container, creating container widget.");
 //        QtMediaObject* pRootWidget = new QtMediaObject;
 //        pRootWidget->_pObject = pRootObject;
 //        pRootObject->setWidgetFactory(pRootWidget);
@@ -89,7 +89,7 @@ QtMediaServer::initController()
 //        pRootWidget->_pContainerView->setModel(pRootObject);
 ////        _pMediaContainerWidget = new QtWidgetList;
 ////        _pMediaContainerWidget->setModel(pRootObject);
-//        Omm::Av::Log::instance()->upnpav().debug("Qt media server pushing root container widget ...");
+//        LOGNS(Omm::Av, upnpav, debug, "Qt media server pushing root container widget ...");
 //        pNavigator->push(pRootWidget);
 ////        pNavigator->push(this);
 //    }
@@ -105,7 +105,7 @@ _pMediaServer(pMediaServer)
 void
 QtMediaServerWidget::configure()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media server widget set name: " + _pMediaServer->getFriendlyName());
+    LOGNS(Omm::Av, upnpav, debug, "Qt media server widget set name: " + _pMediaServer->getFriendlyName());
 
     setLabel(_pMediaServer->getFriendlyName());
 }

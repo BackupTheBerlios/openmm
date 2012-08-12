@@ -83,7 +83,7 @@ public:
 
     C* load(const std::string& objectName, const std::string& className = "", const std::string& prefixName = "")
     {
-        Log::instance()->util().information("plugin loader trying to load " + objectName);
+        LOG(util, information, "plugin loader trying to load " + objectName);
 
         loadPlugin(objectName);
         Poco::StringTokenizer nameSplitter(objectName, "-");
@@ -93,7 +93,7 @@ public:
             classBase = nameSplitter[0];
         }
         else if (Poco::icompare(className, nameSplitter[0])) {
-            Log::instance()->util().error("wrong plugin library base class: " + className);
+            LOG(util, error, "wrong plugin library base class: " + className);
             throw Poco::NotFoundException();
         }
 
@@ -103,11 +103,11 @@ public:
                 classPrefix = nameSplitter[1];
             }
             catch (Poco::RangeException) {
-                Log::instance()->util().error("wrong plugin library name: " + objectName);
+                LOG(util, error, "wrong plugin library name: " + objectName);
                 throw Poco::NotFoundException();
             }
         }
-        Log::instance()->util().information("plugin loader successfully loaded " + objectName);
+        LOG(util, information, "plugin loader successfully loaded " + objectName);
 
         return create(classPrefix, classBase);
     }
@@ -119,10 +119,10 @@ private:
     {
         try {
             _pluginPath = Poco::Environment::get("OMM_PLUGIN_PATH") + _pluginPath;
-            Log::instance()->util().debug("plugin loader OMM_PLUGIN_PATH is: " + _pluginPath);
+            LOG(util, debug, "plugin loader OMM_PLUGIN_PATH is: " + _pluginPath);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->util().debug("plugin loader OMM_PLUGIN_PATH not set, standard search path is: " + _pluginPath);
+            LOG(util, debug, "plugin loader OMM_PLUGIN_PATH not set, standard search path is: " + _pluginPath);
         }
         Poco::StringTokenizer pathSplitter(_pluginPath, ":");
         Poco::StringTokenizer::Iterator it;
@@ -155,7 +155,7 @@ private:
             pRes = _pPluginLoader->create(className);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->util().error("could not create object of class " + className);
+            LOG(util, error, "could not create object of class " + className);
             throw Poco::NotFoundException();
         }
         return pRes;

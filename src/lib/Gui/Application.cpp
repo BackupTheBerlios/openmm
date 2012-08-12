@@ -24,7 +24,7 @@
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
 #include "ApplicationImpl.h"
-
+#include "Log.h"
 
 namespace Omm {
 namespace Gui {
@@ -35,7 +35,7 @@ _pImpl(new ApplicationImpl(this)),
 _pMainView(0),
 _scaleFactor(1.0)
 {
-//    Omm::Gui::Log::instance()->gui().debug("application ctor.");
+//    LOG(gui, debug, "application ctor.");
 }
 
 
@@ -154,7 +154,7 @@ Application::createdMainView()
 void
 Application::receivedSignal(SignalType signal)
 {
-    Omm::Gui::Log::instance()->gui().debug("application signal received.");
+    LOG(gui, debug, "application signal received.");
     switch (signal) {
         case Sys::SignalHandler::SigInt:
         case Sys::SignalHandler::SigQuit:

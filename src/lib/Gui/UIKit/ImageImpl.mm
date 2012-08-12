@@ -42,7 +42,7 @@
 
 - (id)initWithImpl:(Omm::Gui::ImageViewImpl*)pImpl
 {
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiImage initWithImpl ...");
+    LOGNS(Omm::Gui, gui, debug, "OmmGuiImage initWithImpl ...");
     if (self = [super init]) {
         _pImageViewImpl = pImpl;
 //        self.contentMode = UIViewContentModeCenter;
@@ -54,7 +54,7 @@
 
 - (id)setData:(NSData*)pImageData
 {
-    Omm::Gui::Log::instance()->gui().debug("OmmGuiImage setData ...");
+    LOGNS(Omm::Gui, gui, debug, "OmmGuiImage setData ...");
     UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
     [_pImageView initWithImage:pImage];
 //    [[_pImageView alloc] initWithImage:pImage];
@@ -74,7 +74,7 @@
 
 //- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 //{
-////    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
+////    LOGNS(Omm::Gui, gui, debug, "Label view impl touch began");
 //    _pImageViewImpl->pushed();
 //    [super touchesBegan:touches withEvent:event];
 //}
@@ -88,7 +88,7 @@ namespace Gui {
 
 ImageViewImpl::ImageViewImpl(View* pView)
 {
-    Log::instance()->gui().debug("image view impl ctor");
+    LOG(gui, debug, "image view impl ctor");
     OmmGuiImage* pNativeView = [[OmmGuiImage alloc] initWithImpl:this];
 
     initViewImpl(pView, pNativeView);
@@ -103,10 +103,10 @@ ImageViewImpl::~ImageViewImpl()
 void
 ImageViewImpl::setData(const std::string& data)
 {
-    Log::instance()->gui().debug("image view impl set data");
+    LOG(gui, debug, "image view impl set data");
     NSData* pImageData = [NSData dataWithBytes:data.data() length:data.size()];
     if (pImageData == nil) {
-        Log::instance()->gui().error("no image data");
+        LOG(gui, error, "no image data");
         return;
     }
     [static_cast<OmmGuiImage*>(_pNativeView) setData:pImageData];

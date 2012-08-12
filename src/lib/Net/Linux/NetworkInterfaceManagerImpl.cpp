@@ -23,6 +23,7 @@
 #include "Net.h"
 #include "NetworkDevice.h"
 #include "NetImplLinux.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -51,7 +52,7 @@ NetworkInterfaceManagerImpl::~NetworkInterfaceManagerImpl()
 void
 NetworkInterfaceManagerImpl::start()
 {
-    Log::instance()->net().debug("connecting NetworkManager ...");
+    LOG(net, debug, "connecting NetworkManager ...");
     _monitorThread.start(*this);
 }
 
@@ -61,15 +62,15 @@ NetworkInterfaceManagerImpl::run()
 {
     try {
         DBus::default_dispatcher = &_p->_dispatcher;
-        Log::instance()->net().debug("connecting system bus");
+        LOG(net, debug, "connecting system bus");
         DBus::Connection conn = DBus::Connection::SystemBus();
-        Log::instance()->net().debug("initializing NetworkManager");
+        LOG(net, debug, "initializing NetworkManager");
         NetworkManager network(conn);
-        Log::instance()->net().debug("waiting for network device changes ...");
+        LOG(net, debug, "waiting for network device changes ...");
         _p->_dispatcher.enter();
     }
     catch(DBus::Error err) {
-        Log::instance()->net().error("DBus error occured: " + std::string(err.what()));
+        LOG(net, error, "DBus error occured: " + std::string(err.what()));
     }
 }
 
@@ -78,7 +79,7 @@ void
 NetworkInterfaceManagerImpl::stop()
 {
     _p->_dispatcher.leave();
-    Log::instance()->net().debug("disconnected from NetworkManager.");
+    LOG(net, debug, "disconnected from NetworkManager.");
 }
 
 }  // namespace Net

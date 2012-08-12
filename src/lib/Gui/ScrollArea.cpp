@@ -25,6 +25,7 @@
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
 #include "ScrollAreaImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -90,7 +91,7 @@ ScrollAreaView::resizeScrollArea(int width, int height)
 void
 ScrollAreaView::scrollContentsTo(int x, int y)
 {
-    Log::instance()->gui().debug("scroll area scroll content to: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+    LOG(gui, debug, "scroll area scroll content to: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
 
     static_cast<ScrollAreaViewImpl*>(_pImpl)->scrollContentsTo(x, y);
 }

@@ -36,7 +36,7 @@ SliderViewImpl::SliderViewImpl(View* pView)
     QSlider* pNativeView = new QSlider;
     SliderSignalProxy* pSignalProxy = new SliderSignalProxy(this);
 
-//    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
+//    LOG(gui, debug, "slider view impl ctor");
     pNativeView->setOrientation(Qt::Horizontal);
     pNativeView->setTracking(true);
     pNativeView->setSingleStep(5);
@@ -71,7 +71,7 @@ SliderViewImpl::setEnabled(bool enabled)
 void
 SliderSignalProxy::init()
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider view impl, init signal proxy");
+//    LOG(gui, debug, "slider view impl, init signal proxy");
     SignalProxy::init();
     connect(_pViewImpl->getNativeView(), SIGNAL(valueChanged(int)), this, SLOT(valueChangedSlot(int)));
 }
@@ -80,7 +80,7 @@ SliderSignalProxy::init()
 void
 SliderSignalProxy::valueChangedSlot(int value)
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider view impl, calling value changed");
+//    LOG(gui, debug, "slider view impl, calling value changed");
     static_cast<SliderView*>(_pViewImpl->getView())->valueChangedView(value);
 }
 

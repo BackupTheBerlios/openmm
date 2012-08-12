@@ -54,7 +54,7 @@ ButtonModel::getLabel()
 void
 ButtonModel::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button model set label");
+//    LOG(gui, debug, "button model set label");
     _label = label;
 }
 
@@ -90,7 +90,7 @@ ButtonModel::setImage(Image* pImage)
 ButtonView::ButtonView(View* pParent) :
 View(pParent, false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view ctor.");
+//    LOG(gui, debug, "button view ctor.");
     setName("button view");
 
     _minWidth = 30;
@@ -104,7 +104,7 @@ View(pParent, false)
 void
 ButtonView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view sync view: " + getName() + " ...");
+//    LOG(gui, debug, "button view sync view: " + getName() + " ...");
     if (!_pModel) {
         return;
     }

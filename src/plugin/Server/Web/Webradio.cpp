@@ -110,52 +110,52 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
     pSession->sendRequest(request);
     std::stringstream requestHeader;
     request.write(requestHeader);
-    Omm::Av::Log::instance()->upnpav().debug("proxy request header:\n" + requestHeader.str());
+    LOGNS(Omm::Av, upnpav, debug, "proxy request header:\n" + requestHeader.str());
 
     Poco::Net::HTTPResponse response;
     std::istream& istr = pSession->receiveResponse(response);
     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND ||
         response.getStatus() == Poco::Net::HTTPResponse::HTTP_NO_CONTENT) {
-        Omm::Av::Log::instance()->upnpav().error("web radio stream not available");
+        LOGNS(Omm::Av, upnpav, error, "web radio stream not available");
         return 0;
     }
     else if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_SEE_OTHER ||
              response.getStatus() == Poco::Net::HTTPResponse::HTTP_FOUND ||
              response.getStatus() == Poco::Net::HTTPResponse::HTTP_MOVED_PERMANENTLY ||
              response.getStatus() == Poco::Net::HTTPResponse::HTTP_TEMPORARY_REDIRECT) {
-        Omm::Av::Log::instance()->upnpav().information("web radio uri redirected to: " + response.get("Location"));
+        LOGNS(Omm::Av, upnpav, information, "web radio uri redirected to: " + response.get("Location"));
         delete pSession;
         return getStream(response.get("Location"));
     }
 
     if (istr.peek() == EOF) {
-        Omm::Av::Log::instance()->upnpav().error("web radio failed to read data from stream uri: " + uri);
+        LOGNS(Omm::Av, upnpav, error, "web radio failed to read data from stream uri: " + uri);
         return 0;
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("web radio success reading data from stream uri: " + uri);
+        LOGNS(Omm::Av, upnpav, debug, "web radio success reading data from stream uri: " + uri);
     }
 
-    Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    LOGNS(Omm::Av, upnpav, information, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
     std::stringstream responseHeader;
     response.write(responseHeader);
-    Omm::Av::Log::instance()->upnpav().debug("proxy response header:\n" + responseHeader.str());
+    LOGNS(Omm::Av, upnpav, debug, "proxy response header:\n" + responseHeader.str());
 
     if (response.getContentType() == "audio/mpeg" || response.getContentType() == "application/ogg" || response.getContentType() == "audio/aac") {
-        Omm::Av::Log::instance()->upnpav().debug("web radio detected audio content, streaming directly ...");
+        LOGNS(Omm::Av, upnpav, debug, "web radio detected audio content, streaming directly ...");
         return new Poco::Net::HTTPResponseStream(istr, pSession);
     }
     else if (response.getContentType() == "audio/x-scpls" || response.getContentType() == "audio/x-mpegurl") {
         std::vector<std::string> uris;
         // look for streamable URIs in the downloaded playlist
-        Omm::Av::Log::instance()->upnpav().debug("web radio detected playlist, analyzing ...");
+        LOGNS(Omm::Av, upnpav, debug, "web radio detected playlist, analyzing ...");
         std::string line;
         while (getline(istr, line)) {
-            Omm::Av::Log::instance()->upnpav().debug(line);
+            LOGNS(Omm::Av, upnpav, debug, line);
             std::string::size_type uriPos = line.find("http://");
             if (uriPos != std::string::npos) {
                 std::string uri = Poco::trimRight(line.substr(uriPos));
-                Omm::Av::Log::instance()->upnpav().debug("web radio found stream uri: " + uri);
+                LOGNS(Omm::Av, upnpav, debug, "web radio found stream uri: " + uri);
                 uris.push_back(uri);
             }
         }
@@ -169,7 +169,7 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
         }
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("web radio unknown stream type (no audio or playlist)");
+        LOGNS(Omm::Av, upnpav, error, "web radio unknown stream type (no audio or playlist)");
     }
     return 0;
 }
@@ -178,7 +178,7 @@ WebradioModel::getStream(const std::string& uri, const std::string& resourcePath
 void
 WebradioModel::freeStream(std::istream* pIstream)
 {
-    Omm::Av::Log::instance()->upnpav().debug("deleting webradio stream");
+    LOGNS(Omm::Av, upnpav, debug, "deleting webradio stream");
     delete pIstream;
 }
 
@@ -200,7 +200,7 @@ WebradioModel::getDlna(const std::string& path)
 void
 WebradioModel::scanStationConfig(const std::string& stationConfig)
 {
-    Omm::Av::Log::instance()->upnpav().debug("web radio, start scanning station config file: " + stationConfig + " ...");
+    LOGNS(Omm::Av, upnpav, debug, "web radio, start scanning station config file: " + stationConfig + " ...");
 
     _stationNames.clear();
 
@@ -215,44 +215,44 @@ WebradioModel::scanStationConfig(const std::string& stationConfig)
         pDoc = parser.parse(stationConfig);
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("webradio config not found and scanning of stations not yet supported, giving up.");
+        LOGNS(Omm::Av, upnpav, error, "webradio config not found and scanning of stations not yet supported, giving up.");
         return;
     }
 
     Poco::XML::Node* pStationList = pDoc->firstChild();
     if (pStationList->nodeName() != "stationlist") {
-        Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, wrong file format");
+        LOGNS(Omm::Av, upnpav, error, "error reading webradio station list, wrong file format");
         return;
     }
 
     std::string currentStationName;
     if (pStationList->hasChildNodes()) {
         Poco::XML::Node* pStation = pStationList->firstChild();
-        Omm::Av::Log::instance()->upnpav().debug("stationlist first child: " + pStation->nodeName());
+        LOGNS(Omm::Av, upnpav, debug, "stationlist first child: " + pStation->nodeName());
         while (pStation) {
             if (pStation->nodeName() != "station") {
-                Omm::Av::Log::instance()->upnpav().error("error reading webradio station list, no station found.");
+                LOGNS(Omm::Av, upnpav, error, "error reading webradio station list, no station found.");
                 return;
             }
             Poco::XML::Node* pProp = pStation->firstChild();
             while (pProp) {
                 if (pProp->nodeName() == "name") {
                     currentStationName = pProp->innerText();
-                    Omm::Av::Log::instance()->upnpav().debug("added web radio station with name: " + pProp->innerText());
+                    LOGNS(Omm::Av, upnpav, debug, "added web radio station with name: " + pProp->innerText());
                 }
                 else if (pProp->nodeName() == "uri") {
                     _stationNames[pProp->innerText()] = currentStationName;
-                    Omm::Av::Log::instance()->upnpav().debug("added web radio station with uri: " + pProp->innerText());
+                    LOGNS(Omm::Av, upnpav, debug, "added web radio station with uri: " + pProp->innerText());
                 }
                 else {
-                    Omm::Av::Log::instance()->upnpav().warning("webradio station entry in config file has unknown property");
+                    LOGNS(Omm::Av, upnpav, warning, "webradio station entry in config file has unknown property");
                 }
                 pProp = pProp->nextSibling();
             }
             pStation = pStation->nextSibling();
         }
     }
-    Omm::Av::Log::instance()->upnpav().debug("web radio, finished scanning station config file.");
+    LOGNS(Omm::Av, upnpav, debug, "web radio, finished scanning station config file.");
 }
 
 

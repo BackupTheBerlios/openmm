@@ -71,7 +71,7 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
     Poco::URI uriParsed(uri);
     _playlist.clear();
     if (protInfo.getMimeString() == Mime::PLAYLIST) {
-        Omm::Av::Log::instance()->upnpav().debug("renderer engine got playlist");
+        LOG(upnpav, debug, "renderer engine got playlist");
 
         Poco::Net::HTTPClientSession session(uriParsed.getHost(), uriParsed.getPort());
 
@@ -79,15 +79,15 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         session.sendRequest(request);
         std::stringstream requestHeader;
         request.write(requestHeader);
-        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+        LOG(upnpav, debug, "request header:\n" + requestHeader.str());
 
         Poco::Net::HTTPResponse response;
         std::istream& istr = session.receiveResponse(response);
 
-        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        LOG(upnpav, information, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream responseHeader;
         response.write(responseHeader);
-        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        LOG(upnpav, debug, "response header:\n" + responseHeader.str());
 
         std::string line;
         while(std::getline(istr, line)) {
@@ -101,15 +101,15 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
         session.sendRequest(request);
         std::stringstream requestHeader;
         request.write(requestHeader);
-        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+        LOG(upnpav, debug, "request header:\n" + requestHeader.str());
 
         Poco::Net::HTTPResponse response;
         std::istream& istr = session.receiveResponse(response);
 
-        Omm::Av::Log::instance()->upnpav().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        LOG(upnpav, information, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream responseHeader;
         response.write(responseHeader);
-        Omm::Av::Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        LOG(upnpav, debug, "response header:\n" + responseHeader.str());
         setUri(istr, protInfo);
     }
     else {
@@ -121,7 +121,7 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 void
 Engine::setAtomicUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 {
-    Omm::Av::Log::instance()->upnpav().debug("engine sets new atomic uri: " + uri);
+    LOG(upnpav, debug, "engine sets new atomic uri: " + uri);
 
     setUri(uri, protInfo);
 
@@ -134,7 +134,7 @@ Engine::setAtomicUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 void
 Engine::seekTrack(ui4 trackNumber)
 {
-    Omm::Av::Log::instance()->upnpav().debug("engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
+    LOG(upnpav, debug, "engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
     _trackNumberInPlaylist = trackNumber;
     setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
 }
@@ -145,7 +145,7 @@ Engine::nextTrack()
 {
     if (_trackNumberInPlaylist + 1 < _playlist.size()) {
         _trackNumberInPlaylist++;
-        Omm::Av::Log::instance()->upnpav().debug("engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
+        LOG(upnpav, debug, "engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
 }
@@ -156,7 +156,7 @@ Engine::previousTrack()
 {
     if (_trackNumberInPlaylist - 1 >= 0) {
         _trackNumberInPlaylist--;
-        Omm::Av::Log::instance()->upnpav().debug("engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
+        LOG(upnpav, debug, "engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
 }
@@ -202,7 +202,7 @@ Engine::transportStateChanged()
 
     Variant val;
     val.setValue(newTransportState);
-    Omm::Av::Log::instance()->upnpav().debug("engine sets new transport state: " + newTransportState);
+    LOG(upnpav, debug, "engine sets new transport state: " + newTransportState);
     _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
 }
 
@@ -212,7 +212,7 @@ Engine::endOfStream(Poco::Timer& timer)
 {
     if (_playlist.size() && _trackNumberInPlaylist < _playlist.size()) {
 //    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
-        Omm::Av::Log::instance()->upnpav().debug("engine skips to next track in playlist");
+        LOG(upnpav, debug, "engine skips to next track in playlist");
         _trackNumberInPlaylist++;
         stop();
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
@@ -261,7 +261,7 @@ MediaRenderer::addEngine(Engine* pEngine)
     _pRenderingControlImpl->addEngine(pEngine);
     pEngine->_pRenderingControlImpl = _pRenderingControlImpl;
 
-    Log::instance()->upnpav().information("add renderer engine: " + pEngine->getEngineId());
+    LOG(upnpav, information, "add renderer engine: " + pEngine->getEngineId());
 }
 
 } // namespace Av

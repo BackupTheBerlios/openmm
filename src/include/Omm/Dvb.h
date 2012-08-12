@@ -38,6 +38,7 @@ namespace Dvb {
 
 class DvbDevice;
 
+#ifndef NDEBUG
 class Log
 {
 public:
@@ -51,6 +52,7 @@ private:
     static Log*     _pInstance;
     Poco::Logger*   _pDvbLogger;
 };
+#endif // NDEBUG
 
 
 class DvbChannel

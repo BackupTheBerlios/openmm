@@ -48,7 +48,7 @@ QtListWidget::hideWidget()
 void
 QtListWidget::mousePressEvent(QMouseEvent* pMouseEvent)
 {
-    Omm::Av::Log::instance()->upnpav().debug("QtListWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
+    LOGNS(Omm::Av, upnpav, debug, "QtListWidget mouse pressed in widget with row: " + Poco::NumberFormatter::format(getRow()));
     select();
     QWidget::mousePressEvent(pMouseEvent);
 }

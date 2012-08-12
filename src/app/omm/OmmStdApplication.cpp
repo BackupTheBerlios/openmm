@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         pApp = pluginLoader.load("stdapplication-qt", "StdApplication");
     }
     catch(Poco::NotFoundException) {
-        Omm::Log::instance()->upnp().error("OMM application could not find Qt application plugin");
+        LOGNS(Omm, upnp, error, "OMM application could not find Qt application plugin");
         return 1;
     }
 

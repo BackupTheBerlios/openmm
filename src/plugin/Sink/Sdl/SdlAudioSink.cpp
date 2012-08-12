@@ -30,7 +30,7 @@ SdlAudioSink::SdlAudioSink() :
 AudioSink("sdl audio sink")
 {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0 ) {
-        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
+        LOGNS(Omm::AvStream, avstream, error, "failed to init SDL: " + std::string(SDL_GetError()));
 //         return false;
     }
 }
@@ -45,11 +45,11 @@ void audioCallback(void* pThis, uint8_t* sdlBuffer, int sdlBufferSize)
 {
     SdlAudioSink* pSdlAudioSink = static_cast<SdlAudioSink*>(pThis);
     if (!pSdlAudioSink) {
-        Omm::AvStream::Log::instance()->avstream().error("sdl audio sink, audio callback, this is null");
+        LOGNS(Omm::AvStream, avstream, error, "sdl audio sink, audio callback, this is null");
         return;
     }
     
-    Omm::AvStream::Log::instance()->avstream().trace("sdl audio sink, audio callback, sdl buffer size: " + Poco::NumberFormatter::format(sdlBufferSize));
+    LOGNS(Omm::AvStream, avstream, trace, "sdl audio sink, audio callback, sdl buffer size: " + Poco::NumberFormatter::format(sdlBufferSize));
     
     pSdlAudioSink->initSilence((char*)sdlBuffer, sdlBufferSize);
     // if no samples are available, don't block and leave the silence in the pcm buffer
@@ -64,7 +64,7 @@ void audioCallback(void* pThis, uint8_t* sdlBuffer, int sdlBufferSize)
 bool
 SdlAudioSink::initDevice()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("opening SDL audio sink ...");
+    LOGNS(Omm::AvStream, avstream, debug, "opening SDL audio sink ...");
     
     SDL_AudioSpec deviceParamsWanted;
     SDL_AudioSpec deviceParams;
@@ -77,11 +77,11 @@ SdlAudioSink::initDevice()
     deviceParamsWanted.userdata = this;
     
     if(SDL_OpenAudio(&deviceParamsWanted, &deviceParams) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open SDL audio device: " + std::string(SDL_GetError()));
+        LOGNS(Omm::AvStream, avstream, error, "could not open SDL audio device: " + std::string(SDL_GetError()));
         return false;
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug("SDL audio sink opened.");
+    LOGNS(Omm::AvStream, avstream, debug, "SDL audio sink opened.");
     return true;
 }
 
@@ -89,9 +89,9 @@ SdlAudioSink::initDevice()
 bool
 SdlAudioSink::closeDevice()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " closing ...");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " closing ...");
     SDL_CloseAudio();
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " closed.");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " closed.");
 }
 
 

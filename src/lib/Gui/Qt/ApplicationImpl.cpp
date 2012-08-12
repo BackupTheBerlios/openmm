@@ -43,7 +43,7 @@ _height(480),
 _pFullscreenStyleSheet(0),
 _fullscreen(false)
 {
-    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
+    LOG(gui, debug, "application impl ctor");
 }
 
 
@@ -167,7 +167,7 @@ ApplicationImpl::showStatusBar(bool show)
 int
 ApplicationImpl::run(int argc, char** argv)
 {
-    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    LOG(gui, debug, "event loop exec ...");
     _pQtApplication = new QApplication(argc, argv);
     _pMainWindow = new QMainWindow;
     if (_pFullscreenStyleSheet) {
@@ -195,7 +195,7 @@ ApplicationImpl::run(int argc, char** argv)
 
     _pApplication->start();
     int ret = _pQtApplication->exec();
-    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+    LOG(gui, debug, "event loop exec finished.");
     _pApplication->finishedEventLoop();
     _pApplication->stop();
     return ret;

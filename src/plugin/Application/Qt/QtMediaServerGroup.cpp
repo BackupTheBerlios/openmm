@@ -74,7 +74,7 @@ QtMediaServerGroup::createDevice()
 void
 QtMediaServerGroup::show()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media server group show: " + getDeviceType());
+    LOGNS(Omm::Av, upnpav, debug, "Qt media server group show: " + getDeviceType());
 
     QtController* pController = static_cast<QtController*>(getController());
 
@@ -82,7 +82,7 @@ QtMediaServerGroup::show()
         pController->addTab(_pNavigator, shortName().c_str());
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("Qt media server group failed to show device group, no widget available: " + getDeviceType());
+        LOGNS(Omm::Av, upnpav, error, "Qt media server group failed to show device group, no widget available: " + getDeviceType());
     }
 }
 
@@ -92,14 +92,14 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
 {
     QtMediaServer* pMediaServer = static_cast<QtMediaServer*>(pDevice);
 
-    Omm::Av::Log::instance()->upnpav().debug("Qt media server group select device");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media server group select device");
     Omm::Av::CtlMediaObject2* pRootObject = pMediaServer->getRootObject();
     if (pRootObject->isContainer()) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt media server root object is container, creating container widget.");
+        LOGNS(Omm::Av, upnpav, debug, "Qt media server root object is container, creating container widget.");
         QtMediaObject* pRootWidget = new QtMediaObject;
         pRootWidget->_pObject = pRootObject;
         pRootWidget->_pContainerView = new QtWidgetList;
-        Omm::Av::Log::instance()->upnpav().debug("Qt media server pushing root container widget ...");
+        LOGNS(Omm::Av, upnpav, debug, "Qt media server pushing root container widget ...");
         _pNavigator->push(pRootWidget);
         pRootWidget->_pContainerView->setModel(pRootWidget);
     }
@@ -124,9 +124,9 @@ QtMediaServerGroup::getChildWidget(int row)
 void
 QtMediaServerGroup::attachWidget(int row, ListWidget* pWidget)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget");
+//    LOGNS(Omm::Av, upnpav, debug, "media server group attach widget");
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
-    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pServer->getFriendlyName());
+    LOGNS(Omm::Av, upnpav, debug, "media server group attach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pServer->getFriendlyName());
     QtMediaServerWidget* pListWidget = static_cast<QtMediaServerWidget*>(pWidget);
     pListWidget->_pMediaServer = pServer;
     pServer->setDeviceWidget(pListWidget);
@@ -138,7 +138,7 @@ QtMediaServerGroup::attachWidget(int row, ListWidget* pWidget)
 
     emit pListWidget->configureWidget();
     emit pListWidget->showWidgetSignal();
-    Omm::Av::Log::instance()->upnpav().debug("media server group attach widget finished.");
+    LOGNS(Omm::Av, upnpav, debug, "media server group attach widget finished.");
 }
 
 
@@ -146,7 +146,7 @@ void
 QtMediaServerGroup::detachWidget(int row)
 {
     QtMediaServer* pServer = static_cast<QtMediaServer*>(getDevice(row));
-    Omm::Av::Log::instance()->upnpav().debug("media server group detach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pServer->getFriendlyName());
+    LOGNS(Omm::Av, upnpav, debug, "media server group detach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pServer->getFriendlyName());
     QtMediaServerWidget* pListWidget = pServer->getDeviceWidget();
 
     emit pListWidget->hideWidgetSignal();
@@ -159,5 +159,5 @@ QtMediaServerGroup::detachWidget(int row)
 
     pListWidget->_pMediaServer = 0;
     pServer->setDeviceWidget(0);
-    Omm::Av::Log::instance()->upnpav().debug("media server group detach widget finished.");
+    LOGNS(Omm::Av, upnpav, debug, "media server group detach widget finished.");
 }

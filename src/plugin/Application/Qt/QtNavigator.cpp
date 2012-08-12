@@ -82,8 +82,8 @@ void
 QtNavigatorPanel::buttonPushed()
 {
     QtNavigatorPanelButton* pButton = static_cast<QtNavigatorPanelButton*>(QObject::sender());
-    Omm::Av::Log::instance()->upnpav().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
+    LOGNS(Omm::Av, upnpav, debug, "Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
+//    LOGNS(Omm::Util, plugin, debug, "Qt navigator panel button pushed: " + pButton->getNavigable()->getBrowserTitle().toStdString());
     pop(pButton->getNavigable());
     emit selectedNavigable(pButton->getNavigable());
 }
@@ -113,29 +113,29 @@ QtNavigator::~QtNavigator()
 void
 QtNavigator::push(QtNavigable* pNavigable)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+    LOGNS(Omm::Av, upnpav, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
+//    LOGNS(Omm::Util, plugin, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
 
     pNavigable->_pNavigator = this;
     if (pNavigable->getWidget()) {
-        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
+        LOGNS(Omm::Av, upnpav, debug, "Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
         _pStackedWidget->addWidget(pNavigable->getWidget());
         _pStackedWidget->setCurrentWidget(pNavigable->getWidget());
-        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget finished.");
+        LOGNS(Omm::Av, upnpav, debug, "Qt navigator add widget finished.");
     }
     _pNavigatorPanel->push(pNavigable);
     _navigableStack.push(pNavigable);
-    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
+    LOGNS(Omm::Av, upnpav, debug, "Qt navigator showing widget ...");
     pNavigable->show();
-    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
+    LOGNS(Omm::Av, upnpav, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
 }
 
 
 void
 QtNavigator::expose(QtNavigable* pNavigable)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
+    LOGNS(Omm::Av, upnpav, debug, "Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
+//    LOGNS(Omm::Util, plugin, debug, "Qt navigator expose: " + pNavigable->getBrowserTitle().toStdString());
 
     pNavigable->show();
     while(!_navigableStack.empty() && _navigableStack.top() != pNavigable) {

@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include <Poco/String.h>
 #include <Poco/ClassLibrary.h>
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
@@ -33,10 +34,10 @@
 #endif
 
 #include <Omm/AvStream.h>
-#include <Poco/String.h>
+#include "Omm/UpnpAvObject.h"
+#include <Omm/Log.h>
 
 #include "VlcTagger.h"
-#include "Omm/UpnpAvObject.h"
 
 
 VlcMeta::VlcMeta() :
@@ -89,7 +90,7 @@ VlcTagger::~VlcTagger()
 Omm::AvStream::Meta*
 VlcTagger::tag(const std::string& uri)
 {
-    Omm::Av::Log::instance()->upnpav().debug("vlc tagger tagging: " + uri);
+    LOGNS(Omm::Av, upnpav, debug, "vlc tagger tagging: " + uri);
 
     VlcMeta* pMeta = new VlcMeta;
 
@@ -152,7 +153,7 @@ VlcTagger::tag(const std::string& uri)
     Poco::Path path(uri);
     // try to get a filename extension for type of media
     std::string extension = Poco::toLower(path.getExtension());
-//    Omm::Av::Log::instance()->upnpav().debug("vlc tagger extension: " + extension);
+//    LOGNS(Omm::Av, upnpav, debug, "vlc tagger extension: " + extension);
 
     Omm::AvStream::Meta::ContainerFormat containerFormat = Omm::AvStream::Meta::CF_UNKNOWN;
     if (extension == "mp3") {
@@ -221,13 +222,13 @@ VlcTagger::handleException()
 {
 #if LIBVLC_VERSION_INT < 0x110
     if (libvlc_exception_raised(_pException)) {
-        Omm::Av::Log::instance()->upnpav().error("vlc tagger: " + std::string(libvlc_exception_get_message(_pException)));
+        LOGNS(Omm::Av, upnpav, error, "vlc tagger: " + std::string(libvlc_exception_get_message(_pException)));
     }
     libvlc_exception_init(_pException);
 #else
     const char* errMsg = libvlc_errmsg();
     if (errMsg) {
-        Omm::Av::Log::instance()->upnpav().error("vlc tagger: " + std::string(errMsg));
+        LOGNS(Omm::Av, upnpav, error, "vlc tagger: " + std::string(errMsg));
     }
 #endif
 }

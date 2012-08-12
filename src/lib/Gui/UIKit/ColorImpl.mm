@@ -34,7 +34,7 @@ namespace Gui {
 
 ColorImpl::ColorImpl(int red, int green, int blue, int alpha)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
+//    LOG(gui, debug, "Color impl ctor");
     _pUIColor = [UIColor colorWithRed:red/255.0 green:green/255.0 blue:blue/255.0 alpha:alpha/255.0];
 }
 

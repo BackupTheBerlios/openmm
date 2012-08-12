@@ -42,7 +42,7 @@ ImageModel::getData() const
 void
 ImageModel::setData(const std::string& data)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Image model set data");
+//    LOG(gui, debug, "Image model set data");
     _data = data;
 }
 
@@ -50,7 +50,7 @@ ImageModel::setData(const std::string& data)
 void
 ImageModel::setFile(const std::string& fileName)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Image model set file");
+//    LOG(gui, debug, "Image model set file");
     std::ifstream ifs(fileName.c_str());
     const int bufSize = 512;
     char data[bufSize];
@@ -64,7 +64,7 @@ ImageModel::setFile(const std::string& fileName)
 ImageView::ImageView(View* pParent) :
 View(pParent, false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Image view ctor.");
+//    LOG(gui, debug, "Image view ctor.");
     setName("image view");
 
     _minWidth = 20;
@@ -86,7 +86,7 @@ ImageView::setAlignment(Alignment alignment)
 void
 ImageView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("Image view sync view: " + getName());
+//    LOG(gui, debug, "Image view sync view: " + getName());
     if (!_pModel) {
         return;
     }

@@ -23,8 +23,11 @@
 #define GuiLogger_INCLUDED
 
 
+#ifndef NDEBUG
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
+
+#include "../Log.h"
 
 
 namespace Omm {
@@ -35,12 +38,12 @@ class Log
 {
 public:
     static Log* instance();
-    
+
     Poco::Logger& gui();
-    
+
 private:
     Log();
-    
+
     static Log*     _pInstance;
     Poco::Logger*   _pGuiLogger;
 };
@@ -49,4 +52,5 @@ private:
 }  // namespace Omm
 }  // namespace Gui
 
+#endif // NDEBUG
 #endif

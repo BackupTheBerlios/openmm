@@ -23,8 +23,10 @@
 #define QtViewImpl_INCLUDED
 
 #include <QtGui>
+
 #include "ViewImpl.h"
 #include "QtDragImpl.h"
+#include "Log.h"
 #include "Gui/GuiLogger.h"
 
 namespace Omm {
@@ -100,7 +102,7 @@ public:
 
     void dragEnterEvent(QDragEnterEvent* pDragEvent)
     {
-        Omm::Gui::Log::instance()->gui().debug("DRAG ENTER EVENT");
+        LOG(gui, debug, "DRAG ENTER EVENT");
         // if dragging started not in an omm application, mime data is not of type QtMimeData and pDrag is set to 0.
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
@@ -111,7 +113,7 @@ public:
 
     void dragMoveEvent(QDragMoveEvent* pDragEvent)
     {
-        Omm::Gui::Log::instance()->gui().debug("DRAG MOVE EVENT");
+        LOG(gui, debug, "DRAG MOVE EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
             _pViewImpl->dragMoved(pMime->_pDragImpl->getDrag());
@@ -121,13 +123,13 @@ public:
 
     void dragLeaveEvent(QDragLeaveEvent* pDragEvent)
     {
-        Omm::Gui::Log::instance()->gui().debug("DRAG LEAVE EVENT");
+        LOG(gui, debug, "DRAG LEAVE EVENT");
         _pViewImpl->dragLeft();
     }
 
     void dropEvent(QDropEvent* pDropEvent)
     {
-        Omm::Gui::Log::instance()->gui().debug("DROP EVENT");
+        LOG(gui, debug, "DROP EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDropEvent->mimeData());
         if (pMime) {
             _pViewImpl->dropped(pMime->_pDragImpl->getDrag());

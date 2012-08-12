@@ -46,7 +46,7 @@ tagUri(std::vector<std::string>& uris)
             pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
+            LOGNS(Omm::AvStream, avstream, error, "could not find avstream tagger plugin: " + taggerPlugin);
             return;
         }
         Omm::AvStream::Meta* pMeta = pTagger->tag(*it);
@@ -72,7 +72,7 @@ tagStream(std::vector<std::string>& uris)
             pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
         }
         catch(Poco::NotFoundException) {
-            Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
+            LOGNS(Omm::AvStream, avstream, error, "could not find avstream tagger plugin: " + taggerPlugin);
             return;
         }
         std::ifstream ifs((*it).c_str());

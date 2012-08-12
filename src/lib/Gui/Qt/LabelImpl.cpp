@@ -32,7 +32,7 @@ namespace Gui {
 
 LabelViewImpl::LabelViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("label view impl ctor");
+//    LOG(gui, debug, "label view impl ctor");
     QLabel* pNativeView = new QLabel;
 
     initViewImpl(pView, pNativeView);

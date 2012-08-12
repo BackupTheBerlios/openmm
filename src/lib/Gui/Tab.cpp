@@ -24,6 +24,7 @@
 #include "Gui/Tab.h"
 #include "Gui/GuiLogger.h"
 #include "TabImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -34,7 +35,7 @@ TabView::TabView(View* pParent) :
 View(pParent, false),
 _tabCount(0)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab view ctor.");
+    LOG(gui, debug, "tab view ctor.");
     _pImpl = new TabViewImpl(this);
 }
 

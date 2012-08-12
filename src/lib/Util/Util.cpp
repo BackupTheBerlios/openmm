@@ -60,12 +60,12 @@ Home::getHomeDirPath()
 
     if (!_homeDirPath.size()) {
         _homeDirPath = Poco::Environment::get("OMM_HOME", Omm::Sys::SysPath::getPath(Omm::Sys::SysPath::Home)) + "/.omm";
-        Log::instance()->util().information("OMM HOME: " + _homeDirPath);
+        LOG(util, information, "OMM HOME: " + _homeDirPath);
         try {
             Poco::File(_homeDirPath).createDirectories();
         }
         catch (Poco::Exception& e) {
-            Log::instance()->util().error("can not create OMM HOME: " + _homeDirPath);
+            LOG(util, error, "can not create OMM HOME: " + _homeDirPath);
         }
     }
 
@@ -78,14 +78,14 @@ const std::string
 Home::getCacheDirPath(const std::string& relPath)
 {
     Poco::Mutex::ScopedLock lock(_lock);
-//    Log::instance()->util().debug("get cache dir path: " + _homeDirPath);
+//    LOG(util, debug, "get cache dir path: " + _homeDirPath);
 
     std::string fullPath = Poco::Environment::get("OMM_CACHE", getHomeDirPath() + "/cache/") + relPath;
     try {
         Poco::File(fullPath).createDirectories();
     }
     catch (Poco::Exception& e) {
-        Log::instance()->util().error("can not create cache directory path: " + fullPath);
+        LOG(util, error, "can not create cache directory path: " + fullPath);
     }
     return fullPath;
 }
@@ -97,12 +97,13 @@ Home::getConfigDirPath(const std::string& relPath)
     Poco::Mutex::ScopedLock lock(_lock);
 
     std::string fullPath = Poco::Environment::get("OMM_CONFIG", getHomeDirPath() + "/config/") + relPath;
-    Log::instance()->util().debug("OMM config path: " + fullPath);
+//    LOG(util, debug, "OMM config path: " + fullPath);
+    LOG(util, debug, "OMM config path: " + fullPath);
     try {
         Poco::File(fullPath).createDirectories();
     }
     catch (Poco::Exception& e) {
-        Log::instance()->util().error("can not create config directory path: " + fullPath);
+        LOG(util, error, "can not create config directory path: " + fullPath);
     }
     return fullPath;
 }
@@ -118,7 +119,7 @@ Home::getMetaDirPath(const std::string& relPath)
         Poco::File(fullPath).createDirectories();
     }
     catch (Poco::Exception& e) {
-        Log::instance()->util().error("can not create meta directory path: " + fullPath);
+        LOG(util, error, "can not create meta directory path: " + fullPath);
     }
     return fullPath;
 }

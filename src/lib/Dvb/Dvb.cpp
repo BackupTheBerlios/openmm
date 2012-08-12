@@ -31,6 +31,7 @@
 using namespace Omm;
 using namespace Omm::Dvb;
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
@@ -61,7 +62,7 @@ Log::dvb()
 {
     return *_pDvbLogger;
 }
-
+#endif // NDEBUG
 
 
 DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid) :
@@ -179,21 +180,21 @@ DvbFrontend::~DvbFrontend()
 void
 DvbFrontend::openFrontend()
 {
-    Log::instance()->dvb().debug("opening frontend");
+    LOG(dvb, debug, "opening frontend");
 
     if ((_fileDesc = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
-        Log::instance()->dvb().error("opening frontend failed");
+        LOG(dvb, error, "opening frontend failed");
     }
 
     int result = ioctl(_fileDesc, FE_GET_INFO, &_feInfo);
 
     if (result < 0) {
-        Log::instance()->dvb().error("ioctl FE_GET_INFO failed");
+        LOG(dvb, error, "ioctl FE_GET_INFO failed");
         close(_fileDesc);
     }
 
     if (_feInfo.type != FE_QPSK) {
-        Log::instance()->dvb().error("frontend device is not a QPSK (DVB-S) device");
+        LOG(dvb, error, "frontend device is not a QPSK (DVB-S) device");
         close(_fileDesc);
     }
 }
@@ -202,7 +203,7 @@ DvbFrontend::openFrontend()
 bool
 DvbFrontend::tune(DvbChannel* pChannel)
 {
-    Log::instance()->dvb().debug("frontend tuning to channel");
+    LOG(dvb, debug, "frontend tuning to channel");
 
     bool success = false;
     unsigned int ifreq;
@@ -217,7 +218,7 @@ DvbFrontend::tune(DvbChannel* pChannel)
                 if (_pAdapter->_recPsi) {
                     unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_sid);
                     if (pmtPid == 0) {
-                        Log::instance()->dvb().error("couldn't find pmt-pid for sid"); // %04x\n",sid);
+                        LOG(dvb, error, "couldn't find pmt-pid for sid"); // %04x\n",sid);
                         success = false;
                     }
                     else if (!_pAdapter->_pDemux->setPatPid(0) ||
@@ -229,7 +230,7 @@ DvbFrontend::tune(DvbChannel* pChannel)
         }
     }
 
-    Log::instance()->dvb().debug("frontend tuning " + std::string(success ? "success." : "failed."));
+    LOG(dvb, debug, "frontend tuning " + std::string(success ? "success." : "failed."));
     return success;
 }
 
@@ -261,23 +262,23 @@ DvbFrontend::diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBa
     fe_sec_mini_cmd_t burst = satNum % 2 ? SEC_MINI_B : SEC_MINI_A;
 
     if (ioctl(_fileDesc, FE_SET_TONE, SEC_TONE_OFF) == -1) {
-        Log::instance()->dvb().error("FE_SET_TONE failed");
+        LOG(dvb, error, "FE_SET_TONE failed");
     }
     if (ioctl(_fileDesc, FE_SET_VOLTAGE, voltage) == -1) {
-        Log::instance()->dvb().error("FE_SET_VOLTAGE failed");
+        LOG(dvb, error, "FE_SET_VOLTAGE failed");
     }
     usleep(15 * 1000);
     if (ioctl(_fileDesc, FE_DISEQC_SEND_MASTER_CMD, &cmd.cmd) == -1) {
-        Log::instance()->dvb().error("FE_DISEQC_SEND_MASTER_CMD failed");
+        LOG(dvb, error, "FE_DISEQC_SEND_MASTER_CMD failed");
     }
     usleep(cmd.wait * 1000);
     usleep(15 * 1000);
     if (ioctl(_fileDesc, FE_DISEQC_SEND_BURST, burst) == -1) {
-        Log::instance()->dvb().error("FE_DISEQC_SEND_BURST failed");
+        LOG(dvb, error, "FE_DISEQC_SEND_BURST failed");
     }
     usleep(15 * 1000);
     if (ioctl(_fileDesc, FE_SET_TONE, tone) == -1) {
-        Log::instance()->dvb().error("FE_SET_TONE failed");
+        LOG(dvb, error, "FE_SET_TONE failed");
     }
 }
 
@@ -300,7 +301,7 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
     tuneto.u.qpsk.fec_inner = FEC_AUTO;
 
     if (ioctl(_fileDesc, FE_SET_FRONTEND, &tuneto) == -1) {
-        Log::instance()->dvb().error("FE_SET_FRONTEND failed");
+        LOG(dvb, error, "FE_SET_FRONTEND failed");
         return false;
     }
 
@@ -317,7 +318,7 @@ DvbFrontend::checkFrontend()
 //     int timeout = 0;
 
     if (ioctl(_fileDesc, FE_READ_STATUS, &status) == -1) {
-        Log::instance()->dvb().error("FE_READ_STATUS failed");
+        LOG(dvb, error, "FE_READ_STATUS failed");
     }
     /* some frontends might not support all these ioctls, thus we
     * avoid printing errors */
@@ -345,7 +346,7 @@ DvbFrontend::checkFrontend()
     */
 
     if (status & FE_HAS_LOCK) {
-        Log::instance()->dvb().debug("FE_HAS_LOCK");
+        LOG(dvb, debug, "FE_HAS_LOCK");
     }
 }
 
@@ -373,24 +374,24 @@ DvbDemux::~DvbDemux()
 void
 DvbDemux::openDemux()
 {
-    Log::instance()->dvb().debug("opening demuxer");
+    LOG(dvb, debug, "opening demuxer");
 
     if ((_fileDescVideo = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        Log::instance()->dvb().error("opening video demux failed");
+        LOG(dvb, error, "opening video demux failed");
     }
     if ((_fileDescAudio = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        Log::instance()->dvb().error("opening audio demux failed");
+        LOG(dvb, error, "opening audio demux failed");
     }
     if ((_fileDescPcr = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        Log::instance()->dvb().error("opening pcr demux failed");
+        LOG(dvb, error, "opening pcr demux failed");
     }
 
     if (_pAdapter->_recPsi){
         if ((_fileDescPat = open(_deviceName.c_str(), O_RDWR)) < 0) {
-            Log::instance()->dvb().error("opening pat demux failed");
+            LOG(dvb, error, "opening pat demux failed");
         }
         if ((_fileDescPmt = open(_deviceName.c_str(), O_RDWR)) < 0) {
-            Log::instance()->dvb().error("opening pmt demux failed");
+            LOG(dvb, error, "opening pmt demux failed");
         }
     }
 }
@@ -446,7 +447,7 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
 
     int buffersize = 64 * 1024;
     if (ioctl(fileDesc, DMX_SET_BUFFER_SIZE, buffersize) == -1) {
-        Log::instance()->dvb().error("DMX_SET_BUFFER_SIZE failed");
+        LOG(dvb, error, "DMX_SET_BUFFER_SIZE failed");
     }
 
     struct dmx_pes_filter_params pesfilter;
@@ -460,7 +461,7 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
     if (ioctl(fileDesc, DMX_SET_PES_FILTER, &pesfilter) == -1) {
 //         fprintf(stderr, "DMX_SET_PES_FILTER failed "
 //                 "(PID = 0x%04x): %d %m\n", pid, errno);
-        Log::instance()->dvb().error("DMX_SET_PES_FILTER failed");
+        LOG(dvb, error, "DMX_SET_PES_FILTER failed");
         return false;
     }
 
@@ -486,7 +487,7 @@ DvbDemux::getPmtPid(int sid)
     f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
     if (ioctl(_fileDescPat, DMX_SET_FILTER, &f) == -1) {
-        Log::instance()->dvb().error("DMX_SET_FILTER failed");
+        LOG(dvb, error, "DMX_SET_FILTER failed");
         return 0;
     }
 
@@ -495,7 +496,7 @@ DvbDemux::getPmtPid(int sid)
         if (((count = read(_fileDescPat, buf, sizeof(buft))) < 0) && errno == EOVERFLOW)
             count = read(_fileDescPat, buf, sizeof(buft));
         if (count < 0) {
-            Log::instance()->dvb().error("read_sections: read error");
+            LOG(dvb, error, "read_sections: read error");
             return 0;
         }
 
@@ -540,7 +541,7 @@ DvbDvr::openDvr()
 {
     _dvrStream.open(_deviceName.c_str());
     if (!_dvrStream) {
-        Log::instance()->dvb().error("failed to open dvb rec device.");
+        LOG(dvb, error, "failed to open dvb rec device.");
     }
 }
 
@@ -592,13 +593,13 @@ DvbDevice::addAdapter(DvbAdapter* pAdapter)
 bool
 DvbDevice::tune(DvbChannel* pChannel)
 {
-    Log::instance()->dvb().debug("start tuning ...");
+    LOG(dvb, debug, "start tuning ...");
     if (_adapters.size() == 0) {
-        Log::instance()->dvb().error("no adapter found, tuning aborted.");
+        LOG(dvb, error, "no adapter found, tuning aborted.");
         return false;
     }
     if (!_adapters[0]->_pFrontend) {
-        Log::instance()->dvb().error("no frontend found, tuning aborted.");
+        LOG(dvb, error, "no frontend found, tuning aborted.");
         return false;
     }
     return _adapters[0]->_pFrontend->tune(pChannel);
@@ -609,5 +610,5 @@ void
 DvbDevice::stopTune()
 {
     _adapters[0]->_pFrontend->stopTune();
-    Log::instance()->dvb().debug("stopped tuning.");
+    LOG(dvb, debug, "stopped tuning.");
 }

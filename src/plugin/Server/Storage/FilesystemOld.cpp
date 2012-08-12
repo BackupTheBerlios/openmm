@@ -262,8 +262,8 @@ FileModel::getContainerClass()
 std::string
 FileModel::getClass(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get class of item with path " + path + ": ");
-    Omm::Av::Log::instance()->upnpav().debug(_items[path]->_class);
+    LOGNS(Omm::Av, upnpav, debug, "get class of item with path " + path + ": ");
+    LOGNS(Omm::Av, upnpav, debug, _items[path]->_class);
 
     return _items[path]->_class;
 }
@@ -272,7 +272,7 @@ FileModel::getClass(const std::string& path)
 std::string
 FileModel::getTitle(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get title: " + _items[path]->_title);
+    LOGNS(Omm::Av, upnpav, debug, "get title: " + _items[path]->_title);
     return _items[path]->_title;
 }
 
@@ -280,7 +280,7 @@ FileModel::getTitle(const std::string& path)
 std::string
 FileModel::getOptionalProperty(const std::string& path, const std::string& name)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get property: " + name);
+    LOGNS(Omm::Av, upnpav, debug, "get property: " + name);
 
     if (name == Omm::Av::AvProperty::ARTIST) {
         return _items[path]->_artist;
@@ -316,7 +316,7 @@ FileModel::getStream(const std::string& path, const std::string& resourcePath)
     std::string filePath = _basePath + path;
     std::istream* pRes = new std::ifstream(filePath.c_str());
     if (!*pRes) {
-        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + _basePath + path);
+        LOGNS(Omm::Av, upnpav, error, "could not open file for streaming: " + _basePath + path);
         return 0;
     }
     return pRes;
@@ -329,7 +329,7 @@ FileModel::getIconStream(const std::string& path)
     std::string iconPath = _basePath + "/.omm/cache/icons" + path;
     std::istream* pRes = new std::ifstream(iconPath.c_str());
     if (!*pRes) {
-        Omm::Av::Log::instance()->upnpav().error("could not open icon for streaming: " + iconPath);
+        LOGNS(Omm::Av, upnpav, error, "could not open icon for streaming: " + iconPath);
         return 0;
     }
     return pRes;
@@ -344,7 +344,7 @@ FileModel::getSize(const std::string& path)
         res = Poco::File((_basePath + path)).getSize();
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + _basePath + path);
+        LOGNS(Omm::Av, upnpav, error, "could not get size of file: " + _basePath + path);
         res = 0;
     }
     return res;
@@ -354,7 +354,7 @@ FileModel::getSize(const std::string& path)
 std::string
 FileModel::getMime(const std::string& path)
 {
-    Omm::Av::Log::instance()->upnpav().debug("get mime: " + _items[path]->_mime);
+    LOGNS(Omm::Av, upnpav, debug, "get mime: " + _items[path]->_mime);
     return _items[path]->_mime;
 }
 
@@ -370,7 +370,7 @@ FileModel::getDlna(const std::string& path)
 void
 FileModel::endDocument()
 {
-    Omm::Av::Log::instance()->upnpav().debug("parsed items: " + Poco::NumberFormatter::format(_items.size()));
+    LOGNS(Omm::Av, upnpav, debug, "parsed items: " + Poco::NumberFormatter::format(_items.size()));
 }
 
 
@@ -384,7 +384,7 @@ FileModel::startElement(const Poco::XML::XMLString& uri, const Poco::XML::XMLStr
     else if (localName == FileItem::FILE_ITEM_LIST) {
         //_containerClass = attributes.getValue(FileItem::FILE_ITEM_CONTAINER_CLASS_PROPERTY);
         _containerClass = attributes.getValue(0);
-        Omm::Av::Log::instance()->upnpav().debug("local name: " + localName + " number of attributes: " + Poco::NumberFormatter::format(attributes.getLength()) + " parsing attribute container class: " + _containerClass);
+        LOGNS(Omm::Av, upnpav, debug, "local name: " + localName + " number of attributes: " + Poco::NumberFormatter::format(attributes.getLength()) + " parsing attribute container class: " + _containerClass);
     }
     else {
         _parseElement = localName;
@@ -449,7 +449,7 @@ FileModel::scanDirectory(const std::string& basePath)
 //        _itemMap.clear();
         writeCache();
     }
-    Omm::Av::Log::instance()->upnpav().debug("file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
+    LOGNS(Omm::Av, upnpav, debug, "file data model read " + Poco::NumberFormatter::format(_items.size()) + " file items");
 }
 
 
@@ -494,7 +494,7 @@ FileModel::scanDirectory(Poco::File& directory)
             }
         }
         catch(...) {
-            Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
+            LOGNS(Omm::Av, upnpav, warning, dir->path() + " not found while scanning directory, ignoring.");
         }
         ++dir;
     }
@@ -510,12 +510,12 @@ FileModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
+        LOGNS(Omm::Av, upnpav, warning, "could not find avstream tagger plugin: " + taggerPlugin + " loading simple tagger ...");
         try {
             _pTagger = taggerPluginLoader.load("tagger-vlc");
         }
         catch(Poco::NotFoundException) {
-            Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            LOGNS(Omm::Av, upnpav, warning, "could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
             _pTagger = taggerPluginLoader.load("tagger-simple");
         }
     }
@@ -544,7 +544,7 @@ FileModel::readCache()
         parser.parse(_cachePath);
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().warning("cache parser error: " + e.displayText());
+        LOGNS(Omm::Av, upnpav, warning, "cache parser error: " + e.displayText());
     }
     for (std::vector<FileItem*>::iterator it = _itemList.begin(); it != _itemList.end(); ++it) {
         addPath((*it)->_path);
@@ -557,7 +557,7 @@ FileModel::readCache()
 void
 FileModel::writeCache()
 {
-    Omm::Av::Log::instance()->upnpav().debug("writing cache to disk ...");
+    LOGNS(Omm::Av, upnpav, debug, "writing cache to disk ...");
 
     Poco::XML::Document* pCacheDoc= new Poco::XML::Document;
     Poco::AutoPtr<Poco::XML::Element> pFileItemList = pCacheDoc->createElement(FileItem::FILE_ITEM_LIST);
@@ -576,7 +576,7 @@ FileModel::writeCache()
     std::ofstream ostr(_cachePath.c_str());
     writer.writeNode(ostr, pCacheDoc);
 
-    Omm::Av::Log::instance()->upnpav().debug("cache written to disk.");
+    LOGNS(Omm::Av, upnpav, debug, "cache written to disk.");
 }
 
 

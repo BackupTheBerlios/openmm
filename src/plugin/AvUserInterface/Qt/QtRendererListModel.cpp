@@ -45,7 +45,7 @@ QtRendererListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     
     if (index.internalPointer() == 0) {
-        Omm::Av::Log::instance()->upnpav().warning("UpnpRendererListModel::data() reference to renderer device is 0:");
+        LOGNS(Omm::Av, upnpav, warning, "UpnpRendererListModel::data() reference to renderer device is 0:");
         return QVariant();
     }
     
@@ -118,7 +118,7 @@ QtRendererListModel::columnCount(const QModelIndex &/*parent*/) const
 void
 QtRendererListModel::beginAddRenderer(int position)
 {
-    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::beginAddRenderer() at position:" + Poco::NumberFormatter::format(position));
+    LOGNS(Omm::Av, upnpav, debug, "UpnpRendererListModel::beginAddRenderer() at position:" + Poco::NumberFormatter::format(position));
     
     beginInsertRows(QModelIndex(), position, position);
 }
@@ -127,7 +127,7 @@ QtRendererListModel::beginAddRenderer(int position)
 void
 QtRendererListModel::endAddRenderer()
 {
-    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::endAddRenderer()");
+    LOGNS(Omm::Av, upnpav, debug, "UpnpRendererListModel::endAddRenderer()");
     
     endInsertRows();
     emit layoutChanged();
@@ -139,7 +139,7 @@ QtRendererListModel::endAddRenderer()
 void
 QtRendererListModel::beginRemoveRenderer(int position)
 {
-    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::beginRemoveRenderer() at position:" + Poco::NumberFormatter::format(position));
+    LOGNS(Omm::Av, upnpav, debug, "UpnpRendererListModel::beginRemoveRenderer() at position:" + Poco::NumberFormatter::format(position));
     
     beginRemoveRows(QModelIndex(), position, position);
 }
@@ -148,7 +148,7 @@ QtRendererListModel::beginRemoveRenderer(int position)
 void
 QtRendererListModel::endRemoveRenderer()
 {
-    Omm::Av::Log::instance()->upnpav().debug("UpnpRendererListModel::endRemoveRenderer()");
+    LOGNS(Omm::Av, upnpav, debug, "UpnpRendererListModel::endRemoveRenderer()");
     
     endRemoveRows();
     emit layoutChanged();

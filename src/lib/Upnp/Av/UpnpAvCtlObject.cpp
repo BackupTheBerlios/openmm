@@ -152,7 +152,7 @@ CtlMediaObject::readNode(Poco::XML::Node* pNode)
 int
 CtlMediaObject::fetchChildren(ui4 count)
 {
-    Log::instance()->upnpav().debug("controller media object fetch children of object: " + _objectId);
+    LOG(upnpav, debug, "controller media object fetch children of object: " + _objectId);
 
     if (_pServerCode && !_fetchedAllChildren) {
         std::string result;
@@ -166,7 +166,7 @@ CtlMediaObject::fetchChildren(ui4 count)
 //             error("");
 // FIXME: if no children are fetched (network error) and _fetchedAllChildren remains false, controller doesn't stop fetching children
 //             _fetchedAllChildren = true;
-            Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
+            LOG(upnpav, error, "could not fetch children: " + e.displayText());
             return 0;
         }
         readChildren(result);

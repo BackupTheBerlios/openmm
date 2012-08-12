@@ -50,7 +50,7 @@ QtStdApplication::addToolBar(QToolBar* pToolBar)
 void
 QtStdApplication::initApplication(int argc, char** argv)
 {
-    Omm::Log::instance()->upnp().debug("init qt std application ...");
+    LOGNS(Omm, upnp, debug, "init qt std application ...");
 
 //    setupUnixSignalHandlers();
     qRegisterMetaType<std::string>();
@@ -95,7 +95,7 @@ QtStdApplication::initApplication(int argc, char** argv)
 
     _pMainWindow->show();
     
-    Omm::Log::instance()->upnp().debug("finished init qt application.");
+    LOGNS(Omm, upnp, debug, "finished init qt application.");
 }
 
 
@@ -171,13 +171,13 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::initGui()
 //{
-////    Omm::Av::Log::instance()->upnpav().debug("init qt gui ...");
+////    LOGNS(Omm::Av, upnpav, debug, "init qt gui ...");
 //
 //    setupUnixSignalHandlers();
 //    qRegisterMetaType<std::string>();
 //
 ////    _defaultStyleSheet = _pApp->styleSheet();
-////    Omm::Av::Log::instance()->upnpav().debug("default style sheet: " + _defaultStyleSheet.toStdString());
+////    LOGNS(Omm::Av, upnpav, debug, "default style sheet: " + _defaultStyleSheet.toStdString());
 ////    _defaultStyleSheet +=
 ////            "* {font-size: 12px}";
 ////    _defaultStyleSheet +=
@@ -244,7 +244,7 @@ QtStdApplication::quit()
 ////    addLocalServer(pServer);
 ////    startLocalServers();
 //
-////    Omm::Av::Log::instance()->upnpav().debug("finished init qt gui.");
+////    LOGNS(Omm::Av, upnpav, debug, "finished init qt gui.");
 //}
 //
 //
@@ -272,7 +272,7 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::beginNetworkActivity()
 //{
-////    Omm::Av::Log::instance()->upnpav().debug("begin network activity");
+////    LOGNS(Omm::Av, upnpav, debug, "begin network activity");
 //    emit startNetworkActivity();
 //}
 //
@@ -280,7 +280,7 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::endNetworkActivity()
 //{
-////    Omm::Av::Log::instance()->upnpav().debug("end network activity");
+////    LOGNS(Omm::Av, upnpav, debug, "end network activity");
 //    emit stopNetworkActivity();
 //}
 //
@@ -414,12 +414,12 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::skipForwardButtonPressed()
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("skipping to next track in browser list ...");
+//    LOGNS(Omm::Av, upnpav, debug, "skipping to next track in browser list ...");
 //    QModelIndex current = _pBrowserWidget->getCurrentIndex();
 ////    QModelIndex current = _browserWidget._browserView->currentIndex();
 //    if (current.isValid()) {
 //        Omm::Av::CtlMediaObject* pCurrentObject = static_cast<Omm::Av::CtlMediaObject*>(current.internalPointer());
-//        Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
+//        LOGNS(Omm::Av, upnpav, debug, "current title is: " + pCurrentObject->getTitle());
 //        QModelIndex next;
 //        do {
 //            next = current.sibling(current.row() + 1, 0);
@@ -429,7 +429,7 @@ QtStdApplication::quit()
 //                    current = next;
 //                }
 //                else {
-//                    Omm::Av::Log::instance()->upnpav().debug("next title is: " + pNextObject->getTitle());
+//                    LOGNS(Omm::Av, upnpav, debug, "next title is: " + pNextObject->getTitle());
 //                    _pBrowserWidget->setCurrentIndex(next);
 ////                    _browserWidget._browserView->setCurrentIndex(next);
 //                    mediaObjectSelected(pNextObject);
@@ -447,12 +447,12 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::skipBackwardButtonPressed()
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("skipping to previous track in browser list ...");
+//    LOGNS(Omm::Av, upnpav, debug, "skipping to previous track in browser list ...");
 //    QModelIndex current = _pBrowserWidget->getCurrentIndex();
 ////    QModelIndex current = _browserWidget._browserView->currentIndex();
 //    if (current.isValid()) {
 //        Omm::Av::CtlMediaObject* pCurrentObject = static_cast<Omm::Av::CtlMediaObject*>(current.internalPointer());
-//        Omm::Av::Log::instance()->upnpav().debug("current title is: " + pCurrentObject->getTitle());
+//        LOGNS(Omm::Av, upnpav, debug, "current title is: " + pCurrentObject->getTitle());
 //        QModelIndex previous;
 //        do {
 //            previous = current.sibling(current.row() - 1, 0);
@@ -462,7 +462,7 @@ QtStdApplication::quit()
 //                    current = previous;
 //                }
 //                else {
-//                    Omm::Av::Log::instance()->upnpav().debug("previous title is: " + pPreviousObject->getTitle());
+//                    LOGNS(Omm::Av, upnpav, debug, "previous title is: " + pPreviousObject->getTitle());
 //                    _pBrowserWidget->setCurrentIndex(previous);
 ////                    _browserWidget._browserView->setCurrentIndex(previous);
 //                    mediaObjectSelected(pPreviousObject);
@@ -566,7 +566,7 @@ QtStdApplication::quit()
 //void
 //QtAvInterface::unixSignalHandler(int)
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("caught unix signal");
+//    LOGNS(Omm::Av, upnpav, debug, "caught unix signal");
 ////    _pApp->quit();
 //}
 

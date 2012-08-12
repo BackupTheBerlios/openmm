@@ -23,6 +23,7 @@
 #include "Log.h"
 
 
+#ifndef NDEBUG
 namespace Omm {
 namespace Av {
 
@@ -62,4 +63,5 @@ Av::Log::upnpav()
 
 }  // namespace Omm
 }  // namespace Av
+#endif //NDEBUG
 

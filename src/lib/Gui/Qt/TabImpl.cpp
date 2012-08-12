@@ -24,6 +24,7 @@
 #include "TabImpl.h"
 #include "Gui/Tab.h"
 #include "Gui/GuiLogger.h"
+#include "Log.h"
 
 namespace Omm {
 namespace Gui {
@@ -42,7 +43,7 @@ class QtTabWidget : public QTabWidget
 
 TabViewImpl::TabViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab widget implementation ctor");
+    LOG(gui, debug, "tab widget implementation ctor");
 
     QtTabWidget* pNativeView = new QtTabWidget;
 
@@ -61,13 +62,13 @@ TabViewImpl::addView(View* pView, const std::string& tabName, bool show)
     int tabIndex = static_cast<QtTabWidget*>(_pNativeView)->indexOf(static_cast<QWidget*>(pView->getNativeView()));
     if (tabIndex != -1) {
         if (!show) {
-            Omm::Gui::Log::instance()->gui().debug("tab widget implementation remove widget");
+            LOG(gui, debug, "tab widget implementation remove widget");
             static_cast<QtTabWidget*>(_pNativeView)->removeTab(tabIndex);
             return -1;
         }
     }
     else {
-        Omm::Gui::Log::instance()->gui().debug("tab widget implementation add widget");
+        LOG(gui, debug, "tab widget implementation add widget");
         static_cast<QtTabWidget*>(_pNativeView)->addTab(static_cast<QWidget*>(pView->getNativeView()), tabName.c_str());
         return 1;
     }

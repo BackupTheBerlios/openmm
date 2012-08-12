@@ -61,7 +61,7 @@ namespace Gui {
 
 TextLineViewImpl::TextLineViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("TextLine view impl ctor");
+//    LOG(gui, debug, "TextLine view impl ctor");
     OmmGuiTextLine* pNativeView = [[OmmGuiTextLine alloc] init];
     [pNativeView setImpl:this];
 
@@ -77,7 +77,7 @@ TextLineViewImpl::~TextLineViewImpl()
 void
 TextLineViewImpl::setTextLine(const std::string& line)
 {
-//    Omm::Gui::Log::instance()->gui().debug("TextLine view impl set label");
+//    LOG(gui, debug, "TextLine view impl set label");
     NSString* pTextLine = [[NSString alloc] initWithUTF8String:line.c_str()];
     [static_cast<UITextField*>(_pNativeView) setText:pTextLine];
 }
@@ -104,7 +104,7 @@ TextLineViewImpl::setAlignment(View::Alignment alignment)
 void
 TextLineViewImpl::editingFinished(const std::string& text)
 {
-//    Omm::Gui::Log::instance()->gui().debug("text line view impl, calling editedText virtual method: " + text);
+//    LOG(gui, debug, "text line view impl, calling editedText virtual method: " + text);
     IMPL_NOTIFY_CONTROLLER(TextLineController, editedText, text);
 }
 

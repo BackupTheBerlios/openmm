@@ -52,10 +52,10 @@
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
-#include "Log.h"
 
 namespace Omm {
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
@@ -137,6 +137,7 @@ Log::event()
 {
     return *_pEventLogger;
 }
+#endif // NDEBUG
 
 
 Icon::Icon(int width, int height, int depth, const std::string& mime, const std::string& uri) :
@@ -147,7 +148,7 @@ _mime(mime),
 _requestPath(""),
 _searchPath(":/usr/lib/omm:/usr/local/lib/omm")
 {
-    Log::instance()->upnp().debug("search default icon path and OMM_ICON_PATH for icon: " + uri);
+    LOG(upnp, debug, "search default icon path and OMM_ICON_PATH for icon: " + uri);
     try {
         _searchPath = Poco::Environment::get("OMM_ICON_PATH") + _searchPath;
     }
@@ -159,7 +160,7 @@ _searchPath(":/usr/lib/omm:/usr/local/lib/omm")
             retrieve(uri);
         }
         catch (Poco::NotFoundException) {
-            Log::instance()->upnp().error("failed to retrieve icon from: " + uri);
+            LOG(upnp, error, "failed to retrieve icon from: " + uri);
         }
     }
 }
@@ -195,7 +196,7 @@ Icon::setIconRequestPath(const std::string& path)
 void
 Icon::retrieve(const std::string& uri)
 {
-    Log::instance()->upnp().debug("retrieve icon: " + uri);
+    LOG(upnp, debug, "retrieve icon: " + uri);
     Poco::URI iconUri(uri);
 
     if (iconUri.getScheme() == "file") {
@@ -203,7 +204,7 @@ Icon::retrieve(const std::string& uri)
         if (!f.exists()) {
             throw Poco::NotFoundException();
         }
-        Log::instance()->upnp().debug("reading icon from file: " + iconUri.getPath());
+        LOG(upnp, debug, "reading icon from file: " + iconUri.getPath());
         std::ifstream ifs(iconUri.getPath().c_str());
         char* pData = new char[f.getSize()];
         ifs.read(pData, f.getSize());
@@ -211,7 +212,7 @@ Icon::retrieve(const std::string& uri)
 
     }
     else if (iconUri.getScheme() == "http") {
-        Log::instance()->upnp().debug("download icon: " + uri);
+        LOG(upnp, debug, "download icon: " + uri);
         Poco::Net::HTTPStreamFactory streamOpener;
 
         _buffer.clear();
@@ -224,14 +225,14 @@ Icon::retrieve(const std::string& uri)
             delete pInStream;
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnp().error("download icon failed: " + e.displayText());
+            LOG(upnp, error, "download icon failed: " + e.displayText());
         }
         if (size == 0) {
-            Log::instance()->upnp().error("download icon failed, no bytes received.");
+            LOG(upnp, error, "download icon failed, no bytes received.");
             return;
         }
         else {
-            Log::instance()->upnp().debug("download icon success, bytes: " + Poco::NumberFormatter::format(size));
+            LOG(upnp, debug, "download icon success, bytes: " + Poco::NumberFormatter::format(size));
         }
     }
     else if (iconUri.isRelative()) {
@@ -243,12 +244,12 @@ Icon::retrieve(const std::string& uri)
             }
             Poco::URI baseUri(*it + "/");
             baseUri.resolve(iconUri);
-            Log::instance()->upnp().debug("try to read icon from file: " + baseUri.getPath());
+            LOG(upnp, debug, "try to read icon from file: " + baseUri.getPath());
             Poco::File f(baseUri.getPath());
             if (!f.exists()) {
                 continue;
             }
-            Log::instance()->upnp().debug("reading icon from file: " + baseUri.getPath());
+            LOG(upnp, debug, "reading icon from file: " + baseUri.getPath());
             std::ifstream ifs(baseUri.getPath().c_str());
             char* pData = new char[f.getSize()];
             ifs.read(pData, f.getSize());
@@ -306,12 +307,12 @@ SsdpSocket::init()
     _mode = NotConfigured;
     _pBuffer = new char[BUFFER_SIZE];
     // listen to UDP unicast and send out to multicast
-    Log::instance()->ssdp().debug("create broadcast socket");
+    LOG(ssdp, debug, "create broadcast socket");
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
     _pSsdpLocalSenderSocket = new Poco::Net::DatagramSocket;
 
     // listen to UDP multicast
-    Log::instance()->ssdp().debug("create listener socket ...");
+    LOG(ssdp, debug, "create listener socket ...");
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
     _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true);
 //    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true);
@@ -334,7 +335,7 @@ SsdpSocket::init()
 //void
 //SsdpSocket::addInterface(const std::string& name)
 //{
-//    Log::instance()->ssdp().information("add interface: " + name);
+//    LOG(ssdp, information, "add interface: " + name);
 ////    setupSockets();
 //}
 
@@ -342,7 +343,7 @@ SsdpSocket::init()
 //void
 //SsdpSocket::removeInterface(const std::string& name)
 //{
-//    Log::instance()->ssdp().information("remove interface: " + name);
+//    LOG(ssdp, information, "remove interface: " + name);
 ////    resetSockets();
 ////    deinit();
 ////    init();
@@ -361,11 +362,11 @@ void
 SsdpSocket::startListen()
 {
     if (_mode == NotConfigured) {
-        Log::instance()->ssdp().error("failed to start SSDP socket, not configured.");
+        LOG(ssdp, error, "failed to start SSDP socket, not configured.");
         return;
     }
     else if (_mode == Multicast && !_pMulticastListenerThread) {
-        Log::instance()->ssdp().information("starting SSDP multicast listener ...");
+        LOG(ssdp, information, "starting SSDP multicast listener ...");
         _pMulticastListenerThread = new Poco::Thread;
         _pMulticastReactor = new Poco::Net::SocketReactor;
         _pMulticastReactor->addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
@@ -373,14 +374,14 @@ SsdpSocket::startListen()
         _pMulticastListenerThread->start(*_pMulticastReactor);
     }
     else if (_mode == Broadcast && !_pBroadcastListenerThread) {
-        Log::instance()->ssdp().information("starting SSDP broadcast listener ...");
+        LOG(ssdp, information, "starting SSDP broadcast listener ...");
         _pBroadcastListenerThread = new Poco::Thread;
         _pBroadcastReactor = new Poco::Net::SocketReactor;
         _pBroadcastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
         _pBroadcastReactor->addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
         _pBroadcastListenerThread->start(*_pBroadcastReactor);
     }
-    Log::instance()->ssdp().information("SSDP listener started.");
+    LOG(ssdp, information, "SSDP listener started.");
 }
 
 
@@ -388,11 +389,11 @@ void
 SsdpSocket::stopListen()
 {
     if (_mode == NotConfigured) {
-        Log::instance()->ssdp().error("failed to stop SSDP socket, not configured.");
+        LOG(ssdp, error, "failed to stop SSDP socket, not configured.");
         return;
     }
     if (_pMulticastListenerThread) {
-        Log::instance()->ssdp().information("stopping SSDP multicast listener ...");
+        LOG(ssdp, information, "stopping SSDP multicast listener ...");
         _pMulticastReactor->stop();
         _pMulticastListenerThread->join();
         delete _pMulticastReactor;
@@ -401,7 +402,7 @@ SsdpSocket::stopListen()
         _pMulticastListenerThread = 0;
     }
     if (_pBroadcastListenerThread) {
-        Log::instance()->ssdp().information("stopping SSDP broadcast listener ...");
+        LOG(ssdp, information, "stopping SSDP broadcast listener ...");
         _pBroadcastReactor->stop();
         _pBroadcastListenerThread->join();
         delete _pBroadcastReactor;
@@ -409,7 +410,7 @@ SsdpSocket::stopListen()
         delete _pBroadcastListenerThread;
         _pBroadcastListenerThread = 0;
     }
-    Log::instance()->ssdp().information("SSDP listener stopped.");
+    LOG(ssdp, information, "SSDP listener stopped.");
 }
 
 
@@ -426,45 +427,45 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
     else {
         loopReceiver = receiver;
     }
-    Log::instance()->ssdp().debug("sending SSDP message to address: " + loopReceiver.toString() + " ...");
+    LOG(ssdp, debug, "sending SSDP message to address: " + loopReceiver.toString() + " ...");
     try {
         if (_mode == Multicast) {
-            Log::instance()->ssdp().debug("sending SSDP message through multicast socket ...");
+            LOG(ssdp, debug, "sending SSDP message through multicast socket ...");
             bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
         }
         else if (_mode == Broadcast) {
-            Log::instance()->ssdp().debug("sending SSDP message through broadcast socket ...");
+            LOG(ssdp, debug, "sending SSDP message through broadcast socket ...");
             bytesSent = _pSsdpLocalSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
         }
     }
     catch(Poco::Net::NetException& e) {
-        Log::instance()->ssdp().error("sending SSDP message failed: " + e.message());
+        LOG(ssdp, error, "sending SSDP message failed: " + e.message());
     }
-    Log::instance()->ssdp().debug("SSDP message sent.");
+    LOG(ssdp, debug, "SSDP message sent.");
 }
 
 
 void
 SsdpSocket::setupSockets()
 {
-    Log::instance()->ssdp().debug("setting up SSDP sockets ...");
+    LOG(ssdp, debug, "setting up SSDP sockets ...");
     setMode(NotConfigured);
     // start with broadcast mode and set broadcast flag.
     try {
         _pSsdpLocalSenderSocket->setBroadcast(true);
     }
     catch(Poco::Exception& e) {
-        Log::instance()->ssdp().error("failed to set local SSDP socket to broadcast : " + e.message());
+        LOG(ssdp, error, "failed to set local SSDP socket to broadcast : " + e.message());
     }
     setMode(Broadcast);
     try {
         _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     }
     catch(Poco::Exception& e) {
-        Log::instance()->ssdp().error("failed to join multicast group: " + e.message());
-        Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
-        Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-        Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+        LOG(ssdp, error, "failed to join multicast group: " + e.message());
+        LOG(ssdp, warning, "MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+        LOG(ssdp, warning, "as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+        LOG(ssdp, warning, "switching to non-standard compliant broadcast mode for loopback interface.");
         return;
     }
     // set TTL on windows raises Poco::InvalidArgumentException.
@@ -472,16 +473,16 @@ SsdpSocket::setupSockets()
         _pSsdpSenderSocket->setTimeToLive(4);
     }
     catch(Poco::Exception& e) {
-        Log::instance()->ssdp().error("failed to set TTL of SSDP socket: " + e.message());
+        LOG(ssdp, error, "failed to set TTL of SSDP socket: " + e.message());
     }
     // switch to multicast was succesfull, so we turn on multicast flag.
     setMode(Multicast);
-    Log::instance()->ssdp().debug("setting up SSDP sockets in multicast mode finished.");
+    LOG(ssdp, debug, "setting up SSDP sockets in multicast mode finished.");
 
 
 //#ifndef __DARWIN__
 //    if (Net::NetworkInterfaceManager::instance()->loopbackOnly()) {
-//        Log::instance()->ssdp().warning("loopback is the only network interface, forcing broadcast mode.");
+//        LOG(ssdp, warning, "loopback is the only network interface, forcing broadcast mode.");
 //        setBroadcast();
 //    }
 //    else
@@ -489,16 +490,16 @@ SsdpSocket::setupSockets()
 //    {
 //        if (_mode != Multicast) {
 //            try {
-//                Log::instance()->ssdp().debug("set ttl to 4");
+//                LOG(ssdp, debug, "set ttl to 4");
 //                // FIXME: setting TTL on windows segfaults
 //    //            _pSsdpSenderSocket->setTimeToLive(4);  // TODO: let TTL be configurable
 //                setMulticast();
 //            }
 //            catch (Poco::IOException) {
-//                Log::instance()->ssdp().error("failed to join multicast group");
-//                Log::instance()->ssdp().warning("MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
-//                Log::instance()->ssdp().warning("as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-//                Log::instance()->ssdp().warning("switching to non-standard compliant broadcast mode for loopback interface.");
+//                LOG(ssdp, error, "failed to join multicast group");
+//                LOG(ssdp, warning, "MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
+//                LOG(ssdp, warning, "as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
+//                LOG(ssdp, warning, "switching to non-standard compliant broadcast mode for loopback interface.");
 //                setBroadcast();
 //            }
 //        }
@@ -509,13 +510,13 @@ SsdpSocket::setupSockets()
 //void
 //SsdpSocket::resetSockets()
 //{
-//    Log::instance()->ssdp().debug("reset SSDP sockets ...");
+//    LOG(ssdp, debug, "reset SSDP sockets ...");
 //    if (_mode == Multicast) {
-//        Log::instance()->ssdp().debug("leave multicast group ...");
+//        LOG(ssdp, debug, "leave multicast group ...");
 //        _pSsdpListenerSocket->leaveGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
 //    }
 //    else if (_mode == Broadcast) {
-//        Log::instance()->ssdp().debug("disable broadcast mode ...");
+//        LOG(ssdp, debug, "disable broadcast mode ...");
 //        _pSsdpLocalSenderSocket->setBroadcast(false);
 //    }
 //    _mode = NotConfigured;
@@ -526,22 +527,22 @@ void
 SsdpSocket::setMode(SocketMode mode)
 {
     if (mode == NotConfigured) {
-        Log::instance()->ssdp().debug("set SSDP socket to not configured");
+        LOG(ssdp, debug, "set SSDP socket to not configured");
     }
     else if (mode == Broadcast) {
-        Log::instance()->ssdp().debug("set SSDP socket to broadcast");
+        LOG(ssdp, debug, "set SSDP socket to broadcast");
     }
     else {
-        Log::instance()->ssdp().debug("set SSDP socket to multicast");
+        LOG(ssdp, debug, "set SSDP socket to multicast");
     }
     _mode = mode;
 
 //    if (_mode == Broadcast) {
-//        Log::instance()->ssdp().debug("disable broadcast mode ...");
+//        LOG(ssdp, debug, "disable broadcast mode ...");
 //        _pSsdpSenderSocket->setBroadcast(false);
 //    }
 //    if (_mode != Multicast) {
-//        Log::instance()->ssdp().debug("join multicast group ...");
+//        LOG(ssdp, debug, "join multicast group ...");
 //        _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
 //    }
 }
@@ -555,7 +556,7 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
     Poco::Net::DatagramSocket* pDatagramSocket = static_cast<Poco::Net::DatagramSocket*>(pSocket);
     int n = pDatagramSocket->receiveFrom(_pBuffer, BUFFER_SIZE, sender);
     if (n > 0) {
-        Log::instance()->ssdp().debug("received message from: " + sender.toString() + "" + Poco::LineEnding::NEWLINE_DEFAULT + std::string(_pBuffer, n));
+        LOG(ssdp, debug, "received message from: " + sender.toString() + "" + Poco::LineEnding::NEWLINE_DEFAULT + std::string(_pBuffer, n));
 
         _notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), sender));
     }
@@ -586,7 +587,7 @@ DescriptionReader::getDeviceDescription(const std::string& deviceDescriptionUri)
 DeviceContainer*
 DescriptionReader::deviceContainer()
 {
-    Log::instance()->desc().debug("parsing device container ...");
+    LOG(desc, debug, "parsing device container ...");
     DeviceContainer* pRes = new DeviceContainer;
     Poco::XML::Node* pNode = _pDocStack.top()->documentElement()->firstChild();
     bool deviceNodeFound = false;
@@ -607,7 +608,7 @@ DescriptionReader::deviceContainer()
         pNode = pNode->nextSibling();
     }
     if (!deviceNodeFound) {
-        Log::instance()->desc().error("file does not contain a UPnP device description.");
+        LOG(desc, error, "file does not contain a UPnP device description.");
     }
     return pRes;
 }
@@ -616,7 +617,7 @@ DescriptionReader::deviceContainer()
 DeviceData*
 DescriptionReader::rootDeviceData()
 {
-    Log::instance()->desc().debug("parsing root device ...");
+    LOG(desc, debug, "parsing root device ...");
     DeviceData* pRes = 0;
     Poco::XML::Node* pNode = _pDocStack.top()->documentElement()->firstChild();
     bool deviceNodeFound = false;
@@ -629,9 +630,9 @@ DescriptionReader::rootDeviceData()
         pNode = pNode->nextSibling();
     }
     if (!deviceNodeFound) {
-        Log::instance()->desc().error("file does not contain a UPnP root device.");
+        LOG(desc, error, "file does not contain a UPnP root device.");
     }
-    Log::instance()->desc().debug("parsing root device finished.");
+    LOG(desc, debug, "parsing root device finished.");
     return pRes;
 }
 
@@ -645,9 +646,9 @@ DescriptionReader::parseDescription(const std::string& description)
 #else
     parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
 #endif
-//    Log::instance()->desc().debug("parsing description:" + Poco::LineEnding::NEWLINE_DEFAULT + description);
+//    LOG(desc, debug, "parsing description:" + Poco::LineEnding::NEWLINE_DEFAULT + description);
     _pDocStack.push(parser.parseString(description.substr(0, description.rfind('>') + 1)));
-//    Log::instance()->desc().debug("parsing description finished.");
+//    LOG(desc, debug, "parsing description finished.");
 }
 
 
@@ -664,7 +665,7 @@ DescriptionReader::releaseDescriptionDocument()
 DeviceData*
 DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->desc().debug("parsing device ...");
+    LOG(desc, debug, "parsing device ...");
     DeviceData* pRes = new DeviceData();
 
     while (pNode)
@@ -684,14 +685,14 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
                             pRes->addService(service(pChild->firstChild()));
                         }
                         else {
-                            Log::instance()->desc().error("empty service");
+                            LOG(desc, error, "empty service");
                         }
                     }
                     pChild = pChild->nextSibling();
                 }
             }
             else {
-                Log::instance()->desc().error("service list without services");
+                LOG(desc, error, "service list without services");
             }
         }
         else if (pDeviceContainer && pNode->nodeName() == "deviceList") {
@@ -706,14 +707,14 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
                             pDeviceContainer->addDevice(pSubDevice);
                         }
                         else {
-                            Log::instance()->desc().error("empty embedded device");
+                            LOG(desc, error, "empty embedded device");
                         }
                     }
                     pChild = pChild->nextSibling();
                 }
             }
             else {
-                Log::instance()->desc().error("device list without embedded devices");
+                LOG(desc, error, "device list without embedded devices");
             }
         }
         else if (pNode->nodeName() == "iconList") {
@@ -753,7 +754,7 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
                         pRes->addIcon(pIcon);
                         }
                         else {
-                            Log::instance()->desc().error("empty icon specification");
+                            LOG(desc, error, "empty icon specification");
                         }
                     }
                     pChild = pChild->nextSibling();
@@ -765,7 +766,7 @@ DescriptionReader::deviceData(Poco::XML::Node* pNode, DeviceContainer* pDeviceCo
         }
         pNode = pNode->nextSibling();
     }
-    Log::instance()->desc().debug("parsing device finished.");
+    LOG(desc, debug, "parsing device finished.");
     return pRes;
 }
 
@@ -899,7 +900,7 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
         else if (pNode->nodeName() == "defaultValue" && pNode->hasChildNodes()) {
             std::string val = pNode->innerText();
             pRes->setDefaultValue(val);
-            Log::instance()->desc().debug("set default value for state variable \"" + pRes->getName() + "\" to: " + val);
+            LOG(desc, debug, "set default value for state variable \"" + pRes->getName() + "\" to: " + val);
 
             pRes->setValue(val);
         }
@@ -912,8 +913,8 @@ DescriptionReader::stateVar(Poco::XML::Node* pNode)
 std::string&
 UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
 {
-    Log::instance()->desc().information("base URI: " + _deviceDescriptionUri);
-    Log::instance()->desc().information("relative URI: " + relativeUri);
+    LOG(desc, information, "base URI: " + _deviceDescriptionUri);
+    LOG(desc, information, "relative URI: " + relativeUri);
     std::string* res;
     Poco::URI targetUri(_deviceDescriptionUri);
 
@@ -923,7 +924,7 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
         Poco::Path descriptionPath(targetUri.getPath());
         Poco::Path relativePath(relativeUri);
         std::string path = descriptionPath.parent().toString() + relativePath.getFileName();
-        Log::instance()->desc().information("reading description from file: " + path);
+        LOG(desc, information, "reading description from file: " + path);
         std::ifstream ifs(path.c_str());
         std::stringstream ss;
         Poco::StreamCopier::copyStream(ifs, ss);
@@ -931,8 +932,8 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
     }
     else if (targetUri.getScheme() == "http") {
         targetUri.resolve(relativeUri);
-        Log::instance()->desc().information("retrieving description from: " + targetUri.toString());
-        Log::instance()->desc().information("downloading description from host: " + targetUri.getHost()
+        LOG(desc, information, "retrieving description from: " + targetUri.toString());
+        LOG(desc, information, "downloading description from host: " + targetUri.getHost()\
              + ", port: " + Poco::NumberFormatter::format(targetUri.getPort()) + ", path: " + targetUri.getPath());
         Poco::Net::HTTPClientSession session(targetUri.getHost(), targetUri.getPort());
         Poco::Net::HTTPRequest request("GET", targetUri.getPath());
@@ -940,19 +941,19 @@ UriDescriptionReader::retrieveDescription(const std::string& relativeUri)
 
         Poco::Net::HTTPResponse response;
         std::istream& rs = session.receiveResponse(response);
-        Log::instance()->desc().information("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        LOG(desc, information, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream header;
         response.write(header);
-        Log::instance()->desc().debug("response header:" + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+        LOG(desc, debug, "response header:" + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         res = new std::string;
         Poco::StreamCopier::copyToString(rs, *res);
     }
     else {
-        Log::instance()->desc().error("Error in UriDescriptionReader: unknown scheme in description uri");
+        LOG(desc, error, "Error in UriDescriptionReader: unknown scheme in description uri");
         res = new std::string;
         return *res;
     }
-    Log::instance()->desc().debug("retrieved description:" + Poco::LineEnding::NEWLINE_DEFAULT + *res);
+    LOG(desc, debug, "retrieved description:" + Poco::LineEnding::NEWLINE_DEFAULT + *res);
     return *res;
 }
 
@@ -977,7 +978,7 @@ MemoryDescriptionReader::retrieveDescription(const std::string& descriptionKey)
 
 ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action* pActionTemplate) : _pActionTemplate(pActionTemplate)
 {
-    Log::instance()->ctrl().debug("action request:" + Poco::LineEnding::NEWLINE_DEFAULT + requestBody);
+    LOG(ctrl, debug, "action request:" + Poco::LineEnding::NEWLINE_DEFAULT + requestBody);
 
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -989,11 +990,11 @@ ActionRequestReader::ActionRequestReader(const std::string& requestBody, Action*
         _pDoc = parser.parseString(requestBody.substr(0, requestBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->ctrl().error("could not parse action request, SAX parser exception.");
+        LOG(ctrl, error, "could not parse action request, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->ctrl().error("could not parse action request, DOM exception.");
+        LOG(ctrl, error, "could not parse action request, DOM exception.");
         return;
     }
 }
@@ -1021,11 +1022,11 @@ ActionRequestReader::action()
             }
         }
         else {
-            Log::instance()->ctrl().debug("action without arguments");
+            LOG(ctrl, debug, "action without arguments");
         }
     }
     else {
-        Log::instance()->ctrl().error("action without body");
+        LOG(ctrl, error, "action without body");
     }
     return pRes;
 }
@@ -1035,7 +1036,7 @@ ActionResponseReader::ActionResponseReader(const std::string& responseBody, Acti
 _pActionTemplate(pActionTemplate),
 _pDoc(0)
 {
-//    Log::instance()->ctrl().debug("action response:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
+//    LOG(ctrl, debug, "action response:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
     Poco::XML::DOMParser parser;
     // there's coming a lot of rubbish thru the wire, decorated with white-spaces all over the place ...
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -1048,11 +1049,11 @@ _pDoc(0)
         _pDoc = parser.parseString(responseBody.substr(0, responseBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->ctrl().error("could not parse action response, SAX parser exception.");
+        LOG(ctrl, error, "could not parse action response, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->ctrl().error("could not parse action response, DOM exception.");
+        LOG(ctrl, error, "could not parse action response, DOM exception.");
         return;
     }
 }
@@ -1079,17 +1080,17 @@ ActionResponseReader::action()
             Poco::XML::Node* pArgument = pAction->firstChild();
 
             while (pArgument) {
-                Log::instance()->ctrl().debug("action response arg: " + pArgument->nodeName() + " = " + pArgument->innerText());
+                LOG(ctrl, debug, "action response arg: " + pArgument->nodeName() + " = " + pArgument->innerText());
                 pRes->setArgument(pArgument->nodeName(), pArgument->innerText());
                 pArgument = pArgument->nextSibling();
             }
         }
         else {
-            Log::instance()->ctrl().debug("action without arguments");
+            LOG(ctrl, debug, "action without arguments");
         }
     }
     else {
-        Log::instance()->ctrl().error("action without body");
+        LOG(ctrl, error, "action without body");
     }
     return pRes;
 }
@@ -1110,11 +1111,11 @@ _pService(pService)
         _pDoc = parser.parseString(responseBody.substr(0, responseBody.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->event().error("could not parse event message, SAX parser exception.");
+        LOG(event, error, "could not parse event message, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->event().error("could not parse event message, DOM exception.");
+        LOG(event, error, "could not parse event message, DOM exception.");
         return;
     }
 }
@@ -1138,18 +1139,18 @@ void
 EventMessageReader::stateVar(Poco::XML::Node* pNode)
 {
     if (pNode->nodeName() == pNode->prefix() + ":property" && pNode->hasChildNodes()) {
-        Log::instance()->event().debug("event message reader got property");
+        LOG(event, debug, "event message reader got property");
         Poco::XML::Node* pStateVarNode = pNode->firstChild();
         std::string stateVarName = pStateVarNode->nodeName();
         std::string stateVarValue = pStateVarNode->innerText();
         _pService->setStateVar<std::string>(stateVarName, stateVarValue);
-        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " ...");
+        LOG(event, debug, "calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " ...");
         StateVar* pStateVar = _pService->getStateVarReference(stateVarName);
         _pService->getDevice()->getCtlDeviceCode()->eventHandler(pStateVar);
-        Log::instance()->event().debug("calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " finished.");
+        LOG(event, debug, "calling event handler of state var: " + stateVarName + ", value: " + stateVarValue + " finished.");
     }
     else {
-        Log::instance()->event().error("event message without state var element in property set.");
+        LOG(event, error, "event message without state var element in property set.");
     }
 }
 
@@ -1221,7 +1222,7 @@ DescriptionWriter::device(Device& device)
         Poco::AutoPtr<Poco::XML::Text> pVal = _pDoc->createTextNode(*((*it).second));
         pProp->appendChild(pVal);
         pDevice->appendChild(pProp);
-        Log::instance()->desc().debug("writer added property: " + (*it).first + " = " + *(*it).second);
+        LOG(desc, debug, "writer added property: " + (*it).first + " = " + *(*it).second);
     }
 
     // Icons
@@ -1231,7 +1232,7 @@ DescriptionWriter::device(Device& device)
 //        if ((*it)->_pData) {
         if ((*it)->_buffer.size()) {
             pIconList->appendChild(icon(*it));
-            Log::instance()->desc().debug("writer added icon: " + (*it)->_requestPath);
+            LOG(desc, debug, "writer added icon: " + (*it)->_requestPath);
         }
     }
 
@@ -1240,7 +1241,7 @@ DescriptionWriter::device(Device& device)
     pDevice->appendChild(pServiceList);
     for (Device::ServiceIterator it = device.beginService(); it != device.endService(); ++it) {
         pServiceList->appendChild(service(*it));
-        Log::instance()->desc().debug("writer added service: " + (*it)->getServiceType());
+        LOG(desc, debug, "writer added service: " + (*it)->getServiceType());
     }
 
     return pDevice;
@@ -1326,7 +1327,7 @@ DescriptionWriter::write()
 
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote device description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+    LOG(desc, debug, "rewrote device description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     return new std::string(ss.str());
 }
 
@@ -1359,7 +1360,7 @@ ServiceDescriptionWriter::service(Service& service)
     pRoot->appendChild(pActionList);
     for (Service::ActionIterator it = service.beginAction(); it != service.endAction(); ++it) {
         pActionList->appendChild(action(*it));
-        Log::instance()->desc().debug("writer added action: " + (*it)->getName());
+        LOG(desc, debug, "writer added action: " + (*it)->getName());
     }
 
     // write service state table
@@ -1367,7 +1368,7 @@ ServiceDescriptionWriter::service(Service& service)
     pRoot->appendChild(pStateTableList);
     for (Service::StateVarIterator it = service.beginStateVar(); it != service.endStateVar(); ++it) {
         pStateTableList->appendChild(stateVar(*it));
-        Log::instance()->desc().debug("writer added state variable: " + (*it)->getName());
+        LOG(desc, debug, "writer added state variable: " + (*it)->getName());
     }
 }
 
@@ -1381,7 +1382,7 @@ ServiceDescriptionWriter::write()
 
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
-    Log::instance()->desc().debug("rewrote service description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+    LOG(desc, debug, "rewrote service description:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     return new std::string(ss.str());
 }
 
@@ -1402,7 +1403,7 @@ ServiceDescriptionWriter::action(Action* pAction)
     pActionElement->appendChild(pArgumentList);
     for (Action::ArgumentIterator it = pAction->beginArgument(); it != pAction->endArgument(); ++it) {
         pArgumentList->appendChild(argument(*it));
-        Log::instance()->desc().debug("writer added action argument: " + (*it)->getName());
+        LOG(desc, debug, "writer added action argument: " + (*it)->getName());
     }
 
     return pActionElement;
@@ -1532,7 +1533,7 @@ ActionResponseWriter::action(Action& action)
     std::stringstream ss;
     writer.writeNode(ss, pDoc);
     *_responseBody = ss.str();
-//     Log::instance()->ctrl().debug(Omm::Util::format("response body:\n%s", *_responseBody));
+//     LOG(ctrl, debug, Omm::Util::format("response body:\n%s", *_responseBody));
 }
 
 
@@ -1561,14 +1562,14 @@ EventMessageWriter::write(std::string& eventMessage)
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     eventMessage = ss.str();
-    Log::instance()->event().debug("event message:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+    LOG(event, debug, "event message:" + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
 }
 
 
 void
 EventMessageWriter::stateVar(StateVar& stateVar)
 {
-    Log::instance()->event().debug("event message writer for state var: " + stateVar.getName());
+    LOG(event, debug, "event message writer for state var: " + stateVar.getName());
 
     Poco::AutoPtr<Poco::XML::Element> pProperty = _pDoc->createElementNS("urn:schemas-upnp-org:event-1-0", "property");
     Poco::AutoPtr<Poco::XML::Element> pStateVar = _pDoc->createElement(stateVar.getName());
@@ -1585,7 +1586,7 @@ _pSessionUri(0)
 {
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom().toString();
-    Log::instance()->event().debug("creating subscription with SID: " + _uuid);
+    LOG(event, debug, "creating subscription with SID: " + _uuid);
     _eventKey = 0;
 }
 
@@ -1606,7 +1607,7 @@ Subscription::getUuid()
 void
 Subscription::setSid(const std::string& sid)
 {
-    Log::instance()->event().debug("set controller subscription sid: " + sid.substr(5));
+    LOG(event, debug, "set controller subscription sid: " + sid.substr(5));
     _uuid = sid.substr(5);
 }
 
@@ -1617,7 +1618,7 @@ Subscription::addCallbackUri(const std::string& uri)
     try {
         _callbackUris.push_back(Poco::URI(uri));
         if (_pSession) {
-            Log::instance()->event().warning("connection to callback uri already established, skip adding of uri: " + uri);
+            LOG(event, warning, "connection to callback uri already established, skip adding of uri: " + uri);
         }
         else {
             _pSessionUri = &_callbackUris.back();
@@ -1628,7 +1629,7 @@ Subscription::addCallbackUri(const std::string& uri)
         }
     }
     catch(...) {
-        Log::instance()->event().warning("callback uri not valid or reachable, skip adding of uri: " + uri);
+        LOG(event, warning, "callback uri not valid or reachable, skip adding of uri: " + uri);
     }
 }
 
@@ -1655,7 +1656,7 @@ Subscription::sendEventMessage(const std::string& eventMessage)
 
     request.set("SEQ", getEventKey());
     request.setContentLength(eventMessage.size());
-    Log::instance()->event().debug("sending event notification request to: " + _pSessionUri->toString());
+    LOG(event, debug, "sending event notification request to: " + _pSessionUri->toString());
     std::stringstream ss;
     request.write(ss);
 
@@ -1663,12 +1664,12 @@ Subscription::sendEventMessage(const std::string& eventMessage)
     std::ostream& ostr = getSession()->sendRequest(request);
     ostr << eventMessage;
 
-    Log::instance()->event().debug("event notification request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
+    LOG(event, debug, "event notification request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
 
     // receive answer ...
     Poco::Net::HTTPResponse response;
     getSession()->receiveResponse(response);
-    Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    LOG(event, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
 }
 
 
@@ -1705,12 +1706,12 @@ EventMessageQueue::~EventMessageQueue()
 void
 EventMessageQueue::queueStateVar(StateVar& stateVar)
 {
-    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " ...");
+    LOG(event, debug, "queue state var: " + stateVar.getName() + " ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     _stateVars.insert(&stateVar);
     if (!_timerIsRunning) {
-        Log::instance()->event().debug("starting timer ...");
+        LOG(event, debug, "starting timer ...");
         _timerIsRunning = true;
         if (_pModeratorTimer) {
             delete _pModeratorTimer;
@@ -1718,16 +1719,16 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
         // need to create a new Poco::Timer, because same timer can't be reused (works perhaps twice, but not the third time).
         _pModeratorTimer = new Poco::Timer(_maxEventRate);
         _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
-        Log::instance()->event().debug("timer started.");
+        LOG(event, debug, "timer started.");
     }
-    Log::instance()->event().debug("queue state var: " + stateVar.getName() + " finished.");
+    LOG(event, debug, "queue state var: " + stateVar.getName() + " finished.");
 }
 
 
 void
 EventMessageQueue::sendEventMessage(Poco::Timer& timer)
 {
-    Log::instance()->event().debug("event message queue sends event notifications ...");
+    LOG(event, debug, "event message queue sends event notifications ...");
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
 //    _lock.lock();
@@ -1744,7 +1745,7 @@ EventMessageQueue::sendEventMessage(Poco::Timer& timer)
     for (Service::SubscriptionIterator i = _pService->beginEventSubscription(); i != _pService->endEventSubscription(); ++i) {
         (*i)->sendEventMessage(eventMessage);
     }
-    Log::instance()->event().debug("event message queue sends event notifications finished.");
+    LOG(event, debug, "event message queue sends event notifications finished.");
 }
 
 
@@ -1962,7 +1963,7 @@ Service::getControlRequestHandler() const
 Device*
 Service::getDevice() const
 {
-//    Log::instance()->upnp().debug("service, get device pointer: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
+//    LOG(upnp, debug, "service, get device pointer: " + Poco::NumberFormatter::format(_pDeviceData->getDevice()));
     return _pDeviceData->getDevice();
 }
 
@@ -2033,7 +2034,7 @@ Service::setEventSubscriptionPath(std::string eventPath)
 void
 Service::setDeviceData(DeviceData* pDeviceData)
 {
-//    Log::instance()->upnp().debug("service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
+//    LOG(upnp, debug, "service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
 }
 
@@ -2049,7 +2050,7 @@ Service::addAction(Action* pAction)
 void
 Service::addStateVar(StateVar* pStateVar)
 {
-//     Log::instance()->upnp().debug("Service::addStateVar() name: " + pStateVar->getName() + " is evented: " << pStateVar->getSendEvents());
+//     LOG(upnp, debug, "Service::addStateVar() name: " + pStateVar->getName() + " is evented: " << pStateVar->getSendEvents());
 
     _stateVars.append(pStateVar->getName(), pStateVar);
     if(pStateVar->getSendEvents()) {
@@ -2069,10 +2070,10 @@ Service::addEventCallbackPath(const std::string path)
 void
 Service::initController()
 {
-    Log::instance()->upnp().debug("service, init controller ...");
+    LOG(upnp, debug, "service, init controller ...");
     _eventingEnabled = false;
     _baseUri = Poco::URI(getDevice()->getDeviceContainer()->getDescriptionUri());
-    Log::instance()->upnp().debug("service, init controller finished.");
+    LOG(upnp, debug, "service, init controller finished.");
 }
 
 
@@ -2117,47 +2118,47 @@ Service::sendAction(Action* pAction)
     Poco::Net::HTTPClientSession controlRequestSession(Poco::Net::SocketAddress(_baseUri.getAuthority()));
     _serviceLock.unlock();
 
-    Log::instance()->ctrl().debug("*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request.getURI() + " ***");
+    LOG(ctrl, debug, "*** sending action \"" + pAction->getName() + "\" to " + baseUri.getAuthority() + request.getURI() + " ***");
 
     actionNetworkActivity(true);
     try {
         std::ostream& ostr = controlRequestSession.sendRequest(request);
         ostr << actionMessage;
-        Log::instance()->ctrl().debug("action request sent:" + Poco::LineEnding::NEWLINE_DEFAULT + actionMessage);
+        LOG(ctrl, debug, "action request sent:" + Poco::LineEnding::NEWLINE_DEFAULT + actionMessage);
     }
     catch(Poco::Net::ConnectionRefusedException) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("sending of action request failed, connection refused");
+        LOG(ctrl, error, "sending of action request failed, connection refused");
         throw Poco::Exception("");
     }
     catch (...) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("sending of action request failed for some reason");
+        LOG(ctrl, error, "sending of action request failed for some reason");
         throw Poco::Exception("");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
     try {
         std::istream& rs = controlRequestSession.receiveResponse(response);
-        Log::instance()->ctrl().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+        LOG(ctrl, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::string responseBody;
         Poco::StreamCopier::copyToString(rs, responseBody);
-        Log::instance()->ctrl().debug("action response received:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
+        LOG(ctrl, debug, "action response received:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
         ActionResponseReader responseReader(responseBody, pAction);
         responseReader.action();
         actionNetworkActivity(false);
     }
     catch (Poco::Net::NoMessageException) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("no response to action request \"" + pAction->getName()+ "\"");
+        LOG(ctrl, error, "no response to action request \"" + pAction->getName()+ "\"");
         throw Poco::Exception("");
     }
     catch (...) {
         actionNetworkActivity(false);
-        Log::instance()->ctrl().error("no response to action request \"" + pAction->getName()+ "\" received for some reason");
+        LOG(ctrl, error, "no response to action request \"" + pAction->getName()+ "\" received for some reason");
         throw Poco::Exception("");
     }
-    Log::instance()->ctrl().debug("*** action \"" + pAction->getName() + "\" completed ***");
+    LOG(ctrl, debug, "*** action \"" + pAction->getName() + "\" completed ***");
 }
 
 
@@ -2167,7 +2168,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
     eventSubscriptionUri.resolve(getEventSubscriptionPath());
-//    Log::instance()->event().debug("preparing subscription request for uri: "  + eventSubscriptionUri.toString());
+//    LOG(event, debug, "preparing subscription request for uri: "  + eventSubscriptionUri.toString());
     Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
     if (renew) {
@@ -2189,38 +2190,38 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     }
     std::stringstream ss;
     request.write(ss);
-    Log::instance()->event().debug("subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
-    Log::instance()->event().debug("set up client session to uri: " + baseUri.getAuthority());
+    LOG(event, debug, "subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+    LOG(event, debug, "set up client session to uri: " + baseUri.getAuthority());
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
 
-    Log::instance()->event().debug("sending subscription request to " + baseUri.getAuthority() + request.getURI());
+    LOG(event, debug, "sending subscription request to " + baseUri.getAuthority() + request.getURI());
     try {
         eventSubscriptionSession.sendRequest(request);
-        Log::instance()->event().debug("subscription request sent");
+        LOG(event, debug, "subscription request sent");
     }
     catch(Poco::Net::ConnectionRefusedException) {
-        Log::instance()->event().error("sending of subscription request failed, connection refused");
+        LOG(event, error, "sending of subscription request failed, connection refused");
         throw Poco::Exception("");
     }
     catch (...) {
-        Log::instance()->event().error("sending of subscription request failed for some reason");
+        LOG(event, error, "sending of subscription request failed for some reason");
         throw Poco::Exception("");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
     try {
         eventSubscriptionSession.receiveResponse(response);
-//        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+//        LOG(event, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream ss;
         response.write(ss);
-        Log::instance()->event().debug("subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+        LOG(event, debug, "subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
     }
     catch (Poco::Net::NoMessageException) {
-        Log::instance()->event().error("no response to subscription request.");
+        LOG(event, error, "no response to subscription request.");
         throw Poco::Exception("");
     }
     catch (...) {
-        Log::instance()->event().error("no response to subscription received for some reason.");
+        LOG(event, error, "no response to subscription received for some reason.");
         throw Poco::Exception("");
     }
 
@@ -2228,7 +2229,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
         _pControllerSubscriptionData->setSid(response.get("SID"));
     }
 
-    Log::instance()->event().debug("subscription request completed");
+    LOG(event, debug, "subscription request completed");
 }
 
 
@@ -2247,42 +2248,42 @@ Service::sendCancelSubscriptionRequest()
 
     std::stringstream ss;
     request.write(ss);
-    Log::instance()->event().debug("cancel subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
+    LOG(event, debug, "cancel subscription request: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str());
 
-    Log::instance()->event().debug("sending cancel subscription request to " + baseUri.getAuthority() + request.getURI());
+    LOG(event, debug, "sending cancel subscription request to " + baseUri.getAuthority() + request.getURI());
     try {
         eventSubscriptionSession.sendRequest(request);
-        Log::instance()->event().debug("cancel subscription request sent");
+        LOG(event, debug, "cancel subscription request sent");
     }
     catch(Poco::Net::ConnectionRefusedException) {
-        Log::instance()->event().error("sending of cancel subscription request failed, connection refused");
+        LOG(event, error, "sending of cancel subscription request failed, connection refused");
         throw Poco::Exception("");
     }
     catch (...) {
-        Log::instance()->event().error("sending of cancel subscription request failed for some reason");
+        LOG(event, error, "sending of cancel subscription request failed for some reason");
         throw Poco::Exception("");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
     try {
         std::istream& rs = eventSubscriptionSession.receiveResponse(response);
-//        Log::instance()->event().debug("HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+//        LOG(event, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
         std::stringstream ss;
         response.write(ss);
         std::string body;
         Poco::StreamCopier::copyToString(rs, body);
-        Log::instance()->event().debug("cancel subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + body);
+        LOG(event, debug, "cancel subscription response: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + body);
     }
     catch (Poco::Net::NoMessageException) {
-        Log::instance()->event().error("no response to cancel subscription request.");
+        LOG(event, error, "no response to cancel subscription request.");
         throw Poco::Exception("");
     }
     catch (...) {
-        Log::instance()->event().error("no response to cancel subscription received for some reason.");
+        LOG(event, error, "no response to cancel subscription received for some reason.");
         throw Poco::Exception("");
     }
 
-    Log::instance()->event().debug("cancel subscription request completed");
+    LOG(event, debug, "cancel subscription request completed");
 }
 
 
@@ -2293,7 +2294,7 @@ Service::registerSubscription(Subscription* subscription)
     // TODO: only register a Subscription once from one distinct Controller
     //       note that Subscription has a new SID
     std::string sid = subscription->getUuid();
-    Log::instance()->event().debug("register subscription with SID: " + sid);
+    LOG(event, debug, "register subscription with SID: " + sid);
     _eventSubscriptions.append(sid, subscription);
 }
 
@@ -2303,7 +2304,7 @@ Service::unregisterSubscription(Subscription* subscription)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
     std::string sid = subscription->getUuid();
-    Log::instance()->event().debug("unregister subscription with SID: " + sid);
+    LOG(event, debug, "unregister subscription with SID: " + sid);
     _eventSubscriptions.remove(sid);
     if (subscription) {
         delete subscription;
@@ -2350,7 +2351,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     }
     messageWriter.write(eventMessage);
     pSubscription->sendEventMessage(eventMessage);
-    Log::instance()->event().debug("sending initial event message:" + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
+    LOG(event, debug, "sending initial event message:" + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
 }
 
 
@@ -2399,7 +2400,7 @@ _pHttpSocket(pHttpSocket)
 Poco::Net::HTTPRequestHandler*
 UpnpRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-    Log::instance()->http().debug("dispatching request: " + request.getURI());
+    LOG(http, debug, "dispatching request: " + request.getURI());
     Poco::Path path(request.getURI());
     std::string absolutePath = path.absolute("/").toString();
     Poco::Net::HTTPRequestHandler* res;
@@ -2432,7 +2433,7 @@ RequestNotFoundRequestHandler::create()
 void
 RequestNotFoundRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->http().debug("unknown request " + request.getURI() + " HTTP 404 - not found error");
+    LOG(http, debug, "unknown request " + request.getURI() + " HTTP 404 - not found error");
     response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
 }
 
@@ -2456,8 +2457,8 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
 {
     std::ostringstream requestHeader;
     request.write(requestHeader);
-    Log::instance()->desc().debug("description request: " + request.getURI());
-    Log::instance()->desc().debug("description request header: " + Poco::LineEnding::NEWLINE_DEFAULT + requestHeader.str());
+    LOG(desc, debug, "description request: " + request.getURI());
+    LOG(desc, debug, "description request header: " + Poco::LineEnding::NEWLINE_DEFAULT + requestHeader.str());
     if (request.has("Accept-Language")) {
         std::string lang = request.get("Accept-Language");
         // TODO: set proper lang in description response
@@ -2476,10 +2477,10 @@ DescriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, 
 //     response.set("LAST-MODIFIED", "Sun, 14 Mar 2010 11:30:22 GMT");
     std::ostringstream responseHeader;
     response.write(responseHeader);
-    Log::instance()->desc().debug("description response header: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
+    LOG(desc, debug, "description response header: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
     response.sendBuffer(_pDescription->c_str(), _pDescription->size());
     if (response.sent()) {
-        Log::instance()->desc().debug("description (header) successfully sent");
+        LOG(desc, debug, "description (header) successfully sent");
     }
 
     /*
@@ -2509,7 +2510,7 @@ ControlRequestHandler::create()
 void
 ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->ctrl().debug("*** action request: " + request.getURI() + " ***");
+    LOG(ctrl, debug, "*** action request: " + request.getURI() + " ***");
     // synchronous action handling: wait until handleAction() has finished. This must be done in under 30 sec,
     // otherwise it should return and an event should be sent on finishing the action request.
     int length = request.getContentLength();
@@ -2522,7 +2523,7 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     std::string::size_type hash = soapAction.find('#');
     std::string serviceType = soapAction.substr(0, hash);
     std::string actionName = soapAction.substr(hash+1);
-    Log::instance()->ctrl().debug("action received: \"" + actionName + "\" (service type " + serviceType + ")");
+    LOG(ctrl, debug, "action received: \"" + actionName + "\" (service type " + serviceType + ")");
 
 //     std::clog << "ControlRequestHandler for ServiceType: " << _pService->getServiceType() << std::endl;
     // TODO: make getAction() robust against wrong action names
@@ -2546,8 +2547,8 @@ ControlRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco
     response.setContentLength(responseBody.size());
     std::ostream& ostr = response.send();
     ostr << responseBody;
-    Log::instance()->ctrl().debug("action response sent:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
-    Log::instance()->ctrl().debug("*** action request completed: " + request.getURI() + " ***");
+    LOG(ctrl, debug, "action response sent:" + Poco::LineEnding::NEWLINE_DEFAULT + responseBody);
+    LOG(ctrl, debug, "*** action request completed: " + request.getURI() + " ***");
 }
 
 
@@ -2567,7 +2568,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
     Subscription* pSubscription;
 
     if (request.getMethod() == "SUBSCRIBE") {
-        Log::instance()->event().debug("subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+        LOG(event, debug, "subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         if (!request.has("SID")) {
             std::string callbackUriString = request.get("CALLBACK");
             Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
@@ -2601,25 +2602,25 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         std::stringstream responseHeader;
         response.write(responseHeader);
         response.send();
-        Log::instance()->event().debug("event subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
+        LOG(event, debug, "event subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
         if (!request.has("SID")) {
             _pService->sendInitialEventMessage(pSubscription);
         }
     }
     else if (request.getMethod() == "UNSUBSCRIBE") {
-        Log::instance()->event().debug("cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+        LOG(event, debug, "cancel subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
         sid = request.get("SID").substr(5);
         try {
             _pService->unregisterSubscription(_pService->getSubscription(sid));
         }
         catch (...) {
             // TODO: forward error in response to request
-            Log::instance()->event().error("unregister subscription failed, ignoring.");
+            LOG(event, error, "unregister subscription failed, ignoring.");
         }
         std::stringstream responseHeader;
         response.write(responseHeader);
         response.send();
-        Log::instance()->event().debug("event cancel subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
+        LOG(event, debug, "event cancel subscription response sent: " + Poco::LineEnding::NEWLINE_DEFAULT + responseHeader.str());
     }
 }
 
@@ -2642,7 +2643,7 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         std::istream& body = request.stream();
         std::string bodyString;
         Poco::StreamCopier::copyToString(body, bodyString);
-        Log::instance()->event().debug("event notification request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + headerString.str() + bodyString);
+        LOG(event, debug, "event notification request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + headerString.str() + bodyString);
         if (request.has("SID")) {
             sid = request.get("SID");
         }
@@ -2650,14 +2651,14 @@ EventNotificationRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
         }
         EventMessageReader eventMessageReader(bodyString, _pService);
         eventMessageReader.stateVarValues();
-        Log::instance()->event().debug("event notification request handled, sending response ...");
+        LOG(event, debug, "event notification request handled, sending response ...");
         response.send();
-        Log::instance()->event().debug("event notification request response sent.");
+        LOG(event, debug, "event notification request response sent.");
     }
     else {
-        Log::instance()->event().warning("unkown event request on notification listener coming from: " + request.clientAddress().toString());
+        LOG(event, warning, "unkown event request on notification listener coming from: " + request.clientAddress().toString());
     }
-    Log::instance()->event().debug("event notification request handler finished.");
+    LOG(event, debug, "event notification request handler finished.");
 }
 
 
@@ -2671,7 +2672,7 @@ IconRequestHandler::create()
 void
 IconRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnp().debug("icon request from: " + request.getHost());
+    LOG(upnp, debug, "icon request from: " + request.getHost());
 
     response.sendBuffer(_pIcon->_buffer.data(), _pIcon->_buffer.size());
 }
@@ -2708,7 +2709,7 @@ HttpSocket::startServer()
     if (!_isRunning) {
         _pHttpServer->start();
         _isRunning = true;
-        Log::instance()->http().information("server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
+        LOG(http, information, "server started on port: " + Poco::NumberFormatter::format(_httpServerPort));
     }
 }
 
@@ -2719,7 +2720,7 @@ HttpSocket::stopServer()
     if (_isRunning) {
         _pHttpServer->stop();
         _isRunning = false;
-        Log::instance()->http().information("server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
+        LOG(http, information, "server stopped on port: " + Poco::NumberFormatter::format(_httpServerPort));
     }
 }
 
@@ -2769,7 +2770,7 @@ Socket::initSockets()
 void
 Socket::registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler)
 {
-    Log::instance()->http().debug("registering request handler for path: " + path);
+    LOG(http, debug, "registering request handler for path: " + path);
     _httpSocket._pDeviceRequestHandlerFactory->registerRequestHandler(path, requestHandler);
 }
 
@@ -2862,7 +2863,7 @@ Socket::stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet)
 //void
 //Socket::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
 //{
-//    Log::instance()->upnp().debug("socket receives network interface change notification");
+//    LOG(upnp, debug, "socket receives network interface change notification");
 //    Mode mode = getMode();
 //    if (mode == Null) {
 //        _ssdpSocket.setMode(SsdpSocket::Broadcast);
@@ -2874,7 +2875,7 @@ Socket::stopSendSsdpMessageSet(SsdpMessageSet& ssdpMessageSet)
 //void
 //Socket::handleNetworkInterfaceChange(const std::string& interfaceName, bool added)
 //{
-//    Log::instance()->upnp().debug("network listener adds network interface: " + interfaceName);
+//    LOG(upnp, debug, "network listener adds network interface: " + interfaceName);
 ////    writeSsdpMessages();
 //    if (added) {
 //        _ssdpSocket.addInterface(interfaceName);
@@ -2936,7 +2937,7 @@ DeviceManager::registerHttpRequestHandler(std::string path, UpnpRequestHandler* 
 void
 DeviceManager::handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification)
 {
-    Log::instance()->upnp().debug("device manager receives network interface change notification");
+    LOG(upnp, debug, "device manager receives network interface change notification");
 
     if (Net::NetworkInterfaceManager::instance()->loopbackOnly()) {
         _pSocket->setMode(Socket::Local);
@@ -2974,7 +2975,7 @@ DeviceManager::addDeviceContainer(DeviceContainer* pDeviceContainer)
     // TODO: handle subdevices
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        Log::instance()->upnp().debug("device manager adds device container with root device uuid: " + uuid);
+        LOG(upnp, debug, "device manager adds device container with root device uuid: " + uuid);
         _deviceContainers.append(uuid, pDeviceContainer);
         pDeviceContainer->setDeviceManager(this);
     }
@@ -2987,7 +2988,7 @@ DeviceManager::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
-        Log::instance()->upnp().debug("device manager removes device container with root device uuid: " + uuid);
+        LOG(upnp, debug, "device manager removes device container with root device uuid: " + uuid);
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         _deviceContainers.remove(uuid);
     }
@@ -3007,7 +3008,7 @@ DeviceManager::init()
     // FIXME: *this is wrong, should point to DeviceContainer
 //    Net::NetworkInterfaceManager::instance()->registerInterfaceChangeHandler
 //        (Poco::Observer<DeviceContainer,Net::NetworkInterfaceNotification>(*this, &DeviceContainer::handleNetworkInterfaceChangedNotification));
-//    Log::instance()->upnp().debug("device root network interface manager installed");
+//    LOG(upnp, debug, "device root network interface manager installed");
 
     _pSocket->initSockets();
     _pSocket->registerSsdpMessageHandler(Poco::Observer<DeviceManager, SsdpMessage>(*this, &DeviceManager::handleSsdpMessage));
@@ -3018,9 +3019,9 @@ DeviceManager::init()
 void
 DeviceManager::setState(State newState)
 {
-    Log::instance()->upnp().debug("device manager state change: " + _state + " -> " + newState);
+    LOG(upnp, debug, "device manager state change: " + _state + " -> " + newState);
     if (_state == newState) {
-        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
     if (newState == Started) {
@@ -3047,7 +3048,7 @@ DeviceManager::setState(State newState)
         startSsdp();
     }
     _state = newState;
-    Log::instance()->upnp().debug("device manager state change finished");
+    LOG(upnp, debug, "device manager state change finished");
 }
 
 
@@ -3061,36 +3062,36 @@ DeviceManager::getHttpServerUri()
 void
 DeviceManager::startSsdp()
 {
-    Log::instance()->ssdp().information("starting socket ...");
+    LOG(ssdp, information, "starting socket ...");
     _pSocket->startSsdp();
-    Log::instance()->ssdp().information("socket started.");
+    LOG(ssdp, information, "socket started.");
 }
 
 
 void
 DeviceManager::stopSsdp()
 {
-    Log::instance()->ssdp().information("stopping socket ...");
+    LOG(ssdp, information, "stopping socket ...");
     _pSocket->stopSsdp();
-    Log::instance()->ssdp().information("socket stopped.");
+    LOG(ssdp, information, "socket stopped.");
 }
 
 
 void
 DeviceManager::startHttp()
 {
-    Log::instance()->http().information("starting socket...");
+    LOG(http, information, "starting socket...");
     _pSocket->startHttp();
-    Log::instance()->http().information("socket started.");
+    LOG(http, information, "socket started.");
 }
 
 
 void
 DeviceManager::stopHttp()
 {
-    Log::instance()->http().information("stopping socket...");
+    LOG(http, information, "stopping socket...");
     _pSocket->stopHttp();
-    Log::instance()->http().information("socket stopped.");
+    LOG(http, information, "socket stopped.");
 }
 
 
@@ -3106,7 +3107,7 @@ DeviceManager::clear()
 void
 DeviceManager::postDeviceNotification(Poco::Notification* pNotification)
 {
-    Log::instance()->upnp().debug("posting device notification to device manager");
+    LOG(upnp, debug, "posting device notification to device manager");
     _deviceNotificationCenter.postNotification(pNotification);
 }
 
@@ -3137,7 +3138,7 @@ DeviceContainer::getServiceType(const std::string& serviceType)
 {
     std::map<std::string,Service*>::iterator i = _serviceTypes.find(serviceType);
     if (i == _serviceTypes.end()) {
-        Log::instance()->upnp().error("unknown service type: " + serviceType);
+        LOG(upnp, error, "unknown service type: " + serviceType);
     }
     return _serviceTypes[serviceType];
 }
@@ -3146,7 +3147,7 @@ DeviceContainer::getServiceType(const std::string& serviceType)
 void
 DeviceContainer::addDevice(Device* pDevice)
 {
-//    Log::instance()->upnp().debug("add device: " + pDevice->getUuid());
+//    LOG(upnp, debug, "add device: " + pDevice->getUuid());
     _devices.append(pDevice->getUuid(), pDevice);
     pDevice->setDeviceContainer(this);
     for (Device::ServiceIterator it = pDevice->beginService(); it != pDevice->endService(); ++it) {
@@ -3287,7 +3288,7 @@ DeviceContainer::setDeviceManager(DeviceManager* pDeviceManager)
 void
 DeviceContainer::setRootDevice(Device* pDevice)
 {
-//    Log::instance()->upnp().debug("set root device: " + pDevice->getUuid());
+//    LOG(upnp, debug, "set root device: " + pDevice->getUuid());
     _pRootDevice = pDevice;
 }
 
@@ -3307,9 +3308,9 @@ DeviceContainer::setDescriptionUri(const std::string uri)
         _descriptionUri = _stringDescriptionUri;
     }
     catch(Poco::Exception& e) {
-        Log::instance()->http().error("could not parse description URI: " + e.displayText());
+        LOG(http, error, "could not parse description URI: " + e.displayText());
     }
-    Log::instance()->upnp().debug("set description URI finished.");
+    LOG(upnp, debug, "set description URI finished.");
 }
 
 
@@ -3350,7 +3351,7 @@ DeviceContainer::initUuid()
 {
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         if ((*d)->getUuid() == "") {
-            Log::instance()->upnp().debug("init device container: setting random uuid for device");
+            LOG(upnp, debug, "init device container: setting random uuid for device");
             (*d)->setRandomUuid();
         }
         // FIXME: this should override a base uri, if already present in the device description
@@ -3362,7 +3363,7 @@ DeviceContainer::initUuid()
 void
 DeviceContainer::initStateVars()
 {
-    Log::instance()->upnp().debug("init device container: init state vars");
+    LOG(upnp, debug, "init device container: init state vars");
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         (*d)->initStateVars();
     }
@@ -3380,7 +3381,7 @@ DeviceContainer::initDeviceDescriptionHandler()
 void
 DeviceContainer::rewriteDescriptions()
 {
-    Log::instance()->upnp().debug("init device container: rewrite descriptions");
+    LOG(upnp, debug, "init device container: rewrite descriptions");
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
             ServiceDescriptionWriter serviceDescriptionWriter;
@@ -3397,7 +3398,7 @@ DeviceContainer::rewriteDescriptions()
 void
 DeviceContainer::initDevice()
 {
-    Log::instance()->upnp().debug("init device container (device)");
+    LOG(upnp, debug, "init device container (device)");
 
     initUuid();
 
@@ -3442,7 +3443,7 @@ DeviceContainer::initDevice()
 void
 DeviceContainer::writeSsdpMessages()
 {
-    Log::instance()->ssdp().debug("writing messages ...");
+    LOG(ssdp, debug, "writing messages ...");
 
     _pSsdpNotifyAliveMessages->clear();
     _pSsdpNotifyByebyeMessages->clear();
@@ -3454,16 +3455,16 @@ DeviceContainer::writeSsdpMessages()
 
     for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
         Device& device = **d;
-        Log::instance()->ssdp().debug("writing messages for device: " + device.getDeviceType());
+        LOG(ssdp, debug, "writing messages for device: " + device.getDeviceType());
         aliveWriter.device(device);
         byebyeWriter.device(device);
         for(Device::ServiceIterator s = device.beginService(); s != device.endService(); ++s) {
-            Log::instance()->ssdp().debug("writing messages for service: " + (*s)->getServiceType());
+            LOG(ssdp, debug, "writing messages for service: " + (*s)->getServiceType());
             aliveWriter.service(**s);
             byebyeWriter.service(**s);
         }
     }
-    Log::instance()->ssdp().debug("writing messages finished.");
+    LOG(ssdp, debug, "writing messages finished.");
 }
 
 
@@ -3534,7 +3535,7 @@ Device::initControllerEventing()
             (*s)->sendSubscriptionRequest(1800);
         }
         catch (...) {
-            Log::instance()->upnp().error("controller failed to initialize device while subscribing to events, ignoring.");
+            LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
         }
     }
 }
@@ -3585,7 +3586,7 @@ Device::endIcon()
 DeviceContainer*
 Device::getDeviceContainer() const
 {
-//    Log::instance()->upnp().debug("get device container: " + Poco::NumberFormatter::format(_pDeviceContainer));
+//    LOG(upnp, debug, "get device container: " + Poco::NumberFormatter::format(_pDeviceContainer));
     return _pDeviceContainer;
 }
 
@@ -3607,7 +3608,7 @@ Device::getDevDeviceCode() const
 CtlDeviceCode*
 Device::getCtlDeviceCode() const
 {
-//    Log::instance()->upnp().debug("get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
+//    LOG(upnp, debug, "get device ctl code: " + Poco::NumberFormatter::format(_pCtlDeviceCode));
     return _pCtlDeviceCode;
 }
 
@@ -3641,7 +3642,7 @@ Device::getService(std::string serviceType)
         pRes = &_pDeviceData->_services.get(serviceType);
     }
     catch (...) {
-        Log::instance()->upnp().debug("service not available: " + serviceType);
+        LOG(upnp, debug, "service not available: " + serviceType);
     }
     return pRes;
 }
@@ -3657,7 +3658,7 @@ Device::getProperty(const std::string& name)
 void
 Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->upnp().debug("device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
+    LOG(upnp, debug, "device, set device container to: " + Poco::NumberFormatter::format(pDeviceContainer));
     _pDeviceContainer = pDeviceContainer;
 }
 
@@ -3665,7 +3666,7 @@ Device::setDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Device::setDeviceData(DeviceData* pDeviceData)
 {
-//    Log::instance()->upnp().debug("device, set device data to: " + Poco::NumberFormatter::format(pDeviceData));
+//    LOG(upnp, debug, "device, set device data to: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
     pDeviceData->setDevice(this);
 }
@@ -3681,7 +3682,7 @@ Device::setDevDeviceCode(DevDeviceCode* pDevDevice)
 void
 Device::setCtlDeviceCode(CtlDeviceCode* pCtlDevice)
 {
-//    Log::instance()->upnp().debug("device, set device controller code to: " + Poco::NumberFormatter::format(pCtlDevice));
+//    LOG(upnp, debug, "device, set device controller code to: " + Poco::NumberFormatter::format(pCtlDevice));
     _pCtlDeviceCode = pCtlDevice;
 }
 
@@ -3745,7 +3746,7 @@ _pDevice(0)
 Device*
 DeviceData::getDevice()
 {
-//    Log::instance()->upnp().debug("device data, get device: " + Poco::NumberFormatter::format(_pDevice));
+//    LOG(upnp, debug, "device data, get device: " + Poco::NumberFormatter::format(_pDevice));
     return _pDevice;
 }
 
@@ -3845,7 +3846,7 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 ca
     Poco::ScopedLock<Poco::FastMutex> lock(_sendTimerLock);
     // check if continuous Timer is already running and if so then cancel sending of message set and return.
      if (_sendTimerIsRunning) {
-         Log::instance()->ssdp().warning("send timer for ssdp message set is already running, sending cancelled.");
+         LOG(ssdp, warning, "send timer for ssdp message set is already running, sending cancelled.");
          return;
      }
     _pSsdpSocket = &socket;
@@ -3896,7 +3897,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
 {
     int r = _repeat;
     while (r--) {
-        Log::instance()->ssdp().debug("#message sets left to send: " + Poco::NumberFormatter::format(r+1));
+        LOG(ssdp, debug, "#message sets left to send: " + Poco::NumberFormatter::format(r+1));
 
         for (std::vector<SsdpMessage*>::const_iterator i = _ssdpMessages.begin(); i != _ssdpMessages.end(); ++i) {
             _pSsdpSocket->sendMessage(**i, _receiver);
@@ -3932,9 +3933,9 @@ Controller::~Controller()
 void
 Controller::setState(State newState)
 {
-    Log::instance()->upnp().debug("controller state change: " + _state + " -> " + newState);
+    LOG(upnp, debug, "controller state change: " + _state + " -> " + newState);
     if (_state == newState) {
-        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
     if (newState == Started || newState == Local) {
@@ -3949,7 +3950,7 @@ Controller::setState(State newState)
                         (*s)->sendCancelSubscriptionRequest();
                     }
                     catch (...) {
-                        Log::instance()->upnp().error("controller failed to cancel event subscriptions, ignoring.");
+                        LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
                     }
                 }
             }
@@ -3957,7 +3958,7 @@ Controller::setState(State newState)
         DeviceManager::clear();
         DeviceManager::setState(Stopped);
     }
-    Log::instance()->upnp().debug("controller state change finished");
+    LOG(upnp, debug, "controller state change finished");
 }
 
 
@@ -4014,7 +4015,7 @@ Controller::startSsdp()
 void
 Controller::sendMSearch()
 {
-    Log::instance()->upnp().debug("controller sends MSearch");
+    LOG(upnp, debug, "controller sends MSearch");
     SsdpMessage m;
     m.setRequestMethod(SsdpMessage::REQUEST_SEARCH);
     m.setHost();
@@ -4031,7 +4032,7 @@ Controller::sendMSearch()
 void
 Controller::discoverDevice(const std::string& location)
 {
-    Log::instance()->upnp().debug("controller discovers device location: " + location);
+    LOG(upnp, debug, "controller discovers device location: " + location);
 
     UriDescriptionReader descriptionReader;
     descriptionReader.getDeviceDescription(location);
@@ -4050,30 +4051,30 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
     std::string usn = pMessage->getUniqueServiceName();
     std::string::size_type left = usn.find(":") + 1;
     std::string uuid = usn.substr(left, usn.find("::") - left);
-    Log::instance()->ssdp().debug("controller received message:" + Poco::LineEnding::NEWLINE_DEFAULT + pMessage->toString());
+    LOG(ssdp, debug, "controller received message:" + Poco::LineEnding::NEWLINE_DEFAULT + pMessage->toString());
 
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
-//             Log::instance()->ssdp().debug("identified alive message");
+//             LOG(ssdp, debug, "identified alive message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !_deviceContainers.contains(uuid)) {
                 discoverDevice(pMessage->getLocation());
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-             Log::instance()->ssdp().debug("identified byebye message");
+             LOG(ssdp, debug, "identified byebye message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && _deviceContainers.contains(uuid)) {
-                Log::instance()->ssdp().debug("identified byebye message, attempting to remove device container");
+                LOG(ssdp, debug, "identified byebye message, attempting to remove device container");
                 removeDeviceContainer(&_deviceContainers.get(uuid));
             }
             break;
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-//         Log::instance()->ssdp().debug("identified m-search response");
+//         LOG(ssdp, debug, "identified m-search response");
         if (!_deviceContainers.contains(uuid)) {
             discoverDevice(pMessage->getLocation());
         }
@@ -4097,13 +4098,13 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
         for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
             Device* pDevice = *it;
-            Log::instance()->upnp().debug("controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+            LOG(upnp, debug, "controller discovers device of type: " + pDevice->getDeviceType() + ", friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 Device* pTypedDevice = pDeviceGroup->createDevice();
                 pDeviceContainer->replaceDevice(pDevice, pTypedDevice);
 
-                Log::instance()->upnp().information("controller adds device, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
+                LOG(upnp, information, "controller adds device, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
                 pTypedDevice->addCtlDeviceCode();
                 pTypedDevice->initControllerEventing();
                 pTypedDevice->initController();
@@ -4113,7 +4114,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 //                    showDeviceGroup(pDeviceGroup);
                     pDeviceGroup->showDeviceGroup();
                 }
-                Log::instance()->upnp().debug("controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
+                LOG(upnp, debug, "controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
             }
         }
 
@@ -4129,9 +4130,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 void
 Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 {
-    Log::instance()->upnp().debug("remove device container");
+    LOG(upnp, debug, "remove device container");
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
-    Log::instance()->upnp().debug("remove device container with root device uuid: " + uuid);
+    LOG(upnp, debug, "remove device container with root device uuid: " + uuid);
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         int position = _deviceContainers.position(uuid);
@@ -4145,7 +4146,7 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
             Device* pDevice = *it;
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
-                Log::instance()->upnp().information("controller removes device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+                LOG(upnp, information, "controller removes device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
                 pDeviceGroup->removeDevice(pDevice);
             }
         }
@@ -4194,9 +4195,9 @@ DeviceServer::init()
 void
 DeviceServer::setState(State newState)
 {
-    Log::instance()->upnp().debug("device server state change: " + _state + " -> " + newState);
+    LOG(upnp, debug, "device server state change: " + _state + " -> " + newState);
     if (_state == newState) {
-        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
     if (newState == Started) {
@@ -4230,7 +4231,7 @@ DeviceServer::setState(State newState)
             }
         }
     }
-    Log::instance()->upnp().debug("device server state change finished");
+    LOG(upnp, debug, "device server state change finished");
 }
 
 
@@ -4516,10 +4517,10 @@ SsdpMessage::getCacheControl()
         return Poco::NumberParser::parse(value.substr(value.find('=')+1));
     }
     catch (Poco::NotFoundException) {
-        Log::instance()->ssdp().error("missing CACHE-CONTROL in ssdp header");
+        LOG(ssdp, error, "missing CACHE-CONTROL in ssdp header");
     }
     catch (Poco::SyntaxException) {
-        Log::instance()->ssdp().error("wrong number format of CACHE-CONTROL in ssdp header");
+        LOG(ssdp, error, "wrong number format of CACHE-CONTROL in ssdp header");
     }
     return SSDP_CACHE_DURATION;  // if no valid number is given, return minimum required value
 }
@@ -4602,7 +4603,7 @@ SsdpMessage::getLocation()
         return _messageHeader["LOCATION"];
     }
     catch (Poco::NotFoundException) {
-        Log::instance()->ssdp().error("LOCATION field not found");
+        LOG(ssdp, error, "LOCATION field not found");
         return "";
     }
 }
@@ -4702,11 +4703,11 @@ SsdpMessage::getMaximumWaitTime()
         return Poco::NumberParser::parse(_messageHeader["MX"]);
     }
     catch (Poco::NotFoundException) {
-        Log::instance()->ssdp().error("missing MX in SSDP header");
+        LOG(ssdp, error, "missing MX in SSDP header");
 
     }
     catch (Poco::SyntaxException) {
-        Log::instance()->ssdp().error("wrong number format of MX in SSDP header");
+        LOG(ssdp, error, "wrong number format of MX in SSDP header");
     }
     return SSDP_MIN_WAIT_TIME;  // if no valid number is given, return minimum required value
 }
@@ -4730,7 +4731,7 @@ SsdpMessage::getDate()
         return Poco::DateTimeParser::parse(Poco::DateTimeFormat::HTTP_FORMAT, value, timeZoneDifferentail);
     }
     catch (Poco::SyntaxException) {
-        Log::instance()->ssdp().error("wrong date format of DATE in SSDP header");
+        LOG(ssdp, error, "wrong date format of DATE in SSDP header");
     }
 }
 
@@ -4907,13 +4908,13 @@ void
 DeviceGroup::selectDevice(Device* pDevice)
 {
     if (pDevice) {
-        Omm::Log::instance()->upnp().debug("selected device: " + pDevice->getFriendlyName());
+        LOG(upnp, debug, "selected device: " + pDevice->getFriendlyName());
         _pSelectedDevice = pDevice;
         pDevice->selected();
         selectDevice(pDevice, _devices.position(pDevice->getUuid()));
     }
     else {
-        Omm::Log::instance()->upnp().warning("can not select null device");
+        LOG(upnp, warning, "can not select null device");
     }
 }
 

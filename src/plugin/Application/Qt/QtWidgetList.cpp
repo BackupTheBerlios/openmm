@@ -51,7 +51,7 @@ int
 QtWidgetList::visibleRows()
 {
     int rows = viewport()->geometry().height() / _widgetHeight;
-    Omm::Av::Log::instance()->upnpav().debug("widget list number of visible rows: " + Poco::NumberFormatter::format(rows));
+    LOGNS(Omm::Av, upnpav, debug, "widget list number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -67,7 +67,7 @@ QtWidgetList::initWidget(ListWidget* pWidget)
 void
 QtWidgetList::moveWidget(int row, ListWidget* pWidget)
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget list move item widget to row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "widget list move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pWidget);
 }
 
@@ -82,7 +82,7 @@ QtWidgetList::updateScrollWidgetSize()
 int
 QtWidgetList::getOffset()
 {
-//    Omm::Av::Log::instance()->upnpav().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry().y()));
+//    LOGNS(Omm::Av, upnpav().debug("scroll widget offset: " + Poco::NumberFormatter::format(_pScrollWidget->geometry, y, )));
     return _pScrollWidget->geometry().y();
 }
 
@@ -105,7 +105,7 @@ void
 QtWidgetList::resizeEvent(QResizeEvent* pEvent)
 {
     int rows = pEvent->size().height() / _widgetHeight;
-    Omm::Av::Log::instance()->upnpav().debug("Qt widget list resize: " + Poco::NumberFormatter::format(rows));
+    LOGNS(Omm::Av, upnpav, debug, "Qt widget list resize: " + Poco::NumberFormatter::format(rows));
     if (pEvent->oldSize().height() > 0) {
         WidgetListView::resize(rows);
     }
@@ -136,7 +136,7 @@ int
 QtWidgetCanvas::visibleRows()
 {
     int rows = viewport()->geometry().height() / _widgetHeight;
-    Omm::Av::Log::instance()->upnpav().debug("widget canvas number of visible rows: " + Poco::NumberFormatter::format(rows));
+    LOGNS(Omm::Av, upnpav, debug, "widget canvas number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -159,7 +159,7 @@ QtWidgetCanvas::initWidget(ListWidget* pWidget)
 void
 QtWidgetCanvas::moveWidget(int row, ListWidget* pWidget)
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "widget canvas move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pWidget);
 }
 

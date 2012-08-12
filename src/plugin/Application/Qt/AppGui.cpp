@@ -107,13 +107,13 @@ void
 WidgetListModel::insertItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
-        Omm::Av::Log::instance()->upnpav().debug("widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        LOGNS(Omm::Av, upnpav, debug, "widget list model insert row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
         if (_pView) {
             _pView->insertItem(row);
         }
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "widget list model tries to insert item in row number not less than total row count or less than zero (ignoring)");
     }
 }
 
@@ -122,13 +122,13 @@ void
 WidgetListModel::removeItem(int row)
 {
     if (0 <= row && row < totalItemCount()) {
-        Omm::Av::Log::instance()->upnpav().debug("widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
+        LOGNS(Omm::Av, upnpav, debug, "widget list model remove row: " + Poco::NumberFormatter::format(row) + ", row count: " + Poco::NumberFormatter::format(totalItemCount()));
         if (_pView) {
             _pView->removeItem(row);
         }
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "widget list model tries to remove item in row number not less than total row count or less than zero (ignoring)");
     }
 }
 
@@ -162,7 +162,7 @@ _rowOffset(0)
 void
 WidgetListView::setModel(WidgetListModel* pModel)
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget list view set model ...");
+    LOGNS(Omm::Av, upnpav, debug, "widget list view set model ...");
 
     // double link model and view.
     _pModel = pModel;
@@ -170,7 +170,7 @@ WidgetListView::setModel(WidgetListModel* pModel)
         _pModel->_pView = this;
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("widget list view failed to set model (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "widget list view failed to set model (ignoring)");
         return;
     }
 
@@ -181,13 +181,13 @@ WidgetListView::setModel(WidgetListModel* pModel)
     extendWidgetPool(rows);
 
     // insert items that are already in the model.
-    Omm::Av::Log::instance()->upnpav().debug("inserting number of items: " + Poco::NumberFormatter::format(_pModel->totalItemCount()));
+    LOGNS(Omm::Av, upnpav, debug, "inserting number of items: " + Poco::NumberFormatter::format(_pModel->totalItemCount()));
 //    for (int i = 0; i < std::min(_pModel->totalItemCount(), rows); i++) {
     for (int i = 0; i < rowsFetched; i++) {
         insertItem(i);
     }
 
-    Omm::Av::Log::instance()->upnpav().debug("widget list view set model finished.");
+    LOGNS(Omm::Av, upnpav, debug, "widget list view set model finished.");
 }
 
 
@@ -195,7 +195,7 @@ void
 WidgetListView::resize(int rows)
 {
     int rowDelta = rows - widgetPoolSize();
-    Omm::Av::Log::instance()->upnpav().debug("widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
+    LOGNS(Omm::Av, upnpav, debug, "widget list view resize row delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDelta > 0) {
         if (_rowOffset + _visibleWidgets.size() + rowDelta >= _pModel->lastFetched()) {
             _pModel->fetch(_visibleWidgets.size() + rowDelta);
@@ -223,12 +223,12 @@ WidgetListView::widgetPoolSize()
 void
 WidgetListView::extendWidgetPool(int n)
 {
-    Omm::Av::Log::instance()->upnpav().debug("widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
+    LOGNS(Omm::Av, upnpav, debug, "widget list view extend widget pool by number of widgets: " + Poco::NumberFormatter::format(n));
 
     for (int i = 0; i < n; ++i) {
         ListWidget* pWidget = _pModel->createWidget();
         if (!pWidget) {
-            Omm::Av::Log::instance()->upnpav().error("widget list view failed to create widget for pool (ignoring)");
+            LOGNS(Omm::Av, upnpav, error, "widget list view failed to create widget for pool (ignoring)");
             return;
         }
         pWidget->hideWidget();
@@ -236,7 +236,7 @@ WidgetListView::extendWidgetPool(int n)
         _freeWidgets.push(pWidget);
         initWidget(pWidget);
         pWidget->registerEventNotificationHandler(Poco::Observer<WidgetListView, ListWidget::RowSelectNotification>(*this, &WidgetListView::selectNotificationHandler));
-        Omm::Av::Log::instance()->upnpav().debug("allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
+        LOGNS(Omm::Av, upnpav, debug, "allocate widget[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pWidget));
     }
 }
 
@@ -262,7 +262,7 @@ WidgetListView::visibleWidget(int index)
         return _visibleWidgets[index];
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("widget list view failed to retrieve visible widget, out of range (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "widget list view failed to retrieve visible widget, out of range (ignoring)");
         return 0;
     }
 }
@@ -286,7 +286,7 @@ WidgetListView::scrolledToRow(int rowOffset)
         _pModel->fetch(_visibleWidgets.size() + rowDeltaAbsolute);
     }
 
-    Omm::Av::Log::instance()->upnpav().debug("scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
+    LOGNS(Omm::Av, upnpav, debug, "scroll widget to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDeltaAbsolute));
     while (rowDeltaAbsolute--) {
         if (rowDelta > 0) {
             // detach first visible widget
@@ -350,7 +350,7 @@ WidgetListView::insertItem(int row)
         updateScrollWidgetSize();
         // check if item is visible
         if (!itemIsVisible(row)) {
-            Omm::Av::Log::instance()->upnpav().debug("widget list view insert item that is not visible (ignoring)");
+            LOGNS(Omm::Av, upnpav, debug, "widget list view insert item that is not visible (ignoring)");
             return;
         }
     }
@@ -372,7 +372,7 @@ WidgetListView::insertItem(int row)
         moveWidgetToRow(row, pWidget);
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("widget list view failed to attach widget to item, widget pool is empty (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "widget list view failed to attach widget to item, widget pool is empty (ignoring)");
     }
 }
 
@@ -385,7 +385,7 @@ WidgetListView::removeItem(int row)
         updateScrollWidgetSize();
         // check if item is visible
         if (!itemIsVisible(row)) {
-            Omm::Av::Log::instance()->upnpav().debug("widget list view remove item that is not visible (ignoring)");
+            LOGNS(Omm::Av, upnpav, debug, "widget list view remove item that is not visible (ignoring)");
             return;
         }
     }
@@ -406,13 +406,13 @@ WidgetListView::removeItem(int row)
     if (_pModel->totalItemCount() - lastRow > 0) {
         // FIXME: something's going wrong with removal of rows, duplicate rows appear and crash
         // reuse and attach widget below last widget cause it is now becoming visible
-        Omm::Av::Log::instance()->upnpav().debug("widget list view reuse removed item widget");
+        LOGNS(Omm::Av, upnpav, debug, "widget list view reuse removed item widget");
         _pModel->attachWidget(lastRow - 1, pWidget);
         _visibleWidgets.push_back(pWidget);
         moveWidgetToRow(lastRow - 1, pWidget);
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("widget list view free removed item widget");
+        LOGNS(Omm::Av, upnpav, debug, "widget list view free removed item widget");
         // otherwise free widget
         _freeWidgets.push(pWidget);
     }
@@ -446,18 +446,18 @@ Navigator::~Navigator()
 void
 Navigator::push(Navigable* pNavigable)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
-//    Omm::Util::Log::instance()->plugin().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
+//    LOGNS(Omm::Av, upnpav, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " ...");
+//    LOGNS(Omm::Util, plugin, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString());
 
     pNavigable->_pNavigator = this;
     if (pNavigable->getWidget()) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
+//        LOGNS(Omm::Av, upnpav, debug, "Qt navigator add widget: " + Poco::NumberFormatter::format(pNavigable->getWidget()));
         pushImpl(pNavigable);
     }
     _navigableStack.push(pNavigable);
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator showing widget ...");
+//    LOGNS(Omm::Av, upnpav, debug, "Qt navigator showing widget ...");
     pNavigable->show();
-//    Omm::Av::Log::instance()->upnpav().debug("Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
+//    LOGNS(Omm::Av, upnpav, debug, "Qt navigator push: " + pNavigable->getBrowserTitle().toStdString() + " finished.");
 }
 
 

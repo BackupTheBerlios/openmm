@@ -36,7 +36,7 @@ QGraphicsView(static_cast<QWidget*>(pParent ? pParent->getNativeView() : 0)),
 ViewImpl(pView, this),
 _movableViews(movableViews)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl ctor");
+    LOG(gui, debug, "list view impl ctor");
     setAlignment((Qt::AlignLeft | Qt::AlignTop));
 
     _pGraphicsScene = new QGraphicsScene;
@@ -55,11 +55,11 @@ MovableListViewImpl::~MovableListViewImpl()
 int
 MovableListViewImpl::visibleRows()
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())
+    Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())
             + ", height: " Poco::NumberFormatter::format(viewport()->geometry().height()));
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = viewport()->geometry().height() / pListView->_viewHeight;
-    Omm::Gui::Log::instance()->gui().debug("list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
+    LOG(gui, debug, "list view impl number of visible rows: " + Poco::NumberFormatter::format(rows));
     return rows;
 }
 
@@ -67,7 +67,7 @@ MovableListViewImpl::visibleRows()
 void
 MovableListViewImpl::addItemView(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl add item view");
+    LOG(gui, debug, "list view impl add item view");
     ListView* pListView =  static_cast<ListView*>(_pView);
     pView->resize(viewport()->width(), pListView->_viewHeight);
 
@@ -84,7 +84,7 @@ MovableListViewImpl::addItemView(View* pView)
 void
 MovableListViewImpl::moveItemView(int row, View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
+    LOG(gui, debug, "list view impl move item widget to row: " + Poco::NumberFormatter::format(row));
     emit moveWidgetSignal(row, pView);
 }
 

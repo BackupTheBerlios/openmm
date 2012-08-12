@@ -31,6 +31,6 @@ QtMainWindow::QtMainWindow(QWidget* pCentralWidget)
 //void
 //QtMainWindow::keyPressEvent(QKeyEvent* event)
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("key pressed: " + event->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(event->key()));
+//    LOGNS(Omm::Av, upnpav, debug, "key pressed: " + event->text().toStdString() + ", key no: " + Poco::NumberFormatter::format(event->key()));
 //}
 

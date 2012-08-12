@@ -72,7 +72,7 @@ QtDeviceListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, c
         painter->restore();
     }
     if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
-//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
+//        LOGNS(Omm::Av, upnpav, debug, "DRAWING ICON");
         QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
         painter->save();
         icon.paint(painter, iconRect);
@@ -168,7 +168,7 @@ QtStdDeviceGroup::data(const QModelIndex& index, int role) const
     }
 
     if (index.internalPointer() == 0) {
-        Omm::Log::instance()->upnp().warning("QtDeviceGroupModel::data() reference to device is 0:");
+        LOGNS(Omm, upnp, warning, "QtDeviceGroupModel::data() reference to device is 0:");
         return QVariant();
     }
 
@@ -232,7 +232,7 @@ QtStdDeviceGroup::columnCount(const QModelIndex& parent) const
 void
 QtStdDeviceGroup::showDeviceGroup()
 {
-    Omm::Log::instance()->upnp().debug("Qt standard device group show: " + getDeviceType());
+    LOGNS(Omm, upnp, debug, "Qt standard device group show: " + getDeviceType());
 
     QtStdController* pController = static_cast<QtStdController*>(getController());
 
@@ -240,7 +240,7 @@ QtStdDeviceGroup::showDeviceGroup()
         pController->addTab(_pNavigator, shortName().c_str());
     }
     else {
-        Omm::Log::instance()->upnp().error("Qt standard device group failed to show device group, no widget available: " + getDeviceType());
+        LOGNS(Omm, upnp, error, "Qt standard device group failed to show device group, no widget available: " + getDeviceType());
     }
 }
 
@@ -249,7 +249,7 @@ void
 QtStdDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Log::instance()->upnp().debug("Qt device group adds device at position: " + Poco::NumberFormatter::format(position));
+        LOGNS(Omm, upnp, debug, "Qt device group adds device at position: " + Poco::NumberFormatter::format(position));
         beginInsertRows(QModelIndex(), position, position);
     }
     else {
@@ -258,7 +258,7 @@ QtStdDeviceGroup::addDevice(Omm::Device* pDevice, int position, bool begin)
         if (rowCount() == 1) {
 //            emit setCurrentIndex(index(0, 0));
         }
-        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+        LOGNS(Omm, upnp, debug, "Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
     }
 }
 
@@ -267,12 +267,12 @@ void
 QtStdDeviceGroup::removeDevice(Omm::Device* pDevice, int position, bool begin)
 {
     if (begin) {
-        Omm::Log::instance()->upnp().debug("Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
+        LOGNS(Omm, upnp, debug, "Qt device group removes device at position: " + Poco::NumberFormatter::format(position));
         beginRemoveRows(QModelIndex(), position, position);
     }
     else {
         endRemoveRows();
         emit layoutChanged();
-        Omm::Log::instance()->upnp().debug("Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
+        LOGNS(Omm, upnp, debug, "Qt device group finished adding device at position: " + Poco::NumberFormatter::format(position));
     }
 }

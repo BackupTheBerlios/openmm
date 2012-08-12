@@ -81,10 +81,10 @@ _systemUpdateIdTimerInterval(0)
 
 MediaServer::~MediaServer()
 {
-    Log::instance()->upnpav().information("stopping media server ...");
+    LOG(upnpav, information, "stopping media server ...");
     _pHttpServer->stop();
     delete _pHttpServer;
-    Log::instance()->upnpav().information("done");
+    LOG(upnpav, information, "done");
 }
 
 
@@ -101,7 +101,7 @@ MediaServer::start()
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
-    Log::instance()->upnpav().information("media server listening on: " + _socket.address().toString());
+    LOG(upnpav, information, "media server listening on: " + _socket.address().toString());
     startPollSystemUpdateId(true);
 }
 
@@ -146,7 +146,7 @@ MediaServer::setSystemUpdateId(ui4 id)
 void
 MediaServer::setPollSystemUpdateIdTimer(long msec)
 {
-    Log::instance()->upnpav().debug("set poll system update id timer interval to: " + Poco::NumberFormatter::format(msec));
+    LOG(upnpav, debug, "set poll system update id timer interval to: " + Poco::NumberFormatter::format(msec));
 
     _systemUpdateIdTimerInterval = msec;
 }
@@ -156,13 +156,13 @@ void
 MediaServer::startPollSystemUpdateId(bool start)
 {
     if (_pSystemUpdateIdTimer) {
-        Log::instance()->upnpav().debug("stop poll system update id timer ...");
+        LOG(upnpav, debug, "stop poll system update id timer ...");
         _pSystemUpdateIdTimer->stop();
         delete _pSystemUpdateIdTimer;
         _pSystemUpdateIdTimer = 0;
     }
     if (start && _systemUpdateIdTimerInterval) {
-        Log::instance()->upnpav().debug("start poll system update id timer, polling every " + Poco::NumberFormatter::format(_systemUpdateIdTimerInterval) + " msec");
+        LOG(upnpav, debug, "start poll system update id timer, polling every " + Poco::NumberFormatter::format(_systemUpdateIdTimerInterval) + " msec");
         _pSystemUpdateIdTimer = new Poco::Timer(0, _systemUpdateIdTimerInterval);
         Poco::TimerCallback<MediaServer> callback(*this, &MediaServer::pollSystemUpdateId);
         _pSystemUpdateIdTimer->start(callback);
@@ -173,7 +173,7 @@ MediaServer::startPollSystemUpdateId(bool start)
 void
 MediaServer::pollSystemUpdateId(Poco::Timer& timer)
 {
-    Log::instance()->upnpav().debug("poll system update id of server: \"" + getFriendlyName() + "\"");
+    LOG(upnpav, debug, "poll system update id of server: \"" + getFriendlyName() + "\"");
 
     AbstractDataModel* pDataModel = _pServerContainer->getDataModel();
     if (pDataModel) {
@@ -205,21 +205,21 @@ _pServer(pItemServer)
 void
 ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnpav().debug("handle media item request: " + request.getURI());
+    LOG(upnpav, debug, "handle media item request: " + request.getURI());
 
     response.setDate(Poco::Timestamp());
 
     std::ostringstream requestHeader;
     request.write(requestHeader);
-    Log::instance()->upnpav().debug("request method: " + request.getMethod());
-    Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+    LOG(upnpav, debug, "request method: " + request.getMethod());
+    LOG(upnpav, debug, "request header:\n" + requestHeader.str());
 
     Poco::StringTokenizer uri(request.getURI(), "$");
     std::string objectId = uri[0].substr(1);
-    Log::instance()->upnpav().debug("objectId: " + objectId + ", resourceId: " + uri[1]);
+    LOG(upnpav, debug, "objectId: " + objectId + ", resourceId: " + uri[1]);
     ServerObject* pObject = _pServer->_pServerContainer->getDescendant(objectId);
     if (!pObject) {
-        Log::instance()->upnpav().error("item request handler could not find object with id: " + objectId);
+        LOG(upnpav, error, "item request handler could not find object with id: " + objectId);
         return;
     }
 
@@ -228,24 +228,24 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
     std::streamsize resSize = 0;
     if (uri[1] == "i") {
         // object icon requested by controller
-        Log::instance()->upnpav().debug("icon request: server creates icon property");
+        LOG(upnpav, debug, "icon request: server creates icon property");
         pProperty = static_cast<ServerObjectProperty*>(pObject->getProperty(AvProperty::ICON));
-        Log::instance()->upnpav().debug("icon request: server icon property created");
+        LOG(upnpav, debug, "icon request: server icon property created");
         // deliver icon
         if (pProperty) {
             // icon requested (handle other streamable properties as well, such as album art ...)
             try {
                 std::istream* pIstr = pProperty->getStream();
                 if (pIstr) {
-                    Log::instance()->upnpav().debug("sending icon ...");
+                    LOG(upnpav, debug, "sending icon ...");
                     std::ostream& ostr = response.send();
                     std::streamsize numBytes = Poco::StreamCopier::copyStream(*pIstr, ostr);
-                    Log::instance()->upnpav().debug("icon sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
+                    LOG(upnpav, debug, "icon sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
                     delete pIstr;
                 }
             }
             catch(Poco::Exception& e) {
-                Log::instance()->upnpav().debug("delivering icon failed: " + e.displayText());
+                LOG(upnpav, debug, "delivering icon failed: " + e.displayText());
             }
         }
         return;
@@ -255,19 +255,19 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         int resourceId = Poco::NumberParser::parse(uri[1]);
         pResource = static_cast<ServerObjectResource*>(pObject->getResource(resourceId));
         if (!pResource) {
-            Log::instance()->upnpav().error("item request handler no resource for object with id: " + objectId);
+            LOG(upnpav, error, "item request handler no resource for object with id: " + objectId);
             return;
         }
-        Log::instance()->upnpav().debug("item request handler getting size");
+        LOG(upnpav, debug, "item request handler getting size");
         resSize = pResource->getSize();
 
-        Log::instance()->upnpav().debug("item request handler getting prot info");
+        LOG(upnpav, debug, "item request handler getting prot info");
         std::string protInfoString = pResource->getProtInfo();
         ProtocolInfo protInfo(protInfoString);
         std::string mime = protInfo.getMimeString();
         std::string dlna = protInfo.getDlnaString();
 
-        Log::instance()->upnpav().debug("item request handler writing response header");
+        LOG(upnpav, debug, "item request handler writing response header");
         response.setContentType(mime);
         response.set("Mime-Version", "1.0");
         response.set("transferMode.dlna.org", "Streaming");
@@ -307,7 +307,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         }
         std::ostringstream responseHeader;
         response.write(responseHeader);
-        Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        LOG(upnpav, debug, "response header:\n" + responseHeader.str());
         std::ostream& ostr = response.send();
 #ifdef __DARWIN__
         signal(SIGPIPE, SIG_IGN); // fixes abort with "Program received signal SIGPIPE, Broken pipe." on Mac OSX when renderer stops the stream.
@@ -317,10 +317,10 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             // deliver resource
             pIstr = pResource->getStream();
             if (pIstr) {
-                Log::instance()->upnpav().debug("sending stream ...");
+                LOG(upnpav, debug, "sending stream ...");
 //                std::streamsize numBytes = Poco::StreamCopier::copyStream(*pIstr, ostr);
                 std::streamsize numBytes = copyStream(*pIstr, ostr, start, end);
-                Log::instance()->upnpav().debug("stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
+                LOG(upnpav, debug, "stream sent (" + Poco::NumberFormatter::format(numBytes) + " bytes transfered).");
                 // TODO: define different server resource streaming models:
                 // exclusive access (interruptable by second request or not), unlimited number of streams per resource, ...
                 // resource stream should always be deleted by model and freed by separate method in interface of model (freeStream(std::istream*))?
@@ -332,7 +332,7 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             }
         }
         catch(Poco::Exception& e) {
-            Log::instance()->upnpav().debug("streaming aborted: " + e.displayText());
+            LOG(upnpav, debug, "streaming aborted: " + e.displayText());
         }
     }
     else if (request.getMethod() == "HEAD") {
@@ -341,12 +341,12 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
         }
         std::ostringstream responseHeader;
         response.write(responseHeader);
-        Log::instance()->upnpav().debug("response header:\n" + responseHeader.str());
+        LOG(upnpav, debug, "response header:\n" + responseHeader.str());
         response.send();
     }
 
     if (response.sent()) {
-        Log::instance()->upnpav().debug("media item request finished: " + request.getURI());
+        LOG(upnpav, debug, "media item request finished: " + request.getURI());
     }
 }
 
@@ -372,7 +372,7 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
         istr.read(buffer, _bufferSize);
     }
     if( istr.bad() ) {
-       Log::instance()->upnpav().error("reading resource stream failed");
+       LOG(upnpav, error, "reading resource stream failed");
     }
     std::streamsize n = istr.gcount();
     while (n > 0)
@@ -391,7 +391,7 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
                 istr.read(buffer, _bufferSize);
             }
             if( istr.bad() ) {
-                Log::instance()->upnpav().error("reading resource stream failed");
+                LOG(upnpav, error, "reading resource stream failed");
             }
             n = istr.gcount();
         }
@@ -412,10 +412,10 @@ ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& st
         end = Poco::NumberParser::parse(range.substr(delim + 1));
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("range end parsing: " + e.displayText());
+        LOG(upnpav, warning, "range end parsing: " + e.displayText());
     }
-    Log::instance()->upnpav().debug("range: " + range + " (start: " + Poco::NumberFormatter::format((long)start)
-                                                      + ", end: " + (end == -1 ? "not defined" : Poco::NumberFormatter::format((long)end)) + ")");
+    LOG(upnpav, debug, "range: " + range + " (start: " + Poco::NumberFormatter::format((long)start)\
+              + ", end: " + (end == -1 ? "not defined" : Poco::NumberFormatter::format((long)end)) + ")");
 }
 
 
@@ -500,20 +500,20 @@ ServerObjectResource::freeStream(std::istream* pIstream)
 void
 ServerObjectResource::writeResource(const uri& sourceUri)
 {
-    Log::instance()->upnpav().debug("write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
+    LOG(upnpav, debug, "write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
     if (_pObject->_indexNamespace == ServerObject::User) {
         // FIXME: always access the resource stream via getStream(), even on write operations (same in ServerContainer::initChild())
         std::string indexFileName = _pDataModel->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + getPrivateResourceUri();
-        Log::instance()->upnpav().debug("server container, write resource to playlist index file: " + indexFileName);
+        LOG(upnpav, debug, "server container, write resource to playlist index file: " + indexFileName);
         std::ofstream indexFile(indexFileName.c_str());
 
-        Log::instance()->upnpav().debug("write resource, retrieve source from uri: " + sourceUri.toString());
+        LOG(upnpav, debug, "write resource, retrieve source from uri: " + sourceUri.toString());
         Poco::Net::HTTPClientSession session(sourceUri.getHost(), sourceUri.getPort());
         Poco::Net::HTTPRequest request("GET", sourceUri.getPath());
         session.sendRequest(request);
         std::stringstream requestHeader;
         request.write(requestHeader);
-        Omm::Av::Log::instance()->upnpav().debug("request header:\n" + requestHeader.str());
+        LOG(upnpav, debug, "request header:\n" + requestHeader.str());
 
         Poco::Net::HTTPResponse response;
         std::istream& istr = session.receiveResponse(response);
@@ -567,15 +567,15 @@ ServerObject::~ServerObject()
 void
 ServerObject::setUniqueProperty(const std::string& name, const std::string& value)
 {
-//    Log::instance()->upnpav().debug("server container set unique property: " + name);
-//    Log::instance()->upnpav().debug("server container data model: " + Poco::NumberFormatter::format(_pDataModel));
+//    LOG(upnpav, debug, "server container set unique property: " + name);
+//    LOG(upnpav, debug, "server container data model: " + Poco::NumberFormatter::format(_pDataModel));
 
     if (_pDataModel) {
-        Log::instance()->upnpav().debug("server container text converter: " + Poco::NumberFormatter::format(_pDataModel->getTextConverter()));
+        LOG(upnpav, debug, "server container text converter: " + Poco::NumberFormatter::format(_pDataModel->getTextConverter()));
         std::string recodedValue;
         // convert encodings, if necessary
         if (_pDataModel->getTextConverter()) {
-            Log::instance()->upnpav().debug("server container convert character encoding");
+            LOG(upnpav, debug, "server container convert character encoding");
             _pDataModel->getTextConverter()->convert(value, recodedValue);
         }
         else {
@@ -599,7 +599,7 @@ ServerObject::setUniqueProperty(const std::string& name, const std::string& valu
 ServerObject*
 ServerObject::createChildObject()
 {
-    Log::instance()->upnpav().debug("server container create child object");
+    LOG(upnpav, debug, "server container create child object");
 
     ServerObject* pObject = new ServerObject(_pServer);
     pObject->_pDataModel = _pDataModel;
@@ -611,7 +611,7 @@ ServerObject::createChildObject()
 ServerObjectResource*
 ServerObject::createResource()
 {
-    Log::instance()->upnpav().debug("server container create resource");
+    LOG(upnpav, debug, "server container create resource");
 
     return new ServerObjectResource(this, _pDataModel);
 }
@@ -637,7 +637,7 @@ ServerObject::getId()
         }
         objectId = prefix + Poco::NumberFormatter::format(_index);
     }
-    Log::instance()->upnpav().debug("server object id: " + objectId);
+    LOG(upnpav, debug, "server object id: " + objectId);
     return objectId;
 
     // data model based relationship between media objects
@@ -648,7 +648,7 @@ ServerObject::getId()
 //    else {
 //        objectId = getParentId() + "/" + Poco::NumberFormatter::format(_index);
 //    }
-//    Log::instance()->upnpav().debug("server object id: " + objectId);
+//    LOG(upnpav, debug, "server object id: " + objectId);
 //    return objectId;
 
     // media object tree based relationship
@@ -665,7 +665,7 @@ ServerObject::getId()
 std::string
 ServerObject::getParentId()
 {
-//    Log::instance()->upnpav().debug("ServerObject::getParentObjectId()");
+//    LOG(upnpav, debug, "ServerObject::getParentObjectId()");
 
     std::string parentId;
     if (_index == AbstractDataModel::INVALID_INDEX) {
@@ -674,7 +674,7 @@ ServerObject::getParentId()
     else {
         parentId = "0";
     }
-    Log::instance()->upnpav().debug("server parent id: " + parentId);
+    LOG(upnpav, debug, "server parent id: " + parentId);
     return parentId;
 
     // data model based relationship between media objects
@@ -686,7 +686,7 @@ ServerObject::getParentId()
 //        parentId += "/" + Poco::NumberFormatter::format(_parentIndex);
 //        parentPath = _pDataModel->getParentPath(parentPath);
 //    }
-//    Log::instance()->upnpav().debug("server object parent id: " + parentId);
+//    LOG(upnpav, debug, "server object parent id: " + parentId);
 //    return parentId;
 
     // media object tree based relationship
@@ -703,7 +703,7 @@ ServerObject::getParentId()
 ui4
 ServerObject::getIndex()
 {
-//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+//    LOG(upnpav, debug, "ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
     return _index;
 }
 
@@ -711,7 +711,7 @@ ServerObject::getIndex()
 void
 ServerObject::setIndex(ui4 index)
 {
-//    Log::instance()->upnpav().debug("ServerObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
+//    LOG(upnpav, debug, "ServerObject::setObjectNumber() objectId: " + Poco::NumberFormatter::format(id));
     _index = index;
 }
 
@@ -719,7 +719,7 @@ ServerObject::setIndex(ui4 index)
 void
 ServerObject::setIndex(const std::string& index)
 {
-//    Log::instance()->upnpav().debug("ServerObject::setObjectId() from string: " + id);
+//    LOG(upnpav, debug, "ServerObject::setObjectId() from string: " + id);
     _index = Poco::NumberParser::parseUnsigned(index);
 }
 
@@ -741,7 +741,7 @@ ServerObject::setIndex(const std::string& index)
 ui4
 ServerObject::getParentIndex()
 {
-//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+//    LOG(upnpav, debug, "ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
     return _parentIndex;
 }
 
@@ -749,7 +749,7 @@ ServerObject::getParentIndex()
 ServerObject*
 ServerObject::getParent()
 {
-//    Log::instance()->upnpav().debug("ServerObject::getParent()");
+//    LOG(upnpav, debug, "ServerObject::getParent()");
     return _pParent;
 }
 
@@ -757,7 +757,7 @@ ServerObject::getParent()
 void
 ServerObject::setParentIndex(ui4 index)
 {
-//    Log::instance()->upnpav().debug("ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
+//    LOG(upnpav, debug, "ServerObject::getIndex index: " + Poco::NumberFormatter::format(_index));
     _parentIndex = index;
 }
 
@@ -765,7 +765,7 @@ ServerObject::setParentIndex(ui4 index)
 void
 ServerObject::setParent(ServerObject* pParent)
 {
-//    Log::instance()->upnpav().debug("ServerObject::setParent()");
+//    LOG(upnpav, debug, "ServerObject::setParent()");
     _pParent = pParent;
 }
 
@@ -809,7 +809,7 @@ ServerItem::~ServerItem()
 ServerObjectResource*
 ServerItem::createResource()
 {
-    Log::instance()->upnpav().debug("server item create resource");
+    LOG(upnpav, debug, "server item create resource");
 
     return new ServerObjectResource(this, _pDataModel);
 }
@@ -854,7 +854,7 @@ ServerContainer::addPlaylistResource()
 void
 ServerContainer::addUserObject(ServerObject* pChildObject)
 {
-    Log::instance()->upnpav().debug("server container add user object: " + pChildObject->getTitle());
+    LOG(upnpav, debug, "server container add user object: " + pChildObject->getTitle());
     std::vector<ui4> indices;
     _pUserObjectCache->getIndices(indices);
     // TODO: don't use max + 1 as new free index
@@ -885,18 +885,18 @@ ServerContainer::addUserObject(ServerObject* pChildObject)
 void
 ServerContainer::removeUserObject(ServerObject* pChildObject)
 {
-    Log::instance()->upnpav().debug("server container remove user object: " + pChildObject->getTitle());
+    LOG(upnpav, debug, "server container remove user object: " + pChildObject->getTitle());
     _pUserObjectCache->removeMediaObjectForIndex(pChildObject->getIndex());
     std::string metaDir = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath();
     ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pChildObject->getResource());
     std::string resourceFile = pResource->getPrivateResourceUri();
-    Log::instance()->upnpav().debug("server container remove resource: " + metaDir + "/" + resourceFile);
+    LOG(upnpav, debug, "server container remove resource: " + metaDir + "/" + resourceFile);
     Poco::File resource(metaDir + "/" + resourceFile);
     try {
         resource.remove();
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().debug("server container removing resource " + metaDir + "/" + resourceFile + ": " + e.displayText());
+        LOG(upnpav, debug, "server container removing resource " + metaDir + "/" + resourceFile + ": " + e.displayText());
     }
 }
 
@@ -977,7 +977,7 @@ ServerContainer::setLayout(const std::string& layout)
 ServerContainer*
 ServerContainer::createMediaContainer()
 {
-    Log::instance()->upnpav().debug("server container create media container");
+    LOG(upnpav, debug, "server container create media container");
 
     ServerContainer* pContainer = new ServerContainer(_pServer);
     pContainer->_pDataModel = _pDataModel;
@@ -994,7 +994,7 @@ ServerContainer::createMediaContainer()
 ServerItem*
 ServerContainer::createMediaItem()
 {
-    Log::instance()->upnpav().debug("server container create media item");
+    LOG(upnpav, debug, "server container create media item");
 
     ServerItem* pItem = new ServerItem(_pServer);
     pItem->_pDataModel = _pDataModel;
@@ -1037,7 +1037,7 @@ ServerContainer::getSortCaps()
 void
 ServerContainer::setBasePath(const std::string& basePath)
 {
-    Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
+    LOG(upnpav, debug, "server container, set base path to: " + basePath);
     if (_pObjectCache) {
         std::string cacheFilePath = getDataModel()->getCacheDirPath() + _pDataModel->getModelClass() + "/" + basePath + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
@@ -1054,23 +1054,23 @@ ServerContainer::setBasePath(const std::string& basePath)
 void
 ServerContainer::updateCache()
 {
-    Log::instance()->upnpav().debug("server container, update cache started ...");
+    LOG(upnpav, debug, "server container, update cache started ...");
     if (_pObjectCache) {
         // removed objects
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginRemovedIndex(); it != _pDataModel->endRemovedIndex(); ++it) {
-            Log::instance()->upnpav().debug("remove object from cache with index: " + Poco::NumberFormatter::format(*it));
+            LOG(upnpav, debug, "remove object from cache with index: " + Poco::NumberFormatter::format(*it));
             _pObjectCache->removeMediaObjectForIndex(*it);
         }
         // added objects
         for (AbstractDataModel::IndexIterator it = _pDataModel->beginAddedIndex(); it != _pDataModel->endAddedIndex(); ++it) {
-            Log::instance()->upnpav().debug("add object to cache with index: " + Poco::NumberFormatter::format(*it));
+            LOG(upnpav, debug, "add object to cache with index: " + Poco::NumberFormatter::format(*it));
             ServerObject* pObject = _pDataModel->getMediaObject(_pDataModel->getPath(*it));
             if (pObject) {
                 pObject->setIndex(*it);
                 _pObjectCache->insertMediaObject(pObject);
             }
             else {
-                Log::instance()->upnpav().error("could not retrieve media object from data model");
+                LOG(upnpav, error, "could not retrieve media object from data model");
             }
         }
         // modified objects
@@ -1083,7 +1083,7 @@ ServerContainer::updateCache()
             ui4 updateId = _pDataModel->getUpdateId(_pDataModel->getPath(*it));
             ui4 cacheUpdateId = cacheUpdateIds[*it];
             if (updateId != cacheUpdateId) {
-                Log::instance()->upnpav().debug("update object in cache with index: " + Poco::NumberFormatter::format(*it));
+                LOG(upnpav, debug, "update object in cache with index: " + Poco::NumberFormatter::format(*it));
                 ServerObject* pObject = _pDataModel->getMediaObject(_pDataModel->getPath(*it));
                 if (pObject) {
                     pObject->setIndex(*it);
@@ -1096,32 +1096,32 @@ ServerContainer::updateCache()
 //        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
     }
     else {
-        Log::instance()->upnpav().debug("no object cache, no update.");
+        LOG(upnpav, debug, "no object cache, no update.");
     }
-    Log::instance()->upnpav().debug("server container, update cache finished.");
+    LOG(upnpav, debug, "server container, update cache finished.");
 }
 
 
 bool
 ServerContainer::cacheConsistent()
 {
-    Log::instance()->upnpav().debug("server container, check cache for consistency with data model ...");
+    LOG(upnpav, debug, "server container, check cache for consistency with data model ...");
     if (_pObjectCache) {
         std::vector<ui4> cacheIndices;
         _pObjectCache->getIndices(cacheIndices);
         if (cacheIndices.size() != getDataModel()->getIndexCount()) {
-            Log::instance()->upnpav().error("cache size mismatch, object cache: " + Poco::NumberFormatter::format(cacheIndices.size()) + ", data model: " + Poco::NumberFormatter::format(getDataModel()->getIndexCount()));
+            LOG(upnpav, error, "cache size mismatch, object cache: " + Poco::NumberFormatter::format(cacheIndices.size()) + ", data model: " + Poco::NumberFormatter::format(getDataModel()->getIndexCount()));
             return false;
         }
 
         for (std::vector<ui4>::const_iterator it = cacheIndices.begin(); it != cacheIndices.end(); ++it) {
             if (!getDataModel()->hasIndex(*it)) {
-                Log::instance()->upnpav().error("data model missing index: " + Poco::NumberFormatter::format(*it));
+                LOG(upnpav, error, "data model missing index: " + Poco::NumberFormatter::format(*it));
                 return false;
             }
         }
     }
-    Log::instance()->upnpav().debug("server container, cache and data model are consistent.");
+    LOG(upnpav, debug, "server container, cache and data model are consistent.");
     return true;
 }
 
@@ -1149,7 +1149,7 @@ ServerContainer::appendChildWithAutoIndex(AbstractMediaObject* pChild)
 ServerObject*
 ServerContainer::getDescendant(const std::string& objectId)
 {
-    Log::instance()->upnpav().debug("server container get descendant with object id relative to this container's id (in most cases \"0\"): " + objectId);
+    LOG(upnpav, debug, "server container get descendant with object id relative to this container's id (in most cases \"0\"): " + objectId);
 
     std::string::size_type slashPos = objectId.find('/');
     if (slashPos != std::string::npos) {
@@ -1160,7 +1160,7 @@ ServerContainer::getDescendant(const std::string& objectId)
             pChild = static_cast<ServerContainer*>(getChildForIndexString(objectId));
             if (pChild == 0) {
                 // child container is not a child of this container
-                Log::instance()->upnpav().error("retrieving child objectId of container, but no child container found");
+                LOG(upnpav, error, "retrieving child objectId of container, but no child container found");
                 return 0;
             }
             else {
@@ -1175,7 +1175,7 @@ ServerContainer::getDescendant(const std::string& objectId)
     }
     else {
         // child is an item
-        Log::instance()->upnpav().debug("server container get descendant is a child with index: " + objectId);
+        LOG(upnpav, debug, "server container get descendant is a child with index: " + objectId);
         if (objectId == "0") {
             return this;
         }
@@ -1183,7 +1183,7 @@ ServerContainer::getDescendant(const std::string& objectId)
         ServerObject* pChild = getChildForIndexString(objectId);
         if (pChild == 0) {
             // child item is not a child of this container
-            Log::instance()->upnpav().error("no child item found");
+            LOG(upnpav, error, "no child item found");
             return 0;
         }
         else {
@@ -1216,7 +1216,7 @@ ServerContainer::getChildForIndexString(const std::string& indexString)
             index = Poco::NumberParser::parseUnsigned(indexNamespace == Data ? indexString : indexString.substr(1));
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnpav().error("server container could no parse index string");
+            LOG(upnpav, error, "server container could no parse index string");
         }
         return getChildForIndex(index, true, indexNamespace);
     }
@@ -1230,11 +1230,11 @@ ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexName
 
     if (!_pDataModel) {
         // currently, only server containers with data models are handled
-        Log::instance()->upnpav().error("server container without data model, can not retrieve child objects");
+        LOG(upnpav, error, "server container without data model, can not retrieve child objects");
         return 0;
     }
-    Log::instance()->upnpav().debug("server container _pVirtualContainerCache: " + Poco::NumberFormatter::format(_pVirtualContainerCache));
-    Log::instance()->upnpav().debug("server container _pUserObjectCache: " + Poco::NumberFormatter::format(_pUserObjectCache));
+    LOG(upnpav, debug, "server container _pVirtualContainerCache: " + Poco::NumberFormatter::format(_pVirtualContainerCache));
+    LOG(upnpav, debug, "server container _pUserObjectCache: " + Poco::NumberFormatter::format(_pUserObjectCache));
 
     ServerObject* pObject = 0;
     if (indexNamespace == Virtual && _pVirtualContainerCache) {
@@ -1254,7 +1254,7 @@ ServerContainer::getChildForIndex(ui4 index, bool init, IndexNamespace indexName
     }
     else {
         std::string path = _pDataModel->getPath(index);
-        Log::instance()->upnpav().debug("server container, get child from data model with index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
+        LOG(upnpav, debug, "server container, get child from data model with index: " + Poco::NumberFormatter::format(index) + ", path: " + path);
         pObject = _pDataModel->getMediaObject(path);
     }
     if (pObject) {
@@ -1272,7 +1272,7 @@ ServerContainer::getChildrenAtRowOffset(std::vector<ServerObject*>& children, ui
 
      if (!_pDataModel) {
         // currently, only server containers with data models are handled
-        Log::instance()->upnpav().error("server container without data model, can not retrieve child objects");
+        LOG(upnpav, error, "server container without data model, can not retrieve child objects");
         return 0;
     }
 
@@ -1314,7 +1314,7 @@ ServerContainer::generateChildrenPlaylist()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serverLock);
 
-    Log::instance()->upnpav().debug("generate children playlist, container objectID: " + getId() + ", indexNamespace: " + Poco::NumberFormatter::format(_indexNamespace));
+    LOG(upnpav, debug, "generate children playlist, container objectID: " + getId() + ", indexNamespace: " + Poco::NumberFormatter::format(_indexNamespace));
 
 //    switch (_indexNamespace) {
 //        case Data:
@@ -1339,7 +1339,7 @@ ServerContainer::generateChildrenPlaylist()
 //                        playlistLog += playlistEntry;
 //                    }
 //                }
-//                Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+//                LOG(upnpav, debug, "children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
 //            }
 //            else if (_pDataModel) {
 //            // solely AbstractDataModel based retrieval of indices:
@@ -1361,11 +1361,11 @@ ServerContainer::generateChildrenPlaylist()
 //                        playlistLog += playlistEntry;
 //                    }
 //                }
-//                Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+//                LOG(upnpav, debug, "children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
 //            }
 //            else {
 //                // currently, only server containers with object caches are handled
-//                Log::instance()->upnpav().error("server container without object cache or data model, can not generate playlist");
+//                LOG(upnpav, error, "server container without object cache or data model, can not generate playlist");
 //                return 0;
 //            }
 //            break;
@@ -1393,7 +1393,7 @@ ServerContainer::generateChildrenPlaylist()
                         playlistLog += playlistEntry;
                     }
                 }
-                Log::instance()->upnpav().debug("children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
+                LOG(upnpav, debug, "children playlist: " + Poco::LineEnding::NEWLINE_DEFAULT + playlistLog);
 //            break;
 //    }
 
@@ -1404,7 +1404,7 @@ ServerContainer::generateChildrenPlaylist()
 ServerObject*
 ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 {
-    Log::instance()->upnpav().debug("server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index) + ", namespace: " + Poco::NumberFormatter::format(pObject->_indexNamespace));
+    LOG(upnpav, debug, "server container, init child with title: " + pObject->getTitle() + ", index: " + Poco::NumberFormatter::format(index) + ", namespace: " + Poco::NumberFormatter::format(pObject->_indexNamespace));
 
     // set index
     pObject->setIndex(index);
@@ -1431,7 +1431,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 
     std::string privateResourceUri;
     if (AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::PLAYLIST_ITEM)) {
-        Log::instance()->upnpav().debug("server container, init child convert playlist item to playlist container");
+        LOG(upnpav, debug, "server container, init child convert playlist item to playlist container");
         // create playlist container with list of indices that match the paths of m3u file (read in via getStream())
         ServerContainer* pContainer = createMediaContainer();
         pContainer->getProperty(AvProperty::CLASS)->setValue(AvClass::className(AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER));
@@ -1455,20 +1455,20 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
                             std::string path = parentPath == "" ? line : parentPath + line;
                             ui4 index = _pDataModel->getIndex(path);
                             pContainer->_childrenPlaylistIndices.push_back(index);
-                            Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index) + ", path: " + line);
+                            LOG(upnpav, debug, "index: " + Poco::NumberFormatter::format(index) + ", path: " + line);
                         }
                     }
                 }
             }
             else {
                 std::string indexFileName = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + uri;
-                Log::instance()->upnpav().debug("server container, init child get playlist indices from file: " + indexFileName);
+                LOG(upnpav, debug, "server container, init child get playlist indices from file: " + indexFileName);
                 std::ifstream indexFile(indexFileName.c_str());
                 std::string line;
                 while (std::getline(indexFile, line)) {
                     ui4 index = Poco::NumberParser::parse(line);
                     pContainer->_childrenPlaylistIndices.push_back(index);
-                    Log::instance()->upnpav().debug("index: " + Poco::NumberFormatter::format(index));
+                    LOG(upnpav, debug, "index: " + Poco::NumberFormatter::format(index));
                 }
             }
         }
@@ -1482,7 +1482,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
     std::string resourceUri = _pServer->getServerAddress() + "/" + objectId;
 //    if (pObject->isContainer()) {
     if (AvClass::matchClass(pObject->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
-        Log::instance()->upnpav().debug("server container, init child create container playlist resource");
+        LOG(upnpav, debug, "server container, init child create container playlist resource");
         // add playlist resource
         ServerObjectResource* pResource = pObject->createResource();
         pResource->setPrivateResourceUri(privateResourceUri);
@@ -1493,7 +1493,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
         pObject->addResource(pResource);
     }
     else if (!pObject->isContainer()) {
-        Log::instance()->upnpav().debug("server container, init child create item resources");
+        LOG(upnpav, debug, "server container, init child create item resources");
         for (int r = 0; r < pObject->getResourceCount(); r++) {
             AbstractResource* pResource = pObject->getResource(r);
             if (pResource) {
@@ -1521,7 +1521,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
 void
 ServerObjectWriter::writeChildren(std::string& meta, const std::vector<ServerObject*>& children, const std::string& filter)
 {
-    Log::instance()->upnpav().debug("ServerObjectWriter::writeChildren()");
+    LOG(upnpav, debug, "ServerObjectWriter::writeChildren()");
     writeMetaDataHeader();
     for (std::vector<ServerObject*>::const_iterator it = children.begin(); it != children.end(); ++it) {
         ServerObjectWriter writer;
@@ -1544,7 +1544,7 @@ _cacheTableName(cacheTableName),
 _maxQueryPropertyCount(5),
 _indexNamespace(indexNamespace)
 {
-    Log::instance()->upnpav().debug("database cache ctor");
+    LOG(upnpav, debug, "database cache ctor");
     Poco::Data::SQLite::Connector::registerConnector();
 
     _queryPropertyNames.append(AvProperty::CLASS);
@@ -1568,7 +1568,7 @@ DatabaseCache::~DatabaseCache()
 void
 DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
 {
-    Log::instance()->upnpav().debug("database cache set cache file path: " + cacheFilePath);
+    LOG(upnpav, debug, "database cache set cache file path: " + cacheFilePath);
     _cacheFilePath = cacheFilePath;
     _pSession = new Poco::Data::Session("SQLite", cacheFilePath);
 
@@ -1583,13 +1583,13 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
         *_pSession << createTableString, Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache creating object cache table failed: " + e.displayText());
+        LOG(upnpav, warning, "database cache creating object cache table failed: " + e.displayText());
     }
     try {
         *_pSession << "CREATE UNIQUE INDEX " + _cacheTableName + "_idx ON " + _cacheTableName + " (idx)", Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache creating index on object cache table failed: " + e.displayText());
+        LOG(upnpav, warning, "database cache creating index on object cache table failed: " + e.displayText());
     }
 }
 
@@ -1605,7 +1605,7 @@ DatabaseCache::rowCount()
         select.execute();
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache get row count failed: " + e.displayText());
+        LOG(upnpav, warning, "database cache get row count failed: " + e.displayText());
     }
     return recordSet.rowCount();
 }
@@ -1614,7 +1614,7 @@ DatabaseCache::rowCount()
 ServerObject*
 DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
 {
-    Log::instance()->upnpav().debug("database cache table " + _cacheTableName + " get object for index: " + Poco::NumberFormatter::format(index));
+    LOG(upnpav, debug, "database cache table " + _cacheTableName + " get object for index: " + Poco::NumberFormatter::format(index));
 
     std::vector<std::string> objectClass;
     std::vector<std::string> xml;
@@ -1622,11 +1622,11 @@ DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
         *_pSession << "SELECT class, xml FROM " + _cacheTableName + " WHERE idx = :index", Poco::Data::use(index), Poco::Data::into(objectClass), Poco::Data::into(xml), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache get object for index failed: " + e.displayText());
+        LOG(upnpav, error, "database cache get object for index failed: " + e.displayText());
     }
-    Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
+    LOG(upnpav, debug, "database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
     if (xml.size() == 1) {
-        Log::instance()->upnpav().debug("database cache got xml: " + xml[0]);
+        LOG(upnpav, debug, "database cache got xml: " + xml[0]);
         ServerObject* pObject;
         if (AvClass::matchClass(objectClass[0], AvClass::CONTAINER)) {
             pObject = _pServerContainer->createMediaContainer();
@@ -1639,7 +1639,7 @@ DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
         return pObject;
     }
     else {
-        Log::instance()->upnpav().error("database cache get object for index reading meta data failed.");
+        LOG(upnpav, error, "database cache get object for index reading meta data failed.");
         return 0;
     }
 }
@@ -1648,7 +1648,7 @@ DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
 ui4
 DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
-    Log::instance()->upnpav().debug("database cache table " + _cacheTableName + " get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
+    LOG(upnpav, debug, "database cache table " + _cacheTableName + " get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
 
 
     ui4 parentIndex = AbstractDataModel::INVALID_INDEX;
@@ -1658,7 +1658,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         parentIndexNamespace = pParentContainer->_indexNamespace;
     }
 
-    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex) + ", parent class: " + pParentContainer->getClass());
+    LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex) + ", parent class: " + pParentContainer->getClass());
 
     Poco::Data::Statement select(*_pSession);
     std::string statement = "SELECT idx, class, xml FROM " + _cacheTableName;
@@ -1668,7 +1668,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
 
     // present playlist item as playlist container
     if (AvClass::matchClass(pParentContainer->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
-        Log::instance()->upnpav().debug("database cache parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
+        LOG(upnpav, debug, "database cache parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
         for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
             std::vector<std::string> xml;
             ui4 index = pParentContainer->_childrenPlaylistIndices[r];
@@ -1677,9 +1677,9 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
                         Poco::Data::into(xml), Poco::Data::now;
             }
             catch (Poco::Exception& e) {
-                Log::instance()->upnpav().error("database cache get object for index failed: " + e.displayText());
+                LOG(upnpav, error, "database cache get object for index failed: " + e.displayText());
             }
-            Log::instance()->upnpav().debug("database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
+            LOG(upnpav, debug, "database cache get xml for object with index: " + Poco::NumberFormatter::format(index));
             if (xml.size() == 1) {
                 ServerObject* pObject = _pServerContainer->createMediaItem();
                 MediaObjectReader xmlReader;
@@ -1688,7 +1688,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
                 block.push_back(pObject);
             }
             else {
-                Log::instance()->upnpav().error("database cache get object for index reading meta data failed.");
+                LOG(upnpav, error, "database cache get object for index reading meta data failed.");
                 break;
             }
         }
@@ -1701,33 +1701,33 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             whereClause += searchCrit.parse(search);
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().error("database cache search error parsing search criteria: " + e.displayText());
+            LOG(upnpav, error, "database cache search error parsing search criteria: " + e.displayText());
         }
     }
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
-        Log::instance()->upnpav().debug("database cache server container layout: Flat");
+        LOG(upnpav, debug, "database cache server container layout: Flat");
         whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"";
     }
     else if (_pServerContainer->getLayout() == ServerContainer::DirStruct && search == "*") {
-        Log::instance()->upnpav().debug("database cache server container layout: DirStruct");
+        LOG(upnpav, debug, "database cache server container layout: DirStruct");
         useParentIndex = true;
         whereClause += std::string(whereClause == "" ? "" : " AND") + " paridx = :paridx";
     }
     else if (_pServerContainer->getLayout() == ServerContainer::PropertyGroups) {
-        Log::instance()->upnpav().debug("database cache server container layout: PropertyGroups");
+        LOG(upnpav, debug, "database cache server container layout: PropertyGroups");
         if (parentIndex == AbstractDataModel::INVALID_INDEX) {
-            Log::instance()->upnpav().debug("database cache parent container is root container");
+            LOG(upnpav, debug, "database cache parent container is root container");
             virtualChildObjects = true;
 //            statement = "SELECT idx, class, xml FROM " + _cacheTableName + " WHERE prop0 = \"upnp:class\"";
             statement = "SELECT idx, class, xml FROM " + _cacheTableName + " WHERE prop0 = \"" + pParentContainer->_groupPropertyName + "\"";
         }
 //        else if (pParentContainer->isVirtual()) {
         else {
-            Log::instance()->upnpav().debug("database cache parent container is virtual");
+            LOG(upnpav, debug, "database cache parent container is virtual");
             AbstractProperty* pGroupPropertyName = pParentContainer->getProperty(ServerContainer::PROPERTY_GROUP_PROPERTY_NAME);
             AbstractProperty* pGroupPropertyValue = pParentContainer->getProperty(ServerContainer::PROPERTY_GROUP_PROPERTY_VALUE);
             if (pGroupPropertyName && pGroupPropertyValue) {
-                Log::instance()->upnpav().debug("database cache parent container group property name: " + pGroupPropertyName->getValue());
+                LOG(upnpav, debug, "database cache parent container group property name: " + pGroupPropertyName->getValue());
                 whereClause += std::string(whereClause == "" ? "" : " AND") + " " + getColumnName(pGroupPropertyName->getValue()) + " = \"" + pGroupPropertyValue->getValue() + "\"";
             }
         }
@@ -1735,8 +1735,8 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     if (whereClause != "") {
         statement += " WHERE " + whereClause;
     }
-    Log::instance()->upnpav().debug("database cache execute query: " + statement);
-    Log::instance()->upnpav().debug("database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
+    LOG(upnpav, debug, "database cache execute query: " + statement);
+    LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
     if (useParentIndex) {
         select << statement, Poco::Data::use(parentIndex);
     }
@@ -1754,7 +1754,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("database cache get block executing query and moving to offset failed: " + e.displayText());
+        LOG(upnpav, warning, "database cache get block executing query and moving to offset failed: " + e.displayText());
     }
     if (count == 0) {
         // UPnP AV CDS specs, count == 0 then request all children
@@ -1790,7 +1790,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             recordSet.moveNext();
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnpav().warning("database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
+            LOG(upnpav, warning, "database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
         }
     }
     return recordSet.rowCount();
@@ -1806,7 +1806,7 @@ DatabaseCache::getIndices(std::vector<ui4>& indices, const std::string& sort)
         *_pSession << "SELECT idx FROM " + _cacheTableName, Poco::Data::into(indices), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache get indices failed: " + e.displayText());
+        LOG(upnpav, error, "database cache get indices failed: " + e.displayText());
     }
 }
 
@@ -1822,7 +1822,7 @@ DatabaseCache::getUpdateIds(std::map<ui4, ui4>& updateIds)
         }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache get update ids failed: " + e.displayText());
+        LOG(upnpav, error, "database cache get update ids failed: " + e.displayText());
     }
 }
 
@@ -1830,7 +1830,7 @@ DatabaseCache::getUpdateIds(std::map<ui4, ui4>& updateIds)
 void
 DatabaseCache::insertMediaObject(ServerObject* pObject)
 {
-    Log::instance()->upnpav().debug("database cache insert media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
+    LOG(upnpav, debug, "database cache insert media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
     std::string xml;
     MediaObjectWriter2 xmlWriter(false);
     xmlWriter.write(xml, pObject);
@@ -1878,7 +1878,7 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
         }
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache insert media object failed: " + e.displayText());
+        LOG(upnpav, error, "database cache insert media object failed: " + e.displayText());
     }
 }
 
@@ -1895,12 +1895,12 @@ DatabaseCache::updateMediaObject(ServerObject* pObject)
 void
 DatabaseCache::removeMediaObjectForIndex(ui4 index)
 {
-    Log::instance()->upnpav().debug("database cache remove media object with index: " + Poco::NumberFormatter::format(index));
+    LOG(upnpav, debug, "database cache remove media object with index: " + Poco::NumberFormatter::format(index));
     try {
         *_pSession << "DELETE FROM " + _cacheTableName + " WHERE idx = " + Poco::NumberFormatter::format(index), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("database cache remove media object failed: " + e.displayText());
+        LOG(upnpav, error, "database cache remove media object failed: " + e.displayText());
     }
 }
 
@@ -1910,7 +1910,7 @@ DatabaseCache::addPropertiesForQuery(CsvList propertyList)
 {
     std::size_t defaultPropCount = _propertyColumnNames.size();
     if (propertyList.getSize() > _maxQueryPropertyCount) {
-        Log::instance()->upnpav().warning("database cache can only handle up to " + Poco::NumberFormatter::format(_maxQueryPropertyCount) +
+        LOG(upnpav, warning, "database cache can only handle up to " + Poco::NumberFormatter::format(_maxQueryPropertyCount) +\
                 " properties for query (except for class and title, ignoring the rest. Adapt your data model respectively." );
     }
     std::size_t p = 0;
@@ -1931,7 +1931,7 @@ DatabaseCache::updateVirtualObjects(ServerObjectCache* pVirtualObjectCache)
         }
         std::string columnName = getColumnName(*it);
         std::string statement = "SELECT " + columnName + " FROM " + _cacheTableName + " GROUP BY " + columnName + " ORDER BY " + columnName;
-        Log::instance()->upnpav().debug("database cache execute query: " + statement);
+        LOG(upnpav, debug, "database cache execute query: " + statement);
         Poco::Data::Statement select(*_pSession);
         select << statement;
 
@@ -1940,7 +1940,7 @@ DatabaseCache::updateVirtualObjects(ServerObjectCache* pVirtualObjectCache)
             select.execute();
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnpav().warning("database cache update virtual objects executing query failed: " + e.displayText());
+            LOG(upnpav, warning, "database cache update virtual objects executing query failed: " + e.displayText());
         }
         bool more = recordSet.moveFirst();
         while (more) {
@@ -2020,13 +2020,13 @@ std::string
 DatabaseCacheSearchCriteria::translateCompareExp(const std::string& property, const std::string& op, const std::string& val)
 {
     if (property == Omm::Av::AvProperty::RES) {
-        Omm::Av::Log::instance()->upnpav().debug("database cache get object for resource: " + val);
+        LOG(upnpav, debug, "database cache get object for resource: " + val);
         Poco::URI resUri(val);
         std::string resPath = resUri.getPath();
-        Omm::Av::Log::instance()->upnpav().debug("path: " + resPath);
+        LOG(upnpav, debug, "path: " + resPath);
         Poco::StringTokenizer uri(resPath, "$");
         std::string index = uri[0].substr(1);
-        Log::instance()->upnpav().debug("index: " + index);
+        LOG(upnpav, debug, "index: " + index);
         const std::string indexCol("idx"); // funny, using "idx" in the return statement gives a random string (compiler bug?)
         return indexCol + space + op + space + index;
     }
@@ -2140,16 +2140,16 @@ AbstractDataModel::checkSystemUpdateId()
 //    getServerContainer()->cacheConsistent();
 
     if (updateThreadIsRunning()) {
-        Omm::Av::Log::instance()->upnpav().debug("update thread still running, don't check for data model changes.");
+        LOG(upnpav, debug, "update thread still running, don't check for data model changes.");
         return;
     }
 
     ui4 id = getSystemUpdateId(_checkMod);
     if (getCacheSystemUpdateId(_checkMod) == id) {
-        Omm::Av::Log::instance()->upnpav().debug("data model is current, nothing to do.");
+        LOG(upnpav, debug, "data model is current, nothing to do.");
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("data model got new system update id: " + Poco::NumberFormatter::format(id));
+        LOG(upnpav, debug, "data model got new system update id: " + Poco::NumberFormatter::format(id));
         incPublicSystemUpdateId();
         setCacheSystemUpdateId(id, _checkMod);
         _updateThread.start(_updateThreadRunnable);
@@ -2180,7 +2180,7 @@ AbstractDataModel::getIndex(const std::string& path)
         return (*pos).second;
     }
     else {
-        Log::instance()->upnpav().error("abstract data model, could not retrieve index from path: " + path);
+        LOG(upnpav, error, "abstract data model, could not retrieve index from path: " + path);
         return INVALID_INDEX;
     }
 }
@@ -2194,7 +2194,7 @@ AbstractDataModel::getPath(ui4 index)
         return (*pos).second;
     }
     else {
-        Log::instance()->upnpav().error("abstract data model, could not retrieve path from index: " + Poco::NumberFormatter::format(index));
+        LOG(upnpav, error, "abstract data model, could not retrieve path from index: " + Poco::NumberFormatter::format(index));
         return "";
     }
 }
@@ -2259,12 +2259,12 @@ AbstractDataModel::endRemovedIndex()
 void
 AbstractDataModel::addPath(const std::string& path, const std::string& resourcePath)
 {
-//        Log::instance()->upnpav().debug("abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
+//        LOG(upnpav, debug, "abstract data model add path: " + path + " with index: " + Poco::NumberFormatter::format(index));
     std::map<std::string, ui4>::iterator it = _pathMap.find(path);
     if (it == _pathMap.end()) {
         ui4 index = getNewIndex();
         if (index == INVALID_INDEX) {
-            Log::instance()->upnpav().error("abstract data model max index reached, can not add path: " + path);
+            LOG(upnpav, error, "abstract data model max index reached, can not add path: " + path);
             return;
         }
         _pathMap[path] = index;
@@ -2291,7 +2291,7 @@ AbstractDataModel::removeIndex(ui4 index)
         _freeIndices.push(index);
     }
     else {
-        Log::instance()->upnpav().error("abstract data model, could not erase index from index map: " + Poco::NumberFormatter::format(index));
+        LOG(upnpav, error, "abstract data model, could not erase index from index map: " + Poco::NumberFormatter::format(index));
     }
 }
 
@@ -2311,7 +2311,7 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ServerContai
 
     // present playlist item as playlist container
     if (AvClass::matchClass(pParentContainer->getClass(), AvClass::CONTAINER, AvClass::PLAYLIST_CONTAINER)) {
-        Log::instance()->upnpav().debug("abstract data model parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
+        LOG(upnpav, debug, "abstract data model parent children playlist size is: " + Poco::NumberFormatter::format(pParentContainer->_childrenPlaylistIndices.size()));
         for (ui4 r = offset; r < offset + count && r < pParentContainer->_childrenPlaylistIndices.size(); r++) {
             ui4 index = pParentContainer->_childrenPlaylistIndices[r];
             ServerObject* pObject = getMediaObject(getPath(index));
@@ -2360,10 +2360,10 @@ void
 AbstractDataModel::readIndexMap()
 {
     if (!Poco::File(_indexFilePath).exists()) {
-        Omm::Av::Log::instance()->upnpav().debug("index map not present, not reading it");
+        LOG(upnpav, debug, "index map not present, not reading it");
         return;
     }
-    Omm::Av::Log::instance()->upnpav().debug("index map present, reading ...");
+    LOG(upnpav, debug, "index map present, reading ...");
     std::ifstream indexMap(_indexFilePath.toString().c_str());
     std::string line;
 
@@ -2376,7 +2376,7 @@ AbstractDataModel::readIndexMap()
         setCacheSystemUpdateId(Poco::NumberParser::parse(line), true);
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().debug("could not parse update ids: " + e.displayText());
+        LOG(upnpav, debug, "could not parse update ids: " + e.displayText());
     }
 
     ui4 index = 0;
@@ -2394,25 +2394,25 @@ AbstractDataModel::readIndexMap()
         lastIndex = index;
     }
     // TODO: read resource map
-    Omm::Av::Log::instance()->upnpav().debug("index map read finished.");
+    LOG(upnpav, debug, "index map read finished.");
 }
 
 
 void
 AbstractDataModel::writeIndexMap()
 {
-    Log::instance()->upnpav().debug("index map writing to: " + _indexFilePath.toString() + " ...");
+    LOG(upnpav, debug, "index map writing to: " + _indexFilePath.toString() + " ...");
     std::ofstream indexMap(_indexFilePath.toString().c_str());
     indexMap << getPublicSystemUpdateId() << std::endl;
     indexMap << getCacheSystemUpdateId(false) << std::endl;
     indexMap << getCacheSystemUpdateId(true) << std::endl;
 
     for (std::map<ui4, std::string>::iterator it = _indexMap.begin(); it != _indexMap.end(); ++it) {
-//        Log::instance()->upnpav().debug("abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
+//        LOG(upnpav, debug, "abstract data model write index: " + Poco::NumberFormatter::format((*it).first) + ", path: " + (*it).second);
         indexMap << (*it).first << ' ' << (*it).second << std::endl;
     }
     // TODO: write resource map
-    Log::instance()->upnpav().debug("index map write finished.");
+    LOG(upnpav, debug, "index map write finished.");
 }
 
 
@@ -2487,7 +2487,7 @@ AbstractDataModel::updateThread()
     _updateThreadRunning = true;
     _updateThreadLock.unlock();
 
-    Omm::Av::Log::instance()->upnpav().debug("update thread start ...");
+    LOG(upnpav, debug, "update thread start ...");
     // clear temporary index lists
     _lastIndices.clear();
     _commonIndices.clear();
@@ -2498,7 +2498,7 @@ AbstractDataModel::updateThread()
     // as they are meta data and identify a media object within a CDS over time.
 
     // save last index list
-//    Omm::Av::Log::instance()->upnpav().debug("save last index list ... ");
+//    LOG(upnpav, debug, "save last index list ... ");
     for (IndexMapIterator it = beginIndex(); it != endIndex(); ++it) {
         _lastIndices.push_back((*it).first);
     }
@@ -2507,23 +2507,23 @@ AbstractDataModel::updateThread()
     scan();
 
     // calculate indices to be removed
-//    Omm::Av::Log::instance()->upnpav().debug("calculate indices to be removed ...");
+//    LOG(upnpav, debug, "calculate indices to be removed ...");
     for (IndexIterator it = _lastIndices.begin(); it != _lastIndices.end(); ++it) {
         IndexIterator pos = std::find(_commonIndices.begin(), _commonIndices.end(), *it);
         if (pos == _commonIndices.end()) {
             _removedIndices.push_back(*it);
         }
     }
-    Omm::Av::Log::instance()->upnpav().debug("last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +
-                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +
-                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +
+    LOG(upnpav, debug, "last indices: " + Poco::NumberFormatter::format(_lastIndices.size()) +\
+                                            ", common indices: " + Poco::NumberFormatter::format(_commonIndices.size()) +\
+                                            ", added indices: " + Poco::NumberFormatter::format(_addedIndices.size()) +\
                                             ", removed indices: " + Poco::NumberFormatter::format(_removedIndices.size()));
     // remove index maps
-//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps ...");
+//    LOG(upnpav, debug, "remove indices from maps ...");
     for (IndexIterator it = _removedIndices.begin(); it != _removedIndices.end(); ++it) {
         removeIndex(*it);
     }
-//    Omm::Av::Log::instance()->upnpav().debug("remove indices from maps finished, index map updated.");
+//    LOG(upnpav, debug, "remove indices from maps finished, index map updated.");
 
     // save updated index map
     writeIndexMap();
@@ -2534,7 +2534,7 @@ AbstractDataModel::updateThread()
     // trigger evented state variable SystemUpdateID
     _pServerContainer->getServer()->setSystemUpdateId(getPublicSystemUpdateId());
 
-    Omm::Av::Log::instance()->upnpav().debug("update thread finished.");
+    LOG(upnpav, debug, "update thread finished.");
 
     _updateThreadLock.lock();
     _updateThreadRunning = false;
@@ -2546,7 +2546,7 @@ bool
 AbstractDataModel::updateThreadIsRunning()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_updateThreadLock);
-    Log::instance()->upnpav().debug("update thread is running: " + std::string(_updateThreadRunning ? "yes" : "no"));
+    LOG(upnpav, debug, "update thread is running: " + std::string(_updateThreadRunning ? "yes" : "no"));
     return _updateThreadRunning;
 }
 
@@ -2554,8 +2554,8 @@ AbstractDataModel::updateThreadIsRunning()
 ServerObject*
 SimpleDataModel::getMediaObject(const std::string& path)
 {
-//    Log::instance()->upnpav().debug("simple data model get media object for index: " + Poco::NumberFormatter::format(index) + " ...");
-    Log::instance()->upnpav().debug("simple data model get media object for path: " + path + " ...");
+//    LOG(upnpav, debug, "simple data model get media object for index: " + Poco::NumberFormatter::format(index) + " ...");
+    LOG(upnpav, debug, "simple data model get media object for path: " + path + " ...");
 
 //    Omm::Av::MemoryMediaObject* pItem = new Omm::Av::MemoryMediaObject;
 //    std::string path = getPath(index);

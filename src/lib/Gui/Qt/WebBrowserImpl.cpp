@@ -31,7 +31,7 @@ namespace Gui {
 
 WebBrowserViewImpl::WebBrowserViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("WebBrowser view impl ctor");
+//    LOG(gui, debug, "WebBrowser view impl ctor");
     QWebView* pNativeView = new QWebView;
 
     initViewImpl(pView, pNativeView);

@@ -41,13 +41,13 @@ QtStdMediaContainer::~QtStdMediaContainer()
 QString
 QtStdMediaContainer::getBrowserTitle()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt standard media object get widget browser title");
+    LOGNS(Omm::Av, upnpav, debug, "Qt standard media object get widget browser title");
 
     if (_pObject) {
         return QString::fromStdString(_pObject->getTitle());
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("Qt standard media object failed to get object title (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt standard media object failed to get object title (ignoring)");
     }
 }
 
@@ -55,7 +55,7 @@ QtStdMediaContainer::getBrowserTitle()
 void
 QtStdMediaContainer::show()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt standard media object show");
+    LOGNS(Omm::Av, upnpav, debug, "Qt standard media object show");
     
     _pServerWidget->setRootIndex(_modelIndex);
 }

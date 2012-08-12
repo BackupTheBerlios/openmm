@@ -47,7 +47,7 @@ QtWidget::hideWidget()
 //void
 //QtWidget::mousePressEvent(QMouseEvent* pMouseEvent)
 //{
-//    Omm::Av::Log::instance()->upnpav().debug("QtWidget mouse pressed in widget");
+//    LOGNS(Omm::Av, upnpav, debug, "QtWidget mouse pressed in widget");
 //    select();
 //    QWidget::mousePressEvent(pMouseEvent);
 //}

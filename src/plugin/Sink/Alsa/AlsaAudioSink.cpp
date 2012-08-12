@@ -43,7 +43,7 @@ _bufferSize(0),
 _buffer(0)
 {
     if (!open()) {
-        Omm::AvStream::Log::instance()->avstream().error("can not open ALSA PCM device.");
+        LOGNS(Omm::AvStream, avstream, error, "can not open ALSA PCM device.");
     }
 }
 
@@ -65,15 +65,15 @@ AlsaAudioSink::open()
 bool
 AlsaAudioSink::open(const std::string& _device)
 {
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opening with device: %s", getName(), _device));
+    LOGNS(Omm::AvStream, avstream, debug, Poco::format("%s opening with device: %s", getName(), _device));
     
     int err = snd_pcm_open(&_pcmPlayback, _device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (err < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(Poco::format("%s could not open device: %s", getName(), _device));
+        LOGNS(Omm::AvStream, avstream, error, Poco::format("%s could not open device: %s", getName(), _device));
         return false;
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s opened.", getName()));
+    LOGNS(Omm::AvStream, avstream, debug, Poco::format("%s opened.", getName()));
     return true;
 }
 
@@ -85,7 +85,7 @@ AlsaAudioSink::close()
         snd_pcm_close(_pcmPlayback);
     }
     
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
+    LOGNS(Omm::AvStream, avstream, debug, Poco::format("%s closed.", getName()));
 }
 
 
@@ -94,29 +94,29 @@ AlsaAudioSink::initDevice()
 {
     snd_pcm_hw_params_alloca(&_hwParams);
     if (snd_pcm_hw_params_any(_pcmPlayback, _hwParams) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("can not configure PCM device.");
+        LOGNS(Omm::AvStream, avstream, error, "can not configure PCM device.");
         return false;
     }
     if (snd_pcm_hw_params_set_access(_pcmPlayback, _hwParams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device access.");
+        LOGNS(Omm::AvStream, avstream, error, "setting PCM device access.");
         return false;
     }
     if (snd_pcm_hw_params_set_format(_pcmPlayback, _hwParams, _format) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device format.");
+        LOGNS(Omm::AvStream, avstream, error, "setting PCM device format.");
         return false;
     }
     _rate = sampleRate();
     if (snd_pcm_hw_params_set_rate_near(_pcmPlayback, _hwParams, &_rate, 0) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device rate to: " + Poco::NumberFormatter::format(_rate));
+        LOGNS(Omm::AvStream, avstream, error, "setting PCM device rate to: " + Poco::NumberFormatter::format(_rate));
         return false;
     }
     _channels = channels();
     if (snd_pcm_hw_params_set_channels(_pcmPlayback, _hwParams, _channels) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("setting PCM device channels to: " + Poco::NumberFormatter::format(_channels));
+        LOGNS(Omm::AvStream, avstream, error, "setting PCM device channels to: " + Poco::NumberFormatter::format(_channels));
         return false;
     }
 //     if (snd_pcm_hw_params_set_periods(_pcmPlayback, _hwParams, _periods, 0) < 0) {
-//         Omm::AvStream::Log::instance()->avstream().error("setting PCM device periods.");
+//         LOGNS(Omm::AvStream, avstream, error, "setting PCM device periods.");
 //         return false;
 //     }
     // Set buffer size (in frames). The resulting latency is given by
@@ -124,7 +124,7 @@ AlsaAudioSink::initDevice()
 //     snd_pcm_uframes_t bufferSizeInFrames = (_startPeriodSize * _periods) >> 2;
     snd_pcm_uframes_t bufferSizeInFrames = frameCount(_startPeriodSize * _channels);
     if (int ret = snd_pcm_hw_params_set_buffer_size_near(_pcmPlayback, _hwParams, &bufferSizeInFrames)) {
-        Omm::AvStream::Log::instance()->avstream().error(getName() + " setting up PCM device buffer to size: " + Poco::NumberFormatter::format(_bufferSize) + " returns: " + Poco::NumberFormatter::format(ret));
+        LOGNS(Omm::AvStream, avstream, error, getName() + " setting up PCM device buffer to size: " + Poco::NumberFormatter::format(_bufferSize) + " returns: " + Poco::NumberFormatter::format(ret));
         return false;
     }
     if (_buffer) {
@@ -132,15 +132,15 @@ AlsaAudioSink::initDevice()
     }
     _bufferSize = byteCount(bufferSizeInFrames);
     _buffer = new char[_bufferSize];
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " setting up PCM device buffer to number of frames: " + Poco::NumberFormatter::format(bufferSizeInFrames) + ", audio read buffer size in bytes is: " + Poco::NumberFormatter::format(_bufferSize));
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " setting up PCM device buffer to number of frames: " + Poco::NumberFormatter::format(bufferSizeInFrames) + ", audio read buffer size in bytes is: " + Poco::NumberFormatter::format(_bufferSize));
         
     _periodSize = _startPeriodSize;
     if (int ret = snd_pcm_hw_params_set_period_size_near(_pcmPlayback, _hwParams, &_periodSize, 0)) {
-        Omm::AvStream::Log::instance()->avstream().error(getName() + " setting up PCM device period to size: " + Poco::NumberFormatter::format(_periodSize) + " returns: " + Poco::NumberFormatter::format(ret));
+        LOGNS(Omm::AvStream, avstream, error, getName() + " setting up PCM device period to size: " + Poco::NumberFormatter::format(_periodSize) + " returns: " + Poco::NumberFormatter::format(ret));
         return false;
     }
     if (snd_pcm_hw_params(_pcmPlayback, _hwParams) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error(getName() + " initializing device.");
+        LOGNS(Omm::AvStream, avstream, error, getName() + " initializing device.");
         return false;
     }
     
@@ -158,7 +158,7 @@ AlsaAudioSink::closeDevice()
 void
 AlsaAudioSink::startPresentation()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " starting write thread ...");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " starting write thread ...");
     
     _writeThread.start(_writeThreadRunnable);
     _writeThread.setPriority(Poco::Thread::PRIO_HIGHEST);
@@ -168,7 +168,7 @@ AlsaAudioSink::startPresentation()
 void
 AlsaAudioSink::stopPresentation()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " stopping write thread ...");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " stopping write thread ...");
     setStopWriting(true);
 }
 
@@ -176,17 +176,17 @@ AlsaAudioSink::stopPresentation()
 void
 AlsaAudioSink::waitPresentationStop()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " trying to join write thread ...");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " trying to join write thread ...");
     try {
         if (_writeThread.isRunning()) {
             _writeThread.join(500);
         }
     }
     catch(...) {
-        Omm::AvStream::Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown alsa audio write thread");
+        LOGNS(Omm::AvStream, avstream, warning, getName() + " failed to cleanly shutdown alsa audio write thread");
     }
     setStopWriting(false);
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " write thread joined.");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " write thread joined.");
     if (_pcmPlayback) {
         snd_pcm_drop(_pcmPlayback);
     }
@@ -196,23 +196,23 @@ AlsaAudioSink::waitPresentationStop()
 void
 AlsaAudioSink::writeThread()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread started.");
+    LOGNS(Omm::AvStream, avstream, debug, "alsa audio sink write thread started.");
     
     const int bufferSizeInFrames = frameCount(_bufferSize);
     while(!getStopWriting()) {
         audioReadBlocking(_buffer, _bufferSize);
         int samplesWritten = 0;
-        Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
+        LOGNS(Omm::AvStream, avstream, trace, "alsa audio sink write thread, trying to write " + Poco::NumberFormatter::format(_bufferSize) + " bytes");
         // last parameter of snd_pcm_writei are the number of frames (not bytes) to write to the pcm ringbuffer
         while ((samplesWritten = snd_pcm_writei(_pcmPlayback, _buffer, bufferSizeInFrames)) < 0) {
             snd_pcm_prepare(_pcmPlayback);
-            Omm::AvStream::Log::instance()->avstream().warning("<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
+            LOGNS(Omm::AvStream, avstream, warning, "<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }
         Omm::AvStream::Log::instance()->avstream().trace("alsa audio sink write thread, bytes written: " +
             Poco::NumberFormatter::format(samplesWritten << 2));
     }
 
-    Omm::AvStream::Log::instance()->avstream().debug("alsa audio sink write thread finished.");
+    LOGNS(Omm::AvStream, avstream, debug, "alsa audio sink write thread finished.");
 }
 
 

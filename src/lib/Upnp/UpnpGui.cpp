@@ -53,7 +53,7 @@ namespace Omm {
 void
 ConfigRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {
-    Log::instance()->upnp().debug("omm application http request \"" + request.getURI() + "\" from " + request.getHost());
+    LOG(upnp, debug, "omm application http request \"" + request.getURI() + "\" from " + request.getHost());
 
     Poco::URI requestUri(request.getURI());
 
@@ -177,7 +177,7 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
     else if (name == "renderer") {
         Poco::StringTokenizer rendererSpec(value, ":");
         if (rendererSpec.count() < 3) {
-            Omm::Av::Log::instance()->upnpav().information("renderer spec \"" + value + "\" needs four parameters, \"name:uuid:engine\", ignoring");
+            LOGNS(Av, upnpav, information, "renderer spec \"" + value + "\" needs four parameters, \"name:uuid:engine\", ignoring");
         }
         else {
             std::string uuid = rendererSpec[1];
@@ -194,7 +194,7 @@ UpnpApplication::handleOption(const std::string& name, const std::string& value)
     else if (name == "server") {
         Poco::StringTokenizer serverSpec(value, ":");
         if (serverSpec.count() < 4) {
-            Omm::Av::Log::instance()->upnpav().information("server spec \"" + value + "\" needs four parameters, \"name:uuid:datamodel:basepath\", ignoring");
+            LOGNS(Av, upnpav, information, "server spec \"" + value + "\" needs four parameters, \"name:uuid:datamodel:basepath\", ignoring");
         }
         else {
             std::string uuid = serverSpec[1];
@@ -226,7 +226,7 @@ UpnpApplication::main(const std::vector<std::string>& args)
     {
         Poco::Util::Application::init(_argc, _argv);
         if (instanceAlreadyRunning()) {
-            Log::instance()->upnp().information("omm application instance running, starting in controller mode");
+            LOG(upnp, information, "omm application instance running, starting in controller mode");
             setLockInstance(false);
             setIgnoreConfig(true);
         }
@@ -280,7 +280,7 @@ UpnpApplication::start()
 void
 UpnpApplication::stop()
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopping ...");
+    LOGNS(Av, upnpav, debug, "omm application stopping ...");
     _pLocalDeviceServer->setState(DeviceManager::Stopped);
     if (_enableController) {
         _pControllerWidget->setState(DeviceManager::Stopped);
@@ -288,7 +288,7 @@ UpnpApplication::stop()
     stopAppHttpServer();
     saveConfig();
     Poco::Util::Application::uninitialize();
-    Omm::Av::Log::instance()->upnpav().debug("omm application stopped.");
+    LOGNS(Av, upnpav, debug, "omm application stopped.");
 }
 
 
@@ -323,13 +323,13 @@ UpnpApplication::printConfig()
 //    std::vector<std::string> rootKeys;
 //    config().keys(rootKeys);
 //    for (std::vector<std::string>::iterator it = rootKeys.begin(); it != rootKeys.end(); ++it) {
-//        Omm::Av::Log::instance()->upnpav().debug("omm config, root keys: " + *it);
+//        LOGNS(Av, upnpav, debug, "omm config, root keys: " + *it);
 //    }
 
     std::vector<std::string> rendererKeys;
     config().keys("renderer", rendererKeys);
     for (std::vector<std::string>::iterator it = rendererKeys.begin(); it != rendererKeys.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config renderer." + *it + ": " + config().getString("renderer." + *it, ""));
+        LOGNS(Av, upnpav, debug, "omm config renderer." + *it + ": " + config().getString("renderer." + *it, ""));
     }
 
     std::vector<std::string> serverKeys;
@@ -338,7 +338,7 @@ UpnpApplication::printConfig()
         std::vector<std::string> serverConfigKeys;
         config().keys("server." + *it, serverConfigKeys);
         for (std::vector<std::string>::iterator cit = serverConfigKeys.begin(); cit != serverConfigKeys.end(); ++cit) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config server." + *it + "." + *cit + ": " + config().getString("server." + *it + "." + *cit, ""));
+            LOGNS(Av, upnpav, debug, "omm config server." + *it + "." + *cit + ": " + config().getString("server." + *it + "." + *cit, ""));
         }
     }
 
@@ -346,20 +346,20 @@ UpnpApplication::printConfig()
 //        std::vector<std::string> confKeys;
 //        _pConf->keys(confKeys);
 //        for (std::vector<std::string>::iterator it = confKeys.begin(); it != confKeys.end(); ++it) {
-//            Omm::Av::Log::instance()->upnpav().debug("omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
+//            LOGNS(Av, upnpav, debug, "omm config, config file keys: " + *it + ", value: " + _pConf->getString(*it, ""));
 //        }
 //    }
 
 //    std::vector<std::string> appKeys;
 //    config().keys("application", appKeys);
 //    for (std::vector<std::string>::iterator it = appKeys.begin(); it != appKeys.end(); ++it) {
-//        Omm::Av::Log::instance()->upnpav().debug("omm config, application keys: " + *it + ", value: " + config().getString("application." + *it, ""));
+//        LOGNS(Av, upnpav, debug, "omm config, application keys: " + *it + ", value: " + config().getString("application." + *it, ""));
 //    }
 //
 //    std::vector<std::string> sysKeys;
 //    config().keys("system", sysKeys);
 //    for (std::vector<std::string>::iterator it = sysKeys.begin(); it != sysKeys.end(); ++it) {
-//        Omm::Av::Log::instance()->upnpav().debug("omm config, system keys: " + *it + ", value: " + config().getString("system." + *it, ""));
+//        LOGNS(Av, upnpav, debug, "omm config, system keys: " + *it + ", value: " + config().getString("system." + *it, ""));
 //    }
 }
 
@@ -369,7 +369,7 @@ UpnpApplication::printForm(const Poco::Net::HTMLForm& form)
 {
     for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it)
     {
-        Av::Log::instance()->upnpav().debug("form " + it->first + ": " + it->second);
+        LOGNS(Av, upnpav, debug, "form " + it->first + ": " + it->second);
     }
 }
 
@@ -378,16 +378,16 @@ void
 UpnpApplication::loadConfig()
 {
     if (!_ignoreConfig) {
-        Omm::Av::Log::instance()->upnpav().information("reading config file ...");
+        LOGNS(Av, upnpav, information, "reading config file ...");
 
         _confFilePath = Omm::Util::Home::instance()->getConfigDirPath("/") + "omm.properties";
         _pConf = new Poco::Util::PropertyFileConfiguration;
         try {
             _pConf->load(_confFilePath);
-            Omm::Av::Log::instance()->upnpav().information("reading config file done.");
+            LOGNS(Av, upnpav, information, "reading config file done.");
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().error("could not read config file: " + e.displayText());
+            LOGNS(Av, upnpav, error, "could not read config file: " + e.displayText());
         }
     //        config().addWriteable(_pConf, -200);
         config().addWriteable(_pConf, 0);
@@ -409,7 +409,7 @@ void
 UpnpApplication::saveConfig()
 {
     if (!_ignoreConfig) {
-        Omm::Av::Log::instance()->upnpav().information("saving config file ...");
+        LOGNS(Av, upnpav, information, "saving config file ...");
 //            _pConf->setInt("width", app.width());
 //            _pConf->setInt("height", app.height());
         // FIXME: main view is smaller than app window
@@ -417,10 +417,10 @@ UpnpApplication::saveConfig()
         _pConf->setInt("application.height", getMainView()->height());
         try {
             _pConf->save(_confFilePath);
-            Omm::Av::Log::instance()->upnpav().information("saving config file done.");
+            LOGNS(Av, upnpav, information, "saving config file done.");
         }
         catch (Poco::Exception& e) {
-            Omm::Av::Log::instance()->upnpav().error("could not write config file present" + e.displayText());
+            LOGNS(Av, upnpav, error, "could not write config file present" + e.displayText());
         }
     }
 }
@@ -553,12 +553,12 @@ void
 UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
 {
     if (!form.empty()) {
-        Av::Log::instance()->upnpav().debug("omm local devices config update ...");
+        LOGNS(Av, upnpav, debug, "omm local devices config update ...");
         printConfig();
         printForm(form);
 
         // read form data and write all entries to file configuration
-        Av::Log::instance()->upnpav().debug("omm config read in devices form config ...");
+        LOGNS(Av, upnpav, debug, "omm config read in devices form config ...");
         std::set<std::string> serverIds;
         std::string deleteUuid;
         bool createServer = false;
@@ -590,11 +590,11 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
                 newId = Poco::NumberFormatter::format(id);
             }
             // copy data of new server into new server entry.
-            Av::Log::instance()->upnpav().debug("omm config create new local device with id: " + newId);
+            LOGNS(Av, upnpav, debug, "omm config create new local device with id: " + newId);
             std::vector<std::string> newServerKeys;
             _pConf->keys("server.new", newServerKeys);
             for (std::vector<std::string>::iterator it = newServerKeys.begin(); it != newServerKeys.end(); ++it) {
-                Av::Log::instance()->upnpav().debug(std::string("add config entry ") + "server." + newId + "." + *it + ": " + _pConf->getString(*it, ""));
+                LOGNS(Av, upnpav, debug, std::string("add config entry ") + "server." + newId + "." + *it + ": " + _pConf->getString(*it, ""));
                 _pConf->setString("server." + newId + "." + *it, _pConf->getString("server.new." + *it, ""));
             }
             serverIds.insert(newId);
@@ -619,7 +619,7 @@ UpnpApplication::handleDevConfigRequest(const Poco::Net::HTMLForm& form)
         initConfig();
         initLocalDevices();
         _pLocalDeviceServer->setState(DeviceManager::Started);
-        Av::Log::instance()->upnpav().debug("omm local devices config update done.");
+        LOGNS(Av, upnpav, debug, "omm local devices config update done.");
     }
 }
 
@@ -649,7 +649,7 @@ void
 UpnpApplication::initLocalDevices()
 {
     // add local renderer
-    Omm::Av::Log::instance()->upnpav().debug("omm application init local devices ...");
+    LOGNS(Av, upnpav, debug, "omm application init local devices ...");
     if (config().getBool("renderer.enable", false)) {
         setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
                 config().getString("renderer.uuid", ""),
@@ -663,7 +663,7 @@ UpnpApplication::initLocalDevices()
     }
     Poco::StringTokenizer servers(serversString, ",");
     for (Poco::StringTokenizer::Iterator it = servers.begin(); it != servers.end(); ++it) {
-        Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+        LOGNS(Av, upnpav, debug, "omm config, server: " + *it);
         if (_pConf->getBool("server." + *it + ".enable", false)) {
             addLocalServer(*it);
         }
@@ -673,7 +673,7 @@ UpnpApplication::initLocalDevices()
     config().keys("server", serverKeys);
     for (std::vector<std::string>::iterator it = serverKeys.begin(); it != serverKeys.end(); ++it) {
         if (!(_pConf && _pConf->hasProperty("server." + *it + ".enable"))) {
-            Omm::Av::Log::instance()->upnpav().debug("omm config, server: " + *it);
+            LOGNS(Av, upnpav, debug, "omm config, server: " + *it);
             if (config().getBool("server." + *it + ".enable", false)) {
                 addLocalServer(*it);
             }
@@ -695,7 +695,7 @@ UpnpApplication::initLocalDevices()
         _pControllerWidget->setDefaultRenderer(_pLocalMediaRenderer);
     }
 //#endif
-   Omm::Av::Log::instance()->upnpav().debug("omm application init local devices done.");
+   LOGNS(Av, upnpav, debug, "omm application init local devices done.");
 }
 
 
@@ -712,7 +712,7 @@ UpnpApplication::setLocalRenderer(const std::string& name, const std::string& uu
 void
 UpnpApplication::setLocalRenderer()
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application set local renderer ...");
+    LOGNS(Av, upnpav, debug, "omm application set local renderer ...");
 
     Omm::Av::Engine* pEngine;
 #ifdef __IPHONE__
@@ -723,10 +723,10 @@ UpnpApplication::setLocalRenderer()
         pEngine = pluginLoader.load(_rendererPlugin);
     }
     catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().error("could not find engine plugin: " + _rendererPlugin);
+        LOGNS(Av, upnpav, error, "could not find engine plugin: " + _rendererPlugin);
         pEngine = new VlcEngine;
     }
-    Omm::Av::Log::instance()->upnpav().information("engine plugin: " + _rendererPlugin + " loaded successfully");
+    LOGNS(Av, upnpav, information, "engine plugin: " + _rendererPlugin + " loaded successfully");
 #endif
 
     pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
@@ -748,14 +748,14 @@ UpnpApplication::setLocalRenderer()
             _pLocalDeviceContainer->setRootDevice((*_pLocalDeviceContainer->beginDevice()));
         }
     }
-    Omm::Av::Log::instance()->upnpav().debug("omm application set local renderer finished.");
+    LOGNS(Av, upnpav, debug, "omm application set local renderer finished.");
 }
 
 
 void
 UpnpApplication::addLocalServer(const std::string& id)
 {
-    Omm::Av::Log::instance()->upnpav().debug("omm application add local server with id: " + id + " ...");
+    LOGNS(Av, upnpav, debug, "omm application add local server with id: " + id + " ...");
 
     std::string pluginName = config().getString("server." + id + ".plugin", "model-webradio");
     Omm::Av::AbstractDataModel* pDataModel;
@@ -764,10 +764,10 @@ UpnpApplication::addLocalServer(const std::string& id)
         pDataModel = pluginLoader.load(pluginName);
     }
     catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().error("could not find server plugin: " + pluginName);
+        LOGNS(Av, upnpav, error, "could not find server plugin: " + pluginName);
         return;
     }
-    Omm::Av::Log::instance()->upnpav().information("container plugin: " + pluginName + " loaded successfully");
+    LOGNS(Av, upnpav, information, "container plugin: " + pluginName + " loaded successfully");
 
     pDataModel->setCacheDirPath(Util::Home::instance()->getCacheDirPath());
     pDataModel->setMetaDirPath(Util::Home::instance()->getMetaDirPath());
@@ -803,7 +803,7 @@ UpnpApplication::addLocalServer(const std::string& id)
         _pLocalDeviceContainer->setRootDevice(pMediaServer);
     }
 
-    Omm::Av::Log::instance()->upnpav().debug("omm application add local server finished.");
+    LOGNS(Av, upnpav, debug, "omm application add local server finished.");
 }
 
 
@@ -818,7 +818,7 @@ UpnpApplication::startAppHttpServer()
             useRandomPort = false;
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnp().error("failed to start application http server on port " + Poco::NumberFormatter::format(port) + "(" + e.displayText() + ") , using random port.");
+            LOG(upnp, error, "failed to start application http server on port " + Poco::NumberFormatter::format(port) + "(" + e.displayText() + ") , using random port.");
         }
     }
     if (useRandomPort) {
@@ -826,13 +826,13 @@ UpnpApplication::startAppHttpServer()
             _socket = Poco::Net::ServerSocket(0);
         }
         catch (Poco::Exception& e) {
-            Log::instance()->upnp().error("failed to start application http server: " + e.displayText());
+            LOG(upnp, error, "failed to start application http server: " + e.displayText());
         }
     }
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ConfigRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
-    Log::instance()->upnp().information("omm application http server listening on: " + _socket.address().toString());
+    LOG(upnp, information, "omm application http server listening on: " + _socket.address().toString());
 }
 
 
@@ -840,7 +840,7 @@ void
 UpnpApplication::stopAppHttpServer()
 {
     _pHttpServer->stop();
-    Log::instance()->upnp().information("omm application http server stopped on port: " + Poco::NumberFormatter::format(_socket.address().port()));
+    LOG(upnp, information, "omm application http server stopped on port: " + Poco::NumberFormatter::format(_socket.address().port()));
 }
 
 
@@ -886,7 +886,7 @@ UpnpApplication::getConfigHttpUri()
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
 _pApplication(pApplication)
 {
-    Gui::Log::instance()->gui().debug("controller widget register device groups ...");
+    LOGNS(Gui, gui, debug, "controller widget register device groups ...");
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
     registerDeviceGroup(_pMediaServerGroupWidget);
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
@@ -911,9 +911,9 @@ _pApplication(pApplication)
 void
 ControllerWidget::setState(State newState)
 {
-    Log::instance()->upnp().debug("controller widget state change: " + _state + " -> " + newState);
+    LOG(upnp, debug, "controller widget state change: " + _state + " -> " + newState);
     if (_state == newState) {
-        Log::instance()->upnp().debug("new state equal to old state, ignoring");
+        LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
     Controller::setState(newState);
@@ -938,7 +938,7 @@ ControllerWidget::setState(State newState)
 //        _pMediaRendererGroupWidget->getVisibleView()->syncView();
         _pMediaRendererGroupWidget->getDeviceGroupView().syncView();
     }
-    Log::instance()->upnp().debug("controller widget state change finished");
+    LOG(upnp, debug, "controller widget state change finished");
 }
 
 
@@ -974,14 +974,14 @@ ControllerWidget::setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer)
 void
 ControllerWidget::newTransportState(TransportStateNotification* pNotification)
 {
-    Gui::Log::instance()->gui().debug("controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
-    Gui::Log::instance()->gui().debug("local renderer uuid: " + _localRendererUuid);
+    LOGNS(Gui, gui, debug, "controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
+    LOGNS(Gui, gui, debug, "local renderer uuid: " + _localRendererUuid);
     if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING && pNotification->_uuid == _localRendererUuid) {
         Av::CtlMediaRenderer* pRenderer = static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getDevice(pNotification->_uuid));
         if (pRenderer) {
             Av::CtlMediaObject2* pObject = pRenderer->getObject();
             if (pObject) {
-                Gui::Log::instance()->gui().debug("local renderer plays object: " + pObject->getTitle() + ", class: " + pObject->getClass());
+                LOGNS(Gui, gui, debug, "local renderer plays object: " + pObject->getTitle() + ", class: " + pObject->getClass());
                 if (Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
                     || Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)) {
                     setCurrentView(_pVisual);
@@ -1068,7 +1068,7 @@ ControllerWidget::getServer(const std::string& uuid)
 void
 KeyController::keyPressed(KeyCode key)
 {
-    Gui::Log::instance()->gui().debug("key controller, key pressed: " + Poco::NumberFormatter::format(key));
+    LOGNS(Gui, gui, debug, "key controller, key pressed: " + Poco::NumberFormatter::format(key));
     switch (key) {
         case Gui::Controller::KeyMenu:
             _pControllerWidget->showMainMenu();
@@ -1098,7 +1098,7 @@ KeyController::keyPressed(KeyCode key)
 DeviceGroupWidget::DeviceGroupWidget(DeviceGroupDelegate* pDeviceGroupDelegate) :
 DeviceGroup(pDeviceGroupDelegate)
 {
-    Gui::Log::instance()->gui().debug("device group widget ctor (delegate)");
+    LOGNS(Gui, gui, debug, "device group widget ctor (delegate)");
     attachController(this);
 }
 
@@ -1130,7 +1130,7 @@ DeviceGroupWidget::removeDevice(Device* pDevice, int index, bool begin)
 void
 DeviceGroupWidget::showDeviceGroup()
 {
-    Gui::Log::instance()->gui().debug("device group widget show device group");
+    LOGNS(Gui, gui, debug, "device group widget show device group");
     ControllerWidget* pController = static_cast<ControllerWidget*>(getController());
     pController->addView(this, shortName());
 }
@@ -1139,7 +1139,7 @@ DeviceGroupWidget::showDeviceGroup()
 int
 DeviceGroupWidget::totalItemCount()
 {
-    Gui::Log::instance()->gui().debug("device group widget total item count returns: " + Poco::NumberFormatter::format(getDeviceCount()));
+    LOGNS(Gui, gui, debug, "device group widget total item count returns: " + Poco::NumberFormatter::format(getDeviceCount()));
     return getDeviceCount();
 }
 
@@ -1147,7 +1147,7 @@ DeviceGroupWidget::totalItemCount()
 void
 DeviceGroupWidget::selectedItem(int row)
 {
-    Gui::Log::instance()->gui().debug("device group widget selected device");
+    LOGNS(Gui, gui, debug, "device group widget selected device");
     Device* pDevice = static_cast<Device*>(getDevice(row));
     DeviceGroup::selectDevice(pDevice);
 }
@@ -1184,7 +1184,7 @@ MediaRendererGroupWidget::MediaRendererGroupWidget(ControllerWidget* pController
 DeviceGroupWidget(new Av::MediaRendererGroupDelegate),
 _pControllerWidget(pControllerWidget)
 {
-//    Gui::Log::instance()->gui().debug("media renderer group widget ctor");
+//    LOGNS(Gui, gui, debug, "media renderer group widget ctor");
     View::setName("media renderer group view");
     _deviceGroupListView.setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
@@ -1198,7 +1198,7 @@ _pControllerWidget(pControllerWidget)
 Device*
 MediaRendererGroupWidget::createDevice()
 {
-//    Gui::Log::instance()->gui().debug("media renderer group widget create renderer device.");
+//    LOGNS(Gui, gui, debug, "media renderer group widget create renderer device.");
     return new MediaRendererDevice(_pControllerWidget);
 }
 
@@ -1206,7 +1206,7 @@ MediaRendererGroupWidget::createDevice()
 Gui::View*
 MediaRendererGroupWidget::createItemView()
 {
-//    Gui::Log::instance()->gui().debug("media renderer group widget create renderer view.");
+//    LOGNS(Gui, gui, debug, "media renderer group widget create renderer view.");
     return new MediaRendererView;
 }
 
@@ -1238,17 +1238,17 @@ MediaRendererDevice::initController()
 void
 MediaRendererDevice::newUri(const std::string& uri)
 {
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
 //    _trackName.setLabel(uri);
     Av::Connection* pConnection = getConnectionManager()->getConnection(0);
     if (pConnection) {
         std::string serverUuid = pConnection->getServer().getConnectionManagerId().getUuid();
         MediaServerDevice* pServer = _pControllerWidget->getServer(serverUuid);
         if (pServer) {
-            Gui::Log::instance()->gui().debug("media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
+            LOGNS(Gui, gui, debug, "media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
             Av::CtlMediaObject2* pObject = pServer->getMediaObjectFromResource(uri);
             if (pObject) {
-                Gui::Log::instance()->gui().debug("media renderer device playing object with title: \"" + pObject->getTitle() + "\"");
+                LOGNS(Gui, gui, debug, "media renderer device playing object with title: \"" + pObject->getTitle() + "\"");
                 _trackName.setLabel(pObject->getTitle());
             }
         }
@@ -1260,7 +1260,7 @@ MediaRendererDevice::newUri(const std::string& uri)
 void
 MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album)
 {
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
     _trackName.setLabel(artist == "" ? title : artist + " - " + title);
     syncViews();
 }
@@ -1269,8 +1269,8 @@ MediaRendererDevice::newTrack(const std::string& title, const std::string& artis
 void
 MediaRendererDevice::newPosition(int duration, int position)
 {
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((float)position / duration) * 100.0));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((float)position / duration) * 100.0));
     _duration = duration;
     if (duration == 0) {
         _position.setValue(0);
@@ -1285,7 +1285,7 @@ MediaRendererDevice::newPosition(int duration, int position)
 void
 MediaRendererDevice::newVolume(const int volume)
 {
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
 //    _volume = volume;
     _volume.setValue(volume);
     syncViews();
@@ -1295,7 +1295,7 @@ MediaRendererDevice::newVolume(const int volume)
 void
 MediaRendererDevice::newTransportState(const std::string& transportState)
 {
-    Gui::Log::instance()->gui().debug("media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
     _transportState = transportState;
     syncViews();
     startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
@@ -1356,10 +1356,10 @@ public:
     {
         return true;
 
-        Gui::Log::instance()->gui().debug("media renderer play button get enabled");
+        LOGNS(Gui, gui, debug, "media renderer play button get enabled");
         if (_pParent && _pParent->getModel()) {
             std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
-            Gui::Log::instance()->gui().debug("media renderer play button get enabled, transport state: " + transportState);
+            LOGNS(Gui, gui, debug, "media renderer play button get enabled, transport state: " + transportState);
             return (transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
         }
         else {
@@ -1392,10 +1392,10 @@ public:
     {
         return true;
 
-        Gui::Log::instance()->gui().debug("media renderer stop button get enabled");
+        LOGNS(Gui, gui, debug, "media renderer stop button get enabled");
         if (_pParent && _pParent->getModel()) {
             std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
-            Gui::Log::instance()->gui().debug("media renderer stop button get enabled, transport state: " + transportState);
+            LOGNS(Gui, gui, debug, "media renderer stop button get enabled, transport state: " + transportState);
             return (transportState != Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
         }
         else {
@@ -1532,7 +1532,7 @@ MediaRendererView::selectedRenderer()
 void
 MediaRendererView::syncViewImpl()
 {
-    Gui::Log::instance()->gui().debug("media renderer view sync view impl");
+    LOGNS(Gui, gui, debug, "media renderer view sync view impl");
     // FIXME: submodels should by synced implicitely
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
@@ -1546,7 +1546,7 @@ MediaRendererView::syncViewImpl()
 MediaServerGroupWidget::MediaServerGroupWidget() :
 DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
-//    Gui::Log::instance()->gui().debug("media server group widget ctor");
+//    LOGNS(Gui, gui, debug, "media server group widget ctor");
     View::setName("media server group view");
     _deviceGroupListView.setName("media server group view");
     push(&_deviceGroupListView, "Media");
@@ -1563,7 +1563,7 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 Device*
 MediaServerGroupWidget::createDevice()
 {
-    Gui::Log::instance()->gui().debug("media server group widget create server device.");
+    LOGNS(Gui, gui, debug, "media server group widget create server device.");
     return new MediaServerDevice(this);
 }
 
@@ -1571,7 +1571,7 @@ MediaServerGroupWidget::createDevice()
 Gui::View*
 MediaServerGroupWidget::createItemView()
 {
-    Gui::Log::instance()->gui().debug("media server group widget create server view.");
+    LOGNS(Gui, gui, debug, "media server group widget create server view.");
     return new MediaServerView;
 }
 
@@ -1586,13 +1586,13 @@ MediaServerGroupWidget::getItemModel(int row)
 void
 MediaServerGroupWidget::selectedItem(int row)
 {
-    Gui::Log::instance()->gui().debug("media server group widget selected device");
+    LOGNS(Gui, gui, debug, "media server group widget selected device");
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));
     DeviceGroup::selectDevice(pServer);
     pServer->browseRootObject();
     MediaObjectModel* pRootObject = static_cast<MediaObjectModel*>(pServer->getRootObject());
     if (pRootObject->isContainer()) {
-        Gui::Log::instance()->gui().debug("media server group widget selected device has container as root object");
+        LOGNS(Gui, gui, debug, "media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->setName(pServer->getFriendlyName() + " root container");
         if (!pRootObject->isRestricted()) {
@@ -1618,7 +1618,7 @@ MediaServerGroupWidget::selectedItem(int row)
 void
 MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 {
-    Gui::Log::instance()->gui().debug("media server group widget changed search text: " + searchText);
+    LOGNS(Gui, gui, debug, "media server group widget changed search text: " + searchText);
 
     if (searchText == "") {
         return;
@@ -1631,7 +1631,7 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
         Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
 
         std::string searchExp = Poco::replace(_searchString, std::string("%s"), "\"" + searchText + "\"");
-        Gui::Log::instance()->gui().debug("search expression: " + searchExp);
+        LOGNS(Gui, gui, debug, "search expression: " + searchExp);
         pObject->setSearch(searchExp);
 
         // clear cache (reset data model)
@@ -1679,7 +1679,7 @@ MediaServerDevice::createMediaObject()
 void
 MediaServerDevice::newSystemUpdateId(ui4 id)
 {
-    Gui::Log::instance()->gui().debug("media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
+    LOGNS(Gui, gui, debug, "media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
 
     // get (object id of) container, that is on top of navigator
     // can also be a MediaServerGroupWidget, thus the dynamic_cast
@@ -1717,7 +1717,7 @@ _pServerGroup(0)
 int
 MediaContainerWidget::totalItemCount()
 {
-    Gui::Log::instance()->gui().debug("media container widget total item count: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
+    LOGNS(Gui, gui, debug, "media container widget total item count: " + Poco::NumberFormatter::format(_pObjectModel->getChildCount()));
     return _pObjectModel->getChildCount();
 }
 
@@ -1732,10 +1732,10 @@ MediaContainerWidget::createItemView()
 Gui::Model*
 MediaContainerWidget::getItemModel(int row)
 {
-    Gui::Log::instance()->gui().debug("media container widget get item model in row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Gui, gui, debug, "media container widget get item model in row: " + Poco::NumberFormatter::format(row));
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pObjectModel->getChildForRow(row));
     if (!pModel) {
-        Gui::Log::instance()->gui().error("media container widget failed to get item model in row: " + Poco::NumberFormatter::format(row));
+        LOGNS(Gui, gui, error, "media container widget failed to get item model in row: " + Poco::NumberFormatter::format(row));
         return 0;
     }
     // FIXME: this can be done once, when the model is created.
@@ -1777,10 +1777,10 @@ MediaContainerWidget::getItemModel(int row)
 void
 MediaContainerWidget::selectedItem(int row)
 {
-    Gui::Log::instance()->gui().debug("media container widget selected media object");
+    LOGNS(Gui, gui, debug, "media container widget selected media object");
     MediaObjectModel* pChildObject = static_cast<MediaObjectModel*>(getItemModel(row));
     if (pChildObject && pChildObject->isContainer()) {
-        Gui::Log::instance()->gui().debug("media container widget selected media container");
+        LOGNS(Gui, gui, debug, "media container widget selected media container");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->_pObjectModel = pChildObject;
         pContainer->_pServerGroup = _pServerGroup;
@@ -1798,7 +1798,7 @@ MediaContainerWidget::selectedItem(int row)
         _pServerGroup->push(pContainer, pChildObject->getTitle());
     }
     else {
-        Gui::Log::instance()->gui().debug("media container widget selected media item");
+        LOGNS(Gui, gui, debug, "media container widget selected media item");
         _pObjectModel->getServer()->selectMediaObject(pChildObject, _pObjectModel, row);
     }
 }
@@ -1811,7 +1811,7 @@ MediaContainerWidget::createPlaylist(const std::string& playlistName)
         return;
     }
     if (!_pObjectModel->isRestricted()) {
-        Gui::Log::instance()->gui().debug("media server group widget create playlist");
+        LOGNS(Gui, gui, debug, "media server group widget create playlist");
         Av::CtlMediaObject2* pObject = new Av::CtlMediaObject2;
         pObject->setTitle(playlistName);
         pObject->setIsContainer(false);
@@ -1908,10 +1908,10 @@ _pMediaObjectView(pMediaObjectView)
 void
 MediaObjectViewPlaylistButtonController::pushed()
 {
-    Gui::Log::instance()->gui().debug("media object playlist button pushed.");
+    LOGNS(Gui, gui, debug, "media object playlist button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
     std::string objectClass = pModel->getClass();
-    Gui::Log::instance()->gui().debug("media object has class: " + objectClass);
+    LOGNS(Gui, gui, debug, "media object has class: " + objectClass);
 
 //    Gui::Image* pImage = new Gui::Image;
 //    pImage->setData(MediaImages::instance()->getResource("media-container.png"));
@@ -1929,7 +1929,7 @@ _pMediaObjectView(pMediaObjectView)
 void
 MediaObjectViewDestroyButtonController::pushed()
 {
-    Gui::Log::instance()->gui().debug("media object destroy button pushed.");
+    LOGNS(Gui, gui, debug, "media object destroy button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
     pModel->destroyObject(pModel->getId());
 }
@@ -1975,7 +1975,7 @@ _pPlaylistContainer(0)
 int
 PlaylistEditor::totalItemCount()
 {
-    Gui::Log::instance()->gui().debug("playlist editor total item count: " + Poco::NumberFormatter::format(_playlistItems.size()));
+    LOGNS(Gui, gui, debug, "playlist editor total item count: " + Poco::NumberFormatter::format(_playlistItems.size()));
     return _playlistItems.size();
 }
 
@@ -1991,9 +1991,9 @@ PlaylistEditor::createItemView()
 Gui::Model*
 PlaylistEditor::getItemModel(int row)
 {
-    Gui::Log::instance()->gui().debug("playlist editor get item model in row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Gui, gui, debug, "playlist editor get item model in row: " + Poco::NumberFormatter::format(row));
     if (row >= 0 && row < _playlistItems.size()) {
-        Gui::Log::instance()->gui().debug("playlist editor get item with title: " + _playlistItems[row]->getTitle());
+        LOGNS(Gui, gui, debug, "playlist editor get item with title: " + _playlistItems[row]->getTitle());
         return _playlistItems[row];
     }
     else {
@@ -2025,19 +2025,19 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
     if (pModel->isContainer()) {
         if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
             if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
-                Gui::Log::instance()->gui().debug("playlist editor load playlist: " + pModel->getTitle());
+                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
                 setPlaylistContainer(pModel);
                 Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
-                Gui::Log::instance()->gui().debug("media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+                LOGNS(Gui, gui, debug, "media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
                 for (int r = 0; r < pModel->getChildCount(); r++) {
-                    Gui::Log::instance()->gui().debug("title: " + pModel->getChildForRow(r)->getTitle());
+                    LOGNS(Gui, gui, debug, "title: " + pModel->getChildForRow(r)->getTitle());
                     _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
                 }
             }
         }
     }
     else if (_pPlaylistContainer) {
-        Gui::Log::instance()->gui().debug("media object playlist add item with title: " + pModel->getTitle());
+        LOGNS(Gui, gui, debug, "media object playlist add item with title: " + pModel->getTitle());
         _playlistItems.push_back(new MediaObjectModel(*pModel));
         writePlaylistResource();
 
@@ -2051,7 +2051,7 @@ PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
 void
 PlaylistEditor::setPlaylistContainer(MediaObjectModel* pPlaylistContainer)
 {
-    Gui::Log::instance()->gui().debug("set playlist container with title: " + pPlaylistContainer->getTitle());
+    LOGNS(Gui, gui, debug, "set playlist container with title: " + pPlaylistContainer->getTitle());
     _pPlaylistContainer = new MediaObjectModel(*pPlaylistContainer);
 }
 
@@ -2084,7 +2084,7 @@ PlaylistEditor::writePlaylistResource()
 void
 PlaylistEditor::deleteItem(MediaObjectModel* pModel)
 {
-    Gui::Log::instance()->gui().debug("delete media object from playlist with title: " + pModel->getTitle());
+    LOGNS(Gui, gui, debug, "delete media object from playlist with title: " + pModel->getTitle());
     std::vector<MediaObjectModel*>::iterator pos = std::find(_playlistItems.begin(), _playlistItems.end(), pModel);
     if (pos != _playlistItems.end()) {
         _playlistItems.erase(pos);
@@ -2104,7 +2104,7 @@ _pPlaylistEditorObjectView(pPlaylistEditorObjectView)
 void
 PlaylistEditorDeleteObjectController::pushed()
 {
-    Gui::Log::instance()->gui().debug("playlist editor delete button pushed.");
+    LOGNS(Gui, gui, debug, "playlist editor delete button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pPlaylistEditorObjectView->getModel());
     _pPlaylistEditorObjectView->_pPlaylistEditor->deleteItem(pModel);
 }
@@ -2216,7 +2216,7 @@ ActivityIndicator::~ActivityIndicator()
 void
 ActivityIndicator::startActivity()
 {
-//    Gui::Log::instance()->gui().debug("activity indicator start activity");
+//    LOGNS(Gui, gui, debug, "activity indicator start activity");
 
     setActivityInProgress(true);
     if (!indicatorOn()) {
@@ -2224,7 +2224,7 @@ ActivityIndicator::startActivity()
         setModel(_pActivityOnModel);
     }
     else {
-//        Gui::Log::instance()->gui().debug("indicator already on, do nothing");
+//        LOGNS(Gui, gui, debug, "indicator already on, do nothing");
     }
 }
 
@@ -2232,11 +2232,11 @@ ActivityIndicator::startActivity()
 void
 ActivityIndicator::stopActivity()
 {
-//    Gui::Log::instance()->gui().debug("activity indicator stop activity");
+//    LOGNS(Gui, gui, debug, "activity indicator stop activity");
 
     setActivityInProgress(false);
     if (indicatorOn() && !timerActive()) {
-//        Gui::Log::instance()->gui().debug("turn off indicator after short delay ...");
+//        LOGNS(Gui, gui, debug, "turn off indicator after short delay ...");
         setTimerActive(true);
         if (_pOffTimer) {
             delete _pOffTimer;
@@ -2246,7 +2246,7 @@ ActivityIndicator::stopActivity()
         _pOffTimer->start(_stopIndicatorCallback);
     }
     else {
-//        Gui::Log::instance()->gui().debug("indicator already off or timer running, do nothing");
+//        LOGNS(Gui, gui, debug, "indicator already off or timer running, do nothing");
     }
 }
 
@@ -2254,18 +2254,18 @@ ActivityIndicator::stopActivity()
 void
 ActivityIndicator::stopIndicator(Poco::Timer& timer)
 {
-//    Gui::Log::instance()->gui().debug("activity indicator stop timer callback ...");
+//    LOGNS(Gui, gui, debug, "activity indicator stop timer callback ...");
 
     if (!activityInProgress() && indicatorOn()) {
         setModel(_pActivityOffModel);
         setIndicatorOn(false);
-//        Gui::Log::instance()->gui().debug("indicator turned off, no activity in progress anymore");
+//        LOGNS(Gui, gui, debug, "indicator turned off, no activity in progress anymore");
     }
     else {
-//        Gui::Log::instance()->gui().debug("turn off indicator ignored, activity still in progress or indicator already off");
+//        LOGNS(Gui, gui, debug, "turn off indicator ignored, activity still in progress or indicator already off");
     }
     setTimerActive(false);
-//    Gui::Log::instance()->gui().debug("activity indicator stop timer callback finished.");
+//    LOGNS(Gui, gui, debug, "activity indicator stop timer callback finished.");
 }
 
 
@@ -2274,10 +2274,10 @@ ActivityIndicator::setActivityInProgress(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_activityInProgressLock);
     if (set) {
-//        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to true");
+//        LOGNS(Gui, gui, debug, "indicator flag \"activity in progress\" set to true");
     }
     else {
-//        Gui::Log::instance()->gui().debug("indicator flag \"activity in progress\" set to false");
+//        LOGNS(Gui, gui, debug, "indicator flag \"activity in progress\" set to false");
     }
     _activityInProgress = set;
 }
@@ -2296,10 +2296,10 @@ ActivityIndicator::setIndicatorOn(bool set)
 {
     Poco::ScopedLock<Poco::FastMutex> locker(_indicatorOnLock);
     if (set) {
-//        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to true");
+//        LOGNS(Gui, gui, debug, "flag \"indicator on\" set to true");
     }
     else {
-//        Gui::Log::instance()->gui().debug("flag \"indicator on\" set to false");
+//        LOGNS(Gui, gui, debug, "flag \"indicator on\" set to false");
     }
     _indicatorOn = set;
 }

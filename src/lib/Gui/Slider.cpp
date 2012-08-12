@@ -24,6 +24,7 @@
 #include "Gui/Slider.h"
 #include "Gui/GuiLogger.h"
 #include "SliderImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -48,7 +49,7 @@ SliderModel::getValue() const
 void
 SliderModel::setValue(int value)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button model set label");
+//    LOG(gui, debug, "button model set label");
     _value = value;
 
     syncViews();
@@ -74,7 +75,7 @@ View(pParent, false),
 _passiveMode(false),
 _activeMode(false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider view ctor.");
+//    LOG(gui, debug, "slider view ctor.");
     _minWidth = 50;
     _minHeight = 10;
     _prefWidth = 150;
@@ -91,7 +92,7 @@ SliderView::syncViewImpl()
         _activeMode = false;
         return;
     }
-    Omm::Gui::Log::instance()->gui().debug("slider view sync view: " + getName());
+    LOG(gui, debug, "slider view sync view: " + getName());
     SliderModel* pSliderModel = static_cast<SliderModel*>(_pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     _passiveMode = true;
@@ -108,7 +109,7 @@ SliderView::valueChangedView(int value)
         return;
     }
     _activeMode = true;
-    Omm::Gui::Log::instance()->gui().debug("slider view, calling value changed virtual method");
+    LOG(gui, debug, "slider view, calling value changed virtual method");
     NOTIFY_CONTROLLER(SliderController, valueChanged, value);
 }
 

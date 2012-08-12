@@ -59,7 +59,7 @@ CtlMediaServer::getRootObject() const
 void
 CtlMediaServer::browseRootObject()
 {
-    Log::instance()->upnpav().debug("browse root object ...");
+    LOG(upnpav, debug, "browse root object ...");
     _pRoot = createMediaObject();
     try {
         std::string rootMeta;
@@ -69,10 +69,10 @@ CtlMediaServer::browseRootObject()
         _pCtlMediaServerCode->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
         MediaObjectReader reader;
         reader.read(_pRoot, rootMeta);
-        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getClass());
+        LOG(upnpav, debug, "controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getClass());
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
+        LOG(upnpav, error, "controller could not fetch root object, setting default replacement object: " + e.displayText());
         _pRoot->setId("0");
         _pRoot->setIsContainer(true);
     }
@@ -81,10 +81,10 @@ CtlMediaServer::browseRootObject()
 //    _pRoot->setFetchedAllChildren(false);
     if (_pRoot->isContainer()) {
         // don't rely on childCount attribute being present in root container, so we have to fetch some children to get total child count.
-        Log::instance()->upnpav().debug("controller root object is container, fetching children ...");
+        LOG(upnpav, debug, "controller root object is container, fetching children ...");
         _pRoot->getChildForRow(0);
     }
-    Log::instance()->upnpav().debug("browse root object finished.");
+    LOG(upnpav, debug, "browse root object finished.");
 }
 
 
@@ -104,7 +104,7 @@ CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
     ui4 updateId;
     _pCtlMediaServerCode->ContentDirectory()->Search("0", "res = \"" + resource + "\"", "*", 0, 1, "", result, numberReturned, totalMatches, updateId);
     if (numberReturned != 1) {
-        Log::instance()->upnpav().error("get media object from resource failed: 0 or more than one object found.");
+        LOG(upnpav, error, "get media object from resource failed: 0 or more than one object found.");
         return 0;
     }
 
@@ -114,7 +114,7 @@ CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
         reader.read(pObject, result);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("get media object from resource failed: " + e.displayText());
+        LOG(upnpav, error, "get media object from resource failed: " + e.displayText());
         return 0;
     }
     return pObject;
@@ -124,7 +124,7 @@ CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
 void
 CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
 {
-    Log::instance()->upnpav().debug("media server object selected: " + pObject->getTitle());
+    LOG(upnpav, debug, "media server object selected: " + pObject->getTitle());
 
     if (pObject->isContainer()) {
     }

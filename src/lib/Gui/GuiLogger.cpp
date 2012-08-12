@@ -26,6 +26,7 @@
 #include "Log.h"
 
 
+#ifndef NDEBUG
 namespace Omm {
 namespace Gui {
 
@@ -65,3 +66,4 @@ Log::gui()
 
 } // namespace Gui
 } // namespace Omm
+#endif // NDEBUG

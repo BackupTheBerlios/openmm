@@ -45,7 +45,7 @@ WebBrowserModel::getUri()
 void
 WebBrowserModel::setUri(const std::string& uri)
 {
-//    Omm::Gui::Log::instance()->gui().debug("WebBrowser model set label");
+//    LOG(gui, debug, "WebBrowser model set label");
     _uri = uri;
 }
 
@@ -53,7 +53,7 @@ WebBrowserModel::setUri(const std::string& uri)
 WebBrowserView::WebBrowserView(View* pParent) :
 View(pParent, false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("WebBrowser view ctor.");
+//    LOG(gui, debug, "WebBrowser view ctor.");
     setName("WebBrowser view");
 
     _minWidth = 150;
@@ -67,7 +67,7 @@ View(pParent, false)
 void
 WebBrowserView::syncViewImpl()
 {
-//    Omm::Gui::Log::instance()->gui().debug("WebBrowser view sync view: " + getName() + " ...");
+//    LOG(gui, debug, "WebBrowser view sync view: " + getName() + " ...");
     if (!_pModel) {
         return;
     }

@@ -66,8 +66,8 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
     if (offset == -1) {
         offset = getChildCount();
     }
-    Log::instance()->upnpav().debug("controller media object fetch children of object with id: " + objectId
-                                    + ", number of requested children: " + Poco::NumberFormatter::format(count)
+    LOG(upnpav, debug, "controller media object fetch children of object with id: " + objectId\
+                                    + ", number of requested children: " + Poco::NumberFormatter::format(count)\
                                     + ", child offset: " + Poco::NumberFormatter::format(offset));
 
     Omm::ui4 numberReturned = 0;
@@ -79,7 +79,7 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
             _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, count, "", result, numberReturned, totalMatches, updateId);
         }
         catch (Poco::Exception& e){
-            Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
+            LOG(upnpav, error, "could not fetch children: " + e.displayText());
             return 0;
         }
         // _totalMatches is the number of items in the browse result, that matches
@@ -89,7 +89,7 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
         reader.readChildren(_childVec, result, this);
     }
     else {
-        Log::instance()->upnpav().error("controller media object fetch children failed");
+        LOG(upnpav, error, "controller media object fetch children failed");
     }
     return numberReturned;
 }
@@ -98,7 +98,7 @@ CtlMediaObject2::fetchChildren(ui4 count, ui4 offset)
 bool
 CtlMediaObject2::fetchedAllChildren()
 {
-//    Log::instance()->upnpav().debug("AbstractMediaObject::fetchedAllChildren()");
+//    LOG(upnpav, debug, "AbstractMediaObject::fetchedAllChildren()");
     return getChildCount() >= getFetchedChildCount();
 }
 
@@ -144,11 +144,11 @@ CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
     ui4 transferId;
     std::string importUri = getResource(index)->getAttributeValue(AvProperty::IMPORT_URI);
     if (importUri != "") {
-        Log::instance()->upnpav().debug("writing resource: " + importUri + ", from uri: " + sourceUri);
+        LOG(upnpav, debug, "writing resource: " + importUri + ", from uri: " + sourceUri);
         _pServerCode->ContentDirectory()->ImportResource(uri(sourceUri), uri(importUri), transferId);
     }
     else {
-        Log::instance()->upnpav().warning("resource read only, writing failed");
+        LOG(upnpav, warning, "resource read only, writing failed");
     }
 }
 
@@ -156,7 +156,7 @@ CtlMediaObject2::writeResource(const std::string& sourceUri, int index)
 void
 CtlMediaObject2::createChildObject(CtlMediaObject2* pObject)
 {
-    Log::instance()->upnpav().debug("create child media object: " + pObject->getTitle());
+    LOG(upnpav, debug, "create child media object: " + pObject->getTitle());
     MediaObjectWriter2 writer;
     std::string elements;
     writer.write(elements, pObject);
@@ -169,7 +169,7 @@ CtlMediaObject2::createChildObject(CtlMediaObject2* pObject)
 void
 CtlMediaObject2::destroyObject(const std::string& objectId)
 {
-    Log::instance()->upnpav().debug("distroy child media object with object id: " + objectId);
+    LOG(upnpav, debug, "distroy child media object with object id: " + objectId);
     _pServerCode->ContentDirectory()->DestroyObject(objectId);
 }
 
@@ -178,8 +178,8 @@ void
 CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size)
 {
     std::string objectId = getId();
-    Log::instance()->upnpav().debug("controller media object get block of children of object with id: " + objectId
-                                    + ", number of requested children: " + Poco::NumberFormatter::format(size)
+    LOG(upnpav, debug, "controller media object get block of children of object with id: " + objectId\
+                                    + ", number of requested children: " + Poco::NumberFormatter::format(size)\
                                     + ", child offset: " + Poco::NumberFormatter::format(offset));
 
     Omm::ui4 numberReturned = 0;
@@ -196,7 +196,7 @@ CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, 
             }
         }
         catch (Poco::Exception& e){
-            Log::instance()->upnpav().error("could not fetch children: " + e.displayText());
+            LOG(upnpav, error, "could not fetch children: " + e.displayText());
             return;
         }
         // _totalMatches is the number of items in the browse result, that matches
@@ -206,7 +206,7 @@ CtlMediaObject2::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, 
         reader.readChildren(block, result, this);
     }
     else {
-        Log::instance()->upnpav().error("controller media object fetch children failed");
+        LOG(upnpav, error, "controller media object fetch children failed");
     }
 }
 

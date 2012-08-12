@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <algorithm>
+
 #include "Gui/Controller.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
@@ -28,25 +30,25 @@
 namespace Omm {
 namespace Gui {
 
-    
+
 void
 Controller::attachModel(Model* pModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("controller attach model ...");
+//    LOG(gui, debug, "controller attach model ...");
     _models.push_back(pModel);
-//    Omm::Gui::Log::instance()->gui().debug("controller attach model finished.");
+//    LOG(gui, debug, "controller attach model finished.");
 }
 
 
 void
 Controller::detachModel(Model* pModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("controller detach model ...");
+//    LOG(gui, debug, "controller detach model ...");
     ModelIterator pos = std::find(beginModel(), beginModel(), pModel);
     if (pos != _models.end()) {
         _models.erase(pos);
     }
-//    Omm::Gui::Log::instance()->gui().debug("controller detach model finished.");
+//    LOG(gui, debug, "controller detach model finished.");
 }
 
 

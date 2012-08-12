@@ -36,6 +36,7 @@
 namespace Omm {
 namespace Sys {
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
@@ -66,6 +67,7 @@ Log::sys()
 {
     return *_pSysLogger;
 }
+#endif // NDEBUG
 
 
 const std::string

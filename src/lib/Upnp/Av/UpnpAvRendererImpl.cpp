@@ -74,7 +74,7 @@ void
 DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI enters in state: " + transportState);
+    LOG(upnpav, debug, "SetAVTransporURI enters in state: " + transportState);
 
     if (transportState == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
@@ -110,20 +110,20 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
             protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
             std::string duration = obj.getResource()->getAttributeValue(AvProperty::DURATION);
             if (duration != "") {
-                Omm::Av::Log::instance()->upnpav().debug("set duration from CurrentURIMetaData to: " + duration);
+                LOG(upnpav, debug, "set duration from CurrentURIMetaData to: " + duration);
                 _setCurrentTrackDuration(duration);
             }
         }
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("could not parse uri meta data: " + e.message());
+        LOG(upnpav, error, "could not parse uri meta data: " + e.message());
     }
     ProtocolInfo protInfo(protInfoString);
 
-    Omm::Av::Log::instance()->upnpav().debug("engine: " + _engines[InstanceID]->getEngineId() + " set uri: " + CurrentURI);
+    LOG(upnpav, debug, "engine: " + _engines[InstanceID]->getEngineId() + " set uri: " + CurrentURI);
     _engines[InstanceID]->setUriEngine(CurrentURI, protInfo);
 
-    Omm::Av::Log::instance()->upnpav().debug("SetAVTransporURI leaves in state: " + _getTransportState());
+    LOG(upnpav, debug, "SetAVTransporURI leaves in state: " + _getTransportState());
 }
 
 
@@ -155,20 +155,20 @@ void
 DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, std::string& TrackDuration, std::string& TrackMetaData, std::string& TrackURI, std::string& RelTime, std::string& AbsTime, i4& RelCount, i4& AbsCount)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-//    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo enters in state: " + transportState);
+//    LOG(upnpav, debug, "GetPositionInfo enters in state: " + transportState);
 
     if (transportState != AvTransportArgument::TRANSPORT_STATE_PLAYING && transportState != AvTransportArgument::TRANSPORT_STATE_TRANSITIONING) {
         // TODO: return an UPnP error? (better return current values, which may not be 0 in case of paused stream)
         return;
     }
-//    Omm::Av::Log::instance()->upnpav().debug("GetPositionInfo() ...");
+//    LOG(upnpav, debug, "GetPositionInfo() ...");
     Track = _getCurrentTrack();
 
     float engineTrackDuration = _engines[InstanceID]->getLengthSeconds();
-//    Omm::Av::Log::instance()->upnpav().debug("engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
+//    LOG(upnpav, debug, "engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
-//        Omm::Av::Log::instance()->upnpav().debug("set TrackDuration to: " + _getCurrentTrackDuration());
+//        LOG(upnpav, debug, "set TrackDuration to: " + _getCurrentTrackDuration());
         TrackDuration = _getCurrentTrackDuration();
     }
 
@@ -176,14 +176,14 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
     TrackURI = _getCurrentTrackURI();
 
     Poco::UInt64 enginePositionByte = _engines[InstanceID]->getPositionByte();
-//    Omm::Av::Log::instance()->upnpav().debug("engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
+//    LOG(upnpav, debug, "engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
     float enginePosition = _engines[InstanceID]->getPositionPercentage();
-//    Omm::Av::Log::instance()->upnpav().debug("engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
+//    LOG(upnpav, debug, "engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
     float engineTimePosition = _engines[InstanceID]->getPositionSecond();
-//    Omm::Av::Log::instance()->upnpav().debug("engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
+//    LOG(upnpav, debug, "engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
 
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
-//    Omm::Av::Log::instance()->upnpav().debug("set RelativePosition to: " + timePosition);
+//    LOG(upnpav, debug, "set RelativePosition to: " + timePosition);
 
     RelTime = timePosition;
     AbsTime = timePosition;
@@ -222,7 +222,7 @@ void
 DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Stop() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Stop() enters in state: " + transportState);
 
     if (transportState != AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         // be nice to the engine and don't stop when already in stopped or paused state
@@ -254,7 +254,7 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
 {
     std::string speed = Speed;
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Play() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Play() enters in state: " + transportState);
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
         || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK
@@ -303,7 +303,7 @@ void
 DevAVTransportRendererImpl::Pause(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Pause() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Pause() enters in state: " + transportState);
 
     if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
         || transportState == AvTransportArgument::TRANSPORT_STATE_RECORDING) {
@@ -324,12 +324,12 @@ void
 DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit, const std::string& Target)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Seek() enters in state: " + transportState);
 
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
         // TODO: does it make sense to handle "PAUSED_PLAYBACK", too?
-        Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
+        LOG(upnpav, debug, "AVTransportRendererImpl::Seek() seek mode: " + Unit + ", seek target: " + Target);
 
         if (Unit == AvTransportArgument::SEEK_MODE_TRACK_NR) {
             Variant track(Target);
@@ -356,7 +356,7 @@ void
 DevAVTransportRendererImpl::Next(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Next() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Next() enters in state: " + transportState);
 
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
@@ -369,7 +369,7 @@ void
 DevAVTransportRendererImpl::Previous(const ui4& InstanceID)
 {
     std::string transportState = _engines[InstanceID]->transportState();
-    Omm::Av::Log::instance()->upnpav().debug("AVTransportRendererImpl::Previous() enters in state: " + transportState);
+    LOG(upnpav, debug, "AVTransportRendererImpl::Previous() enters in state: " + transportState);
 
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
@@ -422,7 +422,7 @@ DevConnectionManagerRendererImpl::PrepareForConnection(const std::string& Remote
         peerManagerId.parseManagerIdString(PeerConnectionManager);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("could not parse PeerConnectionManager string: " + e.displayText());
+        LOG(upnpav, error, "could not parse PeerConnectionManager string: " + e.displayText());
         return;
     }
     Connection* pConnection = new Connection(peerManagerId.getUuid(), _pThisDevice->getUuid());
@@ -755,7 +755,7 @@ DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::str
     // we don't cache values in the state vars but retreive them directly from the enginge.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    CurrentVolume = _getVolume();
-    Log::instance()->upnpav().debug("get volume of engine instance: " + Poco::NumberFormatter::format(InstanceID));
+    LOG(upnpav, debug, "get volume of engine instance: " + Poco::NumberFormatter::format(InstanceID));
 
     CurrentVolume = _engines[InstanceID]->getVolume(Channel);
 }
@@ -764,7 +764,7 @@ DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::str
 void
 DevRenderingControlRendererImpl::SetVolume(const ui4& InstanceID, const std::string& Channel, const ui2& DesiredVolume)
 {
-    Omm::Av::Log::instance()->upnpav().debug("RenderingControlRendererImpl::SetVolume() instance: " + Poco::NumberFormatter::format(InstanceID) + ", channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
+    LOG(upnpav, debug, "RenderingControlRendererImpl::SetVolume() instance: " + Poco::NumberFormatter::format(InstanceID) + ", channel: " + Channel + ", volume: " + Poco::NumberFormatter::format(DesiredVolume));
 
     _engines[InstanceID]->setVolume(Channel, DesiredVolume);
 

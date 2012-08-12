@@ -58,7 +58,7 @@ class Overlay;
 class Sink;
 class Clock;
 
-
+#ifndef NDEBUG
 class Log
 {
 public:
@@ -72,7 +72,7 @@ private:
     static Log*     _pInstance;
     Poco::Logger*   _pAvStreamLogger;
 };
-
+#endif //NDEBUG
 
 class RingBuffer
 {

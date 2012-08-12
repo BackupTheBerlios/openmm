@@ -47,7 +47,7 @@ DeviceGroupModel(new Omm::Av::MediaRendererGroupDelegate)
 Omm::Device*
 QtMediaRendererGroup::createDevice()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group create media renderer");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media renderer group create media renderer");
     return new QtMediaRenderer;
 }
 
@@ -55,7 +55,7 @@ QtMediaRendererGroup::createDevice()
 void
 QtMediaRendererGroup::show()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer group show: " + getDeviceType());
+    LOGNS(Omm::Av, upnpav, debug, "Qt media renderer group show: " + getDeviceType());
 
     QtController* pController = static_cast<QtController*>(getController());
 
@@ -63,7 +63,7 @@ QtMediaRendererGroup::show()
         pController->addTab(_pWidgetCanvas, shortName().c_str());
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("Qt media renderer group failed to show device group, no widget available: " + getDeviceType());
+        LOGNS(Omm::Av, upnpav, error, "Qt media renderer group failed to show device group, no widget available: " + getDeviceType());
     }
 }
 
@@ -94,9 +94,9 @@ QtMediaRendererGroup::getChildWidget(int row)
 void
 QtMediaRendererGroup::attachWidget(int row, ListWidget* pWidget)
 {
-//    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget");
+//    LOGNS(Omm::Av, upnpav, debug, "media renderer group attach widget");
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
-    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pRenderer->getFriendlyName());
+    LOGNS(Omm::Av, upnpav, debug, "media renderer group attach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pRenderer->getFriendlyName());
     QtMediaRendererWidget* pRendererWidget = static_cast<QtMediaRendererWidget*>(pWidget);
     pRendererWidget->_pRenderer = pRenderer;
     pRenderer->setDeviceWidget(pRendererWidget);
@@ -108,7 +108,7 @@ QtMediaRendererGroup::attachWidget(int row, ListWidget* pWidget)
 
     emit pRendererWidget->configureWidget();
     emit pRendererWidget->showWidgetSignal();
-    Omm::Av::Log::instance()->upnpav().debug("media renderer group attach widget finished.");
+    LOGNS(Omm::Av, upnpav, debug, "media renderer group attach widget finished.");
 }
 
 
@@ -116,7 +116,7 @@ void
 QtMediaRendererGroup::detachWidget(int row)
 {
     QtMediaRenderer* pRenderer = static_cast<QtMediaRenderer*>(getDevice(row));
-    Omm::Av::Log::instance()->upnpav().debug("media renderer group detach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pRenderer->getFriendlyName());
+    LOGNS(Omm::Av, upnpav, debug, "media renderer group detach widget row: " + Poco::NumberFormatter::format(row) + ", name: " + pRenderer->getFriendlyName());
     QtMediaRendererWidget* pRendererWidget = pRenderer->getDeviceWidget();
 
     emit pRendererWidget->hideWidgetSignal();
@@ -129,7 +129,7 @@ QtMediaRendererGroup::detachWidget(int row)
 
     pRendererWidget->_pRenderer = 0;
     pRenderer->setDeviceWidget(0);
-    Omm::Av::Log::instance()->upnpav().debug("media renderer group detach widget finished.");
+    LOGNS(Omm::Av, upnpav, debug, "media renderer group detach widget finished.");
 }
 
 

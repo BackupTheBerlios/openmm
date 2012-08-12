@@ -167,7 +167,7 @@ DevConnectionManagerServerImpl::PrepareForConnection(const std::string& RemotePr
         peerManagerId.parseManagerIdString(PeerConnectionManager);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("could not parse PeerConnectionManager string: " + e.displayText());
+        LOG(upnpav, error, "could not parse PeerConnectionManager string: " + e.displayText());
         return;
     }
     Connection* pConnection = new Connection(peerManagerId.getUuid(), _pThisDevice->getUuid());
@@ -275,14 +275,14 @@ DevContentDirectoryServerImpl::Browse(const std::string& ObjectID, const std::st
     }
     else if (BrowseFlag == "BrowseDirectChildren") {
         // get child objects via row
-        Log::instance()->upnpav().debug("browse direct children of: " + pObject->getTitle());
+        LOG(upnpav, debug, "browse direct children of: " + pObject->getTitle());
         std::vector<ServerObject*> children;
         TotalMatches = pObject->getChildrenAtRowOffset(children, StartingIndex, RequestedCount, SortCriteria);
         NumberReturned = children.size();
         writer.writeChildren(Result, children);
     }
     else {
-        Log::instance()->upnpav().error("Error in Browse: unkown BrowseFlag");
+        LOG(upnpav, error, "Error in Browse: unkown BrowseFlag");
     }
     UpdateID = 0;
 }
@@ -322,12 +322,12 @@ DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, cons
             pContainer = static_cast<ServerContainer*>(pObject);
         }
         else {
-            Log::instance()->upnpav().error("parent object is not a container, cannot create child object");
+            LOG(upnpav, error, "parent object is not a container, cannot create child object");
             return;
         }
     }
     if (pContainer->isRestricted()) {
-        Log::instance()->upnpav().error("parent object restricted, cannot create child object");
+        LOG(upnpav, error, "parent object restricted, cannot create child object");
         return;
     }
     ServerObject* pChildObject = _pRoot->createChildObject();
@@ -336,7 +336,7 @@ DevContentDirectoryServerImpl::CreateObject(const std::string& ContainerID, cons
         reader.read(pChildObject, Elements);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("cannot read elements while creating child object: " + e.message());
+        LOG(upnpav, error, "cannot read elements while creating child object: " + e.message());
         delete pChildObject;
         return;
     }
@@ -359,7 +359,7 @@ DevContentDirectoryServerImpl::DestroyObject(const std::string& ObjectID)
         pObject = _pRoot->getDescendant(ObjectID);
     }
 //    if (pObject->isRestricted()) {
-//        Log::instance()->upnpav().error("object restricted, cannot destroy");
+//        LOG(upnpav, error, "object restricted, cannot destroy");
 //        return;
 //    }
     pObject->destroy();
@@ -381,10 +381,10 @@ DevContentDirectoryServerImpl::ImportResource(const uri& SourceURI, const uri& D
     // get resource of object in DestinationURI
     Poco::StringTokenizer uri(DestinationURI.getPath(), "$");
     std::string objectId = uri[0].substr(1);
-    Log::instance()->upnpav().debug("import resource to objectId: " + objectId + ", resourceId: " + uri[1]);
+    LOG(upnpav, debug, "import resource to objectId: " + objectId + ", resourceId: " + uri[1]);
     ServerObject* pObject = _pRoot->getDescendant(objectId);
     if (!pObject) {
-        Log::instance()->upnpav().error("import resource, could not find object with id: " + objectId);
+        LOG(upnpav, error, "import resource, could not find object with id: " + objectId);
         return;
     }
     int resourceId = Poco::NumberParser::parse(uri[1]);
@@ -394,7 +394,7 @@ DevContentDirectoryServerImpl::ImportResource(const uri& SourceURI, const uri& D
         pResource->writeResource(SourceURI);
     }
     else {
-        Log::instance()->upnpav().error("import resource, no resource for object with id: " + objectId);
+        LOG(upnpav, error, "import resource, no resource for object with id: " + objectId);
     }
 }
 

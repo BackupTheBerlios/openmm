@@ -91,7 +91,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
     ui4 AvTransportId = pConnection->getAvTransportId();
 
     if (_usePlaylistResource && pContainerRes) {
-        Log::instance()->upnpav().debug("selected object is child of a container with playlist resource");
+        LOG(upnpav, debug, "selected object is child of a container with playlist resource");
         std::string metaData;
         MediaObjectWriter2 writer;
         writer.write(metaData, pParentObject);
@@ -121,7 +121,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
         _pCurrentMediaObject = pObject;
     }
     else {
-        Log::instance()->upnpav().warning("selected object has no resource");
+        LOG(upnpav, warning, "selected object has no resource");
     }
 }
 
@@ -198,7 +198,7 @@ CtlMediaRenderer::backPressed()
 void
 CtlMediaRenderer::positionMoved(int position)
 {
-    Log::instance()->upnpav().debug("position moved to: " + Poco::NumberFormatter::format(position));
+    LOG(upnpav, debug, "position moved to: " + Poco::NumberFormatter::format(position));
     try {
         _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position * 1000000));
 //        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position));
@@ -246,14 +246,14 @@ void
 CtlMediaRenderer::startPositionTimer(bool start)
 {
     if (_pPositionTimer) {
-        Log::instance()->upnpav().debug("stop position timer ...");
+        LOG(upnpav, debug, "stop position timer ...");
         _pPositionTimer->stop();
         delete _pPositionTimer;
         _pPositionTimer = 0;
-        Log::instance()->upnpav().debug("position timer stopped.");
+        LOG(upnpav, debug, "position timer stopped.");
     }
     if (start) {
-        Log::instance()->upnpav().debug("start position timer ...");
+        LOG(upnpav, debug, "start position timer ...");
         _pPositionTimer = new Poco::Timer(0, _positionTimerInterval);
         Poco::TimerCallback<CtlMediaRenderer> callback(*this, &CtlMediaRenderer::pollPositionInfo);
         _pPositionTimer->start(callback);
@@ -264,7 +264,7 @@ CtlMediaRenderer::startPositionTimer(bool start)
 void
 CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
 {
-    Log::instance()->upnpav().debug("poll position info");
+    LOG(upnpav, debug, "poll position info");
     // TODO: get TransportState and poll position info only, if it is PLAYING, RECORDING or TRANSITIONING
     ui4 Track;
     std::string TrackDuration;
@@ -275,7 +275,7 @@ CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
     i4 RelCount;
     i4 AbsCount;
     _pCtlMediaRendererCode->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
-//    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
+//    LOG(upnpav, debug, "TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
 
     try {
         r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
@@ -283,7 +283,7 @@ CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
         newPosition(trackDuration, absTime);
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().warning("could not parse current track duration: " + TrackDuration + ", " + e.displayText());
+        LOG(upnpav, warning, "could not parse current track duration: " + TrackDuration + ", " + e.displayText());
     }
 
 //    if (TrackMetaData == "") {
@@ -293,14 +293,14 @@ CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
 //        CtlMediaObject object;
 //        try {
 //            object.readMetaData(TrackMetaData);
-////            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
-////            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
-////            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+////            LOG(upnpav, debug, "new track title: " + object.getTitle());
+////            LOG(upnpav, debug, "new track artist: " + object.getProperty(AvProperty::ARTIST));
+////            LOG(upnpav, debug, "new track album: " + object.getProperty(AvProperty::ALBUM));
 //            newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
 //        }
 //        catch (Poco::Exception& e) {
 //            newTrack("", "", "");
-//            Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+//            LOG(upnpav, error, "could not read current track meta data: " + e.displayText());
 //        }
 //    }
 }
@@ -323,7 +323,7 @@ MediaRendererGroupDelegate::shortName()
 void
 MediaRendererGroupDelegate::init()
 {
-    Log::instance()->upnpav().debug("media renderer delegate init");
+    LOG(upnpav, debug, "media renderer delegate init");
     Controller* pController = _pDeviceGroup->getController();
 //    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
     pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaObjectSelectedNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
@@ -334,7 +334,7 @@ void
 MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification)
 {
     CtlMediaObject* pItem = pMediaItemNotification->getMediaItem();
-    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pItem->getTitle());
+    LOG(upnpav, debug, "media renderer delegate got media item notification: " + pItem->getTitle());
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
         pRenderer->setObject(pItem);
@@ -347,7 +347,7 @@ void
 MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification)
 {
 //    CtlMediaObject2* pItem = pMediaItemNotification->getMediaItem();
-    Log::instance()->upnpav().debug("media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());
+    LOG(upnpav, debug, "media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
         pRenderer->setObject2(pMediaItemNotification->_pObject, pMediaItemNotification->_pParentObject, pMediaItemNotification->_row);

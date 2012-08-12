@@ -65,10 +65,10 @@ public:
     
     static void callback(const SCDynamicStoreRef storeRef, const CFArrayRef changedKeysRef, void* pInfo)
     {
-        Log::instance()->net().debug("dynamic store detects network device change.");
+        LOG(net, debug, "dynamic store detects network device change.");
         for(int i = 0; i < CFArrayGetCount(changedKeysRef); i++) {
             CFStringRef key = static_cast<CFStringRef>(CFArrayGetValueAtIndex(changedKeysRef, i));
-            Log::instance()->net().debug("key: " + std::string(CFStringGetCStringPtr(key, CFStringGetSystemEncoding())));
+            LOG(net, debug, "key: " + std::string(CFStringGetCStringPtr(key, CFStringGetSystemEncoding())));
             CFPropertyListRef val = SCDynamicStoreCopyValue(storeRef, key);
             CFRange left = CFStringFind(key, CFSTR("Interface/"), 0);
             CFRange right = CFStringFind(key, CFSTR("/IPv4"), 0);
@@ -106,13 +106,13 @@ void
 NetworkInterfaceManagerImpl::start()
 {
     // list network devices
-    Log::instance()->net().debug("initializing dynamic store ...");
+    LOG(net, debug, "initializing dynamic store ...");
     CFPropertyListRef interfacePropRef = SCDynamicStoreCopyValue(_p->_dynamicStoreRef, CFSTR("State:/Network/Interface"));
     CFDictionaryRef interfaceDictRef = static_cast<CFDictionaryRef>(interfacePropRef);
     CFArrayRef interfaceListRef = static_cast<CFArrayRef>(CFDictionaryGetValue(interfaceDictRef, CFSTR("Interfaces")));
     for(int i = 0; i < CFArrayGetCount(interfaceListRef); i++) {
         CFStringRef interface = static_cast<CFStringRef>(CFArrayGetValueAtIndex(interfaceListRef, i));
-        Log::instance()->net().debug("dynamic store recognizes interface: " + std::string(CFStringGetCStringPtr(interface, CFStringGetSystemEncoding())));
+        LOG(net, debug, "dynamic store recognizes interface: " + std::string(CFStringGetCStringPtr(interface, CFStringGetSystemEncoding())));
     }
     CFRelease(interfacePropRef);
 
@@ -120,16 +120,16 @@ NetworkInterfaceManagerImpl::start()
     CFStringRef notifyKeyRegex[1];
     notifyKeyRegex[0] = CFSTR("State:/Network/Interface/.*/IPv4");
     if (SCDynamicStoreSetNotificationKeys(_p->_dynamicStoreRef, 0, CFArrayCreate(0, (const void**)notifyKeyRegex, 1, &kCFTypeArrayCallBacks))) {
-        Log::instance()->net().debug("registered network interface monitor.");
+        LOG(net, debug, "registered network interface monitor.");
     }
     else {
-        Log::instance()->net().warning("registration of network interface monitor failed.");
+        LOG(net, warning, "registration of network interface monitor failed.");
     }
     if (SCDynamicStoreSetDispatchQueue(_p->_dynamicStoreRef, _p->_dispatchQueue)) {
-        Log::instance()->net().debug("waiting for network device changes ...");
+        LOG(net, debug, "waiting for network device changes ...");
     }
     else {
-        Log::instance()->net().warning("start of network device monitor failed.");
+        LOG(net, warning, "start of network device monitor failed.");
     }
 }
 
@@ -138,16 +138,16 @@ void
 NetworkInterfaceManagerImpl::stop()
 {
     if (SCDynamicStoreSetDispatchQueue(_p->_dynamicStoreRef, 0)) {
-        Log::instance()->net().debug("stop waiting for network device changes.");
+        LOG(net, debug, "stop waiting for network device changes.");
     }
     else {
-        Log::instance()->net().warning("stop of network device monitor failed.");
+        LOG(net, warning, "stop of network device monitor failed.");
     }
     if (SCDynamicStoreSetNotificationKeys(_p->_dynamicStoreRef, 0, 0)) {
-        Log::instance()->net().debug("unregistered network interface monitor.");
+        LOG(net, debug, "unregistered network interface monitor.");
     }
     else {
-        Log::instance()->net().warning("unregister network interface monitor failed.");
+        LOG(net, warning, "unregister network interface monitor failed.");
     }
 }
 

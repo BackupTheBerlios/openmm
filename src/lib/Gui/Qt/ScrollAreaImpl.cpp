@@ -131,7 +131,7 @@ ScrollAreaViewImpl::addSubview(View* pView)
 void
 ScrollAreaSignalProxy::init()
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl, init signal proxy");
+    LOG(gui, debug, "button view impl, init signal proxy");
     SignalProxy::init();
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pViewImpl->getNativeView());
     connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));

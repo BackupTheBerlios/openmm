@@ -24,6 +24,7 @@
 #include "Gui/TextLine.h"
 #include "Gui/GuiLogger.h"
 #include "TextLineImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -47,7 +48,7 @@ TextLineModel::getTextLine()
 void
 TextLineModel::setTextLine(const std::string& line)
 {
-//    Omm::Gui::Log::instance()->gui().debug("TextLine model set label");
+//    LOG(gui, debug, "TextLine model set label");
     _line = line;
 }
 
@@ -55,7 +56,7 @@ TextLineModel::setTextLine(const std::string& line)
 TextLineView::TextLineView(View* pParent) :
 View(pParent, false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("TextLine view ctor.");
+//    LOG(gui, debug, "TextLine view ctor.");
     setName("label view");
 
     _minWidth = 50;
@@ -76,8 +77,8 @@ TextLineView::setAlignment(Alignment alignment)
 void
 TextLineView::syncViewImpl()
 {
-    Omm::Gui::Log::instance()->gui().debug("TextLine view sync view: " + getName());
-    Omm::Gui::Log::instance()->gui().debug("TextLine view sync view with model: " + Poco::NumberFormatter::format(_pModel));
+    LOG(gui, debug, "TextLine view sync view: " + getName());
+    LOG(gui, debug, "TextLine view sync view with model: " + Poco::NumberFormatter::format(_pModel));
     TextLineModel* pTextLineModel = static_cast<TextLineModel*>(_pModel);
     TextLineViewImpl* pImpl = static_cast<TextLineViewImpl*>(_pImpl);
     if (pTextLineModel) {
@@ -89,7 +90,7 @@ TextLineView::syncViewImpl()
 void
 TextLine::setTextLine(const std::string& line)
 {
-//    Omm::Gui::Log::instance()->gui().debug("TextLine model set label");
+//    LOG(gui, debug, "TextLine model set label");
     TextLineModel::setTextLine(line);
     syncView();
 }

@@ -42,7 +42,7 @@ QtMediaRenderer::setDeviceWidget(QtMediaRendererWidget* pWidget)
 QtMediaRendererWidget*
 QtMediaRenderer::getDeviceWidget()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer get device Widget");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media renderer get device Widget");
     
     return _pMediaRendererWidget;
 }
@@ -51,7 +51,7 @@ QtMediaRenderer::getDeviceWidget()
 void
 QtMediaRenderer::initController()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media renderer init controller");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media renderer init controller");
 }
 
 

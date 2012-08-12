@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 
 #include <Omm/AvStream.h>
+#include <Omm/Log.h>
 
 #include "SimpleTagger.h"
 #include "Omm/UpnpAvObject.h"
@@ -71,14 +72,14 @@ SimpleTagger::~SimpleTagger()
 Omm::AvStream::Meta*
 SimpleTagger::tag(const std::string& uri)
 {
-    Omm::Av::Log::instance()->upnpav().debug("simple tagger tagging: " + uri);
+    LOGNS(Omm::Av, upnpav, debug, "simple tagger tagging: " + uri);
     Poco::Path path(uri);
     // try to get filename for title
     std::string title = path.getFileName();
-    Omm::Av::Log::instance()->upnpav().debug("simple tagger title: " + title);
+    LOGNS(Omm::Av, upnpav, debug, "simple tagger title: " + title);
     // try to get a filename extension for type of media
     std::string extension = Poco::toLower(path.getExtension());
-    Omm::Av::Log::instance()->upnpav().debug("simple tagger extension: " + extension);
+    LOGNS(Omm::Av, upnpav, debug, "simple tagger extension: " + extension);
     SimpleMeta* pMeta = new SimpleMeta;
 
     // TODO: define possible tag strings as string constants

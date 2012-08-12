@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -22,6 +22,10 @@
 #ifndef Log_INCLUDED
 #define Log_INCLUDED
 
+#ifdef NDEBUG
+#define LOG(LOGGER, LEVEL, MESSAGE)
+#define LOGNS(NAMESPACE, LOGGER, LEVEL, MESSAGE)
+#else
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
 #include <Poco/FormattingChannel.h>
@@ -30,6 +34,9 @@
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
 #include <Poco/Timestamp.h>
+
+#define LOG(LOGGER, LEVEL, MESSAGE) Log::instance()->LOGGER().LEVEL(MESSAGE);
+#define LOGNS(NAMESPACE, LOGGER, LEVEL, MESSAGE) NAMESPACE::Log::instance()->LOGGER().LEVEL(MESSAGE);
 
 
 namespace Omm {
@@ -83,4 +90,5 @@ private:
 }  // namespace Omm
 }  // namespace Util
 
+#endif //NDEBUG
 #endif

@@ -48,11 +48,11 @@ private:
         for(int i = 0; i < _numberWrites; ++i) {
             int writeSize = _writeSizeGenerator.next(_maxWriteSize);
             char buffer[writeSize];
-            Omm::AvStream::Log::instance()->avstream().debug(_name + " writing: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
+            LOGNS(Omm::AvStream, avstream, debug, _name + " writing: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
             _pByteQueue->write(buffer, writeSize);
-            Omm::AvStream::Log::instance()->avstream().debug(_name + " wrote: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
+            LOGNS(Omm::AvStream, avstream, debug, _name + " wrote: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
             if (_pByteQueue->full()) {
-                Omm::AvStream::Log::instance()->avstream().debug("queue full");
+                LOGNS(Omm::AvStream, avstream, debug, "queue full");
             }
             Poco::Thread::sleep(_delayGenerator.next(_maxDelay));
         }
@@ -87,11 +87,11 @@ private:
         for(int i = 0; i < _numberReads; ++i) {
             int readSize = _readSizeGenerator.next(_maxReadSize);
             char buffer[readSize];
-            Omm::AvStream::Log::instance()->avstream().debug(_name + " reading: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
+            LOGNS(Omm::AvStream, avstream, debug, _name + " reading: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
             _pByteQueue->read(buffer, readSize);
-            Omm::AvStream::Log::instance()->avstream().debug(_name + " read: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
+            LOGNS(Omm::AvStream, avstream, debug, _name + " read: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
             if (_pByteQueue->empty()) {
-                Omm::AvStream::Log::instance()->avstream().debug("queue empty");
+                LOGNS(Omm::AvStream, avstream, debug, "queue empty");
             }
             Poco::Thread::sleep(_delayGenerator.next(_maxDelay));
         }

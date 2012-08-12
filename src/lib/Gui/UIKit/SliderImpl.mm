@@ -58,7 +58,7 @@ namespace Gui {
 
 SliderViewImpl::SliderViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider view impl ctor");
+//    LOG(gui, debug, "slider view impl ctor");
 
     OmmGuiSlider* pNativeView = [[OmmGuiSlider alloc] init];
     [pNativeView setImpl:this];
@@ -92,7 +92,7 @@ SliderViewImpl::setEnabled(bool enabled)
 void
 SliderViewImpl::valueChanged(int value)
 {
-//    Omm::Gui::Log::instance()->gui().debug("slider implementation, calling value changed virtual method");
+//    LOG(gui, debug, "slider implementation, calling value changed virtual method");
     static_cast<SliderView*>(getView())->valueChangedView(value);
 }
 

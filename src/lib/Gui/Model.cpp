@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <algorithm>
+
 #include "Gui/Model.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
@@ -42,21 +44,21 @@ _views(model._views)
 void
 Model::attachView(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("model attach view ...");
+//    LOG(gui, debug, "model attach view ...");
     _views.push_back(pView);
-//    Omm::Gui::Log::instance()->gui().debug("model attach view finished.");
+//    LOG(gui, debug, "model attach view finished.");
 }
 
 
 void
 Model::detachView(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("model detach view ...");
+//    LOG(gui, debug, "model detach view ...");
     ViewIterator pos = std::find(beginView(), endView(), pView);
     if (pos != _views.end()) {
         _views.erase(pos);
     }
-//    Omm::Gui::Log::instance()->gui().debug("model detach view finished.");
+//    LOG(gui, debug, "model detach view finished.");
 }
 
 
@@ -77,7 +79,7 @@ Model::endView()
 void
 Model::syncViews()
 {
-//    Omm::Gui::Log::instance()->gui().debug("model sync views");
+//    LOG(gui, debug, "model sync views");
     for (ViewIterator it = beginView(); it != endView(); ++it) {
        (*it)->syncView();
     }

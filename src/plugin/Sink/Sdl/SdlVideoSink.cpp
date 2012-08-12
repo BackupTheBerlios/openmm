@@ -68,21 +68,21 @@ VideoSink("sdl video sink", 720, 576, Omm::AvStream::Meta::CC_YUV420P, 3)
 SdlVideoSink::~SdlVideoSink()
 {
     SDL_Quit();
-    Omm::AvStream::Log::instance()->avstream().debug(Poco::format("%s closed.", getName()));
+    LOGNS(Omm::AvStream, avstream, debug, Poco::format("%s closed.", getName()));
 }
 
 
 void
 SdlVideoSink::openWindow(bool fullScreen, int width, int height)
 {
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink opening window ...");
+    LOGNS(Omm::AvStream, avstream, debug, "SDL video sink opening window ...");
     
     _fullScreen = fullScreen;
     _width = width;
     _height = height;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-        Omm::AvStream::Log::instance()->avstream().error("failed to init SDL: " + std::string(SDL_GetError()));
+        LOGNS(Omm::AvStream, avstream, error, "failed to init SDL: " + std::string(SDL_GetError()));
     }
     
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
@@ -103,10 +103,10 @@ SdlVideoSink::openWindow(bool fullScreen, int width, int height)
     SDL_ShowCursor(SDL_DISABLE);
     
     if (_pSdlScreen == 0) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open SDL window: " + std::string(SDL_GetError()));
+        LOGNS(Omm::AvStream, avstream, error, "could not open SDL window: " + std::string(SDL_GetError()));
         return;
     }
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink window opened.");
+    LOGNS(Omm::AvStream, avstream, debug, "SDL video sink window opened.");
 }
 
 
@@ -124,13 +124,13 @@ SdlVideoSink::initDevice()
 bool
 SdlVideoSink::closeDevice()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("closing SDL video sink ...");
+    LOGNS(Omm::AvStream, avstream, debug, "closing SDL video sink ...");
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
-        Omm::AvStream::Log::instance()->avstream().debug("SDL video sink deleting overlay ...");
+        LOGNS(Omm::AvStream, avstream, debug, "SDL video sink deleting overlay ...");
         delete static_cast<SdlOverlay*>(_overlayVector[numOverlay]);
-        Omm::AvStream::Log::instance()->avstream().debug("SDL video sink overlay deleted.");
+        LOGNS(Omm::AvStream, avstream, debug, "SDL video sink overlay deleted.");
     }
-    Omm::AvStream::Log::instance()->avstream().debug("SDL video sink closed.");
+    LOGNS(Omm::AvStream, avstream, debug, "SDL video sink closed.");
     return true;
 }
 
@@ -146,7 +146,7 @@ SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
     rect.w = w;
     rect.h = h;
     
-    Omm::AvStream::Log::instance()->avstream().debug("sdl video sink display overlay frame");
+    LOGNS(Omm::AvStream, avstream, debug, "sdl video sink display overlay frame");
     SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);
 }
 
@@ -168,7 +168,7 @@ SdlVideoSink::displayHeight()
 void
 SdlVideoSink::blankDisplay()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("clear display");
+    LOGNS(Omm::AvStream, avstream, debug, "clear display");
     SDL_Rect rect;
     rect.x = 0;
     rect.y = 0;

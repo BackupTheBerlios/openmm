@@ -32,7 +32,7 @@ namespace Gui {
 
 ImageViewImpl::ImageViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("image view impl ctor");
+//    LOG(gui, debug, "image view impl ctor");
     QLabel* pNativeView = new QLabel;
     _pImage = new QPixmap;
 

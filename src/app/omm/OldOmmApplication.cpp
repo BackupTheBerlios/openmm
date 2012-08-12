@@ -146,7 +146,7 @@ protected:
                 pUserInterface = pluginLoader.load("avinterface-qt", "AvInterface");
             }
             catch(Poco::NotFoundException) {
-                Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for user interface");
+                LOGNS(Omm::Av, upnpav, error, "controller application could not find plugin for user interface");
                 return 1;
             }
 
@@ -165,7 +165,7 @@ protected:
                 pEnginePlugin = enginePluginLoader.load("engine-vlc");
             }
             catch(Poco::NotFoundException) {
-                Omm::Av::Log::instance()->upnpav().error("controller application could not find plugin for engine");
+                LOGNS(Omm::Av, upnpav, error, "controller application could not find plugin for engine");
                 return 1;
             }
 
@@ -241,7 +241,7 @@ protected:
             localDevices.init();
             localDevices.start();
 
-            Omm::Av::Log::instance()->upnpav().debug("ControllerApplication: starting event loop");
+            LOGNS(Omm::Av, upnpav, debug, "ControllerApplication: starting event loop");
             int ret = pUserInterface->eventLoop();
 
             controller.stop();

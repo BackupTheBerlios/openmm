@@ -40,13 +40,13 @@ QtMediaObject::~QtMediaObject()
 QString
 QtMediaObject::getBrowserTitle()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object get widget browser title");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object get widget browser title");
 
     if (_pObject) {
         return QString::fromStdString(_pObject->getTitle());
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object title (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to get object title (ignoring)");
     }
 //    return QString::fromStdString(getTitle());
 }
@@ -55,7 +55,7 @@ QtMediaObject::getBrowserTitle()
 QWidget*
 QtMediaObject::getWidget()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object get container widget");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object get container widget");
 
     return _pContainerView;
 }
@@ -66,12 +66,12 @@ QtMediaObject::totalItemCount()
 {
 
     if (!_pObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get total item count (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to get total item count (ignoring)");
         return 0;
     }
     if (_pObject->isContainer()) {
-//        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
-        Omm::Av::Log::instance()->upnpav().debug("Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
+//        LOGNS(Omm::Av, upnpav, debug, "Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
+        LOGNS(Omm::Av, upnpav, debug, "Qt media object child count: " + Poco::NumberFormatter::format(_pObject->getChildCount()));
 //        return getChildCount();
 //        return _pObject->getChildCount();
         return _pObject->getChildCount();
@@ -83,27 +83,27 @@ QtMediaObject::totalItemCount()
 void
 QtMediaObject::selectItem(int row)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object select item in row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object select item in row: " + Poco::NumberFormatter::format(row));
 
     if (!_pObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object null reference (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object null reference (ignoring)");
         return;
     }
 
     Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
     if (!pChildObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child object (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media container cannot get child object (ignoring)");
         return;
     }
 
     if (pChildObject->isContainer()) {
         if (!getNavigator()) {
-            Omm::Av::Log::instance()->upnpav().error("Qt child container of media object cannot be pushed (ignoring)");
+            LOGNS(Omm::Av, upnpav, error, "Qt child container of media object cannot be pushed (ignoring)");
             return;
         }
         QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(getWidget(row));
         if (!pChildWidget) {
-            Omm::Av::Log::instance()->upnpav().error("Qt media container cannot get child widget to push (ignoring)");
+            LOGNS(Omm::Av, upnpav, error, "Qt media container cannot get child widget to push (ignoring)");
             return;
         }
         pChildWidget->_pContainerView = new QtWidgetList;
@@ -150,7 +150,7 @@ QtMediaObject::lastFetched(bool forward)
 ListWidget*
 QtMediaObject::createWidget()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object create object widget");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object create object widget");
 
     return new QtMediaObject;
 }
@@ -159,7 +159,7 @@ QtMediaObject::createWidget()
 ListWidget*
 QtMediaObject::getWidget(int row)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
 
     if (_pObject) {
         Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
@@ -167,7 +167,7 @@ QtMediaObject::getWidget(int row)
 //        return pChildObject->getListWidget();
     }
     else {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get object widget (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to get object widget (ignoring)");
     }
 }
 
@@ -175,18 +175,18 @@ QtMediaObject::getWidget(int row)
 void
 QtMediaObject::attachWidget(int row, ListWidget* pWidget)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object attach widget row: " + Poco::NumberFormatter::format(row));
     if (!pWidget) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object cannot attach null widget (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object cannot attach null widget (ignoring)");
         return;
     }
     if (!_pObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to attach object widget (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to attach object widget (ignoring)");
         return;
     }
     Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
     if (!pChildObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to get child object (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to get child object (ignoring)");
         return;
     }
     // FIXME: had to comment this out, CtlMediaObject should contain no gui code
@@ -207,10 +207,10 @@ QtMediaObject::attachWidget(int row, ListWidget* pWidget)
 void
 QtMediaObject::detachWidget(int row)
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object detach widget row: " + Poco::NumberFormatter::format(row));
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object detach widget row: " + Poco::NumberFormatter::format(row));
 
     if (!_pObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to detach object widget (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to detach object widget (ignoring)");
         return;
     }
     Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
@@ -234,10 +234,10 @@ QtMediaObject::detachWidget(int row)
 void
 QtMediaObject::configure()
 {
-    Omm::Av::Log::instance()->upnpav().debug("Qt media object configure");
+    LOGNS(Omm::Av, upnpav, debug, "Qt media object configure");
 
     if (!_pObject) {
-        Omm::Av::Log::instance()->upnpav().error("Qt media object failed to configure object (ignoring)");
+        LOGNS(Omm::Av, upnpav, error, "Qt media object failed to configure object (ignoring)");
         return;
     }
     setLabel(_pObject->getTitle());

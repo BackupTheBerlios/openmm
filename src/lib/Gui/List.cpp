@@ -22,11 +22,14 @@
 #include <Poco/NumberFormatter.h>
 #include <vector>
 #include <stack>
+#include <algorithm>
+#include <cmath>
 
 #include "Gui/List.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
 #include "Gui/Drag.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -52,7 +55,7 @@ private:
 void
 ListItemController::selected()
 {
-    Log::instance()->gui().debug("list item controller selected row: " + Poco::NumberFormatter::format(_row));
+    LOG(gui, debug, "list item controller selected row: " + Poco::NumberFormatter::format(_row));
     _pListView->selectedItem(_row);
 }
 
@@ -78,7 +81,7 @@ public:
 
     virtual void dragStarted()
     {
-        Log::instance()->gui().debug("list drag controller drag started");
+        LOG(gui, debug, "list drag controller drag started");
         Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pItemView, _pItemView->getModel());
         _pListView->dragView(_pItemView);
         _pListView->syncViewImpl();
@@ -128,8 +131,8 @@ class ListScrollAreaController : public ScrollAreaController
 void
 ListScrollAreaController::scrolled(int xOffset, int yOffset)
 {
-    Log::instance()->gui().debug("list scroll area scrolled xOffset: " + Poco::NumberFormatter::format(xOffset) + ", yOffset: " + Poco::NumberFormatter::format(yOffset));
-    Log::instance()->gui().debug("list scroll area scrolled row offset: " + Poco::NumberFormatter::format(yOffset / _pListView->getItemViewHeight()));
+    LOG(gui, debug, "list scroll area scrolled xOffset: " + Poco::NumberFormatter::format(xOffset) + ", yOffset: " + Poco::NumberFormatter::format(yOffset));
+    LOG(gui, debug, "list scroll area scrolled row offset: " + Poco::NumberFormatter::format(yOffset / _pListView->getItemViewHeight()));
     _pListView->scrollToRowOffset(yOffset / _pListView->getItemViewHeight());
 }
 
@@ -137,7 +140,7 @@ ListScrollAreaController::scrolled(int xOffset, int yOffset)
 void
 ListScrollAreaController::resized(int width, int height)
 {
-    Log::instance()->gui().debug("list scroll area resized width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
+    LOG(gui, debug, "list scroll area resized width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pListView->resize(width, height);
 }
 
@@ -145,7 +148,7 @@ ListScrollAreaController::resized(int width, int height)
 void
 ListScrollAreaController::presented()
 {
-    Log::instance()->gui().debug("list scroll area presented");
+    LOG(gui, debug, "list scroll area presented");
     resized(_pListView->width(), _pListView->height());
 }
 
@@ -153,7 +156,7 @@ ListScrollAreaController::presented()
 void
 ListScrollAreaController::keyPressed(KeyCode key)
 {
-    Log::instance()->gui().debug("list scroll area key pressed");
+    LOG(gui, debug, "list scroll area key pressed");
     switch (key) {
         case Controller::KeyUp:
             _pListView->highlightItem(_pListView->_highlightedRow - 1);
@@ -219,7 +222,7 @@ ListView::resetListView()
 void
 ListView::addTopView(View* pView)
 {
-    Log::instance()->gui().debug("list view add top view.");
+    LOG(gui, debug, "list view add top view.");
     _pTopView = pView;
     addItemView(pView);
 }
@@ -235,7 +238,7 @@ ListView::setDragMode(int dragMode)
 void
 ListView::syncViewImpl()
 {
-    Log::instance()->gui().debug("list view sync view impl of \"" + getName() + "\"");
+    LOG(gui, debug, "list view sync view impl of \"" + getName() + "\"");
     // whipe out everything
     clearVisibleViews();
 
@@ -245,7 +248,7 @@ ListView::syncViewImpl()
     // if scrolled to top and top view is present, show it
     if (_pTopView) {
         if (_rowOffset == 0) {
-            Log::instance()->gui().debug("list view sync top view is visible");
+            LOG(gui, debug, "list view sync top view is visible");
             _visibleViews.push_back(_pTopView);
             _pTopView->move(0, 0);
             _pTopView->show();
@@ -266,14 +269,14 @@ ListView::showItemsAt(int rowOffset, int itemOffset, int countItems)
 {
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     for (int index = 0; index < countItems; index++) {
-        Log::instance()->gui().debug("list view show item at index: " + Poco::NumberFormatter::format(index));
+        LOG(gui, debug, "list view show item at index: " + Poco::NumberFormatter::format(index));
         View* pView = getFreeView();
         if (!pView) {
             return;
         }
         Model* pItemModel = pModel->getItemModel(itemOffset + index);
         if (!pItemModel) {
-            Log::instance()->gui().warning("list view sync view impl could not get item model at index: " + Poco::NumberFormatter::format(itemOffset + index));
+            LOG(gui, warning, "list view sync view impl could not get item model at index: " + Poco::NumberFormatter::format(itemOffset + index));
             putFreeView(pView);
             continue;
         }
@@ -289,10 +292,10 @@ ListView::showItemsAt(int rowOffset, int itemOffset, int countItems)
 void
 ListView::scrollOneRow(int direction)
 {
-    Log::instance()->gui().debug("list view scroll direction: " + Poco::NumberFormatter::format(direction) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
+    LOG(gui, debug, "list view scroll direction: " + Poco::NumberFormatter::format(direction) + ", offset: " + Poco::NumberFormatter::format(_rowOffset));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    Log::instance()->gui().debug("item count: " + Poco::NumberFormatter::format(totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
+    LOG(gui, debug, "item count: " + Poco::NumberFormatter::format(totalItemCount()) + ", last visible row: " + Poco::NumberFormatter::format(lastVisibleRow()));
     if (direction > 0) {
         if (totalItemCount() <= lastVisibleRow()) {
             return;
@@ -347,7 +350,7 @@ ListView::scrollOneRow(int direction)
 void
 ListView::scrollToRowOffset(int rowOffset)
 {
-    Log::instance()->gui().debug("list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset));
+    LOG(gui, debug, "list view scroll to row offset: " + Poco::NumberFormatter::format(rowOffset));
 
     if (rowOffset < 0) {
         return;
@@ -364,7 +367,7 @@ ListView::scrollToRowOffset(int rowOffset)
         return;
     }
     int rowDeltaAbsolute = std::abs(rowDelta);
-    Log::instance()->gui().debug("list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
+    LOG(gui, debug, "list scroll view to row offset: " + Poco::NumberFormatter::format(rowOffset) + ", delta: " + Poco::NumberFormatter::format(rowDelta));
     if (rowDeltaAbsolute > viewPortHeightInRows()) {
         // far jump
         _rowOffset = rowOffset;
@@ -393,11 +396,9 @@ ListView::resize(int width, int height)
     setItemViewWidth(width);
     updateScrollWidgetSize(totalItemCount());
 
-    Log::instance()->gui().debug(
-          "list view resize, view port height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows())
-        + ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size())
-        + ", view pool size: " + Poco::NumberFormatter::format(_viewPool.size())
-    );
+    LOG(gui, debug, "list view resize, view port height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows()) + \
+            ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size()) + \
+            ", view pool size: " + Poco::NumberFormatter::format(_viewPool.size()));
     // finish if all item views fit into viewport
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     if (!pModel) {
@@ -411,7 +412,7 @@ ListView::resize(int width, int height)
     int rowDelta = std::min(viewPortHeightInRows(), totalItemCount() - _rowOffset) - _visibleViews.size();
     if (rowDelta >= 0) {
         for (int i = 0; i < rowDelta; i++) {
-            Log::instance()->gui().debug("growing view");
+            LOG(gui, debug, "growing view");
             View* pView = getFreeView();
             if (!pView) {
                 return;
@@ -424,7 +425,7 @@ ListView::resize(int width, int height)
         }
     } else {
         for (int i = 0; i < -rowDelta; i++) {
-            Log::instance()->gui().debug("shrinking view");
+            LOG(gui, debug, "shrinking view");
             View* pView = _visibleViews.back();
             putFreeView(pView);
             pView->hide();
@@ -449,7 +450,7 @@ ListView::extendViewPool()
     if (n <= 0) {
         return;
     }
-    Log::instance()->gui().debug("list view \"" + getName() + "\" extend view pool by number of views: " + Poco::NumberFormatter::format(n));
+    LOG(gui, debug, "list view \"" + getName() + "\" extend view pool by number of views: " + Poco::NumberFormatter::format(n));
 
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     if (!pModel) {
@@ -457,19 +458,19 @@ ListView::extendViewPool()
     }
 
     for (int i = 0; i < n; ++i) {
-//        Log::instance()->gui().debug("list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
+//        LOG(gui, debug, "list view extend view create item view ... pModel: " + Poco::NumberFormatter::format(pModel));
         View* pView = pModel->createItemView();
         if (!pView) {
-            Log::instance()->gui().error("list view failed to create view for pool (ignoring)");
+            LOG(gui, error, "list view failed to create view for pool (ignoring)");
             return;
         }
-//        Log::instance()->gui().debug("list view extend view created item view " + pView->getName());
+//        LOG(gui, debug, "list view extend view created item view " + pView->getName());
         pView->hide();
         _viewPool.push_back(pView);
         putFreeView(pView);
         addItemView(pView);
 
-//        Log::instance()->gui().debug("list view creating list item controller ...");
+//        LOG(gui, debug, "list view creating list item controller ...");
         ListItemController* pItemController = new ListItemController;
         pItemController->_pListView = this;
         _itemControllers[pView] = pItemController;
@@ -481,7 +482,7 @@ ListView::extendViewPool()
             pView->setAcceptDrops(true);
         }
 
-//        Log::instance()->gui().debug("allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
+//        LOG(gui, debug, "allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
 }
 
@@ -490,7 +491,7 @@ View*
 ListView::getFreeView()
 {
     if (_freeViews.empty()) {
-        Log::instance()->gui().error("list view, could not get free view");
+        LOG(gui, error, "list view, could not get free view");
         return 0;
     }
     View* pView = _freeViews.top();
@@ -523,7 +524,7 @@ ListView::clearVisibleViews()
 void
 ListView::addItemView(View* pView)
 {
-//    Log::instance()->gui().debug("list view add item view.");
+//    LOG(gui, debug, "list view add item view.");
 
     pView->resize(getViewportWidth(), getItemViewHeight());
     addSubview(pView);
@@ -533,7 +534,7 @@ ListView::addItemView(View* pView)
 void
 ListView::moveItemView(int row, View* pView)
 {
-    Log::instance()->gui().debug("move list item view \"" + pView->getName() + "\" to row: " + Poco::NumberFormatter::format(row));
+    LOG(gui, debug, "move list item view \"" + pView->getName() + "\" to row: " + Poco::NumberFormatter::format(row));
     pView->move(0, getItemViewHeight() * row);
 }
 
@@ -592,7 +593,7 @@ ListView::visibleView(int index)
         return _visibleViews[index];
     }
     else {
-        Log::instance()->gui().error("list view failed to retrieve visible view, out of range (ignoring)");
+        LOG(gui, error, "list view failed to retrieve visible view, out of range (ignoring)");
         return 0;
     }
 }
@@ -629,7 +630,7 @@ ListView::rowFromView(View* pView)
 void
 ListView::setItemViewWidth(int width)
 {
-    Omm::Gui::Log::instance()->gui().debug("list view set item view width: " + Poco::NumberFormatter::format(width));
+    LOG(gui, debug, "list view set item view width: " + Poco::NumberFormatter::format(width));
     if (!_viewPool.size()) {
         return;
     }
@@ -645,7 +646,7 @@ ListView::setItemViewWidth(int width)
 void
 ListView::selectedItem(int row)
 {
-    Log::instance()->gui().debug("list view selected item: " + Poco::NumberFormatter::format(row));
+    LOG(gui, debug, "list view selected item: " + Poco::NumberFormatter::format(row));
 
 //    if (row < _rowOffset || row > lastVisibleRow()) {
 //        return;
@@ -659,13 +660,12 @@ ListView::selectedItem(int row)
 void
 ListView::highlightItem(int row)
 {
-    Log::instance()->gui().debug("list view highlight row: " + Poco::NumberFormatter::format(row)
-                                + ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset)
-                                + ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow())
-                                + ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow)
-                                + ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows())
-                                + ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight())
-    );
+    LOG(gui, debug, "list view highlight row: " + Poco::NumberFormatter::format(row) +\
+            ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset) +\
+            ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow()) +\
+            ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow) +\
+            ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows()) +\
+            ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight()));
     if (row < 0) {
         return;
     }
@@ -709,8 +709,8 @@ ListView::selectHighlightedItem()
 void
 ListView::dragView(View* pView)
 {
-    Log::instance()->gui().debug("list view drag view: " + pView->getName());
-    Log::instance()->gui().debug("list view drag view in row: " + Poco::NumberFormatter::format(rowFromView(pView)));
+    LOG(gui, debug, "list view drag view: " + pView->getName());
+    LOG(gui, debug, "list view drag view in row: " + Poco::NumberFormatter::format(rowFromView(pView)));
     NOTIFY_CONTROLLER(ListController, draggedItem, rowFromView(pView) - (_pTopView ? 1 : 0));
 }
 
@@ -718,10 +718,10 @@ ListView::dragView(View* pView)
 void
 ListView::dropView(Model* pSourceModel, View* pTarget)
 {
-//    Log::instance()->gui().debug("list view drop view source model: " + pSourceModel->getName());
-    Log::instance()->gui().debug("list view drop view target: " + pTarget->getName());
+//    LOG(gui, debug, "list view drop view source model: " + pSourceModel->getName());
+    LOG(gui, debug, "list view drop view target: " + pTarget->getName());
     int row = rowFromView(pTarget) - (_pTopView ? 1 : 0);
-    Log::instance()->gui().debug("list view drop view in row: " + Poco::NumberFormatter::format(row));
+    LOG(gui, debug, "list view drop view in row: " + Poco::NumberFormatter::format(row));
     NOTIFY_CONTROLLER(ListController, droppedItem, pSourceModel, row);
 }
 

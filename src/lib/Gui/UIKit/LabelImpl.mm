@@ -46,7 +46,7 @@
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view impl touch began");
+//    Omm::LOGNS(Gui, gui, debug, "Label view impl touch began");
     _pLabelViewImpl->pushed();
     [super touchesBegan:touches withEvent:event];
 }
@@ -60,7 +60,7 @@ namespace Gui {
 
 LabelViewImpl::LabelViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view impl ctor");
+//    LOG(gui, debug, "Label view impl ctor");
     OmmGuiLabel* pNativeView = [[OmmGuiLabel alloc] init];
     pNativeView.backgroundColor = [[UIColor alloc] initWithWhite:1.0 alpha:0.0];
 //    [pNativeView setTextColor:[UIColor blackColor]];
@@ -78,7 +78,7 @@ LabelViewImpl::~LabelViewImpl()
 void
 LabelViewImpl::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view impl set label");
+//    LOG(gui, debug, "Label view impl set label");
     NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
     [static_cast<UILabel*>(_pNativeView) setText:pLabel];
 }
@@ -105,7 +105,7 @@ LabelViewImpl::setAlignment(View::Alignment alignment)
 void
 LabelViewImpl::pushed()
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label implementation, calling pushed virtual method");
+//    LOG(gui, debug, "Label implementation, calling pushed virtual method");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
 }
 

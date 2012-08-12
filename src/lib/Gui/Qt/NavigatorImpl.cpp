@@ -26,6 +26,7 @@
 #include "QtNavigatorPanel.h"
 #include "Gui/Navigator.h"
 #include "Gui/GuiLogger.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -131,7 +132,7 @@ QtNavigatorPanel::buttonPushed()
 void
 QtNavigatorPanel::textEdited(const QString& text)
 {
-    Omm::Gui::Log::instance()->gui().debug("search text changed: " + text.toStdString());
+    LOG(gui, debug, "search text changed: " + text.toStdString());
     _pNavigatorView->changedSearchText(text.toStdString());
 }
 

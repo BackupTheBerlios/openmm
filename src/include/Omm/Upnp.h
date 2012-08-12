@@ -50,6 +50,7 @@
 #include "UpnpTypes.h"
 #include "Net.h"
 #include "Sys.h"
+#include "Log.h"
 
 namespace Omm {
 
@@ -77,6 +78,7 @@ class SsdpMessage;
 class SsdpMessageSet;
 
 
+#ifndef NDEBUG
 class Log
 {
 public:
@@ -100,6 +102,7 @@ private:
     Poco::Logger*   _pControlLogger;
     Poco::Logger*   _pEventLogger;
 };
+#endif // NDEBUG
 
 
 class Icon
@@ -232,7 +235,7 @@ public:
             return *(*it).second;
         }
         else {
-            Log::instance()->upnp().error("container has no element with key: " + key);
+            LOG(upnp, error, "container has no element with key: " + key);
             throw Poco::Exception("container has no element with key: " + key);
         }
     }
@@ -251,7 +254,7 @@ public:
             _keyVector.push_back(key);
         }
         else {
-            Log::instance()->upnp().error("could not append element to container, key already present (ignoring): " + key);
+            LOG(upnp, error, "could not append element to container, key already present , ignoring): " + key);
         }
     }
 
@@ -267,7 +270,7 @@ public:
             return it - _keyVector.begin();
         }
         else {
-            Log::instance()->upnp().error("could not find position of element in container, key not found: " + key);
+            LOG(upnp, error, "could not find position of element in container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
@@ -286,7 +289,7 @@ public:
             _keyVector.erase(_keyVector.begin() + position(key));
         }
         else {
-            Log::instance()->upnp().error("could not remove element from container, key not found: " + key);
+            LOG(upnp, error, "could not remove element from container, key not found: " + key);
             throw Poco::Exception("");
         }
     }
@@ -295,12 +298,12 @@ public:
     {
         KeyIterator it = _elementMap.find(key);
         if (it == _elementMap.end()) {
-            Log::instance()->upnp().error("could not replace element, key not found: " + key);
+            LOG(upnp, error, "could not replace element, key not found: " + key);
             return;
         }
         int i = position(key);
         _elementVector[i] = pElement;
-        Log::instance()->upnp().debug("replace position: " + Poco::NumberFormatter::format(i) + ", old: " + Poco::NumberFormatter::format((*it).second) + ", new: " + Poco::NumberFormatter::format(pElement));
+        LOG(upnp, debug, "replace position: " + Poco::NumberFormatter::format(i) + ", old: " + Poco::NumberFormatter::format((*it).second) + ", new: " + Poco::NumberFormatter::format(pElement));
         (*it).second = pElement;
     }
 
@@ -312,7 +315,7 @@ public:
             e->getValue(res);
             return res;
         } else {
-             Log::instance()->upnp().error("get container value, could not find key: " + key);
+             LOG(upnp, error, "get container value, could not find key: " + key);
 //            throw Poco::Exception("");
             return T();
         }
@@ -321,7 +324,7 @@ public:
     template<typename T> void setValue(const std::string& key, const T& val)
     {
         if (_elementMap.find(key) == _elementMap.end()) {
-            Log::instance()->upnp().error("could not set container value, key not found: " + key);
+            LOG(upnp, error, "could not set container value, key not found: " + key);
             return;
         }
         Variant* e = (*_elementMap.find(key)).second;
@@ -329,7 +332,7 @@ public:
             e->setValue(val);
         }
         else {
-             Log::instance()->upnp().error("set container value, pointer to Variant is invalid (ignoring)");
+             LOG(upnp, error, "set container value, pointer to Variant is invalid , (ignoring)");
         }
     }
 

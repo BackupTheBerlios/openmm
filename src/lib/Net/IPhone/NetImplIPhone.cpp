@@ -21,6 +21,7 @@
 
 #include "Net.h"
 #include "NetImplIPhone.h"
+#include "Log.h"
 
 #include <SystemConfiguration.h>
 #include <CoreFoundation.h>
@@ -96,10 +97,10 @@ NetworkInterfaceManagerImpl::start()
 {
     if(SCNetworkReachabilityScheduleWithRunLoop(_p->_reachabilityRef, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode))
     {
-        Log::instance()->net().debug("waiting for network device changes ...");
+        LOG(net, debug, "waiting for network device changes ...");
     }
     else {
-        Log::instance()->net().warning("start of network device monitor failed.");
+        LOG(net, warning, "start of network device monitor failed.");
     }
 }
 

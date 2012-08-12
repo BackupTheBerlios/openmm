@@ -70,7 +70,7 @@ namespace Gui {
 
 NavigatorViewImpl::NavigatorViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("navigator view impl ctor");
+    LOG(gui, debug, "navigator view impl ctor");
 
     OmmNavigationController* pNativeView = [[OmmNavigationController alloc] init];
     [pNativeView setImpl:this];
@@ -87,7 +87,7 @@ NavigatorViewImpl::~NavigatorViewImpl()
 void
 NavigatorViewImpl::pushView(View* pView, const std::string name)
 {
-    Omm::Gui::Log::instance()->gui().debug("navigator view implementation push view");
+    LOG(gui, debug, "navigator view implementation push view");
 
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
@@ -137,7 +137,7 @@ NavigatorViewImpl::showSearchBox(bool show)
 void
 NavigatorViewImpl::textEdited(const std::string& searchText)
 {
-    Omm::Gui::Log::instance()->gui().debug("search text changed: " + searchText);
+    LOG(gui, debug, "search text changed: " + searchText);
     IMPL_NOTIFY_CONTROLLER(NavigatorController, changedSearchText, searchText);
 }
 

@@ -40,7 +40,7 @@
 
 - (id)initWithImpl:(Omm::Gui::ScrollAreaViewImpl*)pImpl
 {
-//    Omm::Gui::Log::instance()->gui().debug("OmmGuiListView initWithImpl ...");
+//    Omm::LOGNS(Gui, gui, debug, "OmmGuiListView initWithImpl ...");
     if (self = [super init]) {
         self.delegate = self;
         _pViewImpl = pImpl;
@@ -50,7 +50,7 @@
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView
 {
-//    Omm::Gui::Log::instance()->gui().debug("list view impl scrolling ...");
+//    Omm::LOGNS(Gui, gui, debug, "list view impl scrolling ...");
     _pViewImpl->viewScrolled();
 }
 

@@ -22,6 +22,7 @@
 #ifndef UpnpAvLogger_INCLUDED
 #define UpnpAvLogger_INCLUDED
 
+#ifndef NDEBUG
 #include <Poco/Format.h>
 #include <Poco/Logger.h>
 #include <Poco/PatternFormatter.h>
@@ -50,7 +51,7 @@ private:
 
 }  // namespace Omm
 }  // namespace Av
-
+#endif // NDEBUG
 
 #endif
 

@@ -91,11 +91,11 @@ FileModel::getParentPath(const std::string& path)
 {
     std::string::size_type pos = path.rfind("/");
     if (pos == std::string::npos) {
-        Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: \"\"");
+        LOGNS(Omm::Av, upnpav, debug, "file data model path: " + path + ", parent path: \"\"");
         return "";
     }
     else {
-        Omm::Av::Log::instance()->upnpav().debug("file data model path: " + path + ", parent path: " + path.substr(0, pos));
+        LOGNS(Omm::Av, upnpav, debug, "file data model path: " + path + ", parent path: " + path.substr(0, pos));
         return path.substr(0, pos);
     }
 }
@@ -106,12 +106,12 @@ FileModel::getMediaObject(const std::string& path)
 {
     Poco::Path fullPath(getBasePath(), path);
     if (Poco::File(fullPath).isDirectory()) {
-        Omm::Av::Log::instance()->upnpav().debug("file data model creating container for: " + fullPath.toString());
+        LOGNS(Omm::Av, upnpav, debug, "file data model creating container for: " + fullPath.toString());
         Omm::Av::ServerContainer* pContainer = getServerContainer()->createMediaContainer();
         pContainer->setTitle(fullPath.getFileName());
         return pContainer;
     }
-    Omm::Av::Log::instance()->upnpav().debug("file data model tagging: " + fullPath.toString());
+    LOGNS(Omm::Av, upnpav, debug, "file data model tagging: " + fullPath.toString());
     Omm::AvStream::Meta* pMeta = _pTagger->tag(fullPath.toString());
     if (pMeta) {
         Omm::Av::ServerItem* pItem = getServerContainer()->createMediaItem();
@@ -152,7 +152,7 @@ FileModel::getSize(const std::string& path)
         res = Poco::File(fullPath).getSize();
     }
     catch (Poco::Exception& e) {
-        Omm::Av::Log::instance()->upnpav().error("could not get size of file: " + fullPath.toString());
+        LOGNS(Omm::Av, upnpav, error, "could not get size of file: " + fullPath.toString());
         res = 0;
     }
     return res;
@@ -172,7 +172,7 @@ FileModel::getStream(const std::string& path, const std::string& resourcePath)
     Poco::Path fullPath(getBasePath(), path);
     std::istream* pRes = new std::ifstream(fullPath.toString().c_str());
     if (!*pRes) {
-        Omm::Av::Log::instance()->upnpav().error("could not open file for streaming: " + fullPath.toString());
+        LOGNS(Omm::Av, upnpav, error, "could not open file for streaming: " + fullPath.toString());
         return 0;
     }
     return pRes;
@@ -182,7 +182,7 @@ FileModel::getStream(const std::string& path, const std::string& resourcePath)
 void
 FileModel::freeStream(std::istream* pIstream)
 {
-    Omm::Av::Log::instance()->upnpav().debug("deleting file stream");
+    LOGNS(Omm::Av, upnpav, debug, "deleting file stream");
     delete pIstream;
 }
 
@@ -228,7 +228,7 @@ FileModel::getUpdateId(Poco::File& directory, bool checkMod)
             }
         }
         catch(...) {
-            Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
+            LOGNS(Omm::Av, upnpav, warning, dir->path() + " not found while scanning directory, ignoring.");
         }
         ++dir;
     }
@@ -269,7 +269,7 @@ FileModel::scanDirectory(Poco::File& directory)
             }
         }
         catch(...) {
-            Omm::Av::Log::instance()->upnpav().warning(dir->path() + " not found while scanning directory, ignoring.");
+            LOGNS(Omm::Av, upnpav, warning, dir->path() + " not found while scanning directory, ignoring.");
         }
         ++dir;
     }
@@ -285,12 +285,12 @@ FileModel::loadTagger()
         _pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: " + taggerPlugin + " loading vlc tagger ...");
+        LOGNS(Omm::Av, upnpav, warning, "could not find avstream tagger plugin: " + taggerPlugin + " loading vlc tagger ...");
         try {
             _pTagger = taggerPluginLoader.load("tagger-vlc");
         }
         catch(Poco::NotFoundException) {
-            Omm::Av::Log::instance()->upnpav().warning("could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            LOGNS(Omm::Av, upnpav, warning, "could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
             _pTagger = taggerPluginLoader.load("tagger-simple");
         }
     }

@@ -25,6 +25,7 @@
 #include <Omm/Gui/VerticalLayout.h>
 #include <Omm/Gui/Drag.h>
 #include <Omm/Gui/GuiLogger.h>
+#include <Omm/Log.h>
 
 
 class Application : public Omm::Gui::Application
@@ -33,12 +34,12 @@ class Application : public Omm::Gui::Application
     {
         virtual void dragStarted()
         {
-            Omm::Gui::Log::instance()->gui().debug("drag event");
+            LOGNS(Omm::Gui, gui, debug, "drag event");
         }
 
         virtual void selected()
         {
-            Omm::Gui::Log::instance()->gui().debug("select event");
+            LOGNS(Omm::Gui, gui, debug, "select event");
         }
 
     };

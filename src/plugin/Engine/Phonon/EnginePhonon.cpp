@@ -67,16 +67,16 @@ PhononEngine::play()
         _pVisual->renderImage(image.getBuffer());
     }
     else if (_mime.isVideo()) {
-        Omm::Av::Log::instance()->upnpav().debug("phonon engine: play ...");
+        LOGNS(Omm::Av, upnpav, debug, "phonon engine: play ...");
         Phonon::VideoPlayer* pPlayer = new Phonon::VideoPlayer(Phonon::VideoCategory, static_cast<QWidget*>(_pVisual->getWindow()));
         pPlayer->play(Phonon::MediaSource(_uri.c_str()));
-        Omm::Av::Log::instance()->upnpav().debug("phonon engine: play media finished.");
+        LOGNS(Omm::Av, upnpav, debug, "phonon engine: play media finished.");
     }
     else if (_mime.isAudio()) {
-        Omm::Av::Log::instance()->upnpav().debug("phonon engine: play ...");
+        LOGNS(Omm::Av, upnpav, debug, "phonon engine: play ...");
         Phonon::MediaObject* pPlayer = Phonon::createPlayer(Phonon::MusicCategory, Phonon::MediaSource(_uri.c_str()));
         pPlayer->play();
-        Omm::Av::Log::instance()->upnpav().debug("phonon engine: play media finished.");
+        LOGNS(Omm::Av, upnpav, debug, "phonon engine: play media finished.");
     }
 }
 
@@ -144,7 +144,7 @@ PhononEngine::getLengthSeconds()
 PhononEngine::TransportState
 PhononEngine::getTransportState()
 {
-//    Omm::Av::Log::instance()->upnpav().debug("phonon engine transport state: " + Poco::NumberFormatter::format(res));
+//    LOGNS(Omm::Av, upnpav, debug, "phonon engine transport state: " + Poco::NumberFormatter::format(res));
 
 //    switch (res) {
 //        default:

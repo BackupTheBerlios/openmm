@@ -65,10 +65,9 @@ StressAvUserInterface::eventLoop()
             Poco::Thread::sleep(waitForDevice);
         }
         else {
-            Omm::Av::Log::instance()->upnpav().debug("test #" + Poco::NumberFormatter::format(test)
-                + ", servers: " + Poco::NumberFormatter::format(serverCount())
-                + ", renderers: " + Poco::NumberFormatter::format(rendererCount())
-                );
+            LOGNS(Omm::Av, upnpav, debug, "test #" + Poco::NumberFormatter::format(test)\
+                + ", servers: " + Poco::NumberFormatter::format(serverCount())\
+                + ", renderers: " + Poco::NumberFormatter::format(rendererCount()));
             // choose a random server
             int selectedServerNumber;
             do {
@@ -77,7 +76,7 @@ StressAvUserInterface::eventLoop()
             while (serverUuid(selectedServerNumber) == ignoreServerUuid);
 
             Omm::Av::CtlMediaObject* pRootObject = serverRootObject(selectedServerNumber);
-            Omm::Av::Log::instance()->upnpav().debug("server: " + pRootObject->getTitle() + ", uuid: " + serverUuid(selectedServerNumber));
+            LOGNS(Omm::Av, upnpav, debug, "server: " + pRootObject->getTitle() + ", uuid: " + serverUuid(selectedServerNumber));
 
             // choose a random item
             Omm::Av::CtlMediaObject* pObject = pRootObject;
@@ -92,7 +91,7 @@ StressAvUserInterface::eventLoop()
             if (pRenderer && pObject) {
                 rendererSelected(pRenderer);
                 mediaObjectSelected(pObject);
-                Omm::Av::Log::instance()->upnpav().debug("playing: " + pObject->getTitle() + " on: " + pRenderer->getName());
+                LOGNS(Omm::Av, upnpav, debug, "playing: " + pObject->getTitle() + " on: " + pRenderer->getName());
                 playPressed();
                 Poco::Thread::sleep(maxPlayTime);
 //                Poco::Thread::sleep(playTime.next(maxPlayTime));
@@ -138,6 +137,6 @@ main(int argc, char** argv) {
     controller.setUserInterface(&userInterface);
     controller.setState(Omm::DeviceManager::Started);
 
-    Omm::Av::Log::instance()->upnpav().debug("Upnp-AV stress test: starting event loop");
+    LOGNS(Omm::Av, upnpav, debug, "Upnp-AV stress test: starting event loop");
     return userInterface.eventLoop();
 }

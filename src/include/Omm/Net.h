@@ -35,7 +35,7 @@ namespace Net {
 
 class NetworkInterfaceManagerImpl;
 
-
+#ifndef NDEBUG
 class Log
 {
 public:
@@ -49,6 +49,7 @@ private:
     static Log*     _pInstance;
     Poco::Logger*   _pNetLogger;
 };
+#endif // NDEBUG
 
 
 class NetworkInterfaceManager

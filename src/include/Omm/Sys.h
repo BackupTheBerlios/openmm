@@ -35,6 +35,7 @@
 namespace Omm {
 namespace Sys {
 
+#ifndef NDEBUG
 class Log
 {
 public:
@@ -48,6 +49,7 @@ private:
     static Log*     _pInstance;
     Poco::Logger*   _pSysLogger;
 };
+#endif // NDEBUG
 
 
 class SysPath

@@ -31,7 +31,7 @@ namespace Gui {
 
 TabViewImpl::TabViewImpl(View* pView)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab view impl ctor");
+    LOG(gui, debug, "tab view impl ctor");
 
     UITabBarController* pNativeViewController = [[UITabBarController alloc] init];
     initViewImpl(pView, pNativeViewController);
@@ -46,7 +46,7 @@ TabViewImpl::~TabViewImpl()
 int
 TabViewImpl::addView(View* pView, const std::string& tabName, bool show)
 {
-    Omm::Gui::Log::instance()->gui().debug("tab view implementation add view");
+    LOG(gui, debug, "tab view implementation add view");
 
     UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());

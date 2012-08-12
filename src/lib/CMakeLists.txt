@@ -17,6 +17,8 @@ ${OMM_INCLUDE_DIRS}
 )
 
 
+if(NOT OMM_RELEASE)
+message(STATUS "Adding logging support library libommlog")
 add_library(ommlog
 Log/Log.cpp
 )
@@ -30,6 +32,7 @@ set(OMM_LOG
 ommlog
 CACHE INTERNAL libommlog
 )
+endif(NOT OMM_RELEASE)
 
 
 if(LINUX)
@@ -64,7 +67,7 @@ Net/Net.cpp
 )
 
 target_link_libraries(ommnet
-ommlog
+${OMM_LOG}
 ${LIB_OMMNET_PLATFORM}
 ${POCO_NET}
 ${POCO_FOUNDATION}
@@ -83,7 +86,7 @@ Upnp/Upnp.cpp
 
 target_link_libraries(ommupnp
 ommnet
-ommlog
+${OMM_LOG}
 ${POCO_UTIL}
 ${POCO_XML}
 ${POCO_NET}
@@ -134,7 +137,7 @@ AvStream/AvStream.cpp
 )
 
 target_link_libraries(ommavstream
-ommlog
+${OMM_LOG}
 ${POCO_FOUNDATION}
 )
 
@@ -166,7 +169,7 @@ Sys/Sys.cpp
 )
 
 target_link_libraries(ommsys
-ommlog
+${OMM_LOG}
 ${LIB_OMMSYS_PLATFORM}
 ${POCO_FOUNDATION}
 )
@@ -225,6 +228,7 @@ ${OMM_RESOURCES}
 
 target_link_libraries(ommupnpgui
 ommsys
+ommutil
 ommupnp
 ommupnpav
 ommgui

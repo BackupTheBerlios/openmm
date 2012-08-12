@@ -46,7 +46,7 @@ GuiApplication::~GuiApplication()
 void
 GuiApplication::initApplication(int argc, char** argv)
 {
-    Omm::Log::instance()->upnp().debug("init gui application ...");
+    LOGNS(Omm, upnp, debug, "init gui application ...");
 
 //    _pEventLoop = new Omm::Gui::EventLoop(argc, argv);
 //    _pMainWindow = new Omm::Gui::MainWindow;
@@ -56,7 +56,7 @@ GuiApplication::initApplication(int argc, char** argv)
     _argc = argc;
     _argv = argv;
 
-    Omm::Log::instance()->upnp().debug("finished init gui application.");
+    LOGNS(Omm, upnp, debug, "finished init gui application.");
 }
 
 
@@ -71,16 +71,16 @@ GuiApplication::resize(int width, int height)
 Omm::Controller*
 GuiApplication::createController()
 {
-    Omm::Log::instance()->upnp().debug("application gui create controller ...");
+    LOGNS(Omm, upnp, debug, "application gui create controller ...");
 //    return new Omm::ControllerWidget;
-    Omm::Log::instance()->upnp().debug("application gui create controller finished.");
+    LOGNS(Omm, upnp, debug, "application gui create controller finished.");
 }
 
 
 void
 GuiApplication::addController()
 {
-    Omm::Log::instance()->upnp().debug("application gui add controller");
+    LOGNS(Omm, upnp, debug, "application gui add controller");
 //    _pMainWindow->setMainView(static_cast<Omm::ControllerWidget*>(_pController));
 }
 
@@ -102,7 +102,7 @@ GuiApplication::setWindowTitle(const std::string& title)
 void
 GuiApplication::eventLoop()
 {
-    Omm::Log::instance()->upnp().debug("gui application entering event loop ...");
+    LOGNS(Omm, upnp, debug, "gui application entering event loop ...");
 //    _pEventLoop->run();
     Omm::Gui::Application::runEventLoop(_argc, _argv);
 }

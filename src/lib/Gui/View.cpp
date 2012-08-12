@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <algorithm>
+
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/View.h"
@@ -26,6 +28,7 @@
 #include "Gui/Model.h"
 #include "Gui/Layout.h"
 #include "ViewImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -41,7 +44,7 @@ _maxWidth(200),
 _maxHeight(140),
 _stretchFactor(1.0)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view ctor (parent).");
+//    LOG(gui, debug, "view ctor (parent).");
 
     initView(pParent);
     _pImpl = new PlainViewImpl(this);
@@ -58,7 +61,7 @@ _maxHeight(140),
 _stretchFactor(1.0),
 _scaleFactor(1.0)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view ctor (parent, createPlainView).");
+//    LOG(gui, debug, "view ctor (parent, createPlainView).");
 
     initView(pParent);
     if (createPlainView) {
@@ -83,7 +86,7 @@ View::initView(View* pParent)
     _pLayout = 0;
 
     if (_pParent) {
-//        Omm::Gui::Log::instance()->gui().debug("adding view as child to parent view.");
+//        LOG(gui, debug, "adding view as child to parent view.");
         _pParent->_subviews.push_back(this);
     }
 }
@@ -92,7 +95,7 @@ View::initView(View* pParent)
 void*
 View::getNativeView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+//    LOG(gui, debug, "view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
     return _pImpl->getNativeView();
 }
 
@@ -104,7 +107,7 @@ View::getNativeView()
 #endif
 View::getNativeWindowId()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
+//    LOG(gui, debug, "view get native view, impl:" + Poco::NumberFormatter::format(_pImpl));
     return _pImpl->getNativeWindowId();
 }
 
@@ -112,7 +115,7 @@ View::getNativeWindowId()
 View*
 View::getParent()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view get parent: " + Poco::NumberFormatter::format(_pParent));
+//    LOG(gui, debug, "view get parent: " + Poco::NumberFormatter::format(_pParent));
     return _pParent;
 }
 
@@ -129,16 +132,16 @@ View::addSubview(View* pView)
 void
 View::show(bool async)
 {
-    Omm::Gui::Log::instance()->gui().debug("view show \"" + getName() + "\" ...");
+    LOG(gui, debug, "view show \"" + getName() + "\" ...");
     _pImpl->showView(async);
-//    Omm::Gui::Log::instance()->gui().debug("view show finished.");
+//    LOG(gui, debug, "view show finished.");
 }
 
 
 void
 View::hide(bool async)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view hide.");
+//    LOG(gui, debug, "view hide.");
     _pImpl->hideView(async);
 }
 
@@ -225,7 +228,7 @@ View::setHeight(int height)
 void
 View::resize(SizeConstraint size)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view resize.");
+//    LOG(gui, debug, "view resize.");
     _pImpl->resizeView(width(size), height(size));
     updateLayout();
 }
@@ -234,7 +237,7 @@ View::resize(SizeConstraint size)
 void
 View::resize(int width, int height)
 {
-//    Log::instance()->gui().debug("view resize width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
+//    LOG(gui, debug, "view resize width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pImpl->resizeView(width, height);
     updateLayout();
 }
@@ -258,7 +261,7 @@ View::scale(float factor)
 void
 View::move(int x, int y)
 {
-//    Omm::Gui::Log::instance()->gui().debug("view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+//    LOG(gui, debug, "view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
     _pImpl->moveView(x, y);
 }
 
@@ -273,7 +276,7 @@ View::getModel() const
 void
 View::setModel(Model* pModel)
 {
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+    LOG(gui, debug, "view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     if (_pModel) {
         // if there was a model attached previously, detach controllers (and this view) from it
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
@@ -289,9 +292,9 @@ View::setModel(Model* pModel)
         }
     }
     _pModel = pModel;
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" sync view ...");
+    LOG(gui, debug, "view \"" + getName() + "\" sync view ...");
     syncView();
-    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" set model finished.");
+    LOG(gui, debug, "view \"" + getName() + "\" set model finished.");
 }
 
 
@@ -422,7 +425,7 @@ View::updateLayout()
 void
 View::syncView()
 {
-//    Omm::Gui::Log::instance()->gui().debug("view \"" + getName() + "\" sync view");
+//    LOG(gui, debug, "view \"" + getName() + "\" sync view");
     _pImpl->triggerViewSync();
 }
 

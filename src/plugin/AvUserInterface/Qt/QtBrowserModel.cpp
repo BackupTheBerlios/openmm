@@ -57,7 +57,7 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
         painter->restore();
     }
     if (qVariantCanConvert<QIcon>(index.data(Qt::DecorationRole))) {
-//        Omm::Av::Log::instance()->upnpav().debug("DRAWING ICON");
+//        LOGNS(Omm::Av, upnpav, debug, "DRAWING ICON");
         QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
         painter->save();
         icon.paint(painter, iconRect);
@@ -136,11 +136,11 @@ QtBrowserModel::columnCount(const QModelIndex& parent) const
 {
 //     Omm::Av::ControllerObject* object = getObject(parent);
 //     if (!object) {
-//         Omm::Av::Log::instance()->upnpav().debug("1 col");
+//         LOGNS(Omm::Av, upnpav, debug, "1 col");
 //         return 1;
 //     }
 //     else {
-//         Omm::Av::Log::instance()->upnpav().debug("2 cols");
+//         LOGNS(Omm::Av, upnpav, debug, "2 cols");
 //         return 2;
 //     }
 //    return 3;
@@ -206,7 +206,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
     if (index.internalPointer() == 0) {
-        Omm::Av::Log::instance()->upnpav().warning("UpnpBrowserModel::data() objectId reference is 0:");
+        LOGNS(Omm::Av, upnpav, warning, "UpnpBrowserModel::data() objectId reference is 0:");
         return QVariant();
     }
     Omm::Av::CtlMediaObject* object = getObject(index);

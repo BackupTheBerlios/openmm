@@ -33,7 +33,7 @@ namespace Gui {
 
 ColorImpl::ColorImpl(int red, int green, int blue, int alpha)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Color impl ctor");
+//    LOG(gui, debug, "Color impl ctor");
     _pQtColor = new QColor(red, green, blue, alpha);
 }
 

@@ -42,7 +42,7 @@ main(int argc, char** argv)
         pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        Omm::AvStream::Log::instance()->avstream().error("could not find avstream tagger plugin: " + taggerPlugin);
+        LOGNS(Omm::AvStream, avstream, error, "could not find avstream tagger plugin: " + taggerPlugin);
         return 1;
     }
     Omm::AvStream::Meta* pMeta = pTagger->tag(std::string(argv[1]));

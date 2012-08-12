@@ -35,7 +35,7 @@ _pImpl(new DragImpl(pSource, this)),
 _pSource(pSource),
 _pModel(pModel)
 {
-//    Omm::Gui::Log::instance()->gui().debug("drag ctor.");
+//    LOG(gui, debug, "drag ctor.");
 
 }
 

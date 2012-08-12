@@ -38,6 +38,7 @@
 namespace Omm {
 namespace Net {
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
@@ -68,6 +69,7 @@ Log::net()
 {
     return *_pNetLogger;
 }
+#endif // NDEBUG
 
 
 NetworkInterfaceManager* NetworkInterfaceManager::_pInstance = 0;
@@ -75,7 +77,7 @@ Poco::FastMutex NetworkInterfaceManager::_instanceLock;
 
 NetworkInterfaceManager::NetworkInterfaceManager()
 {
-//    Log::instance()->net().debug("installing network interface manager");
+//    LOG(net, debug, "installing network interface manager");
 
     scanInterfaces();
     findValidIpAddress();
@@ -89,7 +91,7 @@ NetworkInterfaceManager::NetworkInterfaceManager()
 NetworkInterfaceManager*
 NetworkInterfaceManager::instance()
 {
-//    Log::instance()->net().debug("getting instance of network interface manager");
+//    LOG(net, debug, "getting instance of network interface manager");
 
     Poco::FastMutex::ScopedLock lock(_instanceLock);
     if (!_pInstance) {
@@ -115,7 +117,7 @@ NetworkInterfaceManager::findValidIpAddress()
 
     bool validAddressFound = false;
     bool loopBackProvided = false;
-    Log::instance()->net().debug("number of scanned IPv4 interfaces: " + Poco::NumberFormatter::format(_interfaceList.size()));
+    LOG(net, debug, "number of scanned IPv4 interfaces: " + Poco::NumberFormatter::format(_interfaceList.size()));
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = _interfaceList.begin(); it != _interfaceList.end(); ++it) {
         if (isLoopback(*it)) {
             loopBackProvided = true;
@@ -135,15 +137,15 @@ NetworkInterfaceManager::findValidIpAddress()
         }
     }
     if (_interfaceList.size() == 1 && loopBackProvided) {
-        Log::instance()->net().debug("loopback is the only network interface, setting valid IP address to 127.0.0.1");
+        LOG(net, debug, "loopback is the only network interface, setting valid IP address to 127.0.0.1");
         validAddressFound = true;
         _validIpAddress = Poco::Net::IPAddress("127.0.0.1");
     }
     if (validAddressFound) {
-        Log::instance()->net().information("found valid IP address: " + _validIpAddress.toString());
+        LOG(net, information, "found valid IP address: " + _validIpAddress.toString());
     }
     else {
-        Log::instance()->net().fatal("no valid IP address found");
+        LOG(net, fatal, "no valid IP address found");
         // TODO: bail out of application
     }
 }
@@ -173,22 +175,22 @@ NetworkInterfaceManager::scanInterfaces()
     Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
     std::vector<Poco::Net::NetworkInterface> ifList = Poco::Net::NetworkInterface::list();
-    Log::instance()->net().debug("number of network interfaces: " + Poco::NumberFormatter::format(ifList.size()));
+    LOG(net, debug, "number of network interfaces: " + Poco::NumberFormatter::format(ifList.size()));
     for (std::vector<Poco::Net::NetworkInterface>::iterator it = ifList.begin(); it != ifList.end(); ++it) {
         std::string interfaceName = (*it).name();
         Poco::Net::IPAddress address = (*it).address();
         if (address.family() == Poco::Net::IPAddress::IPv4) {
             if (isLoopback(*it)) {
-                Log::instance()->net().debug("found loopback interface: " + interfaceName + ", (index " + Poco::NumberFormatter::format((*it).index()) + ")");
+                LOG(net, debug, "found loopback interface: " + interfaceName + ", (index " + Poco::NumberFormatter::format((*it).index()) + ")");
                 _loopbackInterfaceName = interfaceName;
             }
             else {
-                Log::instance()->net().information("found network interface: " + interfaceName + ", (index: " + Poco::NumberFormatter::format((*it).index()) + ")");
+                LOG(net, information, "found network interface: " + interfaceName + ", (index: " + Poco::NumberFormatter::format((*it).index()) + ")");
             }
             _interfaceList.push_back(*it);
         }
         else {
-            Log::instance()->net().debug("interface "  + interfaceName + " (index " + Poco::NumberFormatter::format((*it).index()) + ") is not IP4, ignoring.");
+            LOG(net, debug, "interface "  + interfaceName + " (index " + Poco::NumberFormatter::format((*it).index()) + ") is not IP4, ignoring.");
         }
     }
 }
@@ -203,16 +205,16 @@ NetworkInterfaceManager::addInterface(const std::string& name)
     Poco::Net::IPAddress address = interface.address();
     // FIXME: check if network interface is already registered
     //if (std::find(_interfaceList.begin(), _interfaceList.end(), name) == _interfaceList.end() && address.family() == Poco::Net::IPAddress::IPv4) {
-        Log::instance()->net().information("adding network interface: " + name);
+        LOG(net, information, "adding network interface: " + name);
         // FIXME: add the right interface ...?
         _interfaceList.push_back(Poco::Net::NetworkInterface::forName(name, false));
         findValidIpAddress();
-        Log::instance()->net().information("notify observer of new network interface: " + name);
+        LOG(net, information, "notify observer of new network interface: " + name);
         _notificationCenter.postNotification(new NetworkInterfaceNotification(name, true));
         //findValidIpAddress();
 //    }
 //    else {
-//        Log::instance()->sys().information("added network interface already known or not IP4: " + name);
+//        LOG(sys, information, "added network interface already known or not IP4: " + name);
 //    }
 }
 
@@ -222,12 +224,12 @@ NetworkInterfaceManager::removeInterface(const std::string& name)
 {
     Poco::ScopedLock<Poco::Mutex> lock(_lock);
 
-    Log::instance()->net().information("removing network interface: " + name);
+    LOG(net, information, "removing network interface: " + name);
 
     // FIXME: erase interface from interface list.
     //_interfaceList.erase(std::find(_interfaceList.begin(), _interfaceList.end(), name));
     findValidIpAddress();
-    Log::instance()->net().information("notify observer of removed network interface: " + name);
+    LOG(net, information, "notify observer of removed network interface: " + name);
     _notificationCenter.postNotification(new NetworkInterfaceNotification(name, false));
 }
 

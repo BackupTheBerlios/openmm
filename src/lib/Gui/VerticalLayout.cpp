@@ -24,6 +24,7 @@
 #include "Gui/VerticalLayout.h"
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -33,8 +34,8 @@ namespace Gui {
 void
 VerticalLayout::layoutView()
 {
-    Omm::Gui::Log::instance()->gui().debug("vertical layout, lay out view ...");
-    
+    LOG(gui, debug, "vertical layout, lay out view ...");
+
     int minSubviewWidth = 0;
     int minSubviewHeight = 0;
     int prefSubviewWidth = 0;
@@ -96,7 +97,7 @@ VerticalLayout::layoutView()
         (*it)->resize(subviewWidth, height);
         subviewHeight += height;
     }
-//    Omm::Gui::Log::instance()->gui().debug("vertical layout, lay out view finished.");
+//    LOG(gui, debug, "vertical layout, lay out view finished.");
 }
 
 
@@ -111,7 +112,7 @@ VerticalLayout::layoutViewEquiDistant()
         (*it)->move(0, (it - _pView->beginSubview()) * (*it)->height());
     }
 
-    Omm::Gui::Log::instance()->gui().debug("vertical layout, laying out view finished.");
+    LOG(gui, debug, "vertical layout, laying out view finished.");
 }
 
 

@@ -206,7 +206,7 @@ _dlna(protInfo._dlna)
 
 ProtocolInfo::ProtocolInfo(const std::string& infoString)
 {
-    Log::instance()->upnpav().debug("Protocol Info: " + infoString);
+    LOG(upnpav, debug, "Protocol Info: " + infoString);
 
     Poco::StringTokenizer infoTokens(infoString, ":");
     try {
@@ -215,7 +215,7 @@ ProtocolInfo::ProtocolInfo(const std::string& infoString)
     }
     catch (Poco::RangeException) {
     }
-    Log::instance()->upnpav().debug("Protocol Info mime: " + _mime + ", dlna: " + _dlna);
+    LOG(upnpav, debug, "Protocol Info mime: " + _mime + ", dlna: " + _dlna);
 }
 
 
@@ -525,12 +525,12 @@ LastChangeSet::setStateVarAttribute(const std::string& name, const std::string& 
 void
 LastChangeSet::writeStateVar(Poco::XML::Node* pNode)
 {
-    Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() ...");
+    LOG(upnpav, debug, "LastChangeSet::writeStateVar() ...");
     Poco::XML::Document* pDoc = pNode->ownerDocument();
 
     for (StateVarIterator varIt = beginStateVar(); varIt != endStateVar(); ++varIt) {
         std::string varName = (*varIt).first;
-        Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() writing: " + varName);
+        LOG(upnpav, debug, "LastChangeSet::writeStateVar() writing: " + varName);
         Poco::AutoPtr<Poco::XML::Element> pStateVar = pDoc->createElement(varName);
         for (StateVarValIterator it = beginStateVarVal(varName); it != endStateVarVal(varName); ++it) {
             Poco::AutoPtr<Poco::XML::Attr> pVal = pDoc->createAttribute((*it).first);
@@ -539,7 +539,7 @@ LastChangeSet::writeStateVar(Poco::XML::Node* pNode)
         }
         pNode->appendChild(pStateVar);
     }
-    Log::instance()->upnpav().debug("LastChangeSet::writeStateVar() finished.");
+    LOG(upnpav, debug, "LastChangeSet::writeStateVar() finished.");
 }
 
 
@@ -558,10 +558,10 @@ LastChangeSet::readStateVars(Poco::XML::Node* pInstanceId)
 {
     Poco::XML::Node* pStateVar = pInstanceId->firstChild();
     while (pStateVar && pStateVar->hasAttributes()) {
-        Log::instance()->upnpav().debug("last change set reader, reading state var: " + pStateVar->nodeName());
+        LOG(upnpav, debug, "last change set reader, reading state var: " + pStateVar->nodeName());
         Poco::XML::NamedNodeMap* pAttributes = pStateVar->attributes();
         for (int i = 0; i < pAttributes->length(); ++i) {
-            Log::instance()->upnpav().debug("last change set reader, reading attribute: " + pAttributes->item(i)->nodeName() + " = " + pAttributes->item(i)->nodeValue());
+            LOG(upnpav, debug, "last change set reader, reading attribute: " + pAttributes->item(i)->nodeName() + " = " + pAttributes->item(i)->nodeValue());
             _stateVars[pStateVar->nodeName()][pAttributes->item(i)->nodeName()] = pAttributes->item(i)->nodeValue();
         }
         pAttributes->release();
@@ -587,7 +587,7 @@ LastChangeReader::endChangeSet()
 void
 LastChangeReader::read(const std::string& message)
 {
-    Log::instance()->upnpav().debug("last change message reader parsing:" + Poco::LineEnding::NEWLINE_DEFAULT + message);
+    LOG(upnpav, debug, "last change message reader parsing:" + Poco::LineEnding::NEWLINE_DEFAULT + message);
 
     Poco::XML::DOMParser parser;
 #if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
@@ -599,18 +599,18 @@ LastChangeReader::read(const std::string& message)
         _pDoc = parser.parseString(message.substr(0, message.rfind('>') + 1));
     }
     catch (Poco::XML::SAXParseException) {
-        Log::instance()->upnpav().error("could not parse last change message, SAX parser exception.");
+        LOG(upnpav, error, "could not parse last change message, SAX parser exception.");
         return;
     }
     catch (Poco::XML::DOMException) {
-        Log::instance()->upnpav().error("could not parse last change message, DOM exception.");
+        LOG(upnpav, error, "could not parse last change message, DOM exception.");
         return;
     }
 
     Poco::XML::Node* pNode = _pDoc->documentElement();
 
     if(pNode && (pNode->nodeName() != "Event")) {
-        Log::instance()->upnpav().error("no valid last change message, ignoring.");
+        LOG(upnpav, error, "no valid last change message, ignoring.");
         return;
     }
     Poco::XML::Node* pChangeSet = pNode;
@@ -619,7 +619,7 @@ LastChangeReader::read(const std::string& message)
         Poco::XML::Node* pInstanceId = pChangeSet->firstChild();
 
         while (pInstanceId && pInstanceId->hasChildNodes()) {
-            Log::instance()->upnpav().debug("last change set reader, reading instance id: " + pInstanceId->nodeName());
+            LOG(upnpav, debug, "last change set reader, reading instance id: " + pInstanceId->nodeName());
             _changeSet.push_back(LastChangeSet());
             _changeSet.back().readStateVars(pInstanceId);
             pInstanceId = pInstanceId->nextSibling();
@@ -657,7 +657,7 @@ LastChange::getValue()
 {
     write();
     clear();
-    Log::instance()->upnpav().debug("last change, get state var value: " + _message);
+    LOG(upnpav, debug, "last change, get state var value: " + _message);
     return _message;
 }
 
@@ -693,7 +693,7 @@ LastChange::write()
 void
 LastChange::writeMessageHeader()
 {
-    Log::instance()->upnpav().debug("last change write message header");
+    LOG(upnpav, debug, "last change write message header");
     _pDoc = new Poco::XML::Document;
 
     _pMessage = _pDoc->createElement("Event");
@@ -710,20 +710,20 @@ LastChange::writeMessageHeader()
 void
 LastChange::writeMessageClose()
 {
-    Log::instance()->upnpav().debug("last change write message header close ...");
+    LOG(upnpav, debug, "last change write message header close ...");
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     std::stringstream ss;
     writer.writeNode(ss, _pDoc);
     _message = ss.str();
-    Log::instance()->upnpav().debug("last change write message header close message: \n" + _message);
+    LOG(upnpav, debug, "last change write message header close message: \n" + _message);
 }
 
 
 void
 LastChange::writeMessageData()
 {
-    Log::instance()->upnpav().debug("last change write message header data ...");
+    LOG(upnpav, debug, "last change write message header data ...");
 
     for (int instanceId = 0; instanceId < _changeSet.size(); ++instanceId) {
         Poco::AutoPtr<Poco::XML::Element> pInstanceId = _pDoc->createElement("InstanceID");
@@ -735,7 +735,7 @@ LastChange::writeMessageData()
         _changeSet[instanceId].writeStateVar(pInstanceId);
     }
 
-    Log::instance()->upnpav().debug("last change write message header data finished.");
+    LOG(upnpav, debug, "last change write message header data finished.");
 }
 
 

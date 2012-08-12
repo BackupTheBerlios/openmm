@@ -30,14 +30,14 @@
 
 namespace Omm {
 namespace Gui {
-    
-    
+
+
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
+//    LOG(gui, debug, "button view impl ctor");
     QPushButton* pNativeView = new QPushButton;
     ButtonSignalProxy* pSignalProxy = new ButtonSignalProxy(this);
-    
+
     initViewImpl(pView, pNativeView, pSignalProxy);
 }
 
@@ -80,7 +80,7 @@ ButtonSignalProxy::init()
 void
 ButtonSignalProxy::pushed()
 {
-    Omm::Gui::Log::instance()->gui().debug("button view impl, calling pushed virtual method");
+    LOG(gui, debug, "button view impl, calling pushed virtual method");
     PROXY_NOTIFY_CONTROLLER(Controller, selected);
     PROXY_NOTIFY_CONTROLLER(ButtonController, pushed);
 }

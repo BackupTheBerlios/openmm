@@ -23,6 +23,8 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
+#include <Omm/Log.h>
+
 #include "PcmAudioSink.h"
 
 
@@ -45,8 +47,7 @@ PcmAudioSink::initDevice()
 {
     std::string fileName(_inStreams[0]->getInfo()->getName() + ".pcm");
     _pcmStream.open(fileName.c_str());
-    Omm::AvStream::Log::instance()->avstream().information(getName() + " writing PCM sample data to file " +
-        fileName);
+    LOGNS(Omm::AvStream, avstream, information, getName() + " writing PCM sample data to file " + fileName);
     return true;
 }
 
@@ -56,13 +57,13 @@ PcmAudioSink::startPresentation()
 {
     int frameCount = 0;
     Omm::AvStream::Frame* pFrame;
-    
+
     while(true) {
         audioReadBlocking(_buffer, _bufferSize);
         _pcmStream.write(_buffer, _bufferSize);
     }
-    
-    Omm::AvStream::Log::instance()->avstream().debug("audio sink finished.");
+
+    LOGNS(Omm::AvStream, avstream, debug, "audio sink finished.");
 }
 
 

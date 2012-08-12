@@ -24,6 +24,7 @@
 #include "Gui/Label.h"
 #include "Gui/GuiLogger.h"
 #include "LabelImpl.h"
+#include "Log.h"
 
 
 namespace Omm {
@@ -47,7 +48,7 @@ LabelModel::getLabel()
 void
 LabelModel::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label model set label");
+//    LOG(gui, debug, "Label model set label");
     _label = label;
 }
 
@@ -55,7 +56,7 @@ LabelModel::setLabel(const std::string& label)
 LabelView::LabelView(View* pParent) :
 View(pParent, false)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label view ctor.");
+//    LOG(gui, debug, "Label view ctor.");
     setName("label view");
 
     _minWidth = 50;
@@ -76,8 +77,8 @@ LabelView::setAlignment(Alignment alignment)
 void
 LabelView::syncViewImpl()
 {
-    Omm::Gui::Log::instance()->gui().debug("Label view sync view: " + getName());
-    Omm::Gui::Log::instance()->gui().debug("Label view sync view with model: " + Poco::NumberFormatter::format(_pModel));
+    LOG(gui, debug, "Label view sync view: " + getName());
+    LOG(gui, debug, "Label view sync view with model: " + Poco::NumberFormatter::format(_pModel));
     LabelModel* pLabelModel = static_cast<LabelModel*>(_pModel);
     LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
     if (pLabelModel) {
@@ -89,7 +90,7 @@ LabelView::syncViewImpl()
 void
 Label::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Label model set label");
+//    LOG(gui, debug, "Label model set label");
     LabelModel::setLabel(label);
     syncView();
 }

@@ -36,7 +36,7 @@ namespace Gui {
 DragImpl::DragImpl(View* pSource, Drag* pDrag) :
 _pDrag(pDrag)
 {
-//    Omm::Gui::Log::instance()->gui().debug("Drag impl ctor");
+//    LOG(gui, debug, "Drag impl ctor");
     _pQtDrag = new QDrag(static_cast<QWidget*>(pSource->getNativeView()));
     _pQtDrag->setMimeData(new QtMimeData(this));
 }

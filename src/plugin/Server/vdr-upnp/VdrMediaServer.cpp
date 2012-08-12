@@ -118,30 +118,30 @@ std::streamsize
 VdrChannelResource::stream(std::ostream& ostr, std::iostream::pos_type seek)
 {
 //     isyslog("start streaming ...");
-    Omm::Av::Log::instance()->upnpav().debug("attempt to stream channel ...");
+    LOGNS(Omm::Av, upnpav, debug, "attempt to stream channel ...");
     cDevice* pDevice = cDevice::GetDevice(_pChannel, 0, false);
     if (!pDevice) {
-        Omm::Av::Log::instance()->upnpav().error("could not grab device");
+        LOGNS(Omm::Av, upnpav, error, "could not grab device");
         return 0;
     }
-    Omm::Av::Log::instance()->upnpav().debug("grabbed device");
+    LOGNS(Omm::Av, upnpav, debug, "grabbed device");
     pDevice->SwitchChannel(_pChannel, false);
-    Omm::Av::Log::instance()->upnpav().debug(Poco::format("switched to channel %s", _pChannel->Name()));
+    LOGNS(Omm::Av, upnpav, debug, Poco::format("switched to channel %s", _pChannel->Name()));
 
     int pids[3] = {_pChannel->Vpid(), _pChannel->Apid(0), 0};
     VdrChannelReceiver receiver(ostr, _pChannel->GetChannelID(), 0, 0, pids);
     pDevice->AttachReceiver(&receiver);
-    Omm::Av::Log::instance()->upnpav().debug("attached receiver");
+    LOGNS(Omm::Av, upnpav, debug, "attached receiver");
     // FIXME: do a select or sth. similar and don't poll from end of stream
     while (ostr.good()) {
 //         isyslog("waiting for client to close ...");
-        Omm::Av::Log::instance()->upnpav().debug("waiting for client to close ...");
+        LOGNS(Omm::Av, upnpav, debug, "waiting for client to close ...");
         Poco::Thread::sleep(1000);
     }
     pDevice->Detach(&receiver);
-    Omm::Av::Log::instance()->upnpav().debug("detached receiver");
+    LOGNS(Omm::Av, upnpav, debug, "detached receiver");
 //     isyslog("sent %d bytes.", receiver.bytesReceived());
-    Omm::Av::Log::instance()->upnpav().debug(Poco::format("sent %d bytes.", Poco::NumberFormatter::format(receiver.bytesReceived())));
+    LOGNS(Omm::Av, upnpav, debug, Poco::format("sent %d bytes.", Poco::NumberFormatter::format(receiver.bytesReceived())));
     return receiver.bytesReceived();
 }
 

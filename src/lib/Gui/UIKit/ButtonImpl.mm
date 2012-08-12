@@ -61,7 +61,7 @@ namespace Gui {
 
 ButtonViewImpl::ButtonViewImpl(View* pView)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view impl ctor");
+//    LOG(gui, debug, "button view impl ctor");
 //    OmmGuiButton* pNativeView = [[OmmGuiButton buttonWithType:UIButtonTypeRoundedRect] init];
     OmmGuiButton* pNativeView = [[OmmGuiButton alloc] init];
 //    pNativeView.backgroundColor = [UIColor yellowColor];
@@ -80,7 +80,7 @@ ButtonViewImpl::~ButtonViewImpl()
 void
 ButtonViewImpl::setLabel(const std::string& label)
 {
-//    Omm::Gui::Log::instance()->gui().debug("button view impl set label");
+//    LOG(gui, debug, "button view impl set label");
     NSString* pLabel = [[NSString alloc] initWithUTF8String:label.c_str()];
     [static_cast<UIButton*>(_pNativeView) setTitle:pLabel forState:UIControlStateNormal];
 }
@@ -104,7 +104,7 @@ ButtonViewImpl::setImage(Image* pImage)
 void
 ButtonViewImpl::pushed()
 {
-//    Omm::Gui::Log::instance()->gui().debug("button implementation, calling pushed virtual method");
+//    LOG(gui, debug, "button implementation, calling pushed virtual method");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
     IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
 }

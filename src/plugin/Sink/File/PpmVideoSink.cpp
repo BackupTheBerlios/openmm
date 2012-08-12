@@ -23,6 +23,8 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
+#include <Omm/Log.h>
+
 #include "PpmVideoSink.h"
 
 
@@ -48,27 +50,27 @@ PpmVideoSink::~PpmVideoSink()
 bool
 PpmVideoSink::initDevice()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("opening ppm video sink ...");
-    
+    LOGNS(Omm::AvStream, avstream, debug, "opening ppm video sink ...");
+
     for (int numOverlay = 0; numOverlay < _overlayCount; numOverlay++) {
         Omm::AvStream::Frame* pFrame = getInStream(0)->getInfo()->allocateVideoFrame(_pixelFormat);
-        
+
         PpmOverlay* pOverlay = new PpmOverlay(this, getInStream(0)->getInfo()->width(), getInStream(0)->getInfo()->height());
-        
+
         pOverlay->_pFrame = pFrame;
-        
+
         pOverlay->_data[0] = (uint8_t*)pFrame->planeData(0);
         pOverlay->_data[1] = (uint8_t*)pFrame->planeData(1);
         pOverlay->_data[2] = (uint8_t*)pFrame->planeData(2);
-        
+
         pOverlay->_pitch[0] = pFrame->planeSize(0);
         pOverlay->_pitch[1] = pFrame->planeSize(1);
         pOverlay->_pitch[2] = pFrame->planeSize(2);
-        
+
         _overlayVector[numOverlay] = pOverlay;
     }
 
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " opened.");
+    LOGNS(Omm::AvStream, avstream, debug, getName() + " opened.");
     return true;
 }
 
@@ -77,12 +79,12 @@ void
 PpmVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
 {
     std::string fileName(getInStream(0)->getInfo()->getName() + "_" + Poco::NumberFormatter::format0(++_frameCount, 3) + ".ppm");
-    
+
     // normally, VideoSink implementation is responsible for scaling the video (hw-accelerated)
     // however, the ppm file sink only writes the stream in original size into files.
 //     int x, y, w, h;
 //     displayRect(x, y, w, h);
-    
+
     std::ofstream ppmFile(fileName.c_str());
     // write PPM header
     ppmFile << "P6\n" << getInStream(0)->getInfo()->width() << " " << getInStream(0)->getInfo()->height() << "\n" << 255 << "\n";

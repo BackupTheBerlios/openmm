@@ -76,7 +76,7 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-//    Omm::Gui::Log::instance()->gui().debug("event loop exec finished.");
+//    Omm::LOGNS(Gui, gui, debug, "event loop exec finished.");
     Omm::Gui::ApplicationImpl::_pApplication->finishedEventLoop();
     Omm::Gui::ApplicationImpl::_pApplication->stop();
 }
@@ -145,7 +145,7 @@ View* ApplicationImpl::_pToolBar = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
-//    Omm::Gui::Log::instance()->gui().debug("application impl ctor");
+//    LOG(gui, debug, "application impl ctor");
 
     _pApplication = pApplication;
 }
@@ -215,7 +215,7 @@ ApplicationImpl::showStatusBar(bool show)
 int
 ApplicationImpl::run(int argc, char** argv)
 {
-    Omm::Gui::Log::instance()->gui().debug("event loop exec ...");
+    LOG(gui, debug, "event loop exec ...");
     NSAutoreleasePool* pAutoreleasePool = [[NSAutoreleasePool alloc] init];
     int ret = UIApplicationMain(argc, argv, nil, @"OmmGuiAppDelegate");
     [pAutoreleasePool release];

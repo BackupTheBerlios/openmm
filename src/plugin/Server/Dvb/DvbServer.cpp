@@ -101,7 +101,7 @@ DvbModel::getStream(const std::string& path, const std::string& resourcePath)
     //        UPDATE: this only happens when renderer and dvb server run in the
     //        same process.
     if (_pRecDevice) {
-        Omm::Dvb::Log::instance()->dvb().debug("releasing dvr device");
+        LOGNS(Omm::Dvb, dvb, debug, "releasing dvr device");
         _pRecDevice->close();
 //        delete _pRecDevice;
 //        _pRecDevice = 0;
@@ -113,12 +113,12 @@ DvbModel::getStream(const std::string& path, const std::string& resourcePath)
     }
 
 //    Poco::Thread::sleep(250);
-    Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
+    LOGNS(Omm::Dvb, dvb, debug, "reading from dvr device ...");
 //    std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
 //    _pRecDevice = new std::ifstream("/dev/dvb/adapter0/dvr0");
     _pRecDevice->open("/dev/dvb/adapter0/dvr0");
     if (!*_pRecDevice) {
-        Omm::Dvb::Log::instance()->dvb().error("dvr device busy");
+        LOGNS(Omm::Dvb, dvb, error, "dvr device busy");
 //        delete _pRecDevice;
 //        _pRecDevice = 0;
     }
@@ -143,7 +143,7 @@ DvbModel::getDlna(const std::string& path)
 void
 DvbModel::scanChannelConfig(const std::string& channelConfig, bool addPaths)
 {
-    Omm::Dvb::Log::instance()->dvb().debug("scan channel config ...");
+    LOGNS(Omm::Dvb, dvb, debug, "scan channel config ...");
 
     clearMaps();
 
@@ -171,7 +171,7 @@ DvbModel::scanChannelConfig(const std::string& channelConfig, bool addPaths)
             addPath(line);
         }
     }
-    Omm::Dvb::Log::instance()->dvb().debug("scan channel config finished.");
+    LOGNS(Omm::Dvb, dvb, debug, "scan channel config finished.");
 }
 
 
@@ -212,7 +212,7 @@ DvbModel::clearMaps()
 //{
 //    Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
 //
-//    Omm::Dvb::Log::instance()->dvb().debug("reading from dvr device ...");
+//    LOGNS(Omm::Dvb, dvb, debug, "reading from dvr device ...");
 //    std::ifstream istr("/dev/dvb/adapter0/dvr0");
 //    std::ofstream ostr("/var/local/ommrec.mpg");
 //    // TODO: stop StreamCopier::copyStream() in the timerCallback thread by closing istr and/or ostr

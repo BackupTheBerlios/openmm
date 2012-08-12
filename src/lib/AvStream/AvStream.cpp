@@ -39,6 +39,7 @@
 namespace Omm {
 namespace AvStream {
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 // possible log levels: trace, debug, information, notice, warning, error, critical, fatal
@@ -72,7 +73,7 @@ Log::avstream()
 {
     return *_pAvStreamLogger;
 }
-
+#endif //NDEBUG
 
 RingBuffer::RingBuffer(int size) :
 _ringBuffer(new char[size]),
@@ -154,13 +155,13 @@ ByteQueue::read(char* buffer, int num)
 void
 ByteQueue::write(const char* buffer, int num)
 {
-    Log::instance()->avstream().trace("byte queue write, num bytes: " + Poco::NumberFormatter::format(num));
+    LOG(avstream, trace, "byte queue write, num bytes: " + Poco::NumberFormatter::format(num));
     int bytesWritten = 0;
     while (bytesWritten < num) {
-        Log::instance()->avstream().trace("byte queue write -> writeSome, trying to write: " + Poco::NumberFormatter::format(num - bytesWritten) + " bytes");
+        LOG(avstream, trace, "byte queue write -> writeSome, trying to write: " + Poco::NumberFormatter::format(num - bytesWritten) + " bytes");
         bytesWritten += writeSome(buffer + bytesWritten, num - bytesWritten);
     }
-    Log::instance()->avstream().trace("byte queue write finished.");
+    LOG(avstream, trace, "byte queue write finished.");
 }
 
 
@@ -169,17 +170,17 @@ ByteQueue::readSome(char* buffer, int num)
 {
     _lock.lock();
     if (_level == 0) {
-        Log::instance()->avstream().trace("byte queue readSome() try to read " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+        LOG(avstream, trace, "byte queue readSome() try to read " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
         // block byte queue for further reading
         _readCondition.wait<Poco::FastMutex>(_lock);
-        Log::instance()->avstream().trace("byte queue readSome() wait over, now reading " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+        LOG(avstream, trace, "byte queue readSome() wait over, now reading " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     }
 
     int bytesRead = (_level < num) ? _level : num;
     _ringBuffer.read(buffer, bytesRead);
     _level -= bytesRead;
 
-    Log::instance()->avstream().trace("byte queue readSome() read " + Poco::NumberFormatter::format(bytesRead) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+    LOG(avstream, trace, "byte queue readSome() read " + Poco::NumberFormatter::format(bytesRead) + " bytes, level: " + Poco::NumberFormatter::format(_level));
 
     // we've read some bytes, so we can put something in, again
     if (_level < _size) {
@@ -196,16 +197,16 @@ ByteQueue::writeSome(const char* buffer, int num)
     _lock.lock();
     if (_level == _size) {
         // block byte queue for further writing
-        Log::instance()->avstream().trace("byte queue writeSome() try to write " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+        LOG(avstream, trace, "byte queue writeSome() try to write " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
         _writeCondition.wait<Poco::FastMutex>(_lock);
-        Log::instance()->avstream().trace("byte queue writeSome() wait over, now writing " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+        LOG(avstream, trace, "byte queue writeSome() wait over, now writing " + Poco::NumberFormatter::format(num) + " bytes, level: " + Poco::NumberFormatter::format(_level));
     }
 
     int bytesWritten = (_size - _level < num) ? (_size - _level) : num;
     _ringBuffer.write(buffer, bytesWritten);
     _level += bytesWritten;
 
-    Log::instance()->avstream().trace("byte queue writeSome() wrote " + Poco::NumberFormatter::format(bytesWritten) + " bytes, level: " + Poco::NumberFormatter::format(_level));
+    LOG(avstream, trace, "byte queue writeSome() wrote " + Poco::NumberFormatter::format(bytesWritten) + " bytes, level: " + Poco::NumberFormatter::format(_level));
 
     // we've written some bytes, so we can get something out, again
     if (_level > 0) {
@@ -235,7 +236,7 @@ ByteQueue::level()
 void
 ByteQueue::clear()
 {
-    Log::instance()->avstream().trace("byte queue clear");
+    LOG(avstream, trace, "byte queue clear");
     char buf[_level];
     read(buf, _level);
 }
@@ -245,7 +246,7 @@ bool
 ByteQueue::full()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    Log::instance()->avstream().trace("byte queue check full() at level: " + Poco::NumberFormatter::format(_level));
+    LOG(avstream, trace, "byte queue check full() at level: " + Poco::NumberFormatter::format(_level));
     return (_level == _size);
 }
 
@@ -254,7 +255,7 @@ bool
 ByteQueue::empty()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
-    Log::instance()->avstream().trace("byte queue check empty() at level: " + Poco::NumberFormatter::format(_level));
+    LOG(avstream, trace, "byte queue check empty() at level: " + Poco::NumberFormatter::format(_level));
     return (_level == 0);
 }
 
@@ -304,8 +305,7 @@ StreamInfo::setName(const std::string& name)
 void
 StreamInfo::printInfo()
 {
-    Log::instance()->avstream().debug("stream width: " + Poco::NumberFormatter::format(width()) + ", height: " +
-        Poco::NumberFormatter::format(height()));
+    LOG(avstream, debug, "stream width: " + Poco::NumberFormatter::format(width()) + ", height: " + Poco::NumberFormatter::format(height()));
 }
 
 
@@ -335,16 +335,16 @@ Frame*
 Stream::firstFrame()
 {
     if (!_pStreamQueue) {
-        Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] get frame no queue attached, ignoring");
+        LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] get frame no queue attached, ignoring");
         return 0;
     }
     else {
         Frame* pRes = _pStreamQueue->front();
         if (!pRes) {
-            Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] first frame is null frame.");
+            LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] first frame is null frame.");
         }
         else {
-            Log::instance()->avstream().trace(getNode()->getName() + " [" + getInfo()->getName() + "] first frame " + pRes->getName() + ".");
+            LOG(avstream, trace, getNode()->getName() + " [" + getInfo()->getName() + "] first frame " + pRes->getName() + ".");
         }
         return pRes;
     }
@@ -355,18 +355,18 @@ Frame*
 Stream::getFrame()
 {
     if (!_pStreamQueue) {
-        Log::instance()->avstream().trace("getFrame() no stream queue");
-        Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] get frame no queue attached, ignoring");
+        LOG(avstream, trace, "getFrame() no stream queue");
+        LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] get frame no queue attached, ignoring");
         return 0;
     }
     else {
         Frame* pRes = _pStreamQueue->get();
         if (!pRes) {
-            Log::instance()->avstream().trace("getFrame() null frame");
-            Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] get frame returns null frame.");
+            LOG(avstream, trace, "getFrame() null frame");
+            LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] get frame returns null frame.");
         }
         else {
-            Log::instance()->avstream().trace(getNode()->getName() + " [" + getInfo()->getName() + "] get frame " + pRes->getName() + ", queue size: " +
+            LOG(avstream, trace, getNode()->getName() + " [" + getInfo()->getName() + "] get frame " + pRes->getName() + ", queue size: " +\
                 Poco::NumberFormatter::format(_pStreamQueue->count()));
         }
         return pRes;
@@ -378,13 +378,13 @@ void
 Stream::putFrame(Frame* pFrame)
 {
     if (!pFrame) {
-        Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] put null frame, discarding frame");
+        LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] put null frame, discarding frame");
     }
     else if (!_pStreamQueue) {
-        Log::instance()->avstream().warning(getNode()->getName() + " [" + getInfo()->getName() + "] put frame " + pFrame->getName() + " no queue attached, discarding frame");
+        LOG(avstream, warning, getNode()->getName() + " [" + getInfo()->getName() + "] put frame " + pFrame->getName() + " no queue attached, discarding frame");
     }
     else {
-        Log::instance()->avstream().trace(getNode()->getName() + " [" + getInfo()->getName() + "] put frame " + pFrame->getName() + ", queue size: " +
+        LOG(avstream, trace, getNode()->getName() + " [" + getInfo()->getName() + "] put frame " + pFrame->getName() + ", queue size: " +\
             Poco::NumberFormatter::format(_pStreamQueue->count()));
         _pStreamQueue->put(pFrame);
     }
@@ -439,7 +439,7 @@ Frame*
 StreamInfo::decodeFrame(Frame* pFrame)
 {
     if (!pFrame || !pFrame->data()) {
-        Log::instance()->avstream().warning("input frame broken while decoding stream " + getName() + ", discarding frame.");
+        LOG(avstream, warning, "input frame broken while decoding stream " + getName() + ", discarding frame.");
         return 0;
     }
 
@@ -472,7 +472,7 @@ _quit(false)
 std::string
 Node::getName()
 {
-//     Log::instance()->avstream().debug("Node::getName()");
+//     LOG(avstream, debug, "Node::getName()");
     Poco::ScopedLock<Poco::FastMutex> lock(_nameLock);
     return _name;
 }
@@ -490,18 +490,18 @@ Node::setName(const std::string& name)
 void
 Node::start()
 {
-    Log::instance()->avstream().debug(getName() + " starting run thread ...");
+    LOG(avstream, debug, getName() + " starting run thread ...");
 
     // first start all nodes downstream, so they can begin sucking frames ...
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
         if (!(*it)) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not start downstream node, no stream attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not start downstream node, no stream attached");
             continue;
         }
         Node* downstreamNode = getDownstreamNode(outStreamNumber);
         if (!downstreamNode) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not start downstream node, no node attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not start downstream node, no node attached");
             continue;
         }
         downstreamNode->start();
@@ -517,19 +517,19 @@ Node::start()
 void
 Node::stop()
 {
-    Log::instance()->avstream().debug(getName() + " stopping run thread ...");
+    LOG(avstream, debug, getName() + " stopping run thread ...");
 
     initiateStop();
     waitForStop();
 
-    Log::instance()->avstream().debug(getName() + " run thread stopped.");
+    LOG(avstream, debug, getName() + " run thread stopped.");
 }
 
 
 void
 Node::initiateStop()
 {
-    Log::instance()->avstream().debug(getName() + " trying to stop run thread ...");
+    LOG(avstream, debug, getName() + " trying to stop run thread ...");
     // first stop this node by setting the _quit flag ...
     setStop(true);
 
@@ -537,21 +537,21 @@ Node::initiateStop()
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
         if (!(*it)) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no stream attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no stream attached");
             continue;
         }
         Node* downstreamNode = getDownstreamNode(outStreamNumber);
         if (!downstreamNode) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not stop downstream node, no node attached");
             continue;
         }
         downstreamNode->initiateStop();
         if ((*it)->getQueue()->full()) {
-            Log::instance()->avstream().debug(getName() + " out stream queue full while stopping node, getting frame");
+            LOG(avstream, debug, getName() + " out stream queue full while stopping node, getting frame");
             delete (*it)->getFrame();
         }
         else if ((*it)->getQueue()->empty()){
-            Log::instance()->avstream().debug(getName() + " out stream queue empty while stopping node, putting flush frame");
+            LOG(avstream, debug, getName() + " out stream queue empty while stopping node, putting flush frame");
             (*it)->putFrame(new Frame(0, (*it)->getInfo(), true));
         }
     }
@@ -561,7 +561,7 @@ Node::initiateStop()
 void
 Node::waitForStop()
 {
-    Log::instance()->avstream().debug(getName() + " trying to join run thread ...");
+    LOG(avstream, debug, getName() + " trying to join run thread ...");
     try {
         // wait for run thread loop to finish
         // FIXME: what, if the thread finishes after _thread.isRunning() and _thread.join()
@@ -570,21 +570,21 @@ Node::waitForStop()
         }
     }
     catch(...) {
-        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown run thread");
+        LOG(avstream, warning, getName() + " failed to cleanly shutdown run thread");
     }
     setStop(false);
-    Log::instance()->avstream().debug(getName() + " run thread joined.");
+    LOG(avstream, debug, getName() + " run thread joined.");
 
     // then wait for all nodes downstream to stop
     int outStreamNumber = 0;
     for (std::vector<Stream*>::iterator it = _outStreams.begin(); it != _outStreams.end(); ++it, ++outStreamNumber) {
         if (!(*it)) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no stream attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no stream attached");
             continue;
         }
         Node* downstreamNode = getDownstreamNode(outStreamNumber);
         if (!downstreamNode) {
-            Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no node attached");
+            LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not wait for downstream node to stop, no node attached");
             continue;
         }
         downstreamNode->waitForStop();
@@ -596,41 +596,41 @@ void
 Node::attach(Node* node, int outStreamNumber, int inStreamNumber)
 {
     if (!node) {
-        Log::instance()->avstream().warning(getName() + ": could not attach null node");
+        LOG(avstream, warning, getName() + ": could not attach null node");
         return;
     }
 
     // entwine StreamInfo and StreamQueue of inStream and outStream
     // TODO: improve warning messages
     if (!_outStreams[outStreamNumber]) {
-        Log::instance()->avstream().warning(getName() + "%s: could not attach ..., output stream invalid");
+        LOG(avstream, warning, getName() + "%s: could not attach ..., output stream invalid");
         return;
     }
     if (!_outStreams[outStreamNumber]->getInfo()) {
-        Log::instance()->avstream().warning(getName() + ": could not attach ..., output stream has no info");
+        LOG(avstream, warning, getName() + ": could not attach ..., output stream has no info");
         return;
     }
     if (!node->_inStreams[inStreamNumber]) {
-        Log::instance()->avstream().warning(getName() + ": could not attach ..., downstream node input stream invalid");
+        LOG(avstream, warning, getName() + ": could not attach ..., downstream node input stream invalid");
         return;
     }
     if (!node->_inStreams[inStreamNumber]->getQueue()) {
-        Log::instance()->avstream().warning(getName() + ": could not attach ..., downstream node input stream has no queue");
+        LOG(avstream, warning, getName() + ": could not attach ..., downstream node input stream has no queue");
         return;
     }
 
     _outStreams[outStreamNumber]->setQueue(node->_inStreams[inStreamNumber]->getQueue());
     node->_inStreams[inStreamNumber]->setInfo(_outStreams[outStreamNumber]->getInfo());
 
-    Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] attached node " + node->getName() + " [" + Poco::NumberFormatter::format(inStreamNumber) + "]");
+    LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] attached node " + node->getName() + " [" + Poco::NumberFormatter::format(inStreamNumber) + "]");
 
-    Log::instance()->avstream().debug("calling init() of " + node->getName());
+    LOG(avstream, debug, "calling init() of " + node->getName());
     bool initSuccess = node->init();
     if (initSuccess) {
-        Log::instance()->avstream().debug(node->getName() + " init success.");
+        LOG(avstream, debug, node->getName() + " init success.");
     }
     else {
-        Log::instance()->avstream().warning(node->getName() + " init failed, start of node canceled.");
+        LOG(avstream, warning, node->getName() + " init failed, start of node canceled.");
         setStop(true);
     }
 }
@@ -640,10 +640,10 @@ void
 Node::detach(int outStreamNumber)
 {
     if (outStreamNumber >= _outStreams.size()) {
-        Log::instance()->avstream().error(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not detach node, stream number to high");
+        LOG(avstream, error, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not detach node, stream number to high");
         return;
     }
-    Log::instance()->avstream().debug(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] detached node " + _outStreams[outStreamNumber]->getQueue()->getNode()->getName());
+    LOG(avstream, debug, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] detached node " + _outStreams[outStreamNumber]->getQueue()->getNode()->getName());
 
     // lazy strategie: only set queue of outStream to 0, so no frames are put into the queue anymore
     // the attached node empties the queue with a valid stream context (StreamInfo) and blocks
@@ -657,12 +657,12 @@ Node::getDownstreamNode(int outStreamNumber)
 {
 //     Poco::ScopedLock<Poco::FastMutex> lock(_lock);
     if (outStreamNumber >= _outStreams.size()) {
-        Log::instance()->avstream().error(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not get downstream node, stream number to high");
+        LOG(avstream, error, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not get downstream node, stream number to high");
         return 0;
     }
     Stream* outStream = _outStreams[outStreamNumber];
     if (!outStream || !outStream->getQueue()) {
-        Log::instance()->avstream().warning(getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not get downstream node, no node attached to output stream.");
+        LOG(avstream, warning, getName() + " [" + Poco::NumberFormatter::format(outStreamNumber) + "] could not get downstream node, no node attached to output stream.");
         return 0;
     }
     return outStream->getQueue()->getNode();
@@ -709,7 +709,7 @@ Node::getOutStream(int outStreamNumber)
 void
 Node::reset()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("node reset ...");
+    LOG(avstream, debug, "node reset ...");
     setStop(false);
     for (std::vector<Stream*>::iterator it = _inStreams.begin(); it != _inStreams.end(); ++it) {
         Queue<Frame*>* pQueue = (*it)->getQueue();
@@ -724,7 +724,7 @@ Node::reset()
             }
         }
     }
-    Omm::AvStream::Log::instance()->avstream().debug("node reset finished.");
+    LOG(avstream, debug, "node reset finished.");
 }
 
 
@@ -803,7 +803,7 @@ Frame::getStreamInfo()
 void
 Frame::writePpm(const std::string& fileName)
 {
-    Log::instance()->avstream().debug("write video frame to PPM file name: " + fileName);
+    LOG(avstream, debug, "write video frame to PPM file name: " + fileName);
 
     Frame* pRes = convert(Meta::CC_RGB24);
 
@@ -822,7 +822,7 @@ _firstAudioStream(-1),
 _firstVideoStream(-1)
 {
 //     // Initialize libavformat and register all the muxers, demuxers and protocols
-//     Log::instance()->ffmpeg().trace("ffmpeg::av_register_all() ...");
+//     LOG(ffmpeg, trace, "ffmpeg::av_register_all() ...");
 //     av_register_all();
 }
 
@@ -832,13 +832,13 @@ Demuxer::set(Meta* pMeta)
 {
     _pMeta = pMeta;
     if (!_pMeta) {
-        Log::instance()->avstream().warning("demuxer could not tag input stream, giving up.");
+        LOG(avstream, warning, "demuxer could not tag input stream, giving up.");
         setStop(true);
     }
     else {
         _pMeta->print();
         if (!init()) {
-            Log::instance()->avstream().warning("demuxer init failed, giving up.");
+            LOG(avstream, warning, "demuxer init failed, giving up.");
             setStop(true);
         }
     }
@@ -861,21 +861,21 @@ Demuxer::init()
 
         //////////// find first audio and video stream ////////////
         if (pStream->getInfo()->isAudio()) {
-            Log::instance()->avstream().information("found audio stream #" + Poco::NumberFormatter::format(streamNr));
+            LOG(avstream, information, "found audio stream #" + Poco::NumberFormatter::format(streamNr));
             pStream->getInfo()->setName("audio" + Poco::NumberFormatter::format(audioStreamCount++));
             if (_firstAudioStream < 0) {
                 _firstAudioStream = streamNr;
             }
         }
         else if (pStream->getInfo()->isVideo()) {
-            Log::instance()->avstream().information("found video stream #" + Poco::NumberFormatter::format(streamNr));
+            LOG(avstream, information, "found video stream #" + Poco::NumberFormatter::format(streamNr));
             pStream->getInfo()->setName("video" + Poco::NumberFormatter::format(videoStreamCount++));
             if (_firstVideoStream < 0) {
                 _firstVideoStream = streamNr;
             }
         }
         else {
-            Log::instance()->avstream().information("found unknown stream #" + Poco::NumberFormatter::format(streamNr));
+            LOG(avstream, information, "found unknown stream #" + Poco::NumberFormatter::format(streamNr));
         }
     }
     return true;
@@ -885,7 +885,7 @@ Demuxer::init()
 void
 Demuxer::reset()
 {
-    Log::instance()->avstream().debug("demuxer reset ...");
+    LOG(avstream, debug, "demuxer reset ...");
     if (_pMeta) {
         delete _pMeta;
     }
@@ -898,14 +898,14 @@ Demuxer::reset()
     _firstAudioStream = -1;
     _firstVideoStream = -1;
     Node::reset();
-    Log::instance()->avstream().debug("demuxer reset finished.");
+    LOG(avstream, debug, "demuxer reset finished.");
 }
 
 
 void
 Demuxer::run()
 {
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
+    LOG(avstream, debug, getName() + " run thread started.");
 
     std::vector<Poco::Int64> lastPtsVec(_outStreams.size(), Meta::invalidPts);
     std::vector<int> lastDurationVec(_outStreams.size(), 0);
@@ -922,7 +922,7 @@ Demuxer::run()
         }
 
         if (!_outStreams[streamIndex]->getQueue()) {
-            Log::instance()->avstream().warning(getName() + " stream " + Poco::NumberFormatter::format(streamIndex) + " not connected, discarding packet");
+            LOG(avstream, warning, getName() + " stream " + Poco::NumberFormatter::format(streamIndex) + " not connected, discarding packet");
             delete pFrame;
             continue;
         }
@@ -938,7 +938,7 @@ Demuxer::run()
         Poco::Int64 currentPts = pFrame->getPts();
         Poco::Int64 correctedPts = correctPts(currentPts, lastPtsVec[streamIndex], lastDurationVec[streamIndex]);
         if (correctedPts != currentPts) {
-            Log::instance()->avstream().warning(getName() + " frame " + pFrame->getName() + ", correct pts " + Poco::NumberFormatter::format(currentPts) + " -> " + Poco::NumberFormatter::format(correctedPts) + ", delta: " +
+            LOG(avstream, warning, getName() + " frame " + pFrame->getName() + ", correct pts " + Poco::NumberFormatter::format(currentPts) + " -> " + Poco::NumberFormatter::format(correctedPts) + ", delta: " +\
                 Poco::NumberFormatter::format((correctedPts - currentPts)));
         }
         pFrame->setPts(correctedPts);
@@ -947,7 +947,7 @@ Demuxer::run()
 
         _outStreams[streamIndex]->putFrame(pFrame);
     }
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
+    LOG(avstream, debug, getName() + " run thread finished.");
 }
 
 
@@ -1044,7 +1044,7 @@ Demuxer::correctPts(Poco::Int64 pts, Poco::Int64 lastPts, int lastDuration)
 //
 //     // and no output stream
 //
-//     Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::avformat_alloc_context()");
+//     LOG(ffmpeg, debug, "ffmpeg::avformat_alloc_context()");
 //     _pMeta->_pFormatContext = avformat_alloc_context();
 // }
 
@@ -1059,14 +1059,14 @@ Muxer::~Muxer()
 // Muxer::set(const std::string& uri, const std::string& format)
 // {
 //     _uri = uri;
-//     Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::guess_format()");
+//     LOG(ffmpeg, debug, "ffmpeg::guess_format()");
 //     _pMeta->_pFormatContext->oformat = guess_format(format.c_str(), NULL, NULL);
 //     // TODO: check for max uri length supported by ffmpeg (currently 1024 ...?)
 //     _uri.copy(_pMeta->_pFormatContext->filename, _uri.size());
 //     _pMeta->_pFormatContext->filename[_uri.size()] = '\0';
 //
 //     if (av_set_parameters(_pMeta->_pFormatContext, 0) < 0) {
-//         Omm::AvStream::Log::instance()->avstream().error("invalid output format parameters");
+//         LOG(avstream, error, "invalid output format parameters");
 //         return;
 //     }
 // }
@@ -1093,14 +1093,14 @@ Muxer::reset()
 // Muxer::prepareOutStream(int streamNumber)
 // {
 //     if (!_inStreams[streamNumber]->getInfo()->findCodec()) {
-//         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find codec");
+//         LOG(avstream, warning, getName() + " init failed, could not find codec");
 //         return false;
 //     }
 //
 //     _inStreams[streamNumber]->setInfo(_inStreams[streamNumber]->getInfo()->cloneOutStreamInfo(_pMeta, streamNumber));
 //
 //     if (!_inStreams[streamNumber]->getInfo()->findEncoder()) {
-//         Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find encoder");
+//         LOG(avstream, warning, getName() + " init failed, could not find encoder");
 //         return false;
 //     }
 //     return true;
@@ -1111,7 +1111,7 @@ Muxer::reset()
 // Muxer::init()
 // {
 //     if (!_inStreams[0]->getInfo() && !_inStreams[1]->getInfo()) {
-//         Log::instance()->avstream().warning(getName() + " init failed, two input streams must be connected");
+//         LOG(avstream, warning, getName() + " init failed, two input streams must be connected");
 //         return false;
 //     }
 //
@@ -1125,10 +1125,10 @@ Muxer::reset()
 //
 //         _pMeta->print(true);
 //
-//         Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::url_fopen()");
+//         LOG(ffmpeg, debug, "ffmpeg::url_fopen()");
 //         url_fopen(&_pMeta->_pFormatContext->pb, _uri.c_str(), URL_WRONLY);
 //
-//         Omm::AvStream::Log::instance()->ffmpeg().debug("ffmpeg::av_write_header()");
+//         LOG(ffmpeg, debug, "ffmpeg::av_write_header()");
 //         av_write_header(_pMeta->_pFormatContext);
 //     }
 //
@@ -1139,7 +1139,7 @@ Muxer::reset()
 // void
 // Muxer::run()
 // {
-//     Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread started.");
+//     LOG(avstream, debug, getName() + " run thread started.");
 //
 //     while (!getStop()) {
 //         // FIXME: handle packet number wrap in muxer
@@ -1149,9 +1149,9 @@ Muxer::reset()
 //         while (pSecondStreamFrame->getNumber() < pFirstStreamFrame->getNumber())
 //         {
 //             // FIXME: segfault (floating point exception) in av_write_frame()
-//             Log::instance()->avstream().debug(getName() + " write frame " + pSecondStreamFrame->getName());
+//             LOG(avstream, debug, getName() + " write frame " + pSecondStreamFrame->getName());
 //             pSecondStreamFrame->_pAvPacket->stream_index = 1;
-//             Log::instance()->ffmpeg().trace("ffmpeg::av_write_frame() ...");
+//             LOG(ffmpeg, trace, "ffmpeg::av_write_frame() ...");
 //             av_write_frame(_pMeta->_pFormatContext, pSecondStreamFrame->_pAvPacket);
 // //             delete pSecondStreamFrame;
 //             pSecondStreamFrame = _inStreams[1]->getFrame();
@@ -1159,15 +1159,15 @@ Muxer::reset()
 //
 //         while (pFirstStreamFrame->getNumber() < pSecondStreamFrame->getNumber())
 //         {
-//             Log::instance()->avstream().debug(getName() + " write frame " + pFirstStreamFrame->getName());
+//             LOG(avstream, debug, getName() + " write frame " + pFirstStreamFrame->getName());
 //             pFirstStreamFrame->_pAvPacket->stream_index = 0;
-//             Log::instance()->ffmpeg().trace("ffmpeg::av_write_frame() ...");
+//             LOG(ffmpeg, trace, "ffmpeg::av_write_frame() ...");
 //             av_write_frame(_pMeta->_pFormatContext, pFirstStreamFrame->_pAvPacket);
 // //             delete pFirstStreamFrame;
 //             pFirstStreamFrame = _inStreams[0]->getFrame();
 //         }
 //     }
-//     Log::instance()->ffmpeg().trace("ffmpeg::av_write_trailer() ...");
+//     LOG(ffmpeg, trace, "ffmpeg::av_write_trailer() ...");
 //     av_write_trailer(_pMeta->_pFormatContext);
 // }
 
@@ -1395,11 +1395,11 @@ bool
 Sink::init()
 {
     if (!_inStreams[0]->getInfo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, input stream info not allocated");
+        LOG(avstream, warning, getName() + " init failed, input stream info not allocated");
         return false;
     }
     if (!_inStreams[0]->getInfo()->findCodec()) {
-        Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, could not find codec");
+        LOG(avstream, warning, getName() + " init failed, could not find codec");
         return false;
     }
 
@@ -1410,56 +1410,56 @@ Sink::init()
 void
 Sink::run()
 {
-    Log::instance()->avstream().debug(getName() + " run thread started.");
+    LOG(avstream, debug, getName() + " run thread started.");
 
     if (!_inStreams[0]->getQueue()) {
-        Omm::AvStream::Log::instance()->avstream().warning("no in stream attached to video sink, stopping.");
+        LOG(avstream, warning, "no in stream attached to video sink, stopping.");
         return;
     }
     Omm::AvStream::Frame* pFrame;
-    Log::instance()->avstream().debug(getName() + " run thread looping ...");
+    LOG(avstream, debug, getName() + " run thread looping ...");
     while ((pFrame = _inStreams[0]->getFrame()) && !getStop()) {
         if (pFrame->isEndOfStream()) {
-            Log::instance()->avstream().debug(getName() + " run thread got end of stream frame, bailing out ...");
+            LOG(avstream, debug, getName() + " run thread got end of stream frame, bailing out ...");
             _streamEventNotifier.postNotification(new EndOfStream);
             break;
         }
         Omm::AvStream::Frame* pDecodedFrame = _inStreams[0]->getInfo()->decodeFrame(pFrame);
         if (!pDecodedFrame) {
-            Omm::AvStream::Log::instance()->avstream().warning(getName() + " decoding failed, discarding frame");
+            LOG(avstream, warning, getName() + " decoding failed, discarding frame");
         }
         else {
             if (!_firstDecodeSuccess) {
                 _firstDecodeSuccess = true;
                 _startTime = pDecodedFrame->getPts();
                 _timeQueue.put(_startTime);
-                Omm::AvStream::Log::instance()->avstream().debug(getName() + " start time is " +
+                LOG(avstream, debug, getName() + " start time is " +\
                     Poco::NumberFormatter::format(_startTime));
             }
             writeDecodedFrame(pDecodedFrame);
         }
     }
-    Omm::AvStream::Log::instance()->avstream().debug(getName() + " run thread finished.");
+    LOG(avstream, debug, getName() + " run thread finished.");
 }
 
 
 void
 Sink::reset()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("sink reset ...");
+    LOG(avstream, debug, "sink reset ...");
     closeDevice();
     _firstDecodeSuccess = false;
     _startTime = Meta::invalidPts;
     _timeQueue.clear();
     Node::reset();
-    Omm::AvStream::Log::instance()->avstream().debug("sink reset finished.");
+    LOG(avstream, debug, "sink reset finished.");
 }
 
 
 void
 Sink::currentTime(Poco::Int64 time)
 {
-    Log::instance()->avstream().trace(getName() + " received current time: " + Poco::NumberFormatter::format(time));
+    LOG(avstream, trace, getName() + " received current time: " + Poco::NumberFormatter::format(time));
 
     _timeQueue.put(time);
 }
@@ -1491,7 +1491,7 @@ bool
 AudioSink::checkInStream()
 {
     if (!_inStreams[0]->getInfo()->isAudio()) {
-        Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, input stream is not an audio stream");
+        LOG(avstream, warning, getName() + " init failed, input stream is not an audio stream");
         return false;
     }
 
@@ -1502,9 +1502,9 @@ AudioSink::checkInStream()
 void
 AudioSink::writeDecodedFrame(Frame* pDecodedFrame)
 {
-    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame of size " + Poco::NumberFormatter::format(pDecodedFrame->size()) + " to byte queue ...");
+    LOG(avstream, trace, getName() + " writing decoded audio frame of size " + Poco::NumberFormatter::format(pDecodedFrame->size()) + " to byte queue ...");
     _byteQueue.write(pDecodedFrame->data(), pDecodedFrame->size());
-    Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded audio frame to byte queue finished.");
+    LOG(avstream, trace, getName() + " writing decoded audio frame to byte queue finished.");
 }
 
 
@@ -1605,7 +1605,7 @@ AudioSink::setVolume(float vol)
 void
 AudioSink::setVolume(char* buffer, int size)
 {
-    Log::instance()->avstream().debug("audio sink set volume ...");
+    LOG(avstream, debug, "audio sink set volume ...");
     int16_t* buf = (int16_t*) buffer;
     int s = size >> 1;
     _volumeLock.lock();
@@ -1613,14 +1613,14 @@ AudioSink::setVolume(char* buffer, int size)
         buf[i] = _volume * buf[i];
     }
     _volumeLock.unlock();
-    Log::instance()->avstream().debug("audio sink set volume finished.");
+    LOG(avstream, debug, "audio sink set volume finished.");
 }
 
 
 void
 AudioSink::halfByteQueue()
 {
-    Log::instance()->avstream().debug("trimming byte queue half full");
+    LOG(avstream, debug, "trimming byte queue half full");
     int diff = _byteQueue.size() / 2 - _byteQueue.level();
     if (diff == 0) {
         return;
@@ -1647,22 +1647,22 @@ AudioSink::clearByteQueue()
 void
 AudioSink::reset()
 {
-    Log::instance()->avstream().debug("audio sink reset ...");
+    LOG(avstream, debug, "audio sink reset ...");
     _audioTime = Meta::invalidPts;
     _byteQueue.clear();
     Sink::reset();
-    Log::instance()->avstream().debug("audio sink reset finished.");
+    LOG(avstream, debug, "audio sink reset finished.");
 }
 
 
 void
 AudioSink::setStartTime(Poco::Int64 startTime, bool toFirstFrame)
 {
-    Log::instance()->avstream().debug(getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
+    LOG(avstream, debug, getName() + " audio start time: " + Poco::NumberFormatter::format(_startTime) + ", clock start time: " + Poco::NumberFormatter::format(startTime) + ".");
 
     if (startTime < _startTime) {
         // TODO: insert silence until _startTime ...?
-        Log::instance()->avstream().warning(getName() + " start time is later than CLOCK start time, should insert silence.");
+        LOG(avstream, warning, getName() + " start time is later than CLOCK start time, should insert silence.");
     }
     else if ((startTime > _startTime) && !toFirstFrame) {
         // TODO: don't hardcode time base and sample size
@@ -1671,7 +1671,7 @@ AudioSink::setStartTime(Poco::Int64 startTime, bool toFirstFrame)
         discardSize = (discardSize >> 2) << 2;
         char discardBuffer[discardSize];
 
-        Log::instance()->avstream().debug(getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format(discardSize) + " bytes.");
+        LOG(avstream, debug, getName() + " start time is earlier than CLOCK start time, discarding " + Poco::NumberFormatter::format(discardSize) + " bytes.");
         audioReadBlocking(discardBuffer, discardSize);
     }
     _audioTime = startTime;
@@ -1707,7 +1707,7 @@ bool
 VideoSink::checkInStream()
 {
     if (!_inStreams[0]->getInfo()->isVideo()) {
-        Omm::AvStream::Log::instance()->avstream().warning(getName() + " init failed, input stream is not a video stream");
+        LOG(avstream, warning, getName() + " init failed, input stream is not a video stream");
         return false;
     }
 
@@ -1724,7 +1724,7 @@ VideoSink::setStartTime(Poco::Int64 startTime)
 void
 VideoSink::startPresentation()
 {
-    Log::instance()->avstream().debug(getName() + " starting timer thread ...");
+    LOG(avstream, debug, getName() + " starting timer thread ...");
 
     _timerThread.start(_timerThreadRunnable);
 }
@@ -1733,16 +1733,16 @@ VideoSink::startPresentation()
 void
 VideoSink::stopPresentation()
 {
-    Log::instance()->avstream().debug(getName() + " stopping timer thread ...");
+    LOG(avstream, debug, getName() + " stopping timer thread ...");
 
     setTimerStop(true);
 
     if (_timeQueue.full()) {
-        Log::instance()->avstream().debug("video sink time queue full while stopping node, getting tick");
+        LOG(avstream, debug, "video sink time queue full while stopping node, getting tick");
         _timeQueue.get();
     }
     else if (_timeQueue.empty()) {
-        Log::instance()->avstream().debug("video sink time queue empty while stopping node, putting tick");
+        LOG(avstream, debug, "video sink time queue empty while stopping node, putting tick");
         _timeQueue.put(0);
     }
 }
@@ -1758,7 +1758,7 @@ VideoSink::stopSinkPresentation()
 void
 VideoSink::waitPresentationStop()
 {
-    Log::instance()->avstream().debug(getName() + " trying to join timer thread ...");
+    LOG(avstream, debug, getName() + " trying to join timer thread ...");
     try {
         // wait for run thread loop to finish
         // FIXME: what, if the thread finishes after _thread.isRunning() and before _thread.join()
@@ -1767,29 +1767,29 @@ VideoSink::waitPresentationStop()
         }
     }
     catch(...) {
-        Log::instance()->avstream().warning(getName() + " failed to cleanly shutdown timer thread");
+        LOG(avstream, warning, getName() + " failed to cleanly shutdown timer thread");
     }
     setTimerStop(false);
-    Log::instance()->avstream().debug(getName() + " timer thread joined.");
+    LOG(avstream, debug, getName() + " timer thread joined.");
 }
 
 
 void
 VideoSink::timerThread()
 {
-    Log::instance()->avstream().debug(getName() + " timer thread started.");
+    LOG(avstream, debug, getName() + " timer thread started.");
 
     while(!getTimerStop()) {
-        Log::instance()->avstream().trace("video sink getting time ...");
+        LOG(avstream, trace, "video sink getting time ...");
         Poco::Int64 time = _timeQueue.get();
 //         Log::instance()->avstream().trace(Poco::format("%s timer thread on tick time: %s, time queue size: %s",
 //             getName(), Poco::NumberFormatter::format(time), Poco::NumberFormatter::format(_timeQueue.count())));
-        Log::instance()->avstream().trace("video sink timer thread on tick time: " +
+        LOG(avstream, trace, "video sink timer thread on tick time: " +\
                                           Poco::NumberFormatter::format(time));
         onTick(time);
     }
 
-    Log::instance()->avstream().debug(getName() + " timer thread finished.");
+    LOG(avstream, debug, getName() + " timer thread finished.");
 }
 
 
@@ -1876,26 +1876,26 @@ VideoSink::displayRect(int& x, int& y, int& w, int& h)
 void
 VideoSink::reset()
 {
-    Log::instance()->avstream().debug("video sink reset ...");
+    LOG(avstream, debug, "video sink reset ...");
     _writeOverlayNumber = 0;
     setTimerStop(false);
     blankDisplay();
     Sink::reset();
     _overlayQueue.clear();
-    Log::instance()->avstream().debug("video sink reset finished.");
+    LOG(avstream, debug, "video sink reset finished.");
 }
 
 
 void
 VideoSink::writeDecodedFrame(Omm::AvStream::Frame* pDecodedFrame)
 {
-//     Omm::AvStream::Log::instance()->avstream().trace(getName() + " writing decoded video frame to overlay ...");
-    Log::instance()->avstream().trace("video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()) + " ...");
+//     LOG(avstream, trace, getName() + " writing decoded video frame to overlay ...");
+    LOG(avstream, trace, "video sink run thread, writing frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()) + " ...");
     Overlay* pWriteOverlay = _overlayVector[_writeOverlayNumber];
     pDecodedFrame->write(pWriteOverlay);
     pWriteOverlay->_pts = pDecodedFrame->getPts();
     pWriteOverlay->_aspectRatio = getInStream(0)->getInfo()->aspectRatio();
-    Log::instance()->avstream().trace("video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
+    LOG(avstream, trace, "video sink run thread, written frame to overlay, frame pts: " + Poco::NumberFormatter::format(pDecodedFrame->getPts()));
     _overlayQueue.put(pWriteOverlay);
     // increment modulo _overlayCount
     _writeOverlayNumber = (_writeOverlayNumber + 1) % _overlayCount;
@@ -1908,12 +1908,12 @@ VideoSink::onTick(Poco::Int64 time)
     Overlay* pOverlay = _overlayQueue.front();
 
     if (!pOverlay) {
-        Omm::AvStream::Log::instance()->avstream().warning("null video frame in overlay queue, ignoring");
+        LOG(avstream, warning, "null video frame in overlay queue, ignoring");
         return;
     }
 
     Poco::Int64 framePts = pOverlay->_pts;
-    Log::instance()->avstream().trace("video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format((framePts - time)));
+    LOG(avstream, trace, "video sink timer thread time: " + Poco::NumberFormatter::format(time) + ", frame pts: " + Poco::NumberFormatter::format(framePts) + ", delta: " + Poco::NumberFormatter::format((framePts - time)));
 
     // wait until the frame in the overlay queue is not newer than current clock time
     // then fetch it from the overlay queue and display it.
@@ -1970,10 +1970,9 @@ void
 Clock::attachAudioSink(AudioSink* pAudioSink)
 {
     _audioSinkVec.push_back(pAudioSink);
-    pAudioSink->_pClock = this,
+    pAudioSink->_pClock = this;
 
-    Log::instance()->avstream().debug("CLOCK attached " +
-        pAudioSink->getName());
+    LOG(avstream, debug, "CLOCK attached " + pAudioSink->getName());
 }
 
 
@@ -1982,7 +1981,7 @@ Clock::attachVideoSink(VideoSink* pVideoSink)
 {
     _videoSinkVec.push_back(pVideoSink);
 
-    Log::instance()->avstream().debug("CLOCK attached " +
+    LOG(avstream, debug, "CLOCK attached " +\
         pVideoSink->getName());
 }
 
@@ -1994,7 +1993,7 @@ Clock::setStartTime(bool toFirstFrame)
 
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         Poco::Int64 time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
+        LOG(avstream, debug, "CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
         // if startTime is not yet in initialized with a valid pts, take the first audio pts
         if (startTime == Meta::invalidPts) {
             startTime = time;
@@ -2008,7 +2007,7 @@ Clock::setStartTime(bool toFirstFrame)
     }
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         Poco::Int64 time = (*it)->_timeQueue.get();
-        Omm::AvStream::Log::instance()->avstream().debug("CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
+        LOG(avstream, debug, "CLOCK received start time " + Poco::NumberFormatter::format(time) + " from " + (*it)->getName());
         if (toFirstFrame) {
             startTime = std::min(time, startTime);
         }
@@ -2016,7 +2015,7 @@ Clock::setStartTime(bool toFirstFrame)
             startTime = std::max(time, startTime);
         }
     }
-    Log::instance()->avstream().debug("CLOCK setting start time to: " + Poco::NumberFormatter::format(startTime));
+    LOG(avstream, debug, "CLOCK setting start time to: " + Poco::NumberFormatter::format(startTime));
 
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->setStartTime(startTime, toFirstFrame);
@@ -2027,7 +2026,7 @@ Clock::setStartTime(bool toFirstFrame)
     _streamTime = startTime;
     _systemTime.update();
 
-    Log::instance()->avstream().debug("CLOCK start time set.");
+    LOG(avstream, debug, "CLOCK start time set.");
 }
 
 
@@ -2037,7 +2036,7 @@ Clock::setStartTime(bool toFirstFrame)
 void
 Clock::setTime(Poco::Int64 currentTime)
 {
-    Log::instance()->avstream().debug("CLOCK set stream time to: " + Poco::NumberFormatter::format(currentTime));
+    LOG(avstream, debug, "CLOCK set stream time to: " + Poco::NumberFormatter::format(currentTime));
 //     Poco::ScopedLock<Poco::FastMutex> lock(_clockLock);
     _clockLock.lock();
     _streamTime = currentTime;
@@ -2058,7 +2057,7 @@ Clock::clockTick(Poco::Timer& timer)
         _streamTime += _systemTime.elapsed() * 9.0 / 100.0;
         _systemTime.update();
 
-        Log::instance()->avstream().debug("CLOCK TICK " + Poco::NumberFormatter::format(_streamTime) + ", since last tick: " +
+        LOG(avstream, debug, "CLOCK TICK " + Poco::NumberFormatter::format(_streamTime) + ", since last tick: " +\
              Poco::NumberFormatter::format((_streamTime - lastTick)));
 
         for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
@@ -2072,46 +2071,46 @@ Clock::clockTick(Poco::Timer& timer)
 void
 Clock::start()
 {
-    Log::instance()->avstream().debug("CLOCK starting audio presentation ...");
+    LOG(avstream, debug, "CLOCK starting audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->startPresentation();
     }
-    Log::instance()->avstream().debug("CLOCK audio presentation started.");
-    Log::instance()->avstream().debug("CLOCK starting video presentation ...");
+    LOG(avstream, debug, "CLOCK audio presentation started.");
+    LOG(avstream, debug, "CLOCK starting video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->startPresentation();
     }
-    Log::instance()->avstream().debug("CLOCK video presentation started.");
-    Log::instance()->avstream().debug("CLOCK start ticking ...");
+    LOG(avstream, debug, "CLOCK video presentation started.");
+    LOG(avstream, debug, "CLOCK start ticking ...");
     _clockTimer.setPeriodicInterval(_clockTick);
     _clockTimer.start(Poco::TimerCallback<Clock>(*this, &Clock::clockTick));
-    Log::instance()->avstream().debug("CLOCK started.");
+    LOG(avstream, debug, "CLOCK started.");
 }
 
 
 void
 Clock::stop()
 {
-    Log::instance()->avstream().debug("CLOCK stop ticking ...");
+    LOG(avstream, debug, "CLOCK stop ticking ...");
     _clockTimer.stop();
-    Log::instance()->avstream().debug("CLOCK ticking stopped.");
-    Log::instance()->avstream().debug("CLOCK stopping audio presentation ...");
+    LOG(avstream, debug, "CLOCK ticking stopped.");
+    LOG(avstream, debug, "CLOCK stopping audio presentation ...");
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->stopSinkPresentation();
     }
-    Log::instance()->avstream().debug("CLOCK stopping video presentation ...");
+    LOG(avstream, debug, "CLOCK stopping video presentation ...");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->stopSinkPresentation();
     }
     for (std::vector<AudioSink*>::iterator it = _audioSinkVec.begin(); it != _audioSinkVec.end(); ++it) {
         (*it)->waitPresentationStop();
     }
-    Log::instance()->avstream().debug("CLOCK audio presentation stopped.");
+    LOG(avstream, debug, "CLOCK audio presentation stopped.");
     for (std::vector<VideoSink*>::iterator it = _videoSinkVec.begin(); it != _videoSinkVec.end(); ++it) {
         (*it)->waitPresentationStop();
     }
-    Log::instance()->avstream().debug("CLOCK video presentation stopped.");
-    Log::instance()->avstream().debug("CLOCK stopped.");
+    LOG(avstream, debug, "CLOCK video presentation stopped.");
+    LOG(avstream, debug, "CLOCK stopped.");
 }
 
 

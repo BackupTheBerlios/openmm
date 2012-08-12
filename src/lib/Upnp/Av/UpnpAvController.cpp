@@ -54,10 +54,10 @@ AvServerView::browseRootObject()
         ui4 updateId;
         _pCtlMediaServer->ContentDirectory()->Browse("0", "BrowseMetadata", "*", 0, 0, "", rootMeta, numberReturned, totalMatches, updateId);
         _pRoot->readMetaData(rootMeta);
-        Log::instance()->upnpav().debug("controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
+        LOG(upnpav, debug, "controller fetched root object with title: " + _pRoot->getTitle() + ", class: " + _pRoot->getProperty(AvProperty::CLASS));
     }
     catch (Poco::Exception& e) {
-        Log::instance()->upnpav().error("controller could not fetch root object, setting default replacement object: " + e.displayText());
+        LOG(upnpav, error, "controller could not fetch root object, setting default replacement object: " + e.displayText());
         _pRoot->setObjectId("0");
         _pRoot->setIsContainer(true);
     }
@@ -148,10 +148,10 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
     for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
         Device* pDevice = *it;
-        Log::instance()->upnpav().information("AV controller add device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        LOG(upnpav, information, "AV controller add device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1") {
-            Log::instance()->upnpav().debug("AV controller add media renderer");
+            LOG(upnpav, debug, "AV controller add media renderer");
             CtlMediaRendererCode* pRendererImpl = new CtlMediaRendererCode(
                 pDevice,
                 new CtlRenderingControlImpl(pUserInterface),
@@ -164,7 +164,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             pUserInterface->endAddRenderer(_renderers.size() - 1);
         }
         else if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
-            Log::instance()->upnpav().debug("AV controller add media server");
+            LOG(upnpav, debug, "AV controller add media server");
             CtlMediaServerCode* pServerImpl = new CtlMediaServerCode(
                 pDevice,
                 new CtlContentDirectoryImpl(pUserInterface),
@@ -185,7 +185,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
             pDevice->initControllerEventing();
         }
 
-        Log::instance()->upnpav().information("AV controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        LOG(upnpav, information, "AV controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     }
 }
 
@@ -197,7 +197,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
     for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
         Device* pDevice = *it;
-        Log::instance()->upnpav().information("av controller removed device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        LOG(upnpav, information, "av controller removed device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
 
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" && _renderers.contains(pDevice->getUuid())) {
             // TODO: delete renderer controller
@@ -216,7 +216,7 @@ AvController::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
         Controller::removeDeviceContainer(pDeviceContainer);
 
-        Log::instance()->upnpav().information("av controller removed device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
+        LOG(upnpav, information, "av controller removed device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
     }
 }
 
@@ -365,7 +365,7 @@ AvUserInterface::playPressed()
             error(e.message());
             return;
         }
-        Log::instance()->upnpav().debug("playing " + _pSelectedObject->getTitle());
+        LOG(upnpav, debug, "playing " + _pSelectedObject->getTitle());
     }
 }
 
@@ -404,7 +404,7 @@ AvUserInterface::pausePressed()
 void
 AvUserInterface::positionMoved(int position)
 {
-    Log::instance()->upnpav().debug("position moved to: " + Poco::NumberFormatter::format(position));
+    LOG(upnpav, debug, "position moved to: " + Poco::NumberFormatter::format(position));
     if (_pSelectedRenderer == 0) {
         return;
     }
@@ -438,7 +438,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     if (_pSelectedRenderer == 0) {
         return;
     }
-//    Log::instance()->upnpav().debug("poll position info ...");
+//    LOG(upnpav, debug, "poll position info ...");
     // TODO: get TransportState and poll position info only, if it is PLAYING, RECORDING or TRANSITIONING
 //     _pSelectedRenderer->AVTransport()->
     ui4 Track;
@@ -450,7 +450,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
     i4 RelCount;
     i4 AbsCount;
     _pSelectedRenderer->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
-//    Log::instance()->upnpav().debug("TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
+//    LOG(upnpav, debug, "TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
 
     try {
         r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
@@ -458,7 +458,7 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         newPosition(trackDuration, absTime);
     }
     catch (Poco::Exception& e) {
-        //Log::instance()->upnpav().warning("could not read current track position: " + e.displayText());
+        //LOG(upnpav, warning, "could not read current track position: " + e.displayText());
     }
 
     if (TrackMetaData == "") {
@@ -468,21 +468,21 @@ AvUserInterface::pollPositionInfo(Poco::Timer& timer)
         CtlMediaObject object;
         try {
             object.readMetaData(TrackMetaData);
-//            Log::instance()->upnpav().debug("new track title: " + object.getTitle());
-//            Log::instance()->upnpav().debug("new track artist: " + object.getProperty(AvProperty::ARTIST));
-//            Log::instance()->upnpav().debug("new track album: " + object.getProperty(AvProperty::ALBUM));
+//            LOG(upnpav, debug, "new track title: " + object.getTitle());
+//            LOG(upnpav, debug, "new track artist: " + object.getProperty(AvProperty::ARTIST));
+//            LOG(upnpav, debug, "new track album: " + object.getProperty(AvProperty::ALBUM));
             newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
         }
         catch (Poco::Exception& e) {
             newTrack("", "", "");
-            Log::instance()->upnpav().error("could not read current track meta data: " + e.displayText());
+            LOG(upnpav, error, "could not read current track meta data: " + e.displayText());
         }
     }
 
     // FIXME: don't poll volume, use eventing through LastChange state variable.
     ui2 vol;
     _pSelectedRenderer->RenderingControl()->GetVolume(0, "Master", vol);
-//    Log::instance()->upnpav().debug("volume of renderer is: " + Poco::NumberFormatter::format(vol));
+//    LOG(upnpav, debug, "volume of renderer is: " + Poco::NumberFormatter::format(vol));
     newVolume(vol);
 }
 
