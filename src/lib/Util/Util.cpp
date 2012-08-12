@@ -33,6 +33,7 @@
 #include <Poco/LineEndingConverter.h>
 
 #include "Util.h"
+#include "Sys.h"
 
 namespace Omm {
 namespace Util {
@@ -199,20 +200,6 @@ Home::instance()
 
 Home::Home()
 {
-    _homeDirPath = Poco::Environment::get("OMM_HOME", Poco::Environment::get("HOME", "/var"));
-    if (_homeDirPath == Poco::Environment::get("HOME")) {
-        _homeDirPath += "/.omm";
-    }
-    else {
-        _homeDirPath += "/omm";
-    }
-    Log::instance()->util().information("OMM HOME: " + _homeDirPath);
-    try {
-        Poco::File(_homeDirPath).createDirectories();
-    }
-    catch (Poco::Exception& e) {
-        Log::instance()->util().error("can not create OMM HOME: " + _homeDirPath);
-    }
 }
 
 
@@ -220,6 +207,17 @@ const std::string
 Home::getHomeDirPath()
 {
     Poco::Mutex::ScopedLock lock(_lock);
+
+    if (!_homeDirPath.size()) {
+        _homeDirPath = Poco::Environment::get("OMM_HOME", Omm::Sys::SysPath::getPath(Omm::Sys::SysPath::Home)) + "/.omm";
+        Log::instance()->util().information("OMM HOME: " + _homeDirPath);
+        try {
+            Poco::File(_homeDirPath).createDirectories();
+        }
+        catch (Poco::Exception& e) {
+            Log::instance()->util().error("can not create OMM HOME: " + _homeDirPath);
+        }
+    }
 
     return _homeDirPath;
 }
@@ -249,6 +247,7 @@ Home::getConfigDirPath(const std::string& relPath)
     Poco::Mutex::ScopedLock lock(_lock);
 
     std::string fullPath = Poco::Environment::get("OMM_CONFIG", getHomeDirPath() + "/config/") + relPath;
+    Log::instance()->util().debug("OMM config path: " + fullPath);
     try {
         Poco::File(fullPath).createDirectories();
     }

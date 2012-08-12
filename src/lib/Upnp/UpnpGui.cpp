@@ -223,6 +223,14 @@ UpnpApplication::main(const std::vector<std::string>& args)
     }
     else
     {
+        Poco::Util::Application::init(_argc, _argv);
+        if (instanceAlreadyRunning()) {
+            Log::instance()->upnp().information("omm application instance running, starting in controller mode");
+            setLockInstance(false);
+            setIgnoreConfig(true);
+        }
+        loadConfig();
+        initConfig();
         Gui::Application::runEventLoop(_argc, _argv);
     }
     return Poco::Util::Application::EXIT_OK;
@@ -259,14 +267,6 @@ UpnpApplication::presentedMainView()
 void
 UpnpApplication::start()
 {
-    Poco::Util::Application::init(_argc, _argv);
-    if (instanceAlreadyRunning()) {
-        Log::instance()->upnp().information("omm application instance running, starting in controller mode");
-        setLockInstance(false);
-        setIgnoreConfig(true);
-    }
-    loadConfig();
-    initConfig();
     startAppHttpServer();
     initLocalDevices();
     if (_enableController) {
@@ -768,6 +768,11 @@ UpnpApplication::addLocalServer(const std::string& id)
     }
     Omm::Av::Log::instance()->upnpav().information("container plugin: " + pluginName + " loaded successfully");
 
+    pDataModel->setCacheDirPath(Util::Home::instance()->getCacheDirPath());
+    pDataModel->setMetaDirPath(Util::Home::instance()->getMetaDirPath());
+    pDataModel->setTextEncoding(config().getString("server." + id + ".textEncoding", "UTF8"));
+    pDataModel->setCheckObjectModifications(config().getBool("server." + id + ".checkMod", false));
+
     _enableServer = true;
     Omm::Av::MediaServer* pMediaServer = new Av::MediaServer;
 
@@ -784,8 +789,6 @@ UpnpApplication::addLocalServer(const std::string& id)
     }
     pContainer->setBasePath(path);
     pContainer->setLayout(config().getString("server." + id + ".layout", "Flat"));
-    pContainer->getDataModel()->setTextEncoding(config().getString("server." + id + ".textEncoding", "UTF8"));
-    pContainer->getDataModel()->setCheckObjectModifications(config().getBool("server." + id + ".checkMod", false));
 
     pMediaServer->setRoot(pContainer);
     pMediaServer->setFriendlyName(name);

@@ -407,8 +407,13 @@ public:
     void setServerContainer(ServerContainer* pServerContainer);
     ServerContainer* getServerContainer();
 
-    void setBasePath(const std::string& basePath);
     std::string getBasePath();
+    std::string getCacheDirPath();
+    std::string getMetaDirPath();
+    void setBasePath(const std::string& path);
+    void setCacheDirPath(const std::string& path);
+    void setMetaDirPath(const std::string& path);
+
     virtual void init() {}
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
@@ -489,10 +494,9 @@ protected:
     ui4 getNewIndex();
 
     Poco::Path                                  _basePath;
-    Poco::Path                                  _cacheDirPath;
-    Poco::Path                                  _configDirPath;
-    Poco::Path                                  _metaDirPath;
     Poco::Path                                  _indexFilePath;
+    Poco::Path                                  _cacheDirPath;
+    Poco::Path                                  _metaDirPath;
 
 private:
     void updateThread();

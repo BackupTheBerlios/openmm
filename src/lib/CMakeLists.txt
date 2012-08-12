@@ -16,11 +16,13 @@ include_directories(
 ${OMM_INCLUDE_DIRS}
 )
 
+
 add_library(ommutil
 Util/Util.cpp
 )
 
 target_link_libraries(ommutil
+ommsys
 ${POCO_NET}
 ${POCO_FOUNDATION}
 )
@@ -36,7 +38,7 @@ add_subdirectory(Net/Linux)
 if(TARGET ommnet-linux)
 set(LIB_OMMNET_PLATFORM ommnet-linux)
 endif(TARGET ommnet-linux)
-elseif(DARWIN)
+elseif(MACOSX)
 add_subdirectory(Net/Darwin)
 if(TARGET ommnet-darwin)
 set(LIB_OMMNET_PLATFORM ommnet-darwin)
@@ -142,11 +144,29 @@ CACHE STRING libommavstream
 )
 
 
+if(LINUX)
+add_subdirectory(Sys/Linux)
+if(TARGET ommsys-linux)
+set(LIB_OMMSYS_PLATFORM ommsys-linux)
+endif(TARGET ommsys-linux)
+elseif(DARWIN)
+add_subdirectory(Sys/Darwin)
+if(TARGET ommsys-darwin)
+set(LIB_OMMSYS_PLATFORM ommsys-darwin)
+endif(TARGET ommsys-darwin)
+elseif(WINDOWS)
+add_subdirectory(Sys/Windows)
+if(TARGET ommsys-windows)
+set(LIB_OMMSYS_PLATFORM ommsys-windows)
+endif(TARGET ommsys-windows)
+endif(LINUX)
+
 add_library(ommsys
 Sys/Sys.cpp
 )
 
 target_link_libraries(ommsys
+${LIB_OMMSYS_PLATFORM}
 ${POCO_FOUNDATION}
 )
 

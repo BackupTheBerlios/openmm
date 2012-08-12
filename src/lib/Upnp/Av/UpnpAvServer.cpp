@@ -502,7 +502,7 @@ ServerObjectResource::writeResource(const uri& sourceUri)
     Log::instance()->upnpav().debug("write resource of object with index name space: " + Poco::NumberFormatter::format(_pObject->_indexNamespace));
     if (_pObject->_indexNamespace == ServerObject::User) {
         // FIXME: always access the resource stream via getStream(), even on write operations (same in ServerContainer::initChild())
-        std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + getPrivateResourceUri());
+        std::string indexFileName = _pDataModel->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + getPrivateResourceUri();
         Log::instance()->upnpav().debug("server container, write resource to playlist index file: " + indexFileName);
         std::ofstream indexFile(indexFileName.c_str());
 
@@ -868,7 +868,7 @@ ServerContainer::addUserObject(ServerObject* pChildObject)
     ServerObjectResource* pResource = new ServerObjectResource(pChildObject, getDataModel());
     // touch a resource file with a unique random filename.
     std::string resourceFileName = Poco::UUIDGenerator::defaultGenerator().createOne().toString();
-    std::string resourceFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath());
+    std::string resourceFilePath = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath();
     std::ofstream resourceFile((resourceFilePath + "/" + resourceFileName).c_str());
     resourceFile.close();
     pResource->setUri(resourceFileName);
@@ -886,7 +886,7 @@ ServerContainer::removeUserObject(ServerObject* pChildObject)
 {
     Log::instance()->upnpav().debug("server container remove user object: " + pChildObject->getTitle());
     _pUserObjectCache->removeMediaObjectForIndex(pChildObject->getIndex());
-    std::string metaDir = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath());
+    std::string metaDir = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath();
     ServerObjectResource* pResource = static_cast<ServerObjectResource*>(pChildObject->getResource());
     std::string resourceFile = pResource->getPrivateResourceUri();
     Log::instance()->upnpav().debug("server container remove resource: " + metaDir + "/" + resourceFile);
@@ -1038,12 +1038,12 @@ ServerContainer::setBasePath(const std::string& basePath)
 {
     Log::instance()->upnpav().debug("server container, set base path to: " + basePath);
     if (_pObjectCache) {
-        std::string cacheFilePath = Util::Home::instance()->getCacheDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
+        std::string cacheFilePath = getDataModel()->getCacheDirPath() + _pDataModel->getModelClass() + "/" + basePath + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
         _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
 //        updateCache();
     }
-    std::string metaFilePath = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + basePath) + "/objects";
+    std::string metaFilePath = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + basePath + "/objects";
     _pUserObjectCache->setCacheFilePath(metaFilePath);
 
     _pDataModel->setBasePath(basePath);
@@ -1460,7 +1460,7 @@ ServerContainer::initChild(ServerObject* pObject, ui4 index, bool fullInit)
                 }
             }
             else {
-                std::string indexFileName = Util::Home::instance()->getMetaDirPath(_pDataModel->getModelClass() + "/" + _pDataModel->getBasePath()) + "/" + uri;
+                std::string indexFileName = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + _pDataModel->getBasePath() + "/" + uri;
                 Log::instance()->upnpav().debug("server container, init child get playlist indices from file: " + indexFileName);
                 std::ifstream indexFile(indexFileName.c_str());
                 std::string line;
@@ -2066,10 +2066,31 @@ AbstractDataModel::getServerContainer()
 }
 
 
-void
-AbstractDataModel::setBasePath(const std::string& basePath)
+std::string
+AbstractDataModel::getBasePath()
 {
-    _basePath = basePath;
+    return _basePath.toString();
+}
+
+
+std::string
+AbstractDataModel::getCacheDirPath()
+{
+    return _cacheDirPath.toString();
+}
+
+
+std::string
+AbstractDataModel::getMetaDirPath()
+{
+    return _metaDirPath.toString();
+}
+
+
+void
+AbstractDataModel::setBasePath(const std::string& path)
+{
+    _basePath = path;
     init();
 
     // TODO: avoid long and hidden paths in meta directory
@@ -2085,16 +2106,23 @@ AbstractDataModel::setBasePath(const std::string& basePath)
     // index map is in meta directory, because var directory should be deletable at any time
     // without loosing information. Indices must be persistant information, because object ids
     // are derived from them (playlists must be removed also, if index map is rebuild entirely)
-    _indexFilePath = Poco::Path(Util::Home::instance()->getMetaDirPath(getModelClass() + "/" + basePath), "index");
+    _indexFilePath = Poco::Path(getMetaDirPath() + getModelClass() + "/" + path, "index");
     readIndexMap();
     checkSystemUpdateId();
 }
 
 
-std::string
-AbstractDataModel::getBasePath()
+void
+AbstractDataModel::setCacheDirPath(const std::string& path)
 {
-    return _basePath.toString();
+    _cacheDirPath = path;
+}
+
+
+void
+AbstractDataModel::setMetaDirPath(const std::string& path)
+{
+    _metaDirPath = path;
 }
 
 

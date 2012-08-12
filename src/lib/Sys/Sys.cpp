@@ -24,6 +24,15 @@
 #include "Sys.h"
 #include "Util.h"
 
+#ifdef __LINUX__
+#include "Linux/SysImplLinux.h"
+#elif __DARWIN__
+#include "Darwin/SysImplDarwin.h"
+#elif __WINDOWS__
+#include "Windows/SysImplWindows.h"
+#endif
+
+
 namespace Omm {
 namespace Sys {
 
@@ -56,6 +65,13 @@ Poco::Logger&
 Log::sys()
 {
     return *_pSysLogger;
+}
+
+
+const std::string
+SysPath::getPath(Location loc)
+{
+    return SysImpl::getPath(loc);
 }
 
 

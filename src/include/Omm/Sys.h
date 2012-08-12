@@ -50,6 +50,18 @@ private:
 };
 
 
+class SysPath
+{
+public:
+    enum Location {Home, Cache, Tmp};
+    /// Home: a place in the system, where the user can store his documents
+    /// Cache: a place in the system, where all users can store cached files, that can be restored automatically
+    /// Tmp: a place in the system, where all users can store temporary files
+
+    static const std::string getPath(Location loc);
+};
+
+
 class Visual
     /// Visual is a basic window that can be supplied by the graphical user
     /// interface of the OS.
