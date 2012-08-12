@@ -20,7 +20,7 @@
  ***************************************************************************/
 
 #include "UpnpAvLogger.h"
-#include "Util.h"
+#include "Log.h"
 
 
 namespace Omm {

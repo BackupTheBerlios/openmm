@@ -234,7 +234,7 @@ public:
 };
 
 
-class ServerContainer : public ServerObject, public Util::ConfigurablePlugin
+class ServerContainer : public ServerObject //, public Util::ConfigurablePlugin
 {
     friend class DatabaseCache;
     friend class AbstractDataModel;

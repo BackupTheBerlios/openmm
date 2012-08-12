@@ -59,10 +59,10 @@ Engine::setVisual(Sys::Visual* pVisual)
 }
 
 
-void
-Engine::setOption(const std::string& key, const std::string& value)
-{
-}
+//void
+//Engine::setOption(const std::string& key, const std::string& value)
+//{
+//}
 
 
 void

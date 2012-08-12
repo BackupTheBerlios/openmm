@@ -22,7 +22,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Sys.h"
-#include "Util.h"
+#include "Log.h"
 
 #ifdef __LINUX__
 #include "Linux/SysImplLinux.h"

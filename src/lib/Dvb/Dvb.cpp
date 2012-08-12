@@ -26,7 +26,7 @@
 #include <cstring>
 
 #include "Dvb.h"
-#include "Util.h"
+#include "Log.h"
 
 using namespace Omm;
 using namespace Omm::Dvb;

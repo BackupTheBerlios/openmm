@@ -29,6 +29,7 @@
 #include <Poco/Util/Application.h>
 
 #include "UpnpGui.h"
+#include "Util.h"
 #include "Gui/GuiLogger.h"
 #include "UpnpAv.h"
 #include "UpnpAvCtlServer.h"

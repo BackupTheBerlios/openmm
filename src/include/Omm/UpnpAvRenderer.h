@@ -26,7 +26,6 @@
 
 #include "Upnp.h"
 #include "UpnpAvObject.h"
-#include "Util.h"
 #include "Sys.h"
 
 namespace Omm {
@@ -38,7 +37,7 @@ class DevRenderingControlRendererImpl;
 class Visual;
 class ProtocolInfo;
 
-class Engine : public Util::ConfigurablePlugin
+class Engine //: public Util::ConfigurablePlugin
 {
     friend class MediaRenderer;
 
@@ -51,7 +50,7 @@ public:
     void setInstancedId(Omm::ui4 instanceId);
     void setVisual(Sys::Visual* pVisual);
 
-    virtual void setOption(const std::string& key, const std::string& value);
+//    virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
 
     // UPnP AV methods

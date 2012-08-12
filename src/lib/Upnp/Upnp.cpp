@@ -28,6 +28,13 @@
 #include <Poco/Message.h>
 #include <Poco/NObserver.h>
 #include <Poco/Observer.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/LineEndingConverter.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/URI.h>
+#include <Poco/StringTokenizer.h>
 #include <Poco/Net/SocketStream.h>
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/NetException.h>
@@ -41,17 +48,11 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/MediaType.h>
-#include <Poco/StreamCopier.h>
-#include <Poco/LineEndingConverter.h>
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeParser.h>
 #include <Poco/DOM/Node.h>
-#include <Poco/URI.h>
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
-#include "Util.h"
+#include "Log.h"
 
 namespace Omm {
 

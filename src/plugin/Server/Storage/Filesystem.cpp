@@ -25,6 +25,7 @@
 
 #include <Omm/UpnpAvObject.h>
 #include <Omm/AvStream.h>
+#include <Omm/Util.h>
 
 #include "Filesystem.h"
 

@@ -49,7 +49,6 @@
 
 #include "UpnpTypes.h"
 #include "Net.h"
-#include "Util.h"
 #include "Sys.h"
 
 namespace Omm {

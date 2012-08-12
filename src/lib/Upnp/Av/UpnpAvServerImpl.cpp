@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/URI.h>
+#include <Poco/StringTokenizer.h>
 
 #include "UpnpAvServerImpl.h"
 

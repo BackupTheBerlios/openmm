@@ -23,7 +23,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "Gui/GuiLogger.h"
-#include "Util.h"
+#include "Log.h"
 
 
 namespace Omm {

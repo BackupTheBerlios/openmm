@@ -17,19 +17,18 @@ ${OMM_INCLUDE_DIRS}
 )
 
 
-add_library(ommutil
-Util/Util.cpp
+add_library(ommlog
+Log/Log.cpp
 )
 
-target_link_libraries(ommutil
-ommsys
+target_link_libraries(ommlog
 ${POCO_NET}
 ${POCO_FOUNDATION}
 )
 
-set(OMM_UTIL
-ommutil
-CACHE INTERNAL libommutil
+set(OMM_LOG
+ommlog
+CACHE INTERNAL libommlog
 )
 
 
@@ -65,6 +64,7 @@ Net/Net.cpp
 )
 
 target_link_libraries(ommnet
+ommlog
 ${LIB_OMMNET_PLATFORM}
 ${POCO_NET}
 ${POCO_FOUNDATION}
@@ -83,7 +83,7 @@ Upnp/Upnp.cpp
 
 target_link_libraries(ommupnp
 ommnet
-ommutil
+ommlog
 ${POCO_UTIL}
 ${POCO_XML}
 ${POCO_NET}
@@ -134,7 +134,7 @@ AvStream/AvStream.cpp
 )
 
 target_link_libraries(ommavstream
-ommutil
+ommlog
 ${POCO_FOUNDATION}
 )
 
@@ -166,6 +166,7 @@ Sys/Sys.cpp
 )
 
 target_link_libraries(ommsys
+ommlog
 ${LIB_OMMSYS_PLATFORM}
 ${POCO_FOUNDATION}
 )
@@ -200,6 +201,22 @@ add_resources(${MEDIA_IMAGE_RESOURCE}
 "img/activity-off.png"
 "img/activity-on.png"
 )
+
+
+add_library(ommutil
+Util/Util.cpp
+)
+
+target_link_libraries(ommutil
+ommsys
+${POCO_FOUNDATION}
+)
+
+set(OMM_UTIL
+ommutil
+CACHE INTERNAL libommutil
+)
+
 
 add_library(ommupnpgui
 Upnp/UpnpGui.cpp

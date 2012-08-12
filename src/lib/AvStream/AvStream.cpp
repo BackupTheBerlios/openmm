@@ -34,7 +34,7 @@
 #include <cmath>
 
 #include "AvStream.h"
-#include "Util.h"
+#include "Log.h"
 
 namespace Omm {
 namespace AvStream {

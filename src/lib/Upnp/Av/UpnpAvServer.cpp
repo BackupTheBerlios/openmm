@@ -24,6 +24,7 @@
 
 #include <Poco/File.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/StringTokenizer.h>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPServerRequest.h>

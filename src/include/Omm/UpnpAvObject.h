@@ -31,7 +31,6 @@
 #include "UpnpTypes.h"
 #include "UpnpAv.h"
 #include "UpnpAvLogger.h"
-#include "Util.h"
 
 // NOTE: for media object ids only use non-reserved characters for segments
 // (according to RFC 3986), because object ids may be used in resource URIs.

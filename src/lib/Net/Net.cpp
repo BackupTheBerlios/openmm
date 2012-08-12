@@ -33,7 +33,7 @@
 #else
 #include "NetImpl.h"
 #endif
-#include "Util.h"
+#include "Log.h"
 
 namespace Omm {
 namespace Net {

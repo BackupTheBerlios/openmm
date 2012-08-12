@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include <Poco/LineEndingConverter.h>
+#include <Poco/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeIterator.h>
