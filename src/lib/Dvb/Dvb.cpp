@@ -39,11 +39,7 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, 0);
-#else
     _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_DEBUG);
-#endif
 }
 
 

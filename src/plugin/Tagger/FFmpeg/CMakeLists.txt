@@ -1,3 +1,6 @@
+return()
+# TODO: adapt ffmpeg to newer lib versions (ByteIOContext etc. deprecated)
+
 find_package(FFMPEG)
 
 if(FFMPEG_FOUND)

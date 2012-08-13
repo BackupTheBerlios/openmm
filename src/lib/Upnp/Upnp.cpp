@@ -63,14 +63,6 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pUpnpLogger = &Poco::Logger::create("UPNP", pChannel, 0);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, 0);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, 0);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, 0);
-    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, 0);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, 0);
-#else
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
@@ -83,7 +75,6 @@ Log::Log()
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
-#endif
 }
 
 

@@ -35,12 +35,7 @@ Av::Log* Av::Log::_pInstance = 0;
 Av::Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, 0);
-#else
     _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_ERROR);
-#endif
 }
 
 
@@ -63,5 +58,5 @@ Av::Log::upnpav()
 
 }  // namespace Omm
 }  // namespace Av
-#endif //NDEBUG
+#endif // NDEBUG
 

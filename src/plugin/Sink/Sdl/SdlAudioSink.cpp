@@ -48,14 +48,14 @@ void audioCallback(void* pThis, uint8_t* sdlBuffer, int sdlBufferSize)
         LOGNS(Omm::AvStream, avstream, error, "sdl audio sink, audio callback, this is null");
         return;
     }
-    
+
     LOGNS(Omm::AvStream, avstream, trace, "sdl audio sink, audio callback, sdl buffer size: " + Poco::NumberFormatter::format(sdlBufferSize));
-    
+
     pSdlAudioSink->initSilence((char*)sdlBuffer, sdlBufferSize);
     // if no samples are available, don't block and leave the silence in the pcm buffer
     if (pSdlAudioSink->audioAvailable()) {
         int bytesRead = pSdlAudioSink->audioRead((char*)sdlBuffer, sdlBufferSize);
-        Omm::AvStream::Log::instance()->avstream().trace("sdl audio sink, audio callback, bytes read: " +
+        LOGNS(Omm::AvStream, avstream, trace, "sdl audio sink, audio callback, bytes read: " +\
             Poco::NumberFormatter::format(bytesRead));
     }
 }
@@ -65,7 +65,7 @@ bool
 SdlAudioSink::initDevice()
 {
     LOGNS(Omm::AvStream, avstream, debug, "opening SDL audio sink ...");
-    
+
     SDL_AudioSpec deviceParamsWanted;
     SDL_AudioSpec deviceParams;
     deviceParamsWanted.freq = sampleRate();
@@ -75,12 +75,12 @@ SdlAudioSink::initDevice()
     deviceParamsWanted.samples = 1024;
     deviceParamsWanted.callback = audioCallback;
     deviceParamsWanted.userdata = this;
-    
+
     if(SDL_OpenAudio(&deviceParamsWanted, &deviceParams) < 0) {
         LOGNS(Omm::AvStream, avstream, error, "could not open SDL audio device: " + std::string(SDL_GetError()));
         return false;
     }
-    
+
     LOGNS(Omm::AvStream, avstream, debug, "SDL audio sink opened.");
     return true;
 }

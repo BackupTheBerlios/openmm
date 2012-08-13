@@ -55,7 +55,7 @@ MovableListViewImpl::~MovableListViewImpl()
 int
 MovableListViewImpl::visibleRows()
 {
-    Log::instance()->gui().debug("list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())
+    LOG(gui, debug, "list view impl viewport width: " + Poco::NumberFormatter::format(viewport()->geometry().width())\
             + ", height: " Poco::NumberFormatter::format(viewport()->geometry().height()));
     ListView* pListView =  static_cast<ListView*>(_pView);
     int rows = viewport()->geometry().height() / pListView->_viewHeight;

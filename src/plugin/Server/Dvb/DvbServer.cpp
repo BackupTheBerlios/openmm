@@ -197,7 +197,7 @@ DvbModel::clearMaps()
 //
 //    _pChannel = pDvbDataModel->_channels[index];
 //    Poco::DateTime nowDate;
-//    Omm::Dvb::Log::instance()->dvb().debug("set timer, channel: " + Poco::NumberFormatter::format(index)
+//    LOGNS(Omm::Dvb, dvb, debug, "set timer, channel: " + Poco::NumberFormatter::format(index)\
 //                + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
 //
 //    // FIXME: startInterval is wrong (too short)

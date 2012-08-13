@@ -44,11 +44,7 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pSysLogger = &Poco::Logger::create("SYS", pChannel, 0);
-#else
     _pSysLogger = &Poco::Logger::create("SYS", pChannel, Poco::Message::PRIO_DEBUG);
-#endif
 }
 
 

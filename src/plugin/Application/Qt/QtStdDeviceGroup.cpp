@@ -54,9 +54,9 @@ QtDeviceListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, c
     QRect textRect(option.rect);
     textRect.setLeft(iconRect.right() + padding);
 
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+//    LOGNS(Omm::Av, upnpav, debug,\
+//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())\
+//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())\
 //    );
 
     if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
@@ -114,7 +114,7 @@ QtStdDeviceGroup::initGui()
 {
     _pCharEncoding = QTextCodec::codecForName("UTF-8");
     _pIconProvider = new QFileIconProvider;
-    
+
     _pDeviceListView = new QListView;
     if (!_pItemDelegate) {
         _pItemDelegate = new QtDeviceListItem(_pDeviceListView);

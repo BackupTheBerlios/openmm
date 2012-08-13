@@ -183,7 +183,7 @@ void
 MovableListView::insertItem(int row)
 {
     LOG(gui, debug, "MovableList view insert item: " + Poco::NumberFormatter::format(row));
-    
+
     MovableListModel* pModel = static_cast<MovableListModel*>(_pModel);
 
     // if view is not lazy, view pool has to be extended when too small and new views are inserted.
@@ -205,7 +205,7 @@ MovableListView::insertItem(int row)
 //        MovableListController* pLC = new MovableListController;
 
 //        int* pInt = new int;
-//        Log::instance()->gui().debug("MovableList view creating MovableList item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)
+//        LOG(gui, debug, "MovableList view creating MovableList item controller finished, pItemController: " + Poco::NumberFormatter::format(pItemController)\
 //        + ", size: " + Poco::NumberFormatter::format(sizeof(*pItemController)));
 //        Controller* pItemController = new Controller;
 //        pItemController->setRow(row);

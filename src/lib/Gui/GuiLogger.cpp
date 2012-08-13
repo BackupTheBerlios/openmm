@@ -38,12 +38,7 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pGuiLogger = &Poco::Logger::create("GUI", pChannel, 0);
-#else
-//    _pGuiLogger = &Poco::Logger::create("GUI", pChannel, Poco::Message::PRIO_ERROR);
     _pGuiLogger = &Poco::Logger::create("GUI", pChannel, Poco::Message::PRIO_DEBUG);
-#endif
 }
 
 

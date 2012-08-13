@@ -47,14 +47,7 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, 0);
-#else
     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_TRACE);
-#endif
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_DEBUG);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_INFORMATION);
-//     _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 

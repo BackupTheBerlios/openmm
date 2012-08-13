@@ -30,7 +30,7 @@
 
 #include "AvStreamFFmpeg.h"
 #include "Omm/UpnpAvObject.h"
-#include "Omm/Util.h"
+#include "Omm/Log.h"
 
 #define PRINT_LIB_VERSION(outstream,libname,LIBNAME,indent) \
 version= libname##_version(); \
@@ -69,11 +69,12 @@ void show_banner(void)
 }
 
 
+#ifndef NDEBUG
 Log* Log::_pInstance = 0;
 
 Log::Log()
 {
-    Poco::Channel* pChannel = Util::Log::instance()->channel();
+    Poco::Channel* pChannel = Omm::Util::Log::instance()->channel();
     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pChannel, Poco::Message::PRIO_TRACE);
 //     _pFfmpegLogger = &Poco::Logger::create("FFMPEG", pChannel, Poco::Message::PRIO_ERROR);
 }
@@ -94,6 +95,7 @@ Log::ffmpeg()
 {
     return *_pFfmpegLogger;
 }
+#endif // NDEBUG
 
 
 FFmpegMeta::FFmpegMeta() :
@@ -624,7 +626,7 @@ FFmpegTagger::IORead(void *opaque, uint8_t *buf, int buf_size)
         LOGNS(Omm::AvStream, avstream, error, "IORead failed to read from std::istream");
         return -1;
     }
-    Omm::AvStream::Log::instance()->avstream().trace("IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + " in " + Poco::NumberFormatter::format(time/1000.0, 3) + " msec (" +  Poco::NumberFormatter::format(bytes*1000/time) + " kB/s), total : " +
+    LOGNS(Omm::AvStream, avstream, trace, "IORead() bytes read: " + Poco::NumberFormatter::format(bytes) + " in " + Poco::NumberFormatter::format(time/1000.0, 3) + " msec (" +  Poco::NumberFormatter::format(bytes*1000/time) + " kB/s), total : " +\
     Poco::NumberFormatter::format(_totalBytes/1000) + "kB in " + Poco::NumberFormatter::format(startTime/(Poco::Timestamp::TimeDiff)1000000) + " sec (" + Poco::NumberFormatter::format((Poco::Timestamp::TimeDiff)(_totalBytes*1000)/startTime) + "kB/s)");
     return bytes;
 }
@@ -779,7 +781,7 @@ FFmpegTagger::tag(std::istream& istr)
         LOGNS(Omm::AvStream, avstream, error, "av_open_input_stream() failed");
         return 0;
     }
-    Log::instance()->ffmpeg().trace("probesize: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->probesize) +
+    LOG(ffmpeg, trace, "probesize: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->probesize) +\
     ", max_analyze_duration: " + Poco::NumberFormatter::format(pMeta->_pFormatContext->max_analyze_duration));
 
     AVMetadataTag* tag = 0;
@@ -870,14 +872,14 @@ FFmpegStreamInfo::findCodec()
     _pAvCodecContext = _pAvStream->codec;
 
     //////////// find decoders for audio and video stream ////////////
-    Omm::AvStream::Log::instance()->avstream().debug("searching codec with codec id: " +
+    LOGNS(Omm::AvStream, avstream, debug, "searching codec with codec id: " +\
         Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
 
     LOG(ffmpeg, trace, "ffmpeg::avcodec_find_decoder() ...");
     _pAvCodec = avcodec_find_decoder(_pAvCodecContext->codec_id);
 
     if(!_pAvCodec) {
-        Omm::AvStream::Log::instance()->avstream().error("could not find decoder for codec id: " +
+        LOGNS(Omm::AvStream, avstream, error, "could not find decoder for codec id: " +\
             Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
         return false;
     }
@@ -890,12 +892,12 @@ FFmpegStreamInfo::findCodec()
 
     LOG(ffmpeg, trace, "ffmpeg::avcodec_open() ...");
     if(avcodec_open(_pAvCodecContext, _pAvCodec) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open decoder for codec id: " +
+        LOGNS(Omm::AvStream, avstream, error, "could not open decoder for codec id: " +\
             Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
         return false;
     }
     LOGNS(Omm::AvStream, avstream, information, "found codec: " + std::string(_pAvCodec->name) + " (" + std::string(_pAvCodec->long_name) + ")");
-    Omm::AvStream::Log::instance()->avstream().information("start time: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->start_time) + ", duration: " +
+    LOGNS(Omm::AvStream, avstream, information, "start time: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->start_time) + ", duration: " +\
         Poco::NumberFormatter::format((Poco::Int64)_pAvStream->duration));
 
     // time_base: fundamental unit of time (in seconds) in terms of which frame timestamps are represented.
@@ -907,8 +909,8 @@ FFmpegStreamInfo::findCodec()
     // r_frame_rate: Real base framerate of the stream.
     LOGNS(Omm::AvStream, avstream, information, "base frame rate numerator: " + Poco::NumberFormatter::format(_pAvStream->r_frame_rate.num) + ", denominator: " + Poco::NumberFormatter::format(_pAvStream->r_frame_rate.den));
 
-//     Omm::AvStream::Log::instance()->avstream().information(Poco::format("average frame rate numerator: %s, denominator: %s",
-//         Poco::NumberFormatter::format(_pAvStream->avg_frame_rate.num),
+//     LOGNS(Omm::AvStream, avstream, information, Poco::format("average frame rate numerator: %s, denominator: %s",\
+//         Poco::NumberFormatter::format(_pAvStream->avg_frame_rate.num),\
 //         Poco::NumberFormatter::format(_pAvStream->avg_frame_rate.den)));
 
     // reference dts (for timestamp generation): Timestamp corresponding to the last dts sync point
@@ -917,7 +919,7 @@ FFmpegStreamInfo::findCodec()
     // AV_NOPTS_VALUE by default.
     LOGNS(Omm::AvStream, avstream, information, "first dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->first_dts) + ", current dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->cur_dts) + ", reference dts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->reference_dts) + ", last IP pts: " + Poco::NumberFormatter::format((Poco::Int64)_pAvStream->last_IP_pts) + ", last IP duration: " +Poco::NumberFormatter::format((Poco::Int64)_pAvStream->last_IP_duration));
 
-//     Omm::AvStream::Log::instance()->avstream().trace(Poco::format("_pStreamInfo->_pAvCodecContext->codec_id %s",
+//     LOGNS(Omm::AvStream, avstream, trace, Poco::format("_pStreamInfo->_pAvCodecContext->codec_id %s",\
 //         Poco::NumberFormatter::format(_pAvCodecContext->codec_id)));
 
     if (isAudio()) {
@@ -943,21 +945,21 @@ FFmpegStreamInfo::findCodec()
 bool
 FFmpegStreamInfo::findEncoder()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("searching encoder with codec id: " +
+    LOGNS(Omm::AvStream, avstream, debug, "searching encoder with codec id: " +\
         Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
 
     LOG(ffmpeg, trace, "ffmpeg::avcodec_find_encoder() ...");
     _pAvCodec = avcodec_find_encoder(_pAvCodecContext->codec_id);
 
     if(!_pAvCodec) {
-        Omm::AvStream::Log::instance()->avstream().error("could not find encoder for codec id: " +
+        LOGNS(Omm::AvStream, avstream, error, "could not find encoder for codec id: " +\
             Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
         return false;
     }
 
     LOG(ffmpeg, trace, "ffmpeg::avcodec_open() ...");
     if(avcodec_open(_pAvCodecContext, _pAvCodec) < 0) {
-        Omm::AvStream::Log::instance()->avstream().error("could not open encoder for codec id: " +
+        LOGNS(Omm::AvStream, avstream, error, "could not open encoder for codec id: " +\
             Poco::NumberFormatter::format(_pAvCodecContext->codec_id));
         return false;
     }
@@ -1012,7 +1014,7 @@ FFmpegStreamInfo::findEncoder()
 int
 FFmpegStreamInfo::sampleSize()
 {
-    Omm::AvStream::Log::instance()->avstream().debug("stream sample format: " +
+    LOGNS(Omm::AvStream, avstream, debug, "stream sample format: " +\
         Poco::NumberFormatter::format((int)_pAvStream->codec->sample_fmt));
 
     // avcodec.h says sample_fmt is not used (always S16?)
@@ -1038,7 +1040,7 @@ FFmpegStreamInfo::sampleSize()
 unsigned int
 FFmpegStreamInfo::sampleRate()
 {
-//     Omm::AvStream::Log::instance()->avstream().debug("stream sample rate: " +
+//     LOGNS(Omm::AvStream, avstream, debug, "stream sample rate: " +\
 //         Poco::NumberFormatter::format((int)_pAvStream->codec->sample_rate));
 
     return _pAvStream->codec->sample_rate;
@@ -1048,7 +1050,7 @@ FFmpegStreamInfo::sampleRate()
 int
 FFmpegStreamInfo::channels()
 {
-//     Omm::AvStream::Log::instance()->avstream().debug("stream channels: " +
+//     LOGNS(Omm::AvStream, avstream, debug, "stream channels: " +\
 //         Poco::NumberFormatter::format((int)_pAvStream->codec->channels));
 
     return _pAvStream->codec->channels;
@@ -1145,7 +1147,7 @@ FFmpegStreamInfo::decodeAudioFrame(Omm::AvStream::Frame* pFrame)
             (int16_t*)_pDecodedAudioFrame->_data, &_pDecodedAudioFrame->_size,
             inBuffer, inBufferSize);
 
-        Log::instance()->ffmpeg().debug("ffmpeg::avcodec_decode_audio2() frame size: " + Poco::NumberFormatter::format(inBufferSize) + ", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", decoded size: " +
+        LOG(ffmpeg, debug, "ffmpeg::avcodec_decode_audio2() frame size: " + Poco::NumberFormatter::format(inBufferSize) + ", bytes consumed: " + Poco::NumberFormatter::format(bytesConsumed) + ", decoded size: " +\
             Poco::NumberFormatter::format(_pDecodedAudioFrame->size())
             );
 
@@ -1345,7 +1347,7 @@ FFmpegFrame::write(Omm::AvStream::Overlay* pOverlay)
 
     Omm::AvStream::Meta::ColorCoding targetPixelFormat = pOverlay->getFormat();
 
-    Omm::AvStream::Log::instance()->avstream().debug("stream pixelFormat: " + Poco::NumberFormatter::format(streamPixelFormat) + ", target pixelFormat: " +
+    LOGNS(Omm::AvStream, avstream, debug, "stream pixelFormat: " + Poco::NumberFormatter::format(streamPixelFormat) + ", target pixelFormat: " +\
         Poco::NumberFormatter::format(targetPixelFormat));
 
     int scaleAlgo = SWS_BICUBIC;
@@ -1382,7 +1384,7 @@ FFmpegFrame::printInfo()
     if (!_pAvFrame) {
         return;
     }
-    Omm::AvStream::Log::instance()->avstream().debug("frame linesize[0..2]: " + Poco::NumberFormatter::format(_pAvFrame->linesize[0]) + ", " + Poco::NumberFormatter::format(_pAvFrame->linesize[1]) + ", "+
+    LOGNS(Omm::AvStream, avstream, debug, "frame linesize[0..2]: " + Poco::NumberFormatter::format(_pAvFrame->linesize[0]) + ", " + Poco::NumberFormatter::format(_pAvFrame->linesize[1]) + ", "+\
         Poco::NumberFormatter::format(_pAvFrame->linesize[2]));
 
 //    LOGNS(Omm::AvStream, avstream, debug, "frame data[0..2]: " + Poco::NumberFormatter::format((void*)_pAvFrame->data[0]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[1]) + ", " + Poco::NumberFormatter::format((unsigned int)_pAvFrame->data[2]));

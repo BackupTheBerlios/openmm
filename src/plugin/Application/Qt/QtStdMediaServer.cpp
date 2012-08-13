@@ -51,9 +51,9 @@ QtStdMediaContainerItem::paint(QPainter* painter, const QStyleOptionViewItem& op
     QRect textRect2(option.rect);
     textRect2.setLeft(textRect.right() + padding);
 
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+//    LOGNS(Omm::Av, upnpav, debug,\
+//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())\
+//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())\
 //    );
 
     if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {

@@ -39,9 +39,9 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
     QRect textRect(option.rect);
     textRect.setLeft(iconRect.right() + padding);
 
-//    Omm::Av::Log::instance()->upnpav().debug(
-//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())
-//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())
+//    LOGNS(Omm::Av, upnpav, debug,\
+//        + "list item painter, font size points: " + Poco::NumberFormatter::format(option.font.pointSize())\
+//        + ", font size pixels: " + Poco::NumberFormatter::format(option.font.pixelSize())\
 //    );
 
     if (qVariantCanConvert<QString>(index.data(Qt::DisplayRole))) {
@@ -64,7 +64,7 @@ QtListItem::paint(QPainter* painter, const QStyleOptionViewItem& option, const Q
         painter->restore();
     }
     // use QApplication::style()->drawControl() to draw Qt widgets on the painter
-    
+
 //    else {
 //        // default painter
 //        QStyledItemDelegate::paint(painter, option, index);
@@ -116,7 +116,7 @@ int
 QtBrowserModel::rowCount(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::rowCount()" << std::endl;
-    
+
     Omm::Av::CtlMediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::rowCount() parent objectId:" << object->_objectId.c_str() << "return rows:" << object->_children.size();
     if (object == 0) {
@@ -124,7 +124,7 @@ QtBrowserModel::rowCount(const QModelIndex &parent) const
 //         return _pServers->size();
         return _pUserInterface->serverCount();
     }
-    
+
 //     std::clog << "UpnpBrowserModel::rowCount() number of child objects: " << object->getChildCount() << std::endl;
 //     return object->_children.size();
     return object->getChildCount();
@@ -152,7 +152,7 @@ bool
 QtBrowserModel::hasChildren(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::hasChildren()" << std::endl;
-    
+
     Omm::Av::CtlMediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::hasChildren() parent objectId:" << object->_objectId.c_str();
     if (object == 0) {
@@ -172,7 +172,7 @@ bool
 QtBrowserModel::canFetchMore(const QModelIndex &parent) const
 {
 //     std::clog << "UpnpBrowserModel::canFetchMore()" << std::endl;
-    
+
     Omm::Av::CtlMediaObject* object = getObject(parent);
     if (object == 0) {
         return false;
@@ -187,7 +187,7 @@ void
 QtBrowserModel::fetchMore(const QModelIndex &parent)
 {
 //     std::clog << "UpnpBrowserModel::fetchMore()" << std::endl;
-    
+
     Omm::Av::CtlMediaObject* object = getObject(parent);
 //     qDebug() << "UpnpBrowserModel::fetchMore() parent objectId:" << object->_objectId.c_str();
     if (object == 0) {
@@ -213,7 +213,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
     std::string artist = object->getProperty(Omm::Av::AvProperty::ARTIST);
     std::string album = object->getProperty(Omm::Av::AvProperty::ALBUM);
     bool titleOnly = (artist == "");
-    
+
     switch (role) {
     case Qt::DisplayRole:
     case Qt::EditRole:
@@ -235,7 +235,7 @@ QtBrowserModel::data(const QModelIndex &index, int role) const
 //         }
 //         return QVariant();
     }
-    
+
     return QVariant();
 }
 
@@ -261,7 +261,7 @@ QtBrowserModel::parent(const QModelIndex &index) const
         if (i < _pUserInterface->serverCount()) {
             return createIndex(i, 0, (void*)(object->parent()));
         }
-        
+
 //         Omm::Container<ServerController>::Iterator server = _pServers->begin();
 //         while ((*server)->root() != object->_parent) {
 //             ++server;
@@ -295,7 +295,7 @@ QtBrowserModel::index(int row, int column, const QModelIndex &parent) const
 //         return createIndex(row, 0, (void*)(_pServers->get(row).root()));
         return createIndex(row, column, (void*)(_pUserInterface->serverRootObject(row)));
     }
-    
+
     // if we can't deliver an index, because _children.size()-1 < row
     // then fetchMore() is triggered -> return QModelIndex()
     if (row > int(object->childCount()) - 1) {
@@ -354,7 +354,7 @@ void
 QtBrowserModel::beginAddServer(int position)
 {
 //     std::clog << "UpnpBrowserModel::beginAddServer() at position: " << position << std::endl;
-    
+
     beginInsertRows(QModelIndex(), position, position);
 }
 
@@ -363,7 +363,7 @@ void
 QtBrowserModel::endAddServer()
 {
 //     std::clog << "UpnpBrowserModel::endAddServer()" << std::endl;
-    
+
     endInsertRows();
     emit layoutChanged();
 }
@@ -372,7 +372,7 @@ void
 QtBrowserModel::beginRemoveServer(int position)
 {
 //     qDebug() << "UpnpBrowserModel::beginRemoveServer() at position: " << position;
-    
+
     beginRemoveRows(QModelIndex(), position, position);
 }
 
@@ -381,7 +381,7 @@ void
 QtBrowserModel::endRemoveServer()
 {
 //     qDebug() << "UpnpBrowserModel::endRemoveServer()";
-    
+
     endRemoveRows();
     emit layoutChanged();
 }

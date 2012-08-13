@@ -46,11 +46,7 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-#ifdef NDEBUG
-    _pNetLogger = &Poco::Logger::create("NET", pChannel, 0);
-#else
     _pNetLogger = &Poco::Logger::create("NET", pChannel, Poco::Message::PRIO_DEBUG);
-#endif
 }
 
 
