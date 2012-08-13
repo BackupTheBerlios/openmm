@@ -410,11 +410,8 @@ UpnpApplication::saveConfig()
 {
     if (!_ignoreConfig) {
         LOGNS(Av, upnpav, information, "saving config file ...");
-//            _pConf->setInt("width", app.width());
-//            _pConf->setInt("height", app.height());
-        // FIXME: main view is smaller than app window
-        _pConf->setInt("application.width", getMainView()->width());
-        _pConf->setInt("application.height", getMainView()->height());
+        _pConf->setInt("application.width", width());
+        _pConf->setInt("application.height", height());
         try {
             _pConf->save(_confFilePath);
             LOGNS(Av, upnpav, information, "saving config file done.");

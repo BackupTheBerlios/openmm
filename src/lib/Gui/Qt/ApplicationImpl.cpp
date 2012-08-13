@@ -69,12 +69,18 @@ ApplicationImpl::resize(int width, int height)
 {
     _width = width;
     _height = height;
+    if (_pMainWindow) {
+        _pMainWindow->resize(width, height);
+    }
 }
 
 
 int
 ApplicationImpl::width()
 {
+    if (_pMainWindow) {
+        return _pMainWindow->width();
+    }
     return _width;
 }
 
@@ -82,6 +88,9 @@ ApplicationImpl::width()
 int
 ApplicationImpl::height()
 {
+    if (_pMainWindow) {
+        return _pMainWindow->height();
+    }
     return _height;
 }
 
@@ -180,8 +189,7 @@ ApplicationImpl::run(int argc, char** argv)
     if (_visible) {
         _pMainWindow->show();
     }
-    _pMainWindow->resize(width(), height());
-    _pApplication->_pMainView->resize(width(), height());
+    _pMainWindow->resize(_width, _height);
     _pApplication->presentedMainView();
 
     _pEventFilter = new QtEventFilter(_pApplication->_pMainView->getViewImpl());
