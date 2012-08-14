@@ -143,7 +143,7 @@ Engine::seekTrack(ui4 trackNumber)
 void
 Engine::nextTrack()
 {
-    if (_trackNumberInPlaylist + 1 < _playlist.size()) {
+    if (_trackNumberInPlaylist < _playlist.size() - 1) {
         _trackNumberInPlaylist++;
         LOG(upnpav, debug, "engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
@@ -154,7 +154,7 @@ Engine::nextTrack()
 void
 Engine::previousTrack()
 {
-    if (_trackNumberInPlaylist - 1 >= 0) {
+    if (_trackNumberInPlaylist >= 1) {
         _trackNumberInPlaylist--;
         LOG(upnpav, debug, "engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);

@@ -110,7 +110,7 @@ protected:
     DevAVTransportRendererImpl*         _pAVTransportImpl;
     DevRenderingControlRendererImpl*    _pRenderingControlImpl;
     std::vector<std::string>            _playlist;
-    Omm::ui4                            _trackNumberInPlaylist;
+    int                                 _trackNumberInPlaylist;
     Poco::Timer*                        _pEndOfStreamTimer;
 };
 
