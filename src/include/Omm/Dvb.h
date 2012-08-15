@@ -64,7 +64,7 @@ class DvbChannel
 public:
     typedef enum {HORIZ = 0, VERT = 1} Polarization;
 
-    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid);
+    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid);
 
 
 private:
@@ -76,6 +76,7 @@ private:
     unsigned int _cpid;
     unsigned int _apid;
     int _sid;
+    unsigned int _tid;
 };
 
 
@@ -185,7 +186,7 @@ public:
 
     void openDemux();
 
-    unsigned int getPmtPid(int sid);
+    unsigned int getPmtPid(unsigned int tid, int sid);
 
     bool setVideoPid(unsigned int pid);
     bool setAudioPid(unsigned int pid);

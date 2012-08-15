@@ -39,7 +39,8 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_DEBUG);
+    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_TRACE);
 }
 
 
@@ -61,7 +62,7 @@ Log::dvb()
 #endif // NDEBUG
 
 
-DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid) :
+DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid) :
 _satNum(satNum),
 _freq(freq),
 _pol(pol),
@@ -69,7 +70,8 @@ _symbolRate(symbolRate),
 _vpid(vpid),
 _cpid(cpid),
 _apid(apid),
-_sid(sid)
+_sid(sid),
+_tid(tid)
 {
 }
 
@@ -212,7 +214,7 @@ DvbFrontend::tune(DvbChannel* pChannel)
             _pAdapter->_pDemux->setPcrPid(pChannel->_cpid)) {
                 success = true;
                 if (_pAdapter->_recPsi) {
-                    unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_sid);
+                    unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_tid, pChannel->_sid);
                     if (pmtPid == 0) {
                         LOG(dvb, error, "couldn't find pmt-pid for sid"); // %04x\n",sid);
                         success = false;
@@ -242,6 +244,8 @@ DvbFrontend::stopTune()
 void
 DvbFrontend::diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBand)
 {
+    LOG(dvb, debug, "diseqc command on sat: " + Poco::NumberFormatter::format(satNum) + " ...");
+
     struct diseqc_cmd {
         struct dvb_diseqc_master_cmd cmd;
         uint32_t wait;
@@ -276,12 +280,16 @@ DvbFrontend::diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBa
     if (ioctl(_fileDesc, FE_SET_TONE, tone) == -1) {
         LOG(dvb, error, "FE_SET_TONE failed");
     }
+
+    LOG(dvb, debug, "diseqc command finished.");
 }
 
 
 bool
 DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
 {
+    LOG(dvb, debug, "tune frontend to frequency: " + Poco::NumberFormatter::format(freq) + " ...");
+
     struct dvb_frontend_parameters tuneto;
     struct dvb_frontend_event event;
 
@@ -300,6 +308,8 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
         LOG(dvb, error, "FE_SET_FRONTEND failed");
         return false;
     }
+
+    LOG(dvb, debug, "tune frontend to frequency finished.");
 
     return true;
 }
@@ -466,11 +476,14 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
 
 
 unsigned int
-DvbDemux::getPmtPid(int sid)
+DvbDemux::getPmtPid(unsigned int tid, int sid)
 {
+    LOG(dvb, trace, "get PMT PID for service id: " + Poco::NumberFormatter::format(sid) + " ...");
+
     int pmt_pid = 0;
     int count;
     int section_length;
+    unsigned int transport_stream_id;
     unsigned char buft[4096];
     unsigned char *buf = buft;
     struct dmx_sct_filter_params f;
@@ -482,38 +495,58 @@ DvbDemux::getPmtPid(int sid)
     f.timeout = 0;
     f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
+    LOG(dvb, trace, "set demuxer filter ...");
     if (ioctl(_fileDescPat, DMX_SET_FILTER, &f) == -1) {
         LOG(dvb, error, "DMX_SET_FILTER failed");
         return 0;
     }
+    LOG(dvb, trace, "set demuxer filter finished.");
 
-    int patread = 0;
-    while (!patread){
-        if (((count = read(_fileDescPat, buf, sizeof(buft))) < 0) && errno == EOVERFLOW)
+    bool patread = false;
+    while (!patread) {
+        LOG(dvb, trace, "read PAT (pid 0) section into buffer ...");
+        if (((count = read(_fileDescPat, buf, sizeof(buft))) < 0) && errno == EOVERFLOW) {
+            LOG(dvb, trace, "read elementary stream pid 0 into buffer failed, second try ...");
             count = read(_fileDescPat, buf, sizeof(buft));
+        }
         if (count < 0) {
-            LOG(dvb, error, "read_sections: read error");
+            LOG(dvb, error, "while reading sections");
             return 0;
         }
+        LOG(dvb, trace, "read " + Poco::NumberFormatter::format(count) + " bytes from elementary stream pid 0 into buffer.");
 
         section_length = ((buf[1] & 0x0f) << 8) | buf[2];
-        if (count != section_length + 3)
+        LOG(dvb, trace, "section length: " + Poco::NumberFormatter::format(section_length));
+
+        if (count != section_length + 3) {
+            LOG(dvb, error, "PAT size mismatch, next read attempt.");
             continue;
+        }
+
+        transport_stream_id = (buf[3] << 8) | buf[4];
+        LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(transport_stream_id));
+        if (transport_stream_id != tid) {
+            LOG(dvb, error, "PAT tid mismatch (" + Poco::NumberFormatter::format(tid) + "), next read attempt.");
+            continue;
+        }
 
         buf += 8;
         section_length -= 8;
 
-        patread = 1;    // assumes one section contains the whole pat
+        patread = true;    // assumes one section contains the whole pat
         while (section_length > 0) {
             int service_id = (buf[0] << 8) | buf[1];
+            LOG(dvb, trace, "search for service id in section, found: " + Poco::NumberFormatter::format(service_id));
             if (service_id == sid) {
                 pmt_pid = ((buf[2] & 0x1f) << 8) | buf[3];
                 section_length = 0;
+                LOG(dvb, trace, "found service id, pmt pid is: " + Poco::NumberFormatter::format(pmt_pid));
             }
             buf += 4;
             section_length -= 4;
         }
     }
+    LOG(dvb, trace, "get PMT PID for service id finished.");
 
     return pmt_pid;
 }

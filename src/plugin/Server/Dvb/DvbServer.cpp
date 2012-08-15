@@ -166,7 +166,8 @@ DvbModel::scanChannelConfig(const std::string& channelConfig, bool addPaths)
         Poco::StringTokenizer audioPid(audioChannel[0], "=");
         unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
-        _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid);
+        unsigned int tid = Poco::NumberParser::parseUnsigned(channelParams[11]);
+        _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid, tid);
         if (addPaths) {
             addPath(line);
         }

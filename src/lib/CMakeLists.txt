@@ -251,7 +251,7 @@ endif(OMM_GUI AND RESGEN)
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommutil ommnet ommupnp ommupnpav ommavstream ommsys
+install(TARGETS ommlog ommnet ommupnp ommupnpav ommavstream ommsys ommutil
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
