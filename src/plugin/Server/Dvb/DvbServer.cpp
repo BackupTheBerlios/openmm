@@ -29,18 +29,22 @@
 
 
 DvbModel::DvbModel()
-//_pRecDevice(0)
-//_pRecDevice(new std::ifstream("/dev/dvb/adapter0/dvr0"))
 {
+    LOGNS(Omm::Dvb, dvb, debug, "dvb model ctor.");
 }
 
 
 void
 DvbModel::init()
 {
-    scanChannelConfig(getBasePath(), false);
+    LOGNS(Omm::Dvb, dvb, debug, "dvb model init ...");
+
+    _channels.setConfFilePath(getBasePath());
+    _channels.scanChannels();
     Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
     Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
+
+    LOGNS(Omm::Dvb, dvb, debug, "dvb model init finished.");
 }
 
 
@@ -61,7 +65,10 @@ DvbModel::getSystemUpdateId(bool checkMod)
 void
 DvbModel::scan()
 {
-    scanChannelConfig(getBasePath());
+    _channels.scanChannels();
+    for (Omm::Dvb::DvbChannels::ChannelIterator it = _channels.beginChannel(); it != _channels.endChannel(); ++it) {
+        addPath(it->first);
+    }
 }
 
 
@@ -75,7 +82,7 @@ DvbModel::getClass(const std::string& path)
 std::string
 DvbModel::getTitle(const std::string& path)
 {
-    return _channelNames[path];
+    return _channels.getChannel(path)->getName();
 }
 
 
@@ -101,7 +108,7 @@ DvbModel::getStream(const std::string& path, const std::string& resourcePath)
     //        UPDATE: this only happens when renderer and dvb server run in the
     //        same process.
 
-    bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
+    bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels.getChannel(path));
     if (!tuneSuccess) {
         return 0;
     }
@@ -129,53 +136,6 @@ std::string
 DvbModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MPEG_PS_PAL";
-}
-
-
-void
-DvbModel::scanChannelConfig(const std::string& channelConfig, bool addPaths)
-{
-    LOGNS(Omm::Dvb, dvb, debug, "scan channel config ...");
-
-    clearMaps();
-
-    std::ifstream channels(channelConfig.c_str());
-    std::string line;
-    while (getline(channels, line)) {
-        Poco::StringTokenizer channelParams(line, ":");
-        Poco::StringTokenizer channelName(channelParams[0], ";");
-        _channelNames[line] = channelName[0];
-        unsigned int freq = Poco::NumberParser::parseUnsigned(channelParams[1]) * 1000;
-        Omm::Dvb::DvbChannel::Polarization pol = (channelParams[2][0] == 'h') ? Omm::Dvb::DvbChannel::HORIZ : Omm::Dvb::DvbChannel::VERT;
-        unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
-        Poco::StringTokenizer videoPid(channelParams[5], "+");
-        unsigned int vpid = Poco::NumberParser::parseUnsigned(videoPid[0]);
-        unsigned int cpid = vpid;
-        if (videoPid.count() > 1) {
-            cpid = Poco::NumberParser::parseUnsigned(videoPid[1]);
-        }
-        Poco::StringTokenizer audioChannel(channelParams[6], ";");
-        Poco::StringTokenizer audioPid(audioChannel[0], "=");
-        unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
-        int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
-        unsigned int tid = Poco::NumberParser::parseUnsigned(channelParams[11]);
-        _channels[line] = new Omm::Dvb::DvbChannel(0, freq, pol, symbolRate, vpid, cpid, apid, sid, tid);
-        if (addPaths) {
-            addPath(line);
-        }
-    }
-    LOGNS(Omm::Dvb, dvb, debug, "scan channel config finished.");
-}
-
-
-void
-DvbModel::clearMaps()
-{
-    _channelNames.clear();
-    for (std::map<std::string, Omm::Dvb::DvbChannel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-        delete it->second;
-    }
-    _channels.clear();
 }
 
 

@@ -20,6 +20,8 @@
  ***************************************************************************/
 #include <Poco/File.h>
 #include <Poco/BufferedStreamBuf.h>
+#include <Poco/StringTokenizer.h>
+#include <Poco/NumberParser.h>
 
 #include <stdint.h>
 #include <fcntl.h>
@@ -63,7 +65,8 @@ Log::dvb()
 #endif // NDEBUG
 
 
-DvbChannel::DvbChannel(unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid) :
+DvbChannel::DvbChannel(const std::string& name, unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid) :
+_name(name),
 _satNum(satNum),
 _freq(freq),
 _pol(pol),
@@ -74,6 +77,91 @@ _apid(apid),
 _sid(sid),
 _tid(tid)
 {
+}
+
+
+std::string
+DvbChannel::getName()
+{
+    return _name;
+}
+
+
+DvbChannels::ChannelIterator
+DvbChannels::beginChannel()
+{
+    return _channelMap.begin();
+}
+
+
+DvbChannels::ChannelIterator
+DvbChannels::endChannel()
+{
+    return _channelMap.end();
+}
+
+
+DvbChannel*
+DvbChannels::getChannel(const std::string& name)
+{
+    return _channelMap[name];
+}
+
+
+void
+ChannelsConf::setConfFilePath(const std::string& confFilePath)
+{
+    _confFilePath = confFilePath;
+}
+
+
+void
+ChannelsConf::scanChannels()
+{
+    scanChannelConfig(_confFilePath);
+}
+
+
+void
+ChannelsConf::scanChannelConfig(const std::string& channelConfig)
+{
+    LOG(dvb, debug, "scan channel config ...");
+
+    clearChannels();
+
+    std::ifstream channels(channelConfig.c_str());
+    std::string line;
+    while (getline(channels, line)) {
+        Poco::StringTokenizer channelParams(line, ":");
+        Poco::StringTokenizer channelName(channelParams[0], ";");
+        unsigned int freq = Poco::NumberParser::parseUnsigned(channelParams[1]) * 1000;
+        DvbChannel::Polarization pol = (channelParams[2][0] == 'h') ? DvbChannel::HORIZ : DvbChannel::VERT;
+        unsigned int symbolRate = Poco::NumberParser::parseUnsigned(channelParams[4]) * 1000;
+        Poco::StringTokenizer videoPid(channelParams[5], "+");
+        unsigned int vpid = Poco::NumberParser::parseUnsigned(videoPid[0]);
+        unsigned int cpid = vpid;
+        if (videoPid.count() > 1) {
+            cpid = Poco::NumberParser::parseUnsigned(videoPid[1]);
+        }
+        Poco::StringTokenizer audioChannel(channelParams[6], ";");
+        Poco::StringTokenizer audioPid(audioChannel[0], "=");
+        unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
+        int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
+        unsigned int tid = Poco::NumberParser::parseUnsigned(channelParams[11]);
+        _channelMap[channelName[0]] = new Omm::Dvb::DvbChannel(channelName[0], 0, freq, pol, symbolRate, vpid, cpid, apid, sid, tid);
+    }
+
+    LOG(dvb, debug, "scan channel config finished.");
+}
+
+
+void
+ChannelsConf::clearChannels()
+{
+    for (std::map<std::string, Omm::Dvb::DvbChannel*>::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it) {
+        delete it->second;
+    }
+    _channelMap.clear();
 }
 
 

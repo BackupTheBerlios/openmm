@@ -50,11 +50,7 @@ public:
     virtual void freeStream(std::istream* pIstream);
 
 private:
-    void scanChannelConfig(const std::string& channelConfig, bool addPaths = true);
-    void clearMaps();
-
-    std::map<std::string, std::string>                  _channelNames;
-    std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
+    Omm::Dvb::ChannelsConf         _channels;
 };
 
 

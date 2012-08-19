@@ -64,19 +64,52 @@ class DvbChannel
 public:
     typedef enum {HORIZ = 0, VERT = 1} Polarization;
 
-    DvbChannel(unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid);
+    DvbChannel(const std::string& name, unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid);
 
+    std::string getName();
 
 private:
-    unsigned int _satNum;
-    unsigned int _freq;
-    Polarization _pol;
-    unsigned int _symbolRate;
-    unsigned int _vpid;
-    unsigned int _cpid;
-    unsigned int _apid;
-    int _sid;
-    unsigned int _tid;
+    std::string         _name;
+    unsigned int        _satNum;
+    unsigned int        _freq;
+    Polarization        _pol;
+    unsigned int        _symbolRate;
+    unsigned int        _vpid;
+    unsigned int        _cpid;
+    unsigned int        _apid;
+    int                 _sid;
+    unsigned int        _tid;
+};
+
+
+class DvbChannels
+{
+public:
+    typedef std::map<std::string, DvbChannel*>::iterator ChannelIterator;
+    ChannelIterator beginChannel();
+    ChannelIterator endChannel();
+
+    virtual void scanChannels() {}
+
+    DvbChannel* getChannel(const std::string& name);
+
+protected:
+    std::map<std::string, DvbChannel*> _channelMap;
+};
+
+
+class ChannelsConf : public DvbChannels
+{
+public:
+    virtual void scanChannels();
+
+    void setConfFilePath(const std::string& confFilePath);
+
+private:
+    void scanChannelConfig(const std::string& channelConfig);
+    void clearChannels();
+
+    std::string _confFilePath;
 };
 
 
