@@ -100,6 +100,7 @@ public:
 
     void openAdapter();
     void getDeviceInfo();  // TODO: implement DvbAdapter::getDeviceInfo()
+    DvbDvr* getDvr();
 
 
 private:
@@ -217,12 +218,15 @@ public:
     ~DvbDvr();
 
     void openDvr();
+    std::istream* getStream();
+    void freeStream();
 
 private:
     DvbAdapter*                 _pAdapter;
     std::string                 _deviceName;
     int                         _num;
-    std::ifstream               _dvrStream;
+    int                         _fileDescDvr;
+    std::istream*               _pDvrStream;
 };
 
 
@@ -238,6 +242,9 @@ public:
 
     bool tune(DvbChannel* pChannel);
     void stopTune();
+
+    std::istream* getStream();
+    void freeStream(std::istream* pIstream);
 
 //     std::istream& getTransportStream(DvbChannel* pChannel);
 //     std::ostream& getPacketizedElementaryStream(Channel* pChannel);

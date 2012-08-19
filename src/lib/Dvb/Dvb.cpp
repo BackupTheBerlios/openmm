@@ -19,6 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 #include <Poco/File.h>
+#include <Poco/BufferedStreamBuf.h>
 
 #include <stdint.h>
 #include <fcntl.h>
@@ -101,7 +102,14 @@ DvbAdapter::openAdapter()
 {
     _pFrontend->openFrontend();
     _pDemux->openDemux();
-//     _pDvr->openDvr();
+    _pDvr->openDvr();
+}
+
+
+DvbDvr*
+DvbAdapter::getDvr()
+{
+    return _pDvr;
 }
 
 
@@ -552,9 +560,35 @@ DvbDemux::getPmtPid(unsigned int tid, int sid)
 }
 
 
+class UnixFileStreamBuf : public Poco::BufferedStreamBuf
+{
+public:
+    UnixFileStreamBuf(int fileDesc) : BasicBufferedStreamBuf(1000, std::ios_base::in), _fileDesc(fileDesc) {}
+
+    virtual int readFromDevice(char_type* buffer, std::streamsize length)
+    {
+        return read(_fileDesc, buffer, length);
+    }
+
+private:
+    int         _fileDesc;
+};
+
+
+class UnixFileIStream : public std::basic_istream<char, std::char_traits<char> >
+{
+public:
+    UnixFileIStream(int fileDesc) : _streamBuf(fileDesc), std::basic_istream<char, std::char_traits<char> >(&_streamBuf) { clear(); }
+
+private:
+    UnixFileStreamBuf   _streamBuf;
+};
+
+
 DvbDvr::DvbDvr(DvbAdapter* pAdapter, int num) :
 _pAdapter(pAdapter),
-_num(num)
+_num(num),
+_pDvrStream(0)
 {
     _deviceName = _pAdapter->_deviceName + "/dvr" + Poco::NumberFormatter::format(_num);
 }
@@ -568,9 +602,40 @@ DvbDvr::~DvbDvr()
 void
 DvbDvr::openDvr()
 {
-    _dvrStream.open(_deviceName.c_str());
-    if (!_dvrStream) {
-        LOG(dvb, error, "failed to open dvb rec device.");
+    LOG(dvb, debug, "opening dvb rec device.");
+//    if ((_fileDescDvr = open(_deviceName.c_str(), O_RDONLY | O_NONBLOCK)) < 0) {
+    if ((_fileDescDvr = open(_deviceName.c_str(), O_RDONLY)) < 0) {
+        LOG(dvb, error, "failed to open dvb rec device: " + _deviceName);
+        return;
+    }
+    _pDvrStream = new UnixFileIStream(_fileDescDvr);
+    if (!_pDvrStream) {
+        LOG(dvb, error, "failed to open dvb rec stream.");
+    }
+}
+
+
+std::istream*
+DvbDvr::getStream()
+{
+    LOG(dvb, debug, "get dvb rec stream.");
+
+    if (!_pDvrStream) {
+        openDvr();
+    }
+    return _pDvrStream;
+}
+
+
+void
+DvbDvr::freeStream()
+{
+    LOG(dvb, debug, "free dvb rec stream.");
+
+    if (_pDvrStream) {
+        delete _pDvrStream;
+        _pDvrStream = 0;
+        close(_fileDescDvr);
     }
 }
 
@@ -640,4 +705,18 @@ DvbDevice::stopTune()
 {
     _adapters[0]->_pFrontend->stopTune();
     LOG(dvb, debug, "stopped tuning.");
+}
+
+
+std::istream*
+DvbDevice::getStream()
+{
+    return _adapters[0]->getDvr()->getStream();
+}
+
+
+void
+DvbDevice::freeStream(std::istream* pIstream)
+{
+    _adapters[0]->getDvr()->freeStream();
 }

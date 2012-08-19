@@ -47,6 +47,7 @@ public:
     virtual std::string getDlna(const std::string& path);
     virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
     virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
+    virtual void freeStream(std::istream* pIstream);
 
 private:
     void scanChannelConfig(const std::string& channelConfig, bool addPaths = true);
@@ -54,7 +55,6 @@ private:
 
     std::map<std::string, std::string>                  _channelNames;
     std::map<std::string, Omm::Dvb::DvbChannel*>        _channels;
-    std::ifstream*                                      _pRecDevice;
 };
 
 

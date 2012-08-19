@@ -28,9 +28,9 @@
 #include "DvbServer.h"
 
 
-DvbModel::DvbModel() :
+DvbModel::DvbModel()
 //_pRecDevice(0)
-_pRecDevice(new std::ifstream("/dev/dvb/adapter0/dvr0"))
+//_pRecDevice(new std::ifstream("/dev/dvb/adapter0/dvr0"))
 {
 }
 
@@ -89,7 +89,7 @@ DvbModel::isSeekable(const std::string& path, const std::string& resourcePath)
 std::istream*
 DvbModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    // FIXME: two subsequent getStream() without stopping the stream may lead to
+    // NOTE:  two subsequent getStream() without stopping the stream may lead to
     //        a blocked dvr device: engine stops reading the previous stream
     //        when receiving the new stream. This may overlap and the file
     //        handle is still open. Even if the engine is stopped right before
@@ -100,29 +100,21 @@ DvbModel::getStream(const std::string& path, const std::string& resourcePath)
     //        handles.
     //        UPDATE: this only happens when renderer and dvb server run in the
     //        same process.
-    if (_pRecDevice) {
-        LOGNS(Omm::Dvb, dvb, debug, "releasing dvr device");
-        _pRecDevice->close();
-//        delete _pRecDevice;
-//        _pRecDevice = 0;
-    }
 
     bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels[path]);
     if (!tuneSuccess) {
         return 0;
     }
 
-//    Poco::Thread::sleep(250);
     LOGNS(Omm::Dvb, dvb, debug, "reading from dvr device ...");
-//    std::ifstream* pIstr = new std::ifstream("/dev/dvb/adapter0/dvr0");
-//    _pRecDevice = new std::ifstream("/dev/dvb/adapter0/dvr0");
-    _pRecDevice->open("/dev/dvb/adapter0/dvr0");
-    if (!*_pRecDevice) {
-        LOGNS(Omm::Dvb, dvb, error, "dvr device busy");
-//        delete _pRecDevice;
-//        _pRecDevice = 0;
-    }
-    return _pRecDevice;
+    return Omm::Dvb::DvbDevice::instance()->getStream();
+}
+
+
+void
+DvbModel::freeStream(std::istream* pIstream)
+{
+    Omm::Dvb::DvbDevice::instance()->freeStream(pIstream);
 }
 
 
