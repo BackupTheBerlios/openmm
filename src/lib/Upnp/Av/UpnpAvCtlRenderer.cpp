@@ -350,6 +350,7 @@ MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaObjectSelectedNotific
     LOG(upnpav, debug, "media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
+        pRenderer->stopPressed();
         pRenderer->setObject2(pMediaItemNotification->_pObject, pMediaItemNotification->_pParentObject, pMediaItemNotification->_row);
         pRenderer->playPressed();
     }
