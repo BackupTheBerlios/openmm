@@ -177,12 +177,16 @@ class DvbFrontend
     friend class SignalCheckThread;
 
 public:
+    enum FrontendType { None, DVBS, DVBT, DVBC, ATSC };
+
     DvbFrontend(DvbAdapter* pAdapter, int num);
     ~DvbFrontend();
 
     void openFrontend();
     void closeFrontend();
 
+    FrontendType getType();
+    bool typeSupported();
     bool tune(DvbChannel* pChannel);
     void stopTune();
 

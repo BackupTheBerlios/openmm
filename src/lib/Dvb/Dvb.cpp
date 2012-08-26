@@ -388,8 +388,8 @@ DvbFrontend::openFrontend()
         closeFrontend();
     }
 
-    if (_feInfo.type != FE_QPSK) {
-        LOG(dvb, error, "frontend device is not a QPSK (DVB-S) device");
+    if (!typeSupported()) {
+        LOG(dvb, error, "frontend device is not a DVB-S or DVB-T device, not yet supported");
         closeFrontend();
     }
 }
@@ -406,6 +406,33 @@ DvbFrontend::closeFrontend()
 }
 
 
+DvbFrontend::FrontendType
+DvbFrontend::getType()
+{
+    LOG(dvb, debug, "frontend type: " + Poco::NumberFormatter::format(_feInfo.type));
+
+    switch (_feInfo.type) {
+        case FE_QPSK:
+            return DVBS;
+        case FE_OFDM:
+            return DVBT;
+        case FE_QAM:
+            return DVBC;
+        case FE_ATSC:
+            return ATSC;
+        default:
+            return None;
+    }
+}
+
+
+bool
+DvbFrontend::typeSupported()
+{
+    return getType() == DVBS || getType() == DVBT;
+}
+
+
 bool
 DvbFrontend::tune(DvbChannel* pChannel)
 {
@@ -413,8 +440,17 @@ DvbFrontend::tune(DvbChannel* pChannel)
 
     bool success = false;
     unsigned int ifreq;
-    bool hiBand = _pAdapter->_pLnb->isHiBand(pChannel->_freq, ifreq);
-    diseqc(pChannel->_satNum, pChannel->_pol, hiBand);
+    if (getType() == DVBS) {
+        bool hiBand = _pAdapter->_pLnb->isHiBand(pChannel->_freq, ifreq);
+        diseqc(pChannel->_satNum, pChannel->_pol, hiBand);
+    }
+    else if (getType() == DVBT) {
+        ifreq = pChannel->_freq;
+    }
+    else {
+        LOG(dvb, error, "frontend type not yet supported, stop tuning.");
+        return false;
+    }
 
     if (tuneFrontend(ifreq, pChannel->_symbolRate)) {
         if (_pAdapter->_pDemux->setVideoPid(pChannel->_vpid) &&
@@ -513,8 +549,19 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
 
     tuneto.frequency = freq;
     tuneto.inversion = INVERSION_AUTO;
-    tuneto.u.qpsk.symbol_rate = symbolRate;
-    tuneto.u.qpsk.fec_inner = FEC_AUTO;
+    if (getType() == DVBS) {
+        tuneto.u.qpsk.symbol_rate = symbolRate;
+        tuneto.u.qpsk.fec_inner = FEC_AUTO;
+    }
+    else if (getType() == DVBT) {
+        tuneto.u.ofdm.bandwidth = BANDWIDTH_8_MHZ;
+        tuneto.u.ofdm.code_rate_HP = FEC_2_3;
+        tuneto.u.ofdm.code_rate_LP = FEC_NONE;
+        tuneto.u.ofdm.constellation = QAM_16;
+        tuneto.u.ofdm.transmission_mode = TRANSMISSION_MODE_8K;
+        tuneto.u.ofdm.guard_interval = GUARD_INTERVAL_1_4;
+        tuneto.u.ofdm.hierarchy_information = HIERARCHY_NONE;
+    }
 
     if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
         LOG(dvb, error, "FE_SET_FRONTEND failed");
