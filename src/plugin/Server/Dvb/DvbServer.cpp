@@ -96,7 +96,7 @@ DvbModel::isSeekable(const std::string& path, const std::string& resourcePath)
 std::istream*
 DvbModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    // NOTE:  two subsequent getStream() without stopping the stream may lead to
+    // FIXME: two subsequent getStream() without stopping the stream may lead to
     //        a blocked dvr device: engine stops reading the previous stream
     //        when receiving the new stream. This may overlap and the file
     //        handle is still open. Even if the engine is stopped right before
@@ -107,6 +107,13 @@ DvbModel::getStream(const std::string& path, const std::string& resourcePath)
     //        handles.
     //        UPDATE: this only happens when renderer and dvb server run in the
     //        same process.
+    //        UPDATE: man(2) close:
+    //        It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
+    //        same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
+    //        tended side effects.
+    //        UPDATE: as long as the same thread accesses the device, it is not busy. This happens, if the http request is
+    //        run in the same thread as the previous http request. Correction: even in same thread, dvr device cannot be
+    //        opened ("Device or resource busy").
 
     bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels.getChannel(path));
     if (!tuneSuccess) {
@@ -137,53 +144,6 @@ DvbModel::getDlna(const std::string& path)
 {
     return "DLNA.ORG_PN=MPEG_PS_PAL";
 }
-
-
-//    //setTimer("ProSieben", Poco::DateTime(2011, 1, 9, 18, 27), Poco::DateTime(2011, 1, 9, 18, 8));
-//void
-//DvbServer::setTimer(const std::string& channel, Poco::DateTime startDate, Poco::DateTime stopDate)
-//{
-    // TODO: need to convert to new path based data model.
-//    DvbDataModel* pDvbDataModel = static_cast<DvbDataModel*>(_pDataModel);
-//    Omm::ui4 index = std::find(pDvbDataModel->_channelNames.begin(), pDvbDataModel->_channelNames.end(), channel)
-//                    - pDvbDataModel->_channelNames.begin();
-//
-//    _pChannel = pDvbDataModel->_channels[index];
-//    Poco::DateTime nowDate;
-//    LOGNS(Omm::Dvb, dvb, debug, "set timer, channel: " + Poco::NumberFormatter::format(index)\
-//                + ", start:" + Poco::NumberFormatter::format((startDate - nowDate).milliseconds()));
-//
-//    // FIXME: startInterval is wrong (too short)
-//    _timer.setStartInterval((startDate - nowDate).milliseconds());
-//    Poco::TimerCallback<DvbServer> callback(*this, &DvbServer::timerCallback);
-//    _timer.start(callback);
-//}
-
-
-//void
-//DvbServer::timerCallback(Poco::Timer& timer)
-//{
-//    Omm::Dvb::DvbDevice::instance()->tune(_pChannel);
-//
-//    LOGNS(Omm::Dvb, dvb, debug, "reading from dvr device ...");
-//    std::ifstream istr("/dev/dvb/adapter0/dvr0");
-//    std::ofstream ostr("/var/local/ommrec.mpg");
-//    // TODO: stop StreamCopier::copyStream() in the timerCallback thread by closing istr and/or ostr
-//    std::streamsize bytes = Poco::StreamCopier::copyStream(istr, ostr);
-//}
-
-
-// RecTimer::RecTimer() :
-// _pChannel(0)
-// {
-// }
-//
-//
-// void
-// RecTimer::setChannel(Omm::Dvb::DvbChannel* pChannel)
-// {
-//     _pChannel = pChannel;
-// }
 
 
 #ifdef OMMPLUGIN

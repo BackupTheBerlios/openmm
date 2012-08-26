@@ -20,9 +20,11 @@
  ***************************************************************************/
 #include <Poco/File.h>
 #include <Poco/BufferedStreamBuf.h>
+//#include <Poco/UnbufferedStreamBuf.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/NumberParser.h>
 
+#include <fstream>
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -31,8 +33,9 @@
 #include "Dvb.h"
 #include "Log.h"
 
-using namespace Omm;
-using namespace Omm::Dvb;
+
+namespace Omm {
+namespace Dvb {
 
 #ifndef NDEBUG
 Log* Log::_pInstance = 0;
@@ -65,7 +68,62 @@ Log::dvb()
 #endif // NDEBUG
 
 
-DvbChannel::DvbChannel(const std::string& name, unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid) :
+class UnixFileStreamBuf : public Poco::BufferedStreamBuf
+//class UnixFileStreamBuf : public Poco::UnbufferedStreamBuf
+{
+public:
+    UnixFileStreamBuf(int fileDesc, int bufSize) : BasicBufferedStreamBuf(bufSize, std::ios_base::in), _fileDesc(fileDesc) {}
+//    UnixFileStreamBuf(int fileDesc) : BasicUnbufferedStreamBuf(), _fileDesc(fileDesc) {}
+
+    virtual int readFromDevice(char_type* buffer, std::streamsize length)
+    {
+        return read(_fileDesc, buffer, length);
+    }
+
+private:
+    int         _fileDesc;
+};
+
+
+class UnixFileIStream : public std::basic_istream<char, std::char_traits<char> >
+{
+public:
+    UnixFileIStream(int fileDesc, int bufSize = 2048) : _streamBuf(fileDesc, bufSize), std::basic_istream<char, std::char_traits<char> >(&_streamBuf) { clear(); }
+
+private:
+    UnixFileStreamBuf   _streamBuf;
+};
+
+
+class ByteQueueStreamBuf : public Poco::BufferedStreamBuf
+//class ByteQueueStreamBuf : public Poco::UnbufferedStreamBuf
+{
+public:
+    ByteQueueStreamBuf(AvStream::ByteQueue& byteQueue) : BasicBufferedStreamBuf(byteQueue.size(), std::ios_base::in), _byteQueue(byteQueue) {}
+//    ByteQueueStreamBuf(int fileDesc) : BasicUnbufferedStreamBuf(), _fileDesc(fileDesc) {}
+
+    virtual int readFromDevice(char_type* buffer, std::streamsize length)
+    {
+        _byteQueue.read(buffer, length);
+        return length;
+    }
+
+private:
+    AvStream::ByteQueue&         _byteQueue;
+};
+
+
+class ByteQueueIStream : public std::basic_istream<char, std::char_traits<char> >
+{
+public:
+    ByteQueueIStream(AvStream::ByteQueue& byteQueue) : _streamBuf(byteQueue), std::basic_istream<char, std::char_traits<char> >(&_streamBuf) { clear(); }
+
+private:
+    ByteQueueStreamBuf   _streamBuf;
+};
+
+
+DvbChannel::DvbChannel(const std::string& name, unsigned int satNum, unsigned int freq, Polarization pol, unsigned int symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid, unsigned int pmtid) :
 _name(name),
 _satNum(satNum),
 _freq(freq),
@@ -75,7 +133,8 @@ _vpid(vpid),
 _cpid(cpid),
 _apid(apid),
 _sid(sid),
-_tid(tid)
+_tid(tid),
+_pmtid(pmtid)
 {
 }
 
@@ -148,7 +207,11 @@ ChannelsConf::scanChannelConfig(const std::string& channelConfig)
         unsigned int apid = Poco::NumberParser::parseUnsigned(audioPid[0]);
         int sid = Poco::NumberParser::parseUnsigned(channelParams[9]);
         unsigned int tid = Poco::NumberParser::parseUnsigned(channelParams[11]);
-        _channelMap[channelName[0]] = new Omm::Dvb::DvbChannel(channelName[0], 0, freq, pol, symbolRate, vpid, cpid, apid, sid, tid);
+        unsigned int pmtid = 0;
+        if (channelParams.count() > 13) {
+            pmtid = Poco::NumberParser::parseUnsigned(channelParams[13]);
+        }
+        _channelMap[channelName[0]] = new Omm::Dvb::DvbChannel(channelName[0], 0, freq, pol, symbolRate, vpid, cpid, apid, sid, tid, pmtid);
     }
 
     LOG(dvb, debug, "scan channel config finished.");
@@ -173,7 +236,9 @@ DvbAdapter::DvbAdapter(int num)
 
     _pFrontend = new DvbFrontend(this, 0);
     _pDemux = new DvbDemux(this, 0);
-    _pDvr = new DvbDvr(this, 0);
+    if (DvbDevice::instance()->useDvrDevice()) {
+        _pDvr = new DvbDvr(this, 0);
+    }
 }
 
 
@@ -181,7 +246,9 @@ DvbAdapter::~DvbAdapter()
 {
     delete _pFrontend;
     delete _pDemux;
-    delete _pDvr;
+    if (DvbDevice::instance()->useDvrDevice()) {
+        delete _pDvr;
+    }
 }
 
 
@@ -189,8 +256,28 @@ void
 DvbAdapter::openAdapter()
 {
     _pFrontend->openFrontend();
-    _pDemux->openDemux();
-    _pDvr->openDvr();
+    _pDemux->openDemux(false);
+    if (DvbDevice::instance()->useDvrDevice()) {
+        _pDvr->openDvr(DvbDevice::instance()->blockDvrDevice());
+    }
+}
+
+
+void
+DvbAdapter::closeAdapter()
+{
+    if (DvbDevice::instance()->useDvrDevice()) {
+        _pDvr->closeDvr();
+    }
+    _pDemux->closeDemux();
+    _pFrontend->closeFrontend();
+}
+
+
+DvbDemux*
+DvbAdapter::getDemux()
+{
+    return _pDemux;
 }
 
 
@@ -232,6 +319,20 @@ DvbLnb::isHiBand(unsigned int freq, unsigned int& ifreq)
 }
 
 
+class SignalCheckThread : public Poco::Runnable
+{
+public:
+    SignalCheckThread(DvbFrontend* pFrontend);
+
+    void run();
+    void stop();
+
+private:
+    DvbFrontend*        _pFrontend;
+    bool                _stop;
+};
+
+
 SignalCheckThread::SignalCheckThread(DvbFrontend* pFrontend) :
 _pFrontend(pFrontend),
 _stop(false)
@@ -267,7 +368,7 @@ _num(num)
 
 DvbFrontend::~DvbFrontend()
 {
-    close(_fileDesc);
+    closeFrontend();
 }
 
 
@@ -276,20 +377,31 @@ DvbFrontend::openFrontend()
 {
     LOG(dvb, debug, "opening frontend");
 
-    if ((_fileDesc = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
-        LOG(dvb, error, "opening frontend failed");
+    if ((_fileDescFrontend = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
+        LOG(dvb, error, "opening frontend failed: " + std::string(strerror(errno)));
     }
 
-    int result = ioctl(_fileDesc, FE_GET_INFO, &_feInfo);
+    int result = ioctl(_fileDescFrontend, FE_GET_INFO, &_feInfo);
 
     if (result < 0) {
         LOG(dvb, error, "ioctl FE_GET_INFO failed");
-        close(_fileDesc);
+        closeFrontend();
     }
 
     if (_feInfo.type != FE_QPSK) {
         LOG(dvb, error, "frontend device is not a QPSK (DVB-S) device");
-        close(_fileDesc);
+        closeFrontend();
+    }
+}
+
+
+void
+DvbFrontend::closeFrontend()
+{
+    LOG(dvb, debug, "closing frontend");
+
+    if (close(_fileDescFrontend)) {
+        LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
     }
 }
 
@@ -310,9 +422,13 @@ DvbFrontend::tune(DvbChannel* pChannel)
             _pAdapter->_pDemux->setPcrPid(pChannel->_cpid)) {
                 success = true;
                 if (_pAdapter->_recPsi) {
-                    unsigned int pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_tid, pChannel->_sid);
+                    unsigned int pmtPid = pChannel->_pmtid;
                     if (pmtPid == 0) {
-                        LOG(dvb, error, "couldn't find pmt-pid for sid"); // %04x\n",sid);
+                        pmtPid = _pAdapter->_pDemux->getPmtPid(pChannel->_tid, pChannel->_sid);
+                    }
+                    LOG(dvb, debug, "pmt pid: " + Poco::NumberFormatter::format(pmtPid));
+                    if (pmtPid == 0) {
+                        LOG(dvb, error, "couldn't find pmt-pid for sid");
                         success = false;
                     }
                     else if (!_pAdapter->_pDemux->setPatPid(0) ||
@@ -357,23 +473,23 @@ DvbFrontend::diseqc(unsigned int satNum, DvbChannel::Polarization pol, bool hiBa
     fe_sec_tone_mode_t tone = hiBand ? SEC_TONE_ON : SEC_TONE_OFF;
     fe_sec_mini_cmd_t burst = satNum % 2 ? SEC_MINI_B : SEC_MINI_A;
 
-    if (ioctl(_fileDesc, FE_SET_TONE, SEC_TONE_OFF) == -1) {
+    if (ioctl(_fileDescFrontend, FE_SET_TONE, SEC_TONE_OFF) == -1) {
         LOG(dvb, error, "FE_SET_TONE failed");
     }
-    if (ioctl(_fileDesc, FE_SET_VOLTAGE, voltage) == -1) {
+    if (ioctl(_fileDescFrontend, FE_SET_VOLTAGE, voltage) == -1) {
         LOG(dvb, error, "FE_SET_VOLTAGE failed");
     }
     usleep(15 * 1000);
-    if (ioctl(_fileDesc, FE_DISEQC_SEND_MASTER_CMD, &cmd.cmd) == -1) {
+    if (ioctl(_fileDescFrontend, FE_DISEQC_SEND_MASTER_CMD, &cmd.cmd) == -1) {
         LOG(dvb, error, "FE_DISEQC_SEND_MASTER_CMD failed");
     }
     usleep(cmd.wait * 1000);
     usleep(15 * 1000);
-    if (ioctl(_fileDesc, FE_DISEQC_SEND_BURST, burst) == -1) {
+    if (ioctl(_fileDescFrontend, FE_DISEQC_SEND_BURST, burst) == -1) {
         LOG(dvb, error, "FE_DISEQC_SEND_BURST failed");
     }
     usleep(15 * 1000);
-    if (ioctl(_fileDesc, FE_SET_TONE, tone) == -1) {
+    if (ioctl(_fileDescFrontend, FE_SET_TONE, tone) == -1) {
         LOG(dvb, error, "FE_SET_TONE failed");
     }
 
@@ -391,7 +507,7 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
 
     // discard stale QPSK events
     while (1) {
-        if (ioctl(_fileDesc, FE_GET_EVENT, &event) == -1)
+        if (ioctl(_fileDescFrontend, FE_GET_EVENT, &event) == -1)
             break;
     }
 
@@ -400,7 +516,7 @@ DvbFrontend::tuneFrontend(unsigned int freq, unsigned int symbolRate)
     tuneto.u.qpsk.symbol_rate = symbolRate;
     tuneto.u.qpsk.fec_inner = FEC_AUTO;
 
-    if (ioctl(_fileDesc, FE_SET_FRONTEND, &tuneto) == -1) {
+    if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
         LOG(dvb, error, "FE_SET_FRONTEND failed");
         return false;
     }
@@ -419,21 +535,21 @@ DvbFrontend::checkFrontend()
     uint32_t ber, uncorrected_blocks;
 //     int timeout = 0;
 
-    if (ioctl(_fileDesc, FE_READ_STATUS, &status) == -1) {
+    if (ioctl(_fileDescFrontend, FE_READ_STATUS, &status) == -1) {
         LOG(dvb, error, "FE_READ_STATUS failed");
     }
     /* some frontends might not support all these ioctls, thus we
     * avoid printing errors */
-    if (ioctl(_fileDesc, FE_READ_SIGNAL_STRENGTH, &signal) == -1) {
+    if (ioctl(_fileDescFrontend, FE_READ_SIGNAL_STRENGTH, &signal) == -1) {
         signal = -2;
     }
-    if (ioctl(_fileDesc, FE_READ_SNR, &snr) == -1) {
+    if (ioctl(_fileDescFrontend, FE_READ_SNR, &snr) == -1) {
         snr = -2;
     }
-    if (ioctl(_fileDesc, FE_READ_BER, &ber) == -1) {
+    if (ioctl(_fileDescFrontend, FE_READ_BER, &ber) == -1) {
         ber = -2;
     }
-    if (ioctl(_fileDesc, FE_READ_UNCORRECTED_BLOCKS, &uncorrected_blocks) == -1) {
+    if (ioctl(_fileDescFrontend, FE_READ_UNCORRECTED_BLOCKS, &uncorrected_blocks) == -1) {
         uncorrected_blocks = -2;
     }
 
@@ -463,38 +579,105 @@ _num(num)
 
 DvbDemux::~DvbDemux()
 {
-    close(_fileDescVideo);
-    close(_fileDescAudio);
-    close(_fileDescPcr);
-    if (_pAdapter->_recPsi) {
-        close(_fileDescPat);
-        close(_fileDescPmt);
+    closeDemux();
+}
+
+
+void
+DvbDemux::openDemux(bool blocking)
+{
+    LOG(dvb, debug, "opening demuxer");
+
+    int flag = blocking ? O_RDWR : O_RDWR | O_NONBLOCK;
+
+    if ((_fileDescVideo = open(_deviceName.c_str(), flag)) < 0) {
+        LOG(dvb, error, "opening video elementary stream failed: " + std::string(strerror(errno)));
+    }
+    if ((_fileDescAudio = open(_deviceName.c_str(), flag)) < 0) {
+        LOG(dvb, error, "opening audio elementary stream failed: " + std::string(strerror(errno)));
+    }
+    if ((_fileDescPcr = open(_deviceName.c_str(), flag)) < 0) {
+        LOG(dvb, error, "opening pcr elementary stream failed: " + std::string(strerror(errno)));
+    }
+    if (_pAdapter->_recPsi){
+        if ((_fileDescPat = open(_deviceName.c_str(), flag)) < 0) {
+            LOG(dvb, error, "opening pat elementary stream failed: " + std::string(strerror(errno)));
+        }
+        if ((_fileDescPmt = open(_deviceName.c_str(), flag)) < 0) {
+            LOG(dvb, error, "opening pmt elementary stream failed: " + std::string(strerror(errno)));
+        }
     }
 }
 
 
 void
-DvbDemux::openDemux()
+DvbDemux::closeDemux()
 {
-    LOG(dvb, debug, "opening demuxer");
+    LOG(dvb, debug, "closing demuxer");
 
-    if ((_fileDescVideo = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        LOG(dvb, error, "opening video demux failed");
-    }
-    if ((_fileDescAudio = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        LOG(dvb, error, "opening audio demux failed");
-    }
-    if ((_fileDescPcr = open(_deviceName.c_str(), O_RDWR)) < 0) {
-        LOG(dvb, error, "opening pcr demux failed");
-    }
 
-    if (_pAdapter->_recPsi){
-        if ((_fileDescPat = open(_deviceName.c_str(), O_RDWR)) < 0) {
-            LOG(dvb, error, "opening pat demux failed");
+    if (close(_fileDescVideo)) {
+        LOG(dvb, error, "failed to close video elementary stream: " + std::string(strerror(errno)));
+    }
+    if (close(_fileDescAudio)) {
+        LOG(dvb, error, "failed to close audio elementary stream: " + std::string(strerror(errno)));
+    }
+    if (close(_fileDescPcr)) {
+        LOG(dvb, error, "failed to close pcr elementary stream: " + std::string(strerror(errno)));
+    }
+    if (_pAdapter->_recPsi) {
+        if (close(_fileDescPat)) {
+            LOG(dvb, error, "failed to close pat elementary stream: " + std::string(strerror(errno)));
         }
-        if ((_fileDescPmt = open(_deviceName.c_str(), O_RDWR)) < 0) {
-            LOG(dvb, error, "opening pmt demux failed");
+        if (close(_fileDescPmt)) {
+            LOG(dvb, error, "failed to close pmt elementary stream: " + std::string(strerror(errno)));
         }
+    }
+}
+
+
+void
+DvbDemux::start()
+{
+    LOG(dvb, debug, "start demuxer");
+
+    if (ioctl(_fileDescVideo, DMX_START) == -1) {
+        LOG(dvb, error, "starting video dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescAudio, DMX_START) == -1) {
+        LOG(dvb, error, "starting audio dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPcr, DMX_START) == -1) {
+        LOG(dvb, error, "starting pcr dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPat, DMX_START) == -1) {
+        LOG(dvb, error, "starting pat dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPmt, DMX_START) == -1) {
+        LOG(dvb, error, "starting pmt dmx filter failed: " + std::string(strerror(errno)));
+    }
+}
+
+
+void
+DvbDemux::stop()
+{
+    LOG(dvb, debug, "stop demuxer");
+
+    if (ioctl(_fileDescVideo, DMX_STOP) == -1) {
+        LOG(dvb, error, "stopping video dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescAudio, DMX_STOP) == -1) {
+        LOG(dvb, error, "stopping audio dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPcr, DMX_STOP) == -1) {
+        LOG(dvb, error, "stopping pcr dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPat, DMX_STOP) == -1) {
+        LOG(dvb, error, "stopping pat dmx filter failed: " + std::string(strerror(errno)));
+    }
+    if (ioctl(_fileDescPmt, DMX_STOP) == -1) {
+        LOG(dvb, error, "stopping pmt dmx filter failed: " + std::string(strerror(errno)));
     }
 }
 
@@ -540,6 +723,20 @@ DvbDemux::setPmtPid(unsigned int pid)
 }
 
 
+std::istream*
+DvbDemux::getVideoStream()
+{
+    return new UnixFileIStream(_fileDescVideo);
+}
+
+
+std::istream*
+DvbDemux::getAudioStream()
+{
+    return new UnixFileIStream(_fileDescAudio);
+}
+
+
 bool
 DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
 {
@@ -547,22 +744,24 @@ DvbDemux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
         return true;
     }
 
-    int buffersize = 64 * 1024;
-    if (ioctl(fileDesc, DMX_SET_BUFFER_SIZE, buffersize) == -1) {
-        LOG(dvb, error, "DMX_SET_BUFFER_SIZE failed");
-    }
+//    int buffersize = 64 * 1024;
+//    if (ioctl(fileDesc, DMX_SET_BUFFER_SIZE, buffersize) == -1) {
+//        LOG(dvb, error, "DMX_SET_BUFFER_SIZE failed: " + std::string(strerror(errno)));
+//    }
 
     struct dmx_pes_filter_params pesfilter;
     pesfilter.pid = pid;
     pesfilter.input = DMX_IN_FRONTEND;
-//     pesfilter.output = dvr ? DMX_OUT_TS_TAP : DMX_OUT_DECODER;
-    pesfilter.output = DMX_OUT_TS_TAP;
+    if (DvbDevice::instance()->useDvrDevice()) {
+        pesfilter.output = DMX_OUT_TS_TAP; // send output to dvr device
+    }
+    else {
+        pesfilter.output = DMX_OUT_TAP; // send output to demux device
+    }
     pesfilter.pes_type = pesType;
-    pesfilter.flags = DMX_IMMEDIATE_START;
+    pesfilter.flags = 0;
 
     if (ioctl(fileDesc, DMX_SET_PES_FILTER, &pesfilter) == -1) {
-//         fprintf(stderr, "DMX_SET_PES_FILTER failed "
-//                 "(PID = 0x%04x): %d %m\n", pid, errno);
         LOG(dvb, error, "DMX_SET_PES_FILTER failed");
         return false;
     }
@@ -589,8 +788,10 @@ DvbDemux::getPmtPid(unsigned int tid, int sid)
     f.filter.filter[0] = 0x00;
     f.filter.mask[0] = 0xff;
     f.timeout = 0;
+    // FIXME: don't set DMX_IMMEDIATE_START, use start() and stop()
     f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
+    // FIXME: pat filter set twice?
     LOG(dvb, trace, "set demuxer filter ...");
     if (ioctl(_fileDescPat, DMX_SET_FILTER, &f) == -1) {
         LOG(dvb, error, "DMX_SET_FILTER failed");
@@ -648,35 +849,19 @@ DvbDemux::getPmtPid(unsigned int tid, int sid)
 }
 
 
-class UnixFileStreamBuf : public Poco::BufferedStreamBuf
-{
-public:
-    UnixFileStreamBuf(int fileDesc) : BasicBufferedStreamBuf(1000, std::ios_base::in), _fileDesc(fileDesc) {}
-
-    virtual int readFromDevice(char_type* buffer, std::streamsize length)
-    {
-        return read(_fileDesc, buffer, length);
-    }
-
-private:
-    int         _fileDesc;
-};
-
-
-class UnixFileIStream : public std::basic_istream<char, std::char_traits<char> >
-{
-public:
-    UnixFileIStream(int fileDesc) : _streamBuf(fileDesc), std::basic_istream<char, std::char_traits<char> >(&_streamBuf) { clear(); }
-
-private:
-    UnixFileStreamBuf   _streamBuf;
-};
-
-
 DvbDvr::DvbDvr(DvbAdapter* pAdapter, int num) :
 _pAdapter(pAdapter),
 _num(num),
-_pDvrStream(0)
+_pDvrStream(0),
+_useByteQueue(true),
+//_useByteQueue(false),
+_fileDescDvr(-1),
+_byteQueue(100*1024),
+_bufferSize(50*1024),
+_pollTimeout(1),
+_pReadThread(0),
+_readThreadRunnable(*this, &DvbDvr::readThread),
+_readThreadRunning(false)
 {
     _deviceName = _pAdapter->_deviceName + "/dvr" + Poco::NumberFormatter::format(_num);
 }
@@ -688,18 +873,135 @@ DvbDvr::~DvbDvr()
 
 
 void
-DvbDvr::openDvr()
+DvbDvr::openDvr(bool blocking)
 {
     LOG(dvb, debug, "opening dvb rec device.");
-//    if ((_fileDescDvr = open(_deviceName.c_str(), O_RDONLY | O_NONBLOCK)) < 0) {
-    if ((_fileDescDvr = open(_deviceName.c_str(), O_RDONLY)) < 0) {
-        LOG(dvb, error, "failed to open dvb rec device: " + _deviceName);
+
+    if (_pDvrStream) {
+        LOG(dvb, debug, "dvb rec device already open.");
         return;
     }
-    _pDvrStream = new UnixFileIStream(_fileDescDvr);
-    if (!_pDvrStream) {
-        LOG(dvb, error, "failed to open dvb rec stream.");
+    else {
+        int flags = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
+        if ((_fileDescDvr = open(_deviceName.c_str(), flags)) < 0) {
+            LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+            return;
+        }
+        if (_useByteQueue) {
+            _fileDescPoll[0].fd = _fileDescDvr;
+            _fileDescPoll[0].events = POLLIN;
+            _pDvrStream = new ByteQueueIStream(_byteQueue);
+        }
+        else {
+            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
+        }
+        if (!_pDvrStream) {
+            LOG(dvb, error, "failed to open dvb rec stream.");
+            return;
+        }
+//        if (_useByteQueue) {
+//            startReadThread();
+//        }
     }
+}
+
+
+void
+DvbDvr::closeDvr()
+{
+    LOG(dvb, debug, "closing dvb rec device.");
+
+//    stopReadThread();
+    if (_pDvrStream) {
+        delete _pDvrStream;
+        _pDvrStream = 0;
+        if (close(_fileDescDvr)) {
+            LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+        }
+        _fileDescDvr = -1;
+    }
+    else {
+        LOG(dvb, debug, "dvb rec device already closed.");
+    }
+}
+
+
+void
+DvbDvr::clearBuffer()
+{
+    if (_pDvrStream) {
+        const int bufsize(_bufferSize);
+        char buf[bufsize];
+        while (int bytes = _pDvrStream->readsome(buf, bufsize)) {
+            LOG(dvb, debug, "clear buffer: " + Poco::NumberFormatter::format(bytes) + " bytes");
+        }
+    }
+}
+
+
+void
+DvbDvr::prefillBuffer()
+{
+    if (_pReadThread) {
+        while (_byteQueue.level() < _byteQueue.size() * 0.5) {
+            Poco::Thread::sleep(1);
+        }
+    }
+}
+
+
+void
+DvbDvr::setBlocking(bool blocking)
+{
+    LOG(dvb, debug, "set dvb rec device to " + std::string(blocking ? "blocking" : "non-blocking"));
+
+    if (_pDvrStream) {
+        long fcntlFlag = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
+        if (fcntl(_fileDescDvr, F_SETFL, fcntlFlag) < 0) {
+            LOG(dvb, error, "failed to set dvb rec device \"" + _deviceName + "\" to " + (blocking ? "blocking" : "non-blocking") + ":" + strerror(errno));
+        }
+    }
+}
+
+
+void
+DvbDvr::startReadThread()
+{
+    LOG(dvb, debug, "start read thread ...");
+
+    if (!_pReadThread) {
+        _readThreadRunning = true;
+        _pReadThread = new Poco::Thread;
+        _pReadThread->start(_readThreadRunnable);
+    }
+}
+
+
+void
+DvbDvr::stopReadThread()
+{
+    LOG(dvb, debug, "stop read thread ...");
+
+    if (_pReadThread) {
+        _readThreadLock.lock();
+        _readThreadRunning = false;
+        _readThreadLock.unlock();
+        if (!_pReadThread->tryJoin(_pollTimeout)) {
+            LOG(dvb, error, "failed to join read thread");
+        }
+        delete _pReadThread;
+        _pReadThread = 0;
+    }
+
+    LOG(dvb, debug, "read thread stopped.");
+}
+
+
+bool
+DvbDvr::readThreadRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_readThreadLock);
+    return _readThreadRunning;
 }
 
 
@@ -708,29 +1010,46 @@ DvbDvr::getStream()
 {
     LOG(dvb, debug, "get dvb rec stream.");
 
-    if (!_pDvrStream) {
-        openDvr();
-    }
     return _pDvrStream;
 }
 
 
 void
-DvbDvr::freeStream()
+DvbDvr::readThread()
 {
-    LOG(dvb, debug, "free dvb rec stream.");
+    LOG(dvb, debug, "read thread started.");
 
-    if (_pDvrStream) {
-        delete _pDvrStream;
-        _pDvrStream = 0;
-        close(_fileDescDvr);
+    char buf[_bufferSize];
+    while (readThreadRunning()) {
+        if (poll(_fileDescPoll, 1, _pollTimeout)) {
+            if (_fileDescPoll[0].revents & POLLIN){
+                int len = read(_fileDescDvr, buf, _bufferSize);
+                if (len > 0) {
+                    _byteQueue.write(buf, len);
+                }
+                else if (len < 0) {
+                    LOG(dvb, error, "dvr read thread failed to read from device");
+                    break;
+                }
+            }
+        }
     }
+
+    LOG(dvb, debug, "read thread finished.");
 }
 
 
 DvbDevice* DvbDevice::_pInstance = 0;
 
-DvbDevice::DvbDevice()
+DvbDevice::DvbDevice() :
+_useDvrDevice(true),
+_blockDvrDevice(false),
+//_blockDvrDevice(true),
+// _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
+//_reopenDvrDevice(true)
+_reopenDvrDevice(false)
+// renderer in same process as dvb server: reopenDvrDevice = true then dvr device busy, reopenDvrDevice = false then stream sometimes broken
+// renderer in different process as dvb server: reopenDvrDevice = true ok, reopenDvrDevice = false then stream sometimes broken
 {
     // FIXME: when do we need to multiply freqs with 1000?
     _lnbs["UNIVERSAL"] = new DvbLnb("Europe | 10800 to 11800 MHz and 11600 to 12700 Mhz | Dual LO, loband 9750, hiband 10600 MHz",
@@ -776,6 +1095,7 @@ bool
 DvbDevice::tune(DvbChannel* pChannel)
 {
     LOG(dvb, debug, "start tuning ...");
+
     if (_adapters.size() == 0) {
         LOG(dvb, error, "no adapter found, tuning aborted.");
         return false;
@@ -799,12 +1119,50 @@ DvbDevice::stopTune()
 std::istream*
 DvbDevice::getStream()
 {
-    return _adapters[0]->getDvr()->getStream();
+    if (_useDvrDevice && _reopenDvrDevice) {
+        _adapters[0]->getDvr()->openDvr(_blockDvrDevice);
+    }
+    _adapters[0]->getDemux()->start();
+    if (_useDvrDevice) {
+        _adapters[0]->getDvr()->startReadThread();
+        _adapters[0]->getDvr()->prefillBuffer();
+        return _adapters[0]->getDvr()->getStream();
+    }
+    else {
+        return _adapters[0]->getDemux()->getAudioStream();
+//        return _adapters[0]->getDemux()->getVideoStream();
+    }
 }
 
 
 void
 DvbDevice::freeStream(std::istream* pIstream)
 {
-    _adapters[0]->getDvr()->freeStream();
+    _adapters[0]->getDemux()->stop();
+    if (_useDvrDevice) {
+        _adapters[0]->getDvr()->stopReadThread();
+        _adapters[0]->getDvr()->clearBuffer();
+        if (_reopenDvrDevice) {
+//            _adapters[0]->getDvr()->setBlocking(false);
+            _adapters[0]->getDvr()->closeDvr();
+        }
+    }
 }
+
+
+bool
+DvbDevice::useDvrDevice()
+{
+    return _useDvrDevice;
+}
+
+
+bool
+DvbDevice::blockDvrDevice()
+{
+    return _blockDvrDevice;
+}
+
+
+}  // namespace Omm
+}  // namespace Dvb

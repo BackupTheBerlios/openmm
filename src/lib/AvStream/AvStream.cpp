@@ -47,7 +47,8 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
-    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_TRACE);
+//    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_TRACE);
+    _pAvStreamLogger = &Poco::Logger::create("AVSTREAM", pChannel, Poco::Message::PRIO_DEBUG);
 }
 
 
@@ -138,10 +139,13 @@ _level(0)
 void
 ByteQueue::read(char* buffer, int num)
 {
+    LOG(avstream, trace, "byte queue read, num bytes: " + Poco::NumberFormatter::format(num));
     int bytesRead = 0;
     while (bytesRead < num) {
+        LOG(avstream, trace, "byte queue read -> readSome, trying to read: " + Poco::NumberFormatter::format(num - bytesRead) + " bytes");
         bytesRead += readSome(buffer + bytesRead, num - bytesRead);
     }
+    LOG(avstream, trace, "byte queue read finished.");
 }
 
 

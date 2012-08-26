@@ -23,20 +23,23 @@
 #define Dvb_INCLUDED
 
 #include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
 #include <Poco/Mutex.h>
 #include <Poco/Logger.h>
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
-#include <fstream>
-
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/dmx.h>
+#include <sys/poll.h>
+
+#include "AvStream.h"
 
 namespace Omm {
 namespace Dvb {
 
 class DvbDevice;
+class SignalCheckThread;
 
 #ifndef NDEBUG
 class Log
@@ -64,7 +67,7 @@ class DvbChannel
 public:
     typedef enum {HORIZ = 0, VERT = 1} Polarization;
 
-    DvbChannel(const std::string& name, unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid);
+    DvbChannel(const std::string& name, unsigned int _satNum, unsigned int freq, Polarization pol, unsigned int _symbolRate, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid, unsigned int pmtid);
 
     std::string getName();
 
@@ -79,6 +82,7 @@ private:
     unsigned int        _apid;
     int                 _sid;
     unsigned int        _tid;
+    unsigned int        _pmtid;
 };
 
 
@@ -132,9 +136,11 @@ public:
     ~DvbAdapter();
 
     void openAdapter();
-    void getDeviceInfo();  // TODO: implement DvbAdapter::getDeviceInfo()
-    DvbDvr* getDvr();
+    void closeAdapter();
 
+    void getDeviceInfo();  // TODO: implement DvbAdapter::getDeviceInfo()
+    DvbDemux* getDemux();
+    DvbDvr* getDvr();
 
 private:
     int             _num;
@@ -165,21 +171,6 @@ private:
 };
 
 
-class SignalCheckThread : public Poco::Runnable
-{
-public:
-    SignalCheckThread(DvbFrontend* pFrontend);
-
-    void run();
-    void stop();
-
-private:
-//     DvbChannel*         _pChannel;
-    DvbFrontend*        _pFrontend;
-    bool                _stop;
-};
-
-
 class DvbFrontend
 {
     friend class DvbAdapter;
@@ -190,6 +181,8 @@ public:
     ~DvbFrontend();
 
     void openFrontend();
+    void closeFrontend();
+
     bool tune(DvbChannel* pChannel);
     void stopTune();
 
@@ -201,7 +194,7 @@ private:
     DvbAdapter*                 _pAdapter;
     std::string                 _deviceName;
     int                         _num;
-    int                         _fileDesc;
+    int                         _fileDescFrontend;
     struct dvb_frontend_info    _feInfo;
 
     Poco::Thread                _t;
@@ -218,7 +211,10 @@ public:
     DvbDemux(DvbAdapter* pAdapter, int num);
     ~DvbDemux();
 
-    void openDemux();
+    void openDemux(bool blocking = true);
+    void closeDemux();
+    void start();
+    void stop();
 
     unsigned int getPmtPid(unsigned int tid, int sid);
 
@@ -227,6 +223,9 @@ public:
     bool setPcrPid(unsigned int pid);
     bool setPatPid(unsigned int pid);
     bool setPmtPid(unsigned int pid);
+
+    std::istream* getVideoStream();
+    std::istream* getAudioStream();
 
 private:
     bool setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType);
@@ -250,16 +249,35 @@ public:
     DvbDvr(DvbAdapter* pAdapter, int num);
     ~DvbDvr();
 
-    void openDvr();
+    void openDvr(bool blocking = true);
+    void closeDvr();
+    void clearBuffer();
+    void prefillBuffer();
+    void startReadThread();
+    void stopReadThread();
+    bool readThreadRunning();
+    void setBlocking(bool blocking = true);
+
     std::istream* getStream();
-    void freeStream();
 
 private:
-    DvbAdapter*                 _pAdapter;
-    std::string                 _deviceName;
-    int                         _num;
-    int                         _fileDescDvr;
-    std::istream*               _pDvrStream;
+    void readThread();
+
+    DvbAdapter*                         _pAdapter;
+    std::string                         _deviceName;
+    int                                 _num;
+    int                                 _fileDescDvr;
+    AvStream::ByteQueue                 _byteQueue;
+    const int                           _bufferSize;
+    std::istream*                       _pDvrStream;
+
+    bool                                _useByteQueue;
+    struct pollfd                       _fileDescPoll[1];
+    const int                           _pollTimeout;  // wait for _pollTimeout millisec for new data on dvr device
+    Poco::Thread*                       _pReadThread;
+    Poco::RunnableAdapter<DvbDvr>       _readThreadRunnable;
+    bool                                _readThreadRunning;
+    Poco::FastMutex                     _readThreadLock;
 };
 
 
@@ -279,10 +297,8 @@ public:
     std::istream* getStream();
     void freeStream(std::istream* pIstream);
 
-//     std::istream& getTransportStream(DvbChannel* pChannel);
-//     std::ostream& getPacketizedElementaryStream(Channel* pChannel);
-//     std::ostream& getProgramStream(Channel* pChannel);
-
+    bool useDvrDevice();
+    bool blockDvrDevice();
 
 private:
     DvbDevice();
@@ -292,6 +308,10 @@ private:
 
     std::map<std::string,DvbLnb*>   _lnbs;  // possible LNB types
     std::vector<DvbAdapter*>        _adapters;
+
+    bool                            _useDvrDevice;
+    bool                            _blockDvrDevice;
+    bool                            _reopenDvrDevice;
 };
 
 }  // namespace Omm
