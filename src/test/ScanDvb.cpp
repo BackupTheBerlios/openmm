@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011                                           |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,36 +19,37 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef DvbServer_INCLUDED
-#define DvbServer_INCLUDED
-
-#include <Poco/DateTime.h>
-
-#include <Omm/UpnpAvServer.h>
+#include <iostream>
+#include <Poco/StreamCopier.h>
+#include <sstream>
 #include <Omm/Dvb.h>
 
 
-class DvbModel : public Omm::Av::SimpleDataModel
-{
-    friend class DvbServer;
+int
+main(int argc, char** argv) {
+    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
+    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
+//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
+    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
+    pAdapter->addFrontend(pFrontend);
 
-public:
-    DvbModel();
+//    pFrontend->listInitialTransponderData();
+//    std::vector<Omm::Dvb::Transponder*> transponderData;
+//    pFrontend->getInitialTransponderData("dvb-t/de-Baden-Wuerttemberg", transponderData);
 
-    virtual void init();
-    virtual std::string getModelClass();
-    virtual Omm::ui4 getSystemUpdateId(bool checkMod);
-    virtual void scan();
+    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
+//    pFrontend->scan("/usr/share/dvb/dvb-t/de-Baden-Wuerttemberg");
+//    pFrontend->scan("dvb-s/Astra-19.2E");
+//    pFrontend->scan("/usr/share/dvb/dvb-s/Astra-19.2E");
 
-    virtual std::string getClass(const std::string& path);
-    virtual std::string getTitle(const std::string& path);
+//    Omm::Dvb::Device::instance()->scan("/usr/share/dvb/dvb-t/de-Baden-Wuerttemberg");
+//    Omm::Dvb::Device::instance()->scan("dvb-t/de-Baden-Wuerttemberg");
+//    Omm::Dvb::Device::instance()->scan("/usr/share/dvb/dvb-s/Astra-19.2E");
+//    Omm::Dvb::Device::instance()->scan("dvb-s/Astra-19.2E");
+    Omm::Dvb::Device::instance()->writeXml(std::cout);
 
-    virtual std::string getMime(const std::string& path);
-    virtual std::string getDlna(const std::string& path);
-    virtual bool isSeekable(const std::string& path, const std::string& resourcePath = "");
-    virtual std::istream* getStream(const std::string& path, const std::string& resourcePath = "");
-    virtual void freeStream(std::istream* pIstream);
-};
+//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
+//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
 
-
-#endif
+    return 0;
+}

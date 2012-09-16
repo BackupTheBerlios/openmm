@@ -1039,12 +1039,26 @@ ServerContainer::setBasePath(const std::string& basePath)
 {
     LOG(upnpav, debug, "server container, set base path to: " + basePath);
     if (_pObjectCache) {
-        std::string cacheFilePath = getDataModel()->getCacheDirPath() + _pDataModel->getModelClass() + "/" + basePath + "/objects";
+        std::string cacheFileDir = getDataModel()->getCacheDirPath() + _pDataModel->getModelClass() + "/" + basePath;
+        try {
+            Poco::File(cacheFileDir).createDirectories();
+        }
+        catch (Poco::Exception& e) {
+            LOG(upnpav, error, "can not create cache file directory: " + cacheFileDir);
+        }
+        std::string cacheFilePath = cacheFileDir + "/objects";
         _pObjectCache->setCacheFilePath(cacheFilePath);
         _pVirtualContainerCache->setCacheFilePath(cacheFilePath);
 //        updateCache();
     }
-    std::string metaFilePath = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + basePath + "/objects";
+    std::string metaFileDir = getDataModel()->getMetaDirPath() + _pDataModel->getModelClass() + "/" + basePath;
+    try {
+            Poco::File(metaFileDir).createDirectories();
+        }
+        catch (Poco::Exception& e) {
+            LOG(upnpav, error, "can not create meta file directory: " + metaFileDir);
+        }
+    std::string metaFilePath = metaFileDir + "/objects";
     _pUserObjectCache->setCacheFilePath(metaFilePath);
 
     _pDataModel->setBasePath(basePath);

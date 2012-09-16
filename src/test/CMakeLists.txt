@@ -155,3 +155,12 @@ target_link_libraries(search
 ${OMM}
 ${OMM_AV}
 )
+
+
+add_executable(scandvb
+ScanDvb.cpp
+)
+
+target_link_libraries(scandvb
+${OMM_DVB}
+)

@@ -39,10 +39,15 @@ DvbModel::init()
 {
     LOGNS(Omm::Dvb, dvb, debug, "dvb model init ...");
 
-    _channels.setConfFilePath(getBasePath());
-    _channels.scanChannels();
-    Omm::Dvb::DvbAdapter* pAdapter = new Omm::Dvb::DvbAdapter(0);
-    Omm::Dvb::DvbDevice::instance()->addAdapter(pAdapter);
+//    _channels.setConfFilePath(getBasePath());
+//    _channels.scanChannels();
+//    Omm::Dvb::Device::instance()->init();
+
+    // TODO: base path should be initial transponder lists
+    // dvb.xml should be set else where
+    std::ifstream xmlDevice(getBasePath().c_str());
+    Omm::Dvb::Device::instance()->readXml(xmlDevice);
+    Omm::Dvb::Device::instance()->open();
 
     LOGNS(Omm::Dvb, dvb, debug, "dvb model init finished.");
 }
@@ -65,8 +70,16 @@ DvbModel::getSystemUpdateId(bool checkMod)
 void
 DvbModel::scan()
 {
-    _channels.scanChannels();
-    for (Omm::Dvb::DvbChannels::ChannelIterator it = _channels.beginChannel(); it != _channels.endChannel(); ++it) {
+//    _channels.scanChannels();
+//    for (Omm::Dvb::Channels::ChannelIterator it = _channels.beginChannel(); it != _channels.endChannel(); ++it) {
+//        addPath(it->first);
+//    }
+
+    // TODO: do a frontend scan
+
+    std::ifstream xmlDevice(getBasePath().c_str());
+    Omm::Dvb::Device::instance()->readXml(xmlDevice);
+    for (Omm::Dvb::Device::ServiceIterator it = Omm::Dvb::Device::instance()->serviceBegin(); it != Omm::Dvb::Device::instance()->serviceEnd(); ++it) {
         addPath(it->first);
     }
 }
@@ -82,7 +95,7 @@ DvbModel::getClass(const std::string& path)
 std::string
 DvbModel::getTitle(const std::string& path)
 {
-    return _channels.getChannel(path)->getName();
+    return path;
 }
 
 
@@ -96,39 +109,14 @@ DvbModel::isSeekable(const std::string& path, const std::string& resourcePath)
 std::istream*
 DvbModel::getStream(const std::string& path, const std::string& resourcePath)
 {
-    // FIXME: two subsequent getStream() without stopping the stream may lead to
-    //        a blocked dvr device: engine stops reading the previous stream
-    //        when receiving the new stream. This may overlap and the file
-    //        handle is still open. Even if the engine is stopped right before
-    //        playing a new stream, it could take a while until reading of stream
-    //        is stopped, too (stop() and play() are typically async calls into
-    //        the engine).
-    //        DvbModel needs a way to interrupt current stream and close file
-    //        handles.
-    //        UPDATE: this only happens when renderer and dvb server run in the
-    //        same process.
-    //        UPDATE: man(2) close:
-    //        It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
-    //        same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
-    //        tended side effects.
-    //        UPDATE: as long as the same thread accesses the device, it is not busy. This happens, if the http request is
-    //        run in the same thread as the previous http request. Correction: even in same thread, dvr device cannot be
-    //        opened ("Device or resource busy").
-
-    bool tuneSuccess = Omm::Dvb::DvbDevice::instance()->tune(_channels.getChannel(path));
-    if (!tuneSuccess) {
-        return 0;
-    }
-
-    LOGNS(Omm::Dvb, dvb, debug, "reading from dvr device ...");
-    return Omm::Dvb::DvbDevice::instance()->getStream();
+    return Omm::Dvb::Device::instance()->getStream(path);
 }
 
 
 void
 DvbModel::freeStream(std::istream* pIstream)
 {
-    Omm::Dvb::DvbDevice::instance()->freeStream(pIstream);
+    Omm::Dvb::Device::instance()->freeStream(pIstream);
 }
 
 
