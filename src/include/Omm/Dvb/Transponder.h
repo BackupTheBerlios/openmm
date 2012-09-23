@@ -60,7 +60,6 @@ public:
     static const int InvalidTransportStreamId;
 
     Transponder(Frontend* pFrontend, unsigned int freq, int tsid);
-//    Transponder(unsigned int freq, unsigned int tsid);
 
     void addService(Dvb::Service* pService);
     Service* getService(unsigned int serviceId);

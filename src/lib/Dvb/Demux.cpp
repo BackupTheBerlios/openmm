@@ -225,25 +225,6 @@ Demux::setSectionFilter(Stream* pStream, Poco::UInt8 tableId)
 }
 
 
-void
-Demux::readSection(Section* pSection, int timeout)
-{
-    Stream stream(Stream::Other, pSection->packetId());
-    selectStream(&stream, Demux::TargetDemux, true);
-    setSectionFilter(&stream, pSection->tableId());
-    runStream(&stream, true);
-    try {
-        pSection->read(&stream, timeout);
-        pSection->parse();
-    }
-    catch (Poco::TimeoutException& e) {
-        LOG(dvb, error, pSection->name() + " table read timeout");
-    }
-    runStream(&stream, false);
-    unselectStream(&stream);
-}
-
-
 bool
 Demux::readSection(Section* pSection)
 {
@@ -253,7 +234,7 @@ Demux::readSection(Section* pSection)
     setSectionFilter(&stream, pSection->tableId());
     runStream(&stream, true);
     try {
-        pSection->read(&stream, pSection->timeout());
+        pSection->read(&stream);
         pSection->parse();
     }
     catch (Poco::TimeoutException& e) {
@@ -322,84 +303,6 @@ Demux::setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType)
     return true;
 }
 
-
-//unsigned int
-//Demux::getPmtPid(unsigned int tid, int sid)
-//{
-//    LOG(dvb, trace, "get PMT PID for service id: " + Poco::NumberFormatter::format(sid) + " ...");
-//
-//    int pmt_pid = 0;
-//    int count;
-//    int section_length;
-//    unsigned int transport_stream_id;
-//    unsigned char buft[4096];
-//    unsigned char *buf = buft;
-//    struct dmx_sct_filter_params f;
-//
-//    memset(&f, 0, sizeof(f));
-//    f.pid = 0;
-//    f.filter.filter[0] = 0x00;
-//    f.filter.mask[0] = 0xff;
-//    f.timeout = 0;
-//    // FIXME: don't set DMX_IMMEDIATE_START, use start() and stop()
-//    f.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-//
-//    // FIXME: pat filter set twice?
-//    LOG(dvb, trace, "set demuxer filter ...");
-//    if (ioctl(_fileDescPat, DMX_SET_FILTER, &f) == -1) {
-//        LOG(dvb, error, "DMX_SET_FILTER failed");
-//        return 0;
-//    }
-//    LOG(dvb, trace, "set demuxer filter finished.");
-//
-//    bool patread = false;
-//    while (!patread) {
-//        LOG(dvb, trace, "read PAT (pid 0) section into buffer ...");
-//        if (((count = read(_fileDescPat, buf, sizeof(buft))) < 0) && errno == EOVERFLOW) {
-//            LOG(dvb, trace, "read elementary stream pid 0 into buffer failed, second try ...");
-//            count = read(_fileDescPat, buf, sizeof(buft));
-//        }
-//        if (count < 0) {
-//            LOG(dvb, error, "while reading sections");
-//            return 0;
-//        }
-//        LOG(dvb, trace, "read " + Poco::NumberFormatter::format(count) + " bytes from elementary stream pid 0 into buffer.");
-//
-//        section_length = ((buf[1] & 0x0f) << 8) | buf[2];
-//        LOG(dvb, trace, "section length: " + Poco::NumberFormatter::format(section_length));
-//
-//        if (count != section_length + 3) {
-//            LOG(dvb, error, "PAT size mismatch, next read attempt.");
-//            continue;
-//        }
-//
-//        transport_stream_id = (buf[3] << 8) | buf[4];
-//        LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(transport_stream_id));
-//        if (transport_stream_id != tid) {
-//            LOG(dvb, error, "PAT tid mismatch (" + Poco::NumberFormatter::format(tid) + "), next read attempt.");
-//            continue;
-//        }
-//
-//        buf += 8;
-//        section_length -= 8;
-//
-//        patread = true;    // assumes one section contains the whole pat
-//        while (section_length > 0) {
-//            int service_id = (buf[0] << 8) | buf[1];
-//            LOG(dvb, trace, "search for service id in section, found: " + Poco::NumberFormatter::format(service_id));
-//            if (service_id == sid) {
-//                pmt_pid = ((buf[2] & 0x1f) << 8) | buf[3];
-//                section_length = 0;
-//                LOG(dvb, trace, "found service id, pmt pid is: " + Poco::NumberFormatter::format(pmt_pid));
-//            }
-//            buf += 4;
-//            section_length -= 4;
-//        }
-//    }
-//    LOG(dvb, trace, "get PMT PID for service id finished.");
-//
-//    return pmt_pid;
-//}
 
 }  // namespace Omm
 }  // namespace Dvb

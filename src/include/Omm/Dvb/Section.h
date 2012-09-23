@@ -38,8 +38,6 @@ public:
     Section(const std::string& name, Poco::UInt16 pid, Poco::UInt8 tableId, unsigned int timeout);
     ~Section();
 
-    void read(Stream* pStream, int timeout);  // deprecated
-
     void read(Stream* pStream);
     virtual void parse() {}
 

@@ -50,24 +50,7 @@ public:
     bool runStream(Stream* pStream, bool run = true);
     bool setSectionFilter(Stream* pStream, Poco::UInt8 tableId);
 
-    void readSection(Section* pSection, int timeout);  // deprecated
     bool readSection(Section* pSection);
-    // deprecated
-//    void start();
-//    void stop();
-//
-//    void openDemux(bool blocking = true);
-//    void closeDemux();
-//
-//    std::istream* getVideoStream();
-//    std::istream* getAudioStream();
-
-//    unsigned int getPmtPid(unsigned int tid, int sid);
-//    bool setVideoPid(unsigned int pid);
-//    bool setAudioPid(unsigned int pid);
-//    bool setPcrPid(unsigned int pid);
-//    bool setPatPid(unsigned int pid);
-//    bool setPmtPid(unsigned int pid);
 
 private:
     bool setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType);
@@ -76,13 +59,6 @@ private:
     Adapter*                    _pAdapter;
     std::string                 _deviceName;
     int                         _num;
-
-    // deprecated
-    int                         _fileDescVideo;
-    int                         _fileDescAudio;
-    int                         _fileDescPcr;
-    int                         _fileDescPat;
-    int                         _fileDescPmt;
 };
 
 }  // namespace Omm

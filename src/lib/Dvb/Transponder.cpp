@@ -49,7 +49,6 @@ const int Transponder::InvalidTransportStreamId(-1);
 
 Transponder::Transponder(Frontend* pFrontend, unsigned int freq, int tsid) :
 _pFrontend(pFrontend),
-//Transponder::Transponder(unsigned int freq, unsigned int tsid) :
 _frequency(freq),
 _transportStreamId(tsid)
 {
@@ -166,8 +165,6 @@ const std::string SatTransponder::FEC_NO_CODING("NoCoding");
 
 SatTransponder::SatTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid) :
 Transponder(pFrontend, freq, tsid)
-//SatTransponder::SatTransponder(unsigned int freq, unsigned int tsid) :
-//Transponder(freq, tid)
 {
 
 }
@@ -333,8 +330,6 @@ const std::string TerrestrialTransponder::HIERARCHY_AUTO("AUTO");
 
 TerrestrialTransponder::TerrestrialTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid) :
 Transponder(pFrontend, freq, tsid)
-//TerrestrialTransponder::TerrestrialTransponder(unsigned int freq, unsigned int tsid) :
-//Transponder(freq, tid)
 {
 }
 
@@ -875,8 +870,6 @@ TerrestrialTransponder::hierarchyToString(fe_hierarchy_t val)
 
 CableTransponder::CableTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid) :
 Transponder(pFrontend, freq, tsid)
-//CableTransponder::CableTransponder(unsigned int freq, unsigned int tsid) :
-//Transponder(freq, tid)
 {
 
 }
@@ -895,8 +888,6 @@ CableTransponder::initTransponder(Poco::StringTokenizer& params)
 
 AtscTransponder::AtscTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid) :
 Transponder(pFrontend, freq, tsid)
-//AtscTransponder::AtscTransponder(unsigned int freq, unsigned int tsid) :
-//Transponder(freq, tid)
 {
 
 }

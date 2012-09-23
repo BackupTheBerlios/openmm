@@ -60,19 +60,6 @@ Section::~Section()
 
 
 void
-Section::read(Stream* pStream, int timeout)
-{
-    pStream->read((Poco::UInt8*)_data, 3, timeout);
-
-    Poco::UInt16 sectionLength = getValue<Poco::UInt16>(12, 12);
-
-//    LOG(dvb, debug, "section length: " + Poco::NumberFormatter::format(sectionLength));
-    pStream->read((Poco::UInt8*)(_data) + 3, sectionLength, timeout);
-    _size = sectionLength + 3;
-}
-
-
-void
 Section::read(Stream* pStream)
 {
     pStream->read((Poco::UInt8*)_data, 3, _timeout);
