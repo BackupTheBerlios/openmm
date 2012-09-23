@@ -8,7 +8,7 @@ message(STATUS "linux DVB headers found in " ${LINUXDVB_INCLUDE_DIR})
 
 include_directories(
 ${LINUXDVB_INCLUDE_DIR}
-${ommlib_SOURCE_DIR}/Omm
+${OMM_INCLUDE_DIR}/Dvb
 )
 
 include(AddResources)
@@ -21,7 +21,16 @@ add_resources(${DVB_TRANSPONDERS_RESOURCE}
 )
 
 set(OMM_DVB_LIB_SRCS
-Dvb.cpp
+Descriptor.cpp
+Device.cpp
+DvbLogger.cpp
+Section.cpp
+Stream.cpp
+Service.cpp
+Transponder.cpp
+Frontend.cpp
+Demux.cpp
+Dvr.cpp
 )
 
 add_library(ommdvb

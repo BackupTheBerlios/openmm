@@ -1,0 +1,510 @@
+/***************************************************************************|
+|  OMM - Open Multimedia                                                    |
+|                                                                           |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
+|  Jörg Bakker (jb'at'open-multimedia.org)                                  |
+|                                                                           |
+|  This file is part of OMM.                                                |
+|                                                                           |
+|  OMM is free software: you can redistribute it and/or modify              |
+|  it under the terms of the GNU General Public License as published by     |
+|  the Free Software Foundation version 3 of the License.                   |
+|                                                                           |
+|  OMM is distributed in the hope that it will be useful,                   |
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of           |
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
+|  GNU General Public License for more details.                             |
+|                                                                           |
+|  You should have received a copy of the GNU General Public License        |
+|  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
+ ***************************************************************************/
+
+#include <fstream>
+#include <sstream>
+#include <cstring>
+
+#include <stdint.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#include <Poco/File.h>
+#include <Poco/StreamCopier.h>
+#include <Poco/NumberParser.h>
+#include <Poco/NumberFormatter.h>
+#include <Poco/DOM/AbstractContainerNode.h>
+#include <Poco/DOM/DOMException.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/AttrMap.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DocumentFragment.h>
+#include <Poco/SAX/InputSource.h>
+
+#include <Poco/StringTokenizer.h>
+#include <Poco/Thread.h>
+#include <map>
+
+#include "Log.h"
+#include "DvbLogger.h"
+#include "Descriptor.h"
+#include "Section.h"
+#include "Stream.h"
+#include "Service.h"
+#include "Transponder.h"
+#include "Frontend.h"
+#include "Demux.h"
+#include "Dvr.h"
+#include "Device.h"
+
+
+namespace Omm {
+namespace Dvb {
+
+
+Adapter::Adapter(int num)
+{
+    _deviceName = "/dev/dvb/adapter" + Poco::NumberFormatter::format(num);
+    _recPsi = true;
+
+//    _pFrontend = new Frontend(this, 0);
+
+}
+
+
+Adapter::~Adapter()
+{
+//    delete _pFrontend;
+
+}
+
+
+void
+Adapter::addFrontend(Frontend* pFrontend)
+{
+//    _pFrontend = pFrontend;
+    _frontends.push_back(pFrontend);
+}
+
+
+void
+Adapter::openAdapter()
+{
+    for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
+        (*it)->openFrontend();
+    }
+//    _pFrontend->openFrontend();
+
+}
+
+
+void
+Adapter::closeAdapter()
+{
+//    _pFrontend->closeFrontend();
+    for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
+        (*it)->closeFrontend();
+    }
+}
+
+
+//Demux*
+//Adapter::getDemux()
+//{
+//    return _pDemux;
+//}
+//
+//
+//Dvr*
+//Adapter::getDvr()
+//{
+//    return _pDvr;
+//}
+
+
+void
+Adapter::readXml(Poco::XML::Node* pXmlAdapter)
+{
+    LOG(dvb, debug, "read adapter ...");
+
+    if (pXmlAdapter->hasChildNodes()) {
+        Poco::XML::Node* pXmlFrontend = pXmlAdapter->firstChild();
+        std::string frontendType = static_cast<Poco::XML::Element*>(pXmlFrontend)->getAttribute("type");
+        int numFrontend = 0;
+        while (pXmlFrontend && pXmlFrontend->nodeName() == "frontend") {
+            Frontend* pFrontend;
+            if (frontendType == Frontend::DVBS) {
+                pFrontend = new SatFrontend(this, numFrontend);
+            }
+            else if (frontendType == Frontend::DVBT) {
+                pFrontend = new TerrestrialFrontend(this, numFrontend);
+            }
+            else if (frontendType == Frontend::DVBC) {
+                pFrontend = new CableFrontend(this, numFrontend);
+            }
+            else if (frontendType == Frontend::ATSC) {
+                pFrontend = new AtscFrontend(this, numFrontend);
+            }
+            addFrontend(pFrontend);
+            pFrontend->readXml(pXmlFrontend);
+            pXmlFrontend = pXmlFrontend->nextSibling();
+            numFrontend++;
+        }
+    }
+    else {
+        LOG(dvb, error, "dvb description contains no frontends");
+        return;
+    }
+
+    LOG(dvb, debug, "read adapter.");
+}
+
+
+void
+Adapter::writeXml(Poco::XML::Element* pDvbDevice)
+{
+    LOG(dvb, debug, "write adapter ...");
+
+    Poco::XML::Document* pDoc = pDvbDevice->ownerDocument();
+    Poco::XML::Element* pAdapter = pDoc->createElement("adapter");
+    pDvbDevice->appendChild(pAdapter);
+//    if (_pFrontend) {
+//        _pFrontend->writeXml(pAdapter);
+//    }
+    for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
+        (*it)->writeXml(pAdapter);
+    }
+
+
+    LOG(dvb, debug, "wrote adapter.");
+}
+
+
+Device* Device::_pInstance = 0;
+
+Device::Device() :
+_useDvrDevice(true),
+//_blockDvrDevice(false),
+_blockDvrDevice(true),
+// _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
+//_reopenDvrDevice(true)
+_reopenDvrDevice(false)
+// renderer in same process as dvb server: reopenDvrDevice = true then dvr device busy, reopenDvrDevice = false then stream sometimes broken
+// renderer in different process as dvb server: reopenDvrDevice = true ok, reopenDvrDevice = false then stream sometimes broken
+{
+}
+
+
+Device::~Device()
+{
+    for(std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        delete *it;
+    }
+}
+
+
+Device*
+Device::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Device;
+    }
+    return _pInstance;
+}
+
+
+Device::ServiceIterator
+Device::serviceBegin()
+{
+    return _serviceMap.begin();
+}
+
+
+Device::ServiceIterator
+Device::serviceEnd()
+{
+    return _serviceMap.end();
+}
+
+
+//void
+//Device::init()
+//{
+//    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
+//    pAdapter->openAdapter();
+//    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
+//}
+
+
+void
+Device::open()
+{
+    for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        (*it)->openAdapter();
+    }
+}
+
+
+void
+Device::scan(const std::string& initialTransponderData)
+{
+    // TODO: allocate adapters and frontend according to device nodes in system
+    _adapters[0]->_frontends[0]->scan(initialTransponderData);
+    initServiceMap();
+}
+
+
+void
+Device::readXml(std::istream& istream)
+{
+    LOG(dvb, debug, "read device ...");
+
+    Poco::AutoPtr<Poco::XML::Document> pXmlDoc = new Poco::XML::Document;
+    Poco::XML::InputSource xmlFile(istream);
+
+    Poco::XML::DOMParser parser;
+#if (POCO_VERSION & 0xFFFFFFFF) < 0x01040000
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_WHITESPACE, false);
+#else
+    parser.setFeature(Poco::XML::DOMParser::FEATURE_FILTER_WHITESPACE, true);
+#endif
+    try {
+        pXmlDoc = parser.parse(&xmlFile);
+    }
+    catch (Poco::Exception& e) {
+        LOG(dvb, error, "parsing dvb description failed: " + e.displayText());
+        return;
+    }
+
+    Poco::XML::Node* pDvbDevice = pXmlDoc->documentElement();
+    if (!pDvbDevice || pDvbDevice->nodeName() != "device") {
+        LOG(dvb, error, "xml not a valid dvb description");
+        return;
+    }
+    if (pDvbDevice->hasChildNodes()) {
+        Poco::XML::Node* pXmlAdapter = pDvbDevice->firstChild();
+        int numAdapter = 0;
+        while (pXmlAdapter && pXmlAdapter->nodeName() == "adapter") {
+            Adapter* pAdapter = new Adapter(numAdapter);
+            addAdapter(pAdapter);
+            pAdapter->readXml(pXmlAdapter);
+            pXmlAdapter = pXmlAdapter->nextSibling();
+            numAdapter++;
+        }
+    }
+    else {
+        LOG(dvb, error, "dvb description contains no adapters");
+        return;
+    }
+    initServiceMap();
+
+    LOG(dvb, debug, "read device.");
+}
+
+
+void
+Device::writeXml(std::ostream& ostream)
+{
+    LOG(dvb, debug, "write device ...");
+    Poco::AutoPtr<Poco::XML::Document> pXmlDoc = new Poco::XML::Document;
+
+    Poco::XML::DOMWriter writer;
+    writer.setOptions(Poco::XML::XMLWriter::WRITE_XML_DECLARATION | Poco::XML::XMLWriter::PRETTY_PRINT);
+
+    Poco::XML::Element* pDvbDevice = pXmlDoc->createElement("device");
+    pXmlDoc->appendChild(pDvbDevice);
+    try {
+        for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+            (*it)->writeXml(pDvbDevice);
+        }
+        writer.writeNode(ostream, pXmlDoc);
+    }
+    catch (Poco::Exception& e) {
+        LOG(dvb, error, "writing dvb description failed: " + e.displayText());
+    }
+    LOG(dvb, debug, "wrote device.");
+}
+
+
+void
+Device::addAdapter(Adapter* pAdapter)
+{
+    _adapters.push_back(pAdapter);
+}
+
+
+//bool
+//Device::tune(Transponder* pTransponder)
+//{
+//    LOG(dvb, debug, "start tuning ...");
+//
+//    if (_adapters.size() == 0) {
+//        LOG(dvb, error, "no adapter found, tuning aborted.");
+//        return false;
+//    }
+////    if (!_adapters[0]->_pFrontend) {
+////        LOG(dvb, error, "no frontend found, tuning aborted.");
+////        return false;
+////    }
+//    if (_adapters[0]->_frontends.size() == 0) {
+//        LOG(dvb, error, "no frontend found, tuning aborted.");
+//        return false;
+//    }
+//    return _adapters[0]->_frontends[0]->tune(pTransponder);
+//}
+
+
+//void
+//Device::stopTune()
+//{
+//    _adapters[0]->_frontends[0]->stopTune();
+//    LOG(dvb, debug, "stopped tuning.");
+//}
+
+
+Transponder*
+Device::getTransponder(const std::string& serviceName)
+{
+    ServiceIterator it = _serviceMap.find(serviceName);
+    if (it != _serviceMap.end() && it->second.size()) {
+        return it->second[0];
+    }
+    else {
+        LOG(dvb, error, "could not find transponder for service: " + serviceName);
+        return 0;
+    }
+}
+
+
+    // FIXME: two subsequent getStream() without stopping the stream may lead to
+    //        a blocked dvr device: engine stops reading the previous stream
+    //        when receiving the new stream. This may overlap and the file
+    //        handle is still open. Even if the engine is stopped right before
+    //        playing a new stream, it could take a while until reading of stream
+    //        is stopped, too (stop() and play() are typically async calls into
+    //        the engine).
+    //        DvbModel needs a way to interrupt current stream and close file
+    //        handles.
+    //        UPDATE: this only happens when renderer and dvb server run in the
+    //        same process.
+    //        UPDATE: man(2) close:
+    //        It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
+    //        same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
+    //        tended side effects.
+    //        UPDATE: as long as the same thread accesses the device, it is not busy. This happens, if the http request is
+    //        run in the same thread as the previous http request. Correction: even in same thread, dvr device cannot be
+    //        opened ("Device or resource busy").
+
+std::istream*
+Device::getStream(const std::string& serviceName)
+{
+    Transponder* pTransponder = getTransponder(serviceName);
+    Frontend* pFrontend = pTransponder->_pFrontend;
+    // TODO: check if not already tuned to transponder
+    bool tuneSuccess = pFrontend->tune(pTransponder);
+    if (!tuneSuccess) {
+        return 0;
+    }
+
+    Service* pService = pTransponder->getService(serviceName);
+    Demux* pDemux = pFrontend->_pDemux;
+    // TODO: check if service not already selected on demuxer
+    pDemux->selectService(pService, Demux::TargetDvr);
+    pDemux->runService(pService, true);
+
+    LOG(dvb, debug, "reading from dvr device ...");
+    // TODO: return stream from Service (which gets it from own muxer)
+    Dvr* pDvr = pFrontend->_pDvr;
+    std::istream* pStream = pDvr->getStream();
+    _streamMap[pStream] = pService;
+    return pStream;
+}
+
+
+//std::istream*
+//Device::getStream()
+//{
+//    if (_useDvrDevice && _reopenDvrDevice) {
+//        _adapters[0]->getDvr()->openDvr(_blockDvrDevice);
+//    }
+//    _adapters[0]->getDemux()->start();
+//    if (_useDvrDevice) {
+//        _adapters[0]->getDvr()->startReadThread();
+//        _adapters[0]->getDvr()->prefillBuffer();
+//        return _adapters[0]->getDvr()->getStream();
+//    }
+//    else {
+//        return _adapters[0]->getDemux()->getAudioStream();
+////        return _adapters[0]->getDemux()->getVideoStream();
+//    }
+//}
+
+
+void
+Device::freeStream(std::istream* pIstream)
+{
+
+    // TODO: only stop and free service stream (not complete demux)
+    Service* pService = _streamMap[pIstream];
+    if (!pService) {
+        return;
+    }
+    Demux* pDemux = pService->_pTransponder->_pFrontend->_pDemux;
+    pDemux->runService(pService, false);
+    pDemux->unselectService(pService);
+    Dvr* pDvr = pService->_pTransponder->_pFrontend->_pDvr;
+    if (_useDvrDevice) {
+        pDvr->clearBuffer();
+    }
+    _streamMap.erase(pIstream);
+
+    //    _adapters[0]->getDemux()->stop();
+//    if (_useDvrDevice) {
+//        _adapters[0]->getDvr()->stopReadThread();
+//        _adapters[0]->getDvr()->clearBuffer();
+//        if (_reopenDvrDevice) {
+////            _adapters[0]->getDvr()->setBlocking(false);
+//            _adapters[0]->getDvr()->closeDvr();
+//        }
+//    }
+}
+
+
+bool
+Device::useDvrDevice()
+{
+    return _useDvrDevice;
+}
+
+
+bool
+Device::blockDvrDevice()
+{
+    return _blockDvrDevice;
+}
+
+
+void
+Device::initServiceMap()
+{
+    for (std::vector<Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
+        for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
+            for (std::vector<Transponder*>::iterator tit = (*fit)->_transponders.begin(); tit != (*fit)->_transponders.end(); ++tit) {
+                for (std::vector<Service*>::iterator sit = (*tit)->_services.begin(); sit != (*tit)->_services.end(); ++sit) {
+                    _serviceMap[(*sit)->_name].push_back(*tit);
+                }
+            }
+        }
+    }
+}
+
+
+}  // namespace Omm
+}  // namespace Dvb

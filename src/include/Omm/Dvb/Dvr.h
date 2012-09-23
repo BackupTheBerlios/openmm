@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,30 +19,57 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
-#include <Omm/Dvb/Device.h>
-#include <Omm/Dvb/Frontend.h>
+#ifndef Dvr_INCLUDED
+#define Dvr_INCLUDED
+
+#include <sys/poll.h>
 
 
-int
-main(int argc, char** argv) {
-    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
-    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-    pAdapter->addFrontend(pFrontend);
+namespace Omm {
+namespace Dvb {
 
-//    pFrontend->listInitialTransponderData();
+class Adapter;
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
+class Dvr
+{
+    friend class Adapter;
 
-    Omm::Dvb::Device::instance()->writeXml(std::cout);
+public:
+    Dvr(Adapter* pAdapter, int num);
+    ~Dvr();
 
-//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
-//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
+    void openDvr(bool blocking = true);
+    void closeDvr();
+    void clearBuffer();
+    void prefillBuffer();
+    void startReadThread();
+    void stopReadThread();
+    bool readThreadRunning();
+    void setBlocking(bool blocking = true);
 
-    return 0;
-}
+    std::istream* getStream();
+
+private:
+    void readThread();
+
+    Adapter*                            _pAdapter;
+    std::string                         _deviceName;
+    int                                 _num;
+    int                                 _fileDescDvr;
+    AvStream::ByteQueue                 _byteQueue;
+    const int                           _bufferSize;
+    std::istream*                       _pDvrStream;
+
+    bool                                _useByteQueue;
+    struct pollfd                       _fileDescPoll[1];
+    const int                           _pollTimeout;  // wait for _pollTimeout millisec for new data on dvr device
+    Poco::Thread*                       _pReadThread;
+    Poco::RunnableAdapter<Dvr>          _readThreadRunnable;
+    bool                                _readThreadRunning;
+    Poco::FastMutex                     _readThreadLock;
+};
+
+}  // namespace Omm
+}  // namespace Dvb
+
+#endif

@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,30 +19,40 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
-#include <Omm/Dvb/Device.h>
-#include <Omm/Dvb/Frontend.h>
+#ifndef DvbLogger_INCLUDED
+#define DvbLogger_INCLUDED
+
+#include <Poco/Logger.h>
+#include <Poco/Format.h>
+#include <Poco/StringTokenizer.h>
+#include <Poco/TextConverter.h>
+#include <Poco/TextEncoding.h>
+#include <Poco/UTF8Encoding.h>
+
+#include "Log.h"
+
+namespace Omm {
+namespace Dvb {
 
 
-int
-main(int argc, char** argv) {
-    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
-    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-    pAdapter->addFrontend(pFrontend);
+#ifndef NDEBUG
+class Log
+{
+public:
+    static Log* instance();
 
-//    pFrontend->listInitialTransponderData();
+    Poco::Logger& dvb();
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
+private:
+    Log();
 
-    Omm::Dvb::Device::instance()->writeXml(std::cout);
+    static Log*     _pInstance;
+    Poco::Logger*   _pDvbLogger;
+};
+#endif // NDEBUG
 
-//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
-//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
 
-    return 0;
-}
+}  // namespace Omm
+}  // namespace Dvb
+
+#endif

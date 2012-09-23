@@ -25,7 +25,7 @@
 #include <Poco/DateTime.h>
 
 #include <Omm/UpnpAvServer.h>
-#include <Omm/Dvb.h>
+#include <Omm/Dvb/Dvb.h>
 
 
 class DvbModel : public Omm::Av::SimpleDataModel

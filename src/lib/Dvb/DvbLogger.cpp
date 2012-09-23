@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,30 +19,43 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
-#include <Omm/Dvb/Device.h>
-#include <Omm/Dvb/Frontend.h>
+#include "Log.h"
+#include "DvbLogger.h"
 
 
-int
-main(int argc, char** argv) {
-    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
-    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-    pAdapter->addFrontend(pFrontend);
+namespace Omm {
+namespace Dvb {
 
-//    pFrontend->listInitialTransponderData();
+#ifndef NDEBUG
+Log* Log::_pInstance = 0;
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
+// possible log levels: trace, debug, information, notice, warning, error, critical, fatal
 
-    Omm::Dvb::Device::instance()->writeXml(std::cout);
-
-//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
-//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
-
-    return 0;
+Log::Log()
+{
+    Poco::Channel* pChannel = Util::Log::instance()->channel();
+//    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_DEBUG);
+    _pDvbLogger = &Poco::Logger::create("DVB", pChannel, Poco::Message::PRIO_TRACE);
 }
+
+
+Log*
+Log::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new Log;
+    }
+    return _pInstance;
+}
+
+
+Poco::Logger&
+Log::dvb()
+{
+    return *_pDvbLogger;
+}
+#endif // NDEBUG
+
+
+}  // namespace Omm
+}  // namespace Dvb

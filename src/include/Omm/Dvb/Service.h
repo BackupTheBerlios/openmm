@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,30 +19,55 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
-#include <Omm/Dvb/Device.h>
-#include <Omm/Dvb/Frontend.h>
+#ifndef Service_INCLUDED
+#define Service_INCLUDED
 
+#include <Poco/DOM/DOMException.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/AttrMap.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DocumentFragment.h>
 
-int
-main(int argc, char** argv) {
-    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
-    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-    pAdapter->addFrontend(pFrontend);
+namespace Omm {
+namespace Dvb {
 
-//    pFrontend->listInitialTransponderData();
+class Transponder;
+class Stream;
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
+class Service
+{
+    friend class Transponder;
+    friend class Frontend;
+    friend class Device;
+    friend class Demux;
 
-    Omm::Dvb::Device::instance()->writeXml(std::cout);
+public:
+//    Service(const std::string& name, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int pmtid);
+    Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid);
 
-//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
-//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
+    void addStream(Stream* pStream);
+    void readXml(Poco::XML::Node* pXmlService);
+    void writeXml(Poco::XML::Element* pTransponder);
 
-    return 0;
-}
+private:
+    Transponder*                _pTransponder;
+    std::string                 _name;
+    unsigned int                _sid;
+    unsigned int                _pmtid;
+
+    std::vector<Stream*>        _streams;
+};
+
+}  // namespace Omm
+}  // namespace Dvb
+
+#endif
