@@ -40,6 +40,8 @@
 #include "DvbLogger.h"
 #include "Service.h"
 #include "Transponder.h"
+#include "Frontend.h"
+#include "Dvb/Frontend.h"
 
 
 namespace Omm {
@@ -164,18 +166,35 @@ const std::string SatTransponder::FEC_NO_CODING("NoCoding");
 
 
 SatTransponder::SatTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid) :
-Transponder(pFrontend, freq, tsid)
+Transponder(pFrontend, freq, tsid),
+_satNum(SatFrontend::InvalidSatNum)
 {
-
 }
 
 
 void
-SatTransponder::init(unsigned int satNum, unsigned int symbolRate, const std::string& polarization)
+SatTransponder::init(const std::string satPosition, unsigned int satNum, unsigned int symbolRate, const std::string& polarization)
 {
     LOG(dvb, debug, "init sat transponder.");
 
-    _satNum = satNum;
+    SatFrontend* pFrontend = dynamic_cast<SatFrontend*>(_pFrontend);
+    if (!pFrontend) {
+         LOG(dvb, error, "frontend of sat transponder is not sat frontend, cannot init transponder");
+         return;
+    }
+
+    if (satPosition != "") {
+        _satPosition = satPosition;
+    }
+    if (satNum != SatFrontend::InvalidSatNum) {
+        _satNum = satNum;
+    }
+    else if (_satPosition != "") {
+        _satNum = pFrontend->getSatNum(_satPosition);
+    }
+//    if (_satPosition != "" && _satNum != SatFrontend::InvalidSatNum) {
+//        pFrontend->setSatNum(_satPosition, _satNum);
+//    }
     _symbolRate = symbolRate;
     _polarization = polarization;
 }
@@ -267,7 +286,7 @@ SatTransponder::initTransponder(Poco::StringTokenizer& params)
         LOG(dvb, error, "invalid symbol rate for sat transponder: " + params[3]);
         return false;
     }
-    init(0, symbolRate, params[2]);
+    init("", SatFrontend::InvalidSatNum, symbolRate, params[2]);
     return true;
 }
 

@@ -29,15 +29,15 @@
 int
 main(int argc, char** argv) {
     Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
+//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
+    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
     Omm::Dvb::Device::instance()->addAdapter(pAdapter);
     pAdapter->addFrontend(pFrontend);
 
 //    pFrontend->listInitialTransponderData();
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
+//    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
+    pFrontend->scan("dvb-s/Astra-19.2E");
 
     Omm::Dvb::Device::instance()->writeXml(std::cout);
 

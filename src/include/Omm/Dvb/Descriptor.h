@@ -67,7 +67,7 @@ class SatelliteDeliverySystemDescriptor : public Descriptor
 public:
     unsigned int frequency();
     /// returns frequency in kHz
-    float orbitalPosition();
+    std::string orbitalPosition();
     std::string polarization();
     std::string modulationSystem();
     std::string modulationType();

@@ -111,6 +111,20 @@ public:
         return res;
     }
 
+    std::string
+    getBcdString(unsigned int byteOffset, int countDigits, int decimals = 0)
+    {
+        std::string res;
+        for (int i = 0; i < countDigits; i++) {
+            if (decimals > 0 && decimals <= countDigits && i == countDigits - decimals) {
+                res += '.';
+            }
+            char digit = getValue<char>(byteOffset * 8 + i * 4, 4) + '0';
+            res += digit;
+        }
+        return res;
+    }
+
     void* getData()
     {
         return _data;

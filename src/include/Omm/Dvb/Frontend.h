@@ -57,8 +57,8 @@ public:
     void closeFrontend();
 
     void scan(const std::string& initialTransponderData);
-    void readXml(Poco::XML::Node* pXmlFrontend);
-    void writeXml(Poco::XML::Element* pAdapter);
+    virtual void readXml(Poco::XML::Node* pXmlFrontend);
+    virtual void writeXml(Poco::XML::Element* pAdapter);
 
     const std::string getType();
     const std::string getName();
@@ -73,10 +73,10 @@ public:
 protected:
     bool waitForLock(Poco::Timestamp::TimeDiff timeout = 0);  // timeout in microseconds, 0 means forever
     bool hasLock();
-    void scanTransponder(Transponder* pTransponder);
-    void scanPatPmt(Transponder* pTransponder);
+    bool scanTransponder(Transponder* pTransponder);
+    bool scanPatPmt(Transponder* pTransponder);
     void scanSdt(Transponder* pTransponder);
-    void scanNit(Transponder* pTransponder);
+    void scanNit(Transponder* pTransponder, bool actual = false);
 //    void scanTransponderOld(Transponder* pTransponder);
 //    std::string trim(const std::string& str);
     std::string filter(const std::string& str);
@@ -84,12 +84,13 @@ protected:
     int                         _fileDescFrontend;
     struct dvb_frontend_info    _feInfo;
     Poco::Timestamp::TimeDiff   _frontendTimeout;
+    Poco::AutoPtr<Poco::XML::Element>   _pXmlFrontend;
 
 private:
 //    void diseqc(unsigned int satNum, Channel::Polarization pol, bool hiBand);
 //    bool tuneFrontend(unsigned int freq, unsigned int symbolRate);
     void checkFrontend();
-    bool addKownTransponder(Transponder* pTransponder);
+    bool addKnownTransponder(Transponder* pTransponder);
     /// addKownTransponder() returns true if transponder is new (has not been scanned yet)
 
     Adapter*                    _pAdapter;
@@ -136,16 +137,27 @@ private:
 class SatFrontend : public Frontend
 {
 public:
+    static const int InvalidSatNum;
+    static const int maxSatNum;
+
     SatFrontend(Adapter* pAdapter, int num);
 
     virtual bool tune(Transponder* pTransponder);
     virtual Transponder* createTransponder(unsigned int freq, unsigned int tsid);
+    virtual void readXml(Poco::XML::Node* pXmlFrontend);
+    virtual void writeXml(Poco::XML::Element* pAdapter);
+
+    int getSatNum(const std::string& orbitalPosition);
+    void setSatNum(const std::string& orbitalPosition, int satNum);
+    bool isSatNumKnown(int satNum);
 
 private:
     void diseqc(unsigned int satNum, const std::string& polarization, bool hiBand);
+    void printSatMap();
 
-    std::map<std::string,Lnb*>  _lnbs;  // possible LNB types
+    std::map<std::string, Lnb*> _lnbs;  // possible LNB types
     Lnb*                        _pLnb;
+    std::map<std::string, int>  _satNumMap;
 };
 
 

@@ -214,7 +214,7 @@ Frontend::scan(const std::string& initialTransponderData)
         LOG(dvb, trace, "initial transponder (freq: " + Poco::NumberFormatter::format((*it)->_frequency) + ", tsid: " + Poco::NumberFormatter::format((*it)->_transportStreamId) + ")");
         if (tune(*it)) {
             scanTransponder(*it);
-            if (addKownTransponder(*it)) {
+            if (addKnownTransponder(*it)) {
                 addTransponder(*it);
             }
             else {
@@ -279,12 +279,12 @@ Frontend::writeXml(Poco::XML::Element* pAdapter)
     LOG(dvb, debug, "write frontend ...");
 
     Poco::XML::Document* pDoc = pAdapter->ownerDocument();
-    Poco::XML::Element* pFrontend = pDoc->createElement("frontend");
-    pFrontend->setAttribute("type", getType());
-    pFrontend->setAttribute("name", getName());
-    pAdapter->appendChild(pFrontend);
+    _pXmlFrontend = pDoc->createElement("frontend");
+    _pXmlFrontend->setAttribute("type", getType());
+    _pXmlFrontend->setAttribute("name", getName());
+    pAdapter->appendChild(_pXmlFrontend);
     for (std::vector<Transponder*>::iterator it = _transponders.begin(); it != _transponders.end(); ++it) {
-        (*it)->writeXml(pFrontend);
+        (*it)->writeXml(_pXmlFrontend);
     }
 
     LOG(dvb, debug, "wrote frontend.");
@@ -452,7 +452,7 @@ Frontend::checkFrontend()
 
 
 bool
-Frontend::addKownTransponder(Transponder* pTransponder)
+Frontend::addKnownTransponder(Transponder* pTransponder)
 {
     bool newTransponder = false;
     std::map<unsigned int, Transponder*>::iterator pos = _scannedTransponders.find(pTransponder->_transportStreamId);
@@ -500,27 +500,35 @@ Frontend::hasLock()
 }
 
 
-void
+bool
 Frontend::scanTransponder(Transponder* pTransponder)
 {
     LOG(dvb, trace, "************** Transponder **************");
-    scanPatPmt(pTransponder);
-//    scanSdt(pTransponder);
-    scanNit(pTransponder);
+    if (scanPatPmt(pTransponder)) {
+    //    scanSdt(pTransponder);
+    //    scanNit(pTransponder);
+        scanNit(pTransponder, true);
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 
-void
+bool
 Frontend::scanPatPmt(Transponder* pTransponder)
 {
     LOG(dvb, trace, "--------------     PAT     --------------");
     PatSection pat;
     if (_pDemux->readSection(&pat)) {
-        if (pTransponder->_transportStreamId = Transponder::InvalidTransportStreamId) {
+        LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(pat.transportStreamId()));
+        if (pTransponder->_transportStreamId == Transponder::InvalidTransportStreamId) {
             pTransponder->_transportStreamId = pat.transportStreamId();
         }
         else if (pTransponder->_transportStreamId != pat.transportStreamId()) {
             LOG(dvb, error, "transport stream id mismatch: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + " != " + Poco::NumberFormatter::format(pat.transportStreamId()));
+            return false;
         }
         LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pat.serviceCount()));
         for (int serviceIndex = 0; serviceIndex < pat.serviceCount(); serviceIndex++) {
@@ -535,6 +543,10 @@ Frontend::scanPatPmt(Transponder* pTransponder)
                 }
             }
         }
+        return true;
+    }
+    else {
+        return false;
     }
 }
 
@@ -555,11 +567,11 @@ Frontend::scanSdt(Transponder* pTransponder)
 
 
 void
-Frontend::scanNit(Transponder* pTransponder)
+Frontend::scanNit(Transponder* pTransponder, bool actual)
 {
     std::vector<Transponder*> additionalTransponders;
-    LOG(dvb, trace, "--------------     NIT     --------------");
-    NitOtherSection nit;
+    LOG(dvb, trace, "--------------     NIT (" + std::string(actual ? "actual" : "other") + ")    --------------");
+    NitSection nit(actual ? NitSection::NitActualTableId : NitSection::NitOtherTableId);
     if (_pDemux->readSection(&nit)) {
         LOG(dvb, trace, "network id: " + Poco::NumberFormatter::format(nit.networkId()) + ", name: " + nit.networkName());
 //        LOG(dvb, trace, "network descriptor count: " + Poco::NumberFormatter::format(nit.networkDescriptorCount()));
@@ -576,11 +588,22 @@ Frontend::scanNit(Transponder* pTransponder)
                     }
                 }
                 else if (SatelliteDeliverySystemDescriptor* pD = dynamic_cast<SatelliteDeliverySystemDescriptor*>(pDescriptor)) {
-                    LOG(dvb, trace, "orbital position: " + Poco::NumberFormatter::format(pD->orbitalPosition()) +
-                                  ", frequency[kHz]: " + Poco::NumberFormatter::format(pD->frequency()));
-                    SatTransponder* pT = new SatTransponder(this, pD->frequency(), nit.transportStreamId(t));
-                    pT->init(0, pD->symbolRate(), pD->polarization());
-                    additionalTransponders.push_back(pT);
+                    LOG(dvb, trace, "orbital position: " + pD->orbitalPosition() +
+                                  ", frequency[kHz]: " + Poco::NumberFormatter::format(pD->frequency()) +
+                                  ", polarization: " + pD->polarization() +
+                                  ", symbol rate: " + Poco::NumberFormatter::format(pD->symbolRate()));
+//                    if (actual) {
+//                        SatTransponder* pT = dynamic_cast<SatTransponder*>(pTransponder);
+//                        if (pT) {
+//                            // if NIT of actual transponder can be scanned, tuning to this transponder must have been successfull and sat num is valid.
+//                            pT->init(pD->orbitalPosition(), pT->_satNum, pD->symbolRate(), pD->polarization());
+//                        }
+//                    }
+//                    else {
+                        SatTransponder* pT = new SatTransponder(this, pD->frequency(), nit.transportStreamId(t));
+                        pT->init(pD->orbitalPosition(), SatFrontend::InvalidSatNum, pD->symbolRate(), pD->polarization());
+                        additionalTransponders.push_back(pT);
+//                    }
                 }
                 else if (TerrestrialDeliverySystemDescriptor* pD = dynamic_cast<TerrestrialDeliverySystemDescriptor*>(pDescriptor)) {
                     LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency()));
@@ -593,7 +616,9 @@ Frontend::scanNit(Transponder* pTransponder)
                             TerrestrialTransponder::guard_intervalFromString(pD->guardInterval()),
                             TerrestrialTransponder::hierarchyFromString(pD->hierarchyInformation())
                     );
-                    additionalTransponders.push_back(pT);
+//                    if (!actual) {
+                        additionalTransponders.push_back(pT);
+//                    }
                 }
                 else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
                     for (int i = 0; i < pD->centreFrequencyCount(); i++) {
@@ -603,15 +628,16 @@ Frontend::scanNit(Transponder* pTransponder)
             }
         }
     }
-    for (std::vector<Transponder*>::iterator it = additionalTransponders.begin(); it != additionalTransponders.end(); ++it) {
-        if (addKownTransponder(*it) && tune(*it)) {
-            scanTransponder(*it);
-            addTransponder(*it);
+//    if (!actual) {
+        for (std::vector<Transponder*>::iterator it = additionalTransponders.begin(); it != additionalTransponders.end(); ++it) {
+            if (addKnownTransponder(*it) && tune(*it) && scanTransponder(*it)) {
+                addTransponder(*it);
+            }
+            else {
+                delete *it;
+            }
         }
-        else {
-            delete *it;
-        }
-    }
+//    }
 }
 
 
@@ -914,6 +940,9 @@ Lnb::isHiBand(unsigned int freq, unsigned int& ifreq)
 }
 
 
+const int SatFrontend::InvalidSatNum(-1);
+const int SatFrontend::maxSatNum(4);
+
 SatFrontend::SatFrontend(Adapter* pAdapter, int num) :
 Frontend(pAdapter, num)
 {
@@ -932,28 +961,77 @@ Frontend(pAdapter, num)
 }
 
 
+//bool
+//SatFrontend::tune(Transponder* pTransponder)
+//{
+//    SatTransponder* pTrans = static_cast<SatTransponder*>(pTransponder);
+//    LOG(dvb, debug, "sat frontend tuning to transponder with frequency (sat pos/no): " + Poco::NumberFormatter::format(pTransponder->_frequency)
+//            + " (" + pTrans->_satPosition + "/" + Poco::NumberFormatter::format(pTrans->_satNum) + ")"
+//            + " ...");
+//
+//    unsigned int ifreq;
+//    bool hiBand = _pLnb->isHiBand(pTrans->_frequency, ifreq);
+//    diseqc(0, pTrans->_polarization, hiBand);
+//
+//    struct dvb_frontend_parameters tuneto;
+//    tuneto.frequency = ifreq;
+//    tuneto.inversion = INVERSION_AUTO;
+//    tuneto.u.qpsk.symbol_rate = pTrans->_symbolRate;
+//    tuneto.u.qpsk.fec_inner = FEC_AUTO;
+//
+//    if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
+//        LOG(dvb, debug, "sat frontend tuning failed.");
+//        return false;
+//    }
+//    return waitForLock(_frontendTimeout);
+//}
+
+
 bool
 SatFrontend::tune(Transponder* pTransponder)
 {
-    LOG(dvb, debug, "sat frontend tuning to transponder with frequency: " + Poco::NumberFormatter::format(pTransponder->_frequency) + " ...");
-
     SatTransponder* pTrans = static_cast<SatTransponder*>(pTransponder);
-    struct dvb_frontend_parameters tuneto;
+    LOG(dvb, debug, "sat frontend tuning to transponder with frequency (sat pos/no): " + Poco::NumberFormatter::format(pTransponder->_frequency)
+            + " (" + pTrans->_satPosition + "/" + Poco::NumberFormatter::format(pTrans->_satNum) + ")"
+            + " ...");
 
-    unsigned int ifreq;
-    bool hiBand = _pLnb->isHiBand(pTrans->_frequency, ifreq);
-    diseqc(pTrans->_satNum, pTrans->_polarization, hiBand);
-
-    tuneto.frequency = ifreq;
-    tuneto.inversion = INVERSION_AUTO;
-    tuneto.u.qpsk.symbol_rate = pTrans->_symbolRate;
-    tuneto.u.qpsk.fec_inner = FEC_AUTO;
-
-    if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
-        LOG(dvb, debug, "sat frontend tuning failed.");
-        return false;
+    int firstSat = 0;
+    int lastSat = maxSatNum - 1;
+    if (pTrans->_satNum != InvalidSatNum) {
+        firstSat = pTrans->_satNum;
+        lastSat = pTrans->_satNum;
     }
-    return waitForLock(_frontendTimeout);
+    bool success = false;
+    for (int i = firstSat; i <= lastSat; i++) {
+        if (pTrans->_satPosition != "" && getSatNum(pTrans->_satPosition) == InvalidSatNum && isSatNumKnown(i)) {
+            // transponder has orbital sat position but satellite is not known, yet, so don't tune to already known satellites
+            // (they have different orbital positions than the new position of this transponder)
+            continue;
+        }
+        unsigned int ifreq;
+        bool hiBand = _pLnb->isHiBand(pTrans->_frequency, ifreq);
+        diseqc(i, pTrans->_polarization, hiBand);
+
+        struct dvb_frontend_parameters tuneto;
+        tuneto.frequency = ifreq;
+        tuneto.inversion = INVERSION_AUTO;
+        tuneto.u.qpsk.symbol_rate = pTrans->_symbolRate;
+        tuneto.u.qpsk.fec_inner = FEC_AUTO;
+
+        if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
+            LOG(dvb, debug, "sat frontend tuning failed.");
+            continue;
+        }
+        success = waitForLock(_frontendTimeout);
+        if (success) {
+            pTrans->_satNum = i;
+            if (pTrans->_satPosition != "") {
+                setSatNum(pTrans->_satPosition, pTrans->_satNum);
+            }
+            break;
+        }
+    }
+    return success;
 }
 
 
@@ -961,6 +1039,117 @@ Transponder*
 SatFrontend::createTransponder(unsigned int freq, unsigned int tsid)
 {
     return new SatTransponder(this, freq, tsid);
+}
+
+
+void
+SatFrontend::readXml(Poco::XML::Node* pXmlFrontend)
+{
+    Frontend::readXml(pXmlFrontend);
+
+    if (pXmlFrontend->hasChildNodes()) {
+        Poco::XML::Node* pXmlParam = pXmlFrontend->firstChild();
+        while (pXmlParam) {
+            if (pXmlParam->nodeName() == "transponder") {
+                // do nothing
+            }
+            else if (pXmlParam->nodeName() == "satellite") {
+                Poco::XML::Node* pXmlSatParam = pXmlParam->firstChild();
+                std::string satPos;
+                int satNum = InvalidSatNum;
+                while (pXmlSatParam) {
+                    Poco::XML::Node* pXmlSatParamVal = pXmlSatParam->firstChild();
+                    if (!pXmlSatParamVal) {
+                        LOG(dvb, error, "sat frontend satellite parameter without value: " + pXmlParam->nodeName());
+                        continue;
+                    }
+                    if (pXmlSatParam->nodeName() == "orbitalPosition") {
+                        satPos = pXmlSatParamVal->innerText();
+                    }
+                    else if (pXmlSatParam->nodeName() == "index") {
+                        satNum = Poco::NumberParser::parse(pXmlSatParamVal->innerText());
+                    }
+                    pXmlSatParam = pXmlSatParam->nextSibling();
+                }
+                setSatNum(satPos, satNum);
+            }
+            else {
+                LOG(dvb, error, "sat frontend unknown parameter: " + pXmlParam->nodeName());
+            }
+
+            pXmlParam = pXmlParam->nextSibling();
+        }
+    }
+    else {
+        LOG(dvb, error, "sat frontend description contains no satellites");
+        return;
+    }
+}
+
+
+void
+SatFrontend::writeXml(Poco::XML::Element* pAdapter)
+{
+    Frontend::writeXml(pAdapter);
+
+    Poco::XML::Document* pDoc = pAdapter->ownerDocument();
+
+    for (std::map<std::string, int>::iterator it = _satNumMap.begin(); it != _satNumMap.end(); ++it) {
+        Poco::AutoPtr<Poco::XML::Element> pSat = pDoc->createElement("satellite");
+        Poco::AutoPtr<Poco::XML::Element> pSatPos = pDoc->createElement("orbitalPosition");
+        Poco::AutoPtr<Poco::XML::Text> pSatPosVal = pDoc->createTextNode(it->first);
+        pSatPos->appendChild(pSatPosVal);
+        pSat->appendChild(pSatPos);
+        Poco::AutoPtr<Poco::XML::Element> pSatNum = pDoc->createElement("index");
+        Poco::AutoPtr<Poco::XML::Text> pSatNumVal = pDoc->createTextNode(Poco::NumberFormatter::format(it->second));
+        pSatNum->appendChild(pSatNumVal);
+        pSat->appendChild(pSatNum);
+        _pXmlFrontend->appendChild(pSat);
+    }
+}
+
+
+int
+SatFrontend::getSatNum(const std::string& orbitalPosition)
+{
+    std::map<std::string, int>::iterator pos = _satNumMap.find(orbitalPosition);
+    if (pos != _satNumMap.end()) {
+        return pos->second;
+    }
+    else {
+        return InvalidSatNum;
+    }
+}
+
+
+void
+SatFrontend::setSatNum(const std::string& orbitalPosition, int satNum)
+{
+    std::map<std::string, int>::iterator pos = _satNumMap.find(orbitalPosition);
+    if (pos != _satNumMap.end()) {
+        if (pos->second != satNum) {
+            LOG(dvb, warning, "sat position already mapped (overwriting): " + orbitalPosition + " -> " + Poco::NumberFormatter::format(satNum) +
+                    " (was: " + Poco::NumberFormatter::format(pos->second) + ")");
+        }
+        else {
+            return;
+        }
+    }
+    _satNumMap[orbitalPosition] = satNum;
+    printSatMap();
+}
+
+
+bool
+SatFrontend::isSatNumKnown(int satNum)
+{
+    bool res = false;
+    for (std::map<std::string, int>::iterator it = _satNumMap.begin(); it != _satNumMap.end(); ++it) {
+        if (it->second == satNum) {
+            res = true;
+        }
+    }
+    return res;
 }
 
 
@@ -1005,6 +1194,15 @@ SatFrontend::diseqc(unsigned int satNum, const std::string& polarization, bool h
     }
 
     LOG(dvb, debug, "diseqc command finished.");
+}
+
+
+void
+SatFrontend::printSatMap()
+{
+    for (std::map<std::string, int>::iterator it = _satNumMap.begin(); it != _satNumMap.end(); ++it) {
+        LOG(dvb, trace, "sat map entry (pos/num): " + it->first + "/" + Poco::NumberFormatter::format(it->second));
+    }
 }
 
 

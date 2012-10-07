@@ -22,8 +22,8 @@
 #ifndef Section_INCLUDED
 #define Section_INCLUDED
 
-
 #include "DvbUtil.h"
+
 
 namespace Omm {
 namespace Dvb {
@@ -39,7 +39,7 @@ public:
     ~Section();
 
     void read(Stream* pStream);
-    virtual void parse() {}
+    virtual void parse();
 
     std::string name();
     Poco::UInt16 packetId();
@@ -53,6 +53,8 @@ private:
     std::string         _name;
     Poco::UInt16        _pid;
     Poco::UInt8         _tableId;
+    Poco::UInt8         _sectionNumber;
+    Poco::UInt8         _lastSectionNumber;
     const unsigned int  _sizeMax;
     unsigned int        _size;
     unsigned int        _timeout;

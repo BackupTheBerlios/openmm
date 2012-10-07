@@ -19,10 +19,6 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <vector>
-#include <Poco/Types.h>
-
-#include "Log.h"
 #include "Descriptor.h"
 #include "Section.h"
 #include "Stream.h"
@@ -69,6 +65,13 @@ Section::read(Stream* pStream)
 //    LOG(dvb, debug, "section length: " + Poco::NumberFormatter::format(sectionLength));
     pStream->read((Poco::UInt8*)(_data) + 3, sectionLength, _timeout);
     _size = sectionLength + 3;
+}
+
+
+void
+Section::parse()
+{
+
 }
 
 
@@ -124,6 +127,8 @@ _serviceCount(0)
 void
 PatSection::parse()
 {
+    Section::parse();
+
     _serviceCount = (length() - 8 - 4) / 4;  // section header size = 8, crc = 4, service section size = 4
     unsigned int headerSize = 8 * 8;
     unsigned int serviceSize = 4 * 8;
@@ -171,6 +176,8 @@ Section("PMT", pid, 0x02, 5)
 void
 PmtSection::parse()
 {
+    Section::parse();
+
     _pcrPid = getValue<Poco::UInt16>(67, 13);
     Poco::UInt16 programInfoLength = getValue<Poco::UInt16>(84, 12);
 
@@ -240,6 +247,8 @@ Section("SDT", 0x11, 0x42, 5)
 void
 SdtSection::parse()
 {
+    Section::parse();
+
     unsigned int sdtHeaderSize = 88;
     unsigned int totalSdtSectionSize = length() * 8 - sdtHeaderSize - 4 * 8;
     unsigned int sdtOffset = 0;
@@ -309,6 +318,8 @@ Section("NIT", 0x10, tableId, 15)
 void
 NitSection::parse()
 {
+    Section::parse();
+
     Poco::UInt16 networkDescriptorsLength = getValue<Poco::UInt16>(68, 12);
     unsigned int head = 80;
     unsigned int byteOffset = 0;

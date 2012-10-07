@@ -71,18 +71,19 @@ public:
 protected:
     virtual bool initTransponder(Poco::StringTokenizer& params) {}
 
+    Frontend*                           _pFrontend;
     std::vector<Dvb::Service*>          _services;
     Poco::AutoPtr<Poco::XML::Element>   _pXmlTransponder;
 
 private:
-    Frontend*           _pFrontend;
-    unsigned int        _frequency;
-    int                 _transportStreamId;
+    unsigned int                        _frequency;
+    int                                 _transportStreamId;
 };
 
 
 class SatTransponder : public Transponder
 {
+    friend class Frontend;
     friend class SatFrontend;
 
 public:
@@ -110,7 +111,7 @@ public:
 
     SatTransponder(Frontend* pFrontend, unsigned int freq, unsigned int tsid);
 
-    void init(unsigned int satNum, unsigned int symbolRate, const std::string& polarization);
+    void init(const std::string satPosition, unsigned int satNum, unsigned int symbolRate, const std::string& polarization);
 
     virtual void readXml(Poco::XML::Node* pXmlTransponder);
     virtual void writeXml(Poco::XML::Element* pFrontend);
@@ -118,7 +119,8 @@ public:
 private:
     virtual bool initTransponder(Poco::StringTokenizer& params);
 
-    unsigned int        _satNum;
+    std::string         _satPosition;
+    int                 _satNum;
     unsigned int        _symbolRate;
     std::string         _polarization;
 };

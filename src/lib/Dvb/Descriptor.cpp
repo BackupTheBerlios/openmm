@@ -68,7 +68,7 @@ Descriptor::createDescriptor(void* data)
             pRes = new CellFrequencyLinkDescriptor;
             break;
         default:
-            LOG(dvb, error, "descriptor type unkown");
+            LOG(dvb, warning, "descriptor type unkown");
     }
     if (pRes) {
         pRes->_data = data;
@@ -144,10 +144,11 @@ SatelliteDeliverySystemDescriptor::frequency()
 }
 
 
-float
+std::string
 SatelliteDeliverySystemDescriptor::orbitalPosition()
 {
-    return getBcd<float>(6, 4) / 10;
+    return getBcdString(6, 4, 1);
+//    return getBcd<float>(6, 4) / 10;
 }
 
 
