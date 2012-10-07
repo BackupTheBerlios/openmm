@@ -239,7 +239,29 @@ Demux::readSection(Section* pSection)
     }
     catch (Poco::TimeoutException& e) {
         success = false;
-        LOG(dvb, error, pSection->name() + " table read timeout");
+        LOG(dvb, error, pSection->name() + " section read timeout");
+    }
+    runStream(&stream, false);
+    unselectStream(&stream);
+    return success;
+}
+
+
+bool
+Demux::readTable(Table* pTable)
+{
+    bool success = true;
+    Stream stream(Stream::Other, pTable->getFirstSection()->packetId());
+    selectStream(&stream, Demux::TargetDemux, true);
+    setSectionFilter(&stream, pTable->getFirstSection()->tableId());
+    runStream(&stream, true);
+    try {
+        pTable->read(&stream);
+        pTable->parse();
+    }
+    catch (Poco::TimeoutException& e) {
+        success = false;
+        LOG(dvb, error, pTable->getFirstSection()->name() + " table read timeout");
     }
     runStream(&stream, false);
     unselectStream(&stream);

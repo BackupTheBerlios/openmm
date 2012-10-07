@@ -22,10 +22,95 @@
 #include "Descriptor.h"
 #include "Section.h"
 #include "Stream.h"
+#include "Dvb/Section.h"
+#include "DvbLogger.h"
 
 
 namespace Omm {
 namespace Dvb {
+
+
+Table::Table(Section& firstSection) :
+_pFirstSection(firstSection.clone())
+{
+}
+
+
+Table::~Table()
+{
+    for (std::vector<Section*>::iterator it = _sections.begin(); it != _sections.end(); ++it) {
+        delete (*it);
+        *it = 0;
+    }
+}
+
+
+void
+Table::read(Stream* pStream)
+{
+    int attempt = 1;
+    LOG(dvb, trace, "table section read attempt: " + Poco::NumberFormatter::format(attempt));
+    _pFirstSection->read(pStream);
+    attempt++;
+    int sectionCount = _pFirstSection->lastSectionNumber() + 1;
+    int maxAttempts = sectionCount + 3;
+    LOG(dvb, trace, "table section count: " + Poco::NumberFormatter::format(sectionCount));
+    for (int i = 0; i < sectionCount; i++) {
+        _sections.push_back(0);
+    }
+    int sectionNumber = _pFirstSection->sectionNumber();
+    LOG(dvb, trace, "table section number of first section: " + Poco::NumberFormatter::format(sectionNumber));
+    _sections[sectionNumber] = _pFirstSection;
+    int sectionsRead = 1;
+    while (sectionsRead < sectionCount && attempt < maxAttempts) {
+        LOG(dvb, trace, "table section read attempt: " + Poco::NumberFormatter::format(attempt));
+        Section* pS = _pFirstSection->clone();
+        pS->read(pStream);
+        int sNumber = pS->sectionNumber();
+        LOG(dvb, trace, "table section number of next section: " + Poco::NumberFormatter::format(sNumber));
+        if (!_sections[sNumber]) {
+            _sections[sNumber] = pS;
+            sectionsRead++;
+        }
+        attempt++;
+    }
+    if (sectionsRead == sectionCount) {
+        LOG(dvb, trace, "table read all sections");
+    }
+    else {
+        LOG(dvb, trace, "table max read attempt reached");
+    }
+}
+
+
+void
+Table::parse()
+{
+    for (std::vector<Section*>::iterator it = _sections.begin(); it != _sections.end(); ++it) {
+        (*it)->parse();
+    }
+}
+
+
+int
+Table::sectionCount()
+{
+    return _sections.size();
+}
+
+
+Section*
+Table::getFirstSection()
+{
+    return _pFirstSection;
+}
+
+
+Section*
+Table::getSection(int index)
+{
+    return _sections[index];
+}
 
 
 Section::Section(Poco::UInt8 tableId) :
@@ -68,10 +153,10 @@ Section::read(Stream* pStream)
 }
 
 
-void
-Section::parse()
+Section*
+Section::clone()
 {
-
+    return new Section(_name, _pid, _tableId, _timeout);
 }
 
 
@@ -99,7 +184,21 @@ Section::tableId()
 Poco::UInt16
 Section::tableIdExtension()
 {
-    return getValue<Poco::UInt16>(24, 16);
+    return getValue<Poco::UInt16>(3 * 8, 16);
+}
+
+
+Poco::UInt8
+Section::sectionNumber()
+{
+    return getValue<Poco::UInt8>(6 * 8, 8);
+}
+
+
+Poco::UInt8
+Section::lastSectionNumber()
+{
+    return getValue<Poco::UInt8>(7 * 8, 8);
 }
 
 
@@ -124,11 +223,16 @@ _serviceCount(0)
 }
 
 
+Section*
+PatSection::clone()
+{
+    return new PatSection;
+}
+
+
 void
 PatSection::parse()
 {
-    Section::parse();
-
     _serviceCount = (length() - 8 - 4) / 4;  // section header size = 8, crc = 4, service section size = 4
     unsigned int headerSize = 8 * 8;
     unsigned int serviceSize = 4 * 8;
@@ -173,11 +277,16 @@ Section("PMT", pid, 0x02, 5)
 }
 
 
+Section*
+PmtSection::clone()
+{
+    return new PmtSection(packetId());
+}
+
+
 void
 PmtSection::parse()
 {
-    Section::parse();
-
     _pcrPid = getValue<Poco::UInt16>(67, 13);
     Poco::UInt16 programInfoLength = getValue<Poco::UInt16>(84, 12);
 
@@ -244,11 +353,16 @@ Section("SDT", 0x11, 0x42, 5)
 }
 
 
+Section*
+SdtSection::clone()
+{
+    return new SdtSection;
+}
+
+
 void
 SdtSection::parse()
 {
-    Section::parse();
-
     unsigned int sdtHeaderSize = 88;
     unsigned int totalSdtSectionSize = length() * 8 - sdtHeaderSize - 4 * 8;
     unsigned int sdtOffset = 0;
@@ -315,11 +429,16 @@ Section("NIT", 0x10, tableId, 15)
 }
 
 
+Section*
+NitSection::clone()
+{
+    return new NitSection(tableId());
+}
+
+
 void
 NitSection::parse()
 {
-    Section::parse();
-
     Poco::UInt16 networkDescriptorsLength = getValue<Poco::UInt16>(68, 12);
     unsigned int head = 80;
     unsigned int byteOffset = 0;

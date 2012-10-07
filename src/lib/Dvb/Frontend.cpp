@@ -109,8 +109,8 @@ Frontend::Frontend(Adapter* pAdapter, int num) :
 _fileDescFrontend(-1),
 _pAdapter(pAdapter),
 _num(num),
-//_frontendTimeout(2000000)
-_frontendTimeout(1000000)
+_frontendTimeout(2000000)
+//_frontendTimeout(1000000)
 {
     _deviceName = _pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(_num);
     _pDemux = new Demux(pAdapter, 0);
@@ -571,73 +571,65 @@ Frontend::scanNit(Transponder* pTransponder, bool actual)
 {
     std::vector<Transponder*> additionalTransponders;
     LOG(dvb, trace, "--------------     NIT (" + std::string(actual ? "actual" : "other") + ")    --------------");
-    NitSection nit(actual ? NitSection::NitActualTableId : NitSection::NitOtherTableId);
-    if (_pDemux->readSection(&nit)) {
-        LOG(dvb, trace, "network id: " + Poco::NumberFormatter::format(nit.networkId()) + ", name: " + nit.networkName());
+    NitSection nitSection(actual ? NitSection::NitActualTableId : NitSection::NitOtherTableId);
+    Table nitTab(nitSection);
+    if (_pDemux->readTable(&nitTab)) {
+        NitSection* pNit = static_cast<NitSection*>(nitTab.getFirstSection());
+        LOG(dvb, trace, "network id: " + Poco::NumberFormatter::format(pNit->networkId()) + ", name: " + pNit->networkName());
 //        LOG(dvb, trace, "network descriptor count: " + Poco::NumberFormatter::format(nit.networkDescriptorCount()));
-        for (unsigned int t = 0; t < nit.transportStreamCount(); t++) {
-            LOG(dvb, trace, "original network id: " + Poco::NumberFormatter::format(nit.originalNetworkId(t)) +
-                          ", transport stream id: " + Poco::NumberFormatter::format(nit.transportStreamId(t)));
+        for (int s = 0; s < nitTab.sectionCount(); s++) {
+            NitSection* pS = static_cast<NitSection*>(nitTab.getSection(s));
+            for (unsigned int t = 0; t < pS->transportStreamCount(); t++) {
+                LOG(dvb, trace, "original network id: " + Poco::NumberFormatter::format(pS->originalNetworkId(t)) +
+                            ", transport stream id: " + Poco::NumberFormatter::format(pS->transportStreamId(t)));
 
-            for (unsigned int d = 0; d < nit.transportStreamDescriptorCount(t); d++) {
-                Descriptor* pDescriptor = nit.transportStreamDescriptor(t, d);
-                if (ServiceListDescriptor* pD = dynamic_cast<ServiceListDescriptor*>(pDescriptor)) {
-//                    LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pD->serviceCount()));
-                    for (int i = 0; i < pD->serviceCount(); i++) {
-//                        LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pD->serviceId(i)));
+                for (unsigned int d = 0; d < pS->transportStreamDescriptorCount(t); d++) {
+                    Descriptor* pDescriptor = pS->transportStreamDescriptor(t, d);
+                    if (ServiceListDescriptor* pD = dynamic_cast<ServiceListDescriptor*>(pDescriptor)) {
+    //                    LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pD->serviceCount()));
+                        for (int i = 0; i < pD->serviceCount(); i++) {
+    //                        LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pD->serviceId(i)));
+                        }
                     }
-                }
-                else if (SatelliteDeliverySystemDescriptor* pD = dynamic_cast<SatelliteDeliverySystemDescriptor*>(pDescriptor)) {
-                    LOG(dvb, trace, "orbital position: " + pD->orbitalPosition() +
-                                  ", frequency[kHz]: " + Poco::NumberFormatter::format(pD->frequency()) +
-                                  ", polarization: " + pD->polarization() +
-                                  ", symbol rate: " + Poco::NumberFormatter::format(pD->symbolRate()));
-//                    if (actual) {
-//                        SatTransponder* pT = dynamic_cast<SatTransponder*>(pTransponder);
-//                        if (pT) {
-//                            // if NIT of actual transponder can be scanned, tuning to this transponder must have been successfull and sat num is valid.
-//                            pT->init(pD->orbitalPosition(), pT->_satNum, pD->symbolRate(), pD->polarization());
-//                        }
-//                    }
-//                    else {
-                        SatTransponder* pT = new SatTransponder(this, pD->frequency(), nit.transportStreamId(t));
+                    else if (SatelliteDeliverySystemDescriptor* pD = dynamic_cast<SatelliteDeliverySystemDescriptor*>(pDescriptor)) {
+                        LOG(dvb, trace, "orbital position: " + pD->orbitalPosition() +
+                                    ", frequency[kHz]: " + Poco::NumberFormatter::format(pD->frequency()) +
+                                    ", polarization: " + pD->polarization() +
+                                    ", symbol rate: " + Poco::NumberFormatter::format(pD->symbolRate()));
+                        SatTransponder* pT = new SatTransponder(this, pD->frequency(), pS->transportStreamId(t));
                         pT->init(pD->orbitalPosition(), SatFrontend::InvalidSatNum, pD->symbolRate(), pD->polarization());
                         additionalTransponders.push_back(pT);
-//                    }
-                }
-                else if (TerrestrialDeliverySystemDescriptor* pD = dynamic_cast<TerrestrialDeliverySystemDescriptor*>(pDescriptor)) {
-                    LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency()));
-                    TerrestrialTransponder* pT = new TerrestrialTransponder(this, pD->centreFrequency(), nit.transportStreamId(t));
-                    pT->init(TerrestrialTransponder::bandwidthFromString(pD->bandwidth()),
-                            TerrestrialTransponder::coderateFromString(pD->codeRateHpStream()),
-                            TerrestrialTransponder::coderateFromString(pD->codeRateLpStream()),
-                            TerrestrialTransponder::modulationFromString(pD->constellation()),
-                            TerrestrialTransponder::transmitModeFromString(pD->transmissionMode()),
-                            TerrestrialTransponder::guard_intervalFromString(pD->guardInterval()),
-                            TerrestrialTransponder::hierarchyFromString(pD->hierarchyInformation())
-                    );
-//                    if (!actual) {
+                    }
+                    else if (TerrestrialDeliverySystemDescriptor* pD = dynamic_cast<TerrestrialDeliverySystemDescriptor*>(pDescriptor)) {
+                        LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency()));
+                        TerrestrialTransponder* pT = new TerrestrialTransponder(this, pD->centreFrequency(), pS->transportStreamId(t));
+                        pT->init(TerrestrialTransponder::bandwidthFromString(pD->bandwidth()),
+                                TerrestrialTransponder::coderateFromString(pD->codeRateHpStream()),
+                                TerrestrialTransponder::coderateFromString(pD->codeRateLpStream()),
+                                TerrestrialTransponder::modulationFromString(pD->constellation()),
+                                TerrestrialTransponder::transmitModeFromString(pD->transmissionMode()),
+                                TerrestrialTransponder::guard_intervalFromString(pD->guardInterval()),
+                                TerrestrialTransponder::hierarchyFromString(pD->hierarchyInformation())
+                        );
                         additionalTransponders.push_back(pT);
-//                    }
-                }
-                else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
-                    for (int i = 0; i < pD->centreFrequencyCount(); i++) {
-                        LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency(i)));
+                    }
+                    else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
+                        for (int i = 0; i < pD->centreFrequencyCount(); i++) {
+                            LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency(i)));
+                        }
                     }
                 }
             }
         }
     }
-//    if (!actual) {
-        for (std::vector<Transponder*>::iterator it = additionalTransponders.begin(); it != additionalTransponders.end(); ++it) {
-            if (addKnownTransponder(*it) && tune(*it) && scanTransponder(*it)) {
-                addTransponder(*it);
-            }
-            else {
-                delete *it;
-            }
+    for (std::vector<Transponder*>::iterator it = additionalTransponders.begin(); it != additionalTransponders.end(); ++it) {
+        if (addKnownTransponder(*it) && tune(*it) && scanTransponder(*it)) {
+            addTransponder(*it);
         }
-//    }
+        else {
+            delete *it;
+        }
+    }
 }
 
 
@@ -990,7 +982,11 @@ Frontend(pAdapter, num)
 bool
 SatFrontend::tune(Transponder* pTransponder)
 {
-    SatTransponder* pTrans = static_cast<SatTransponder*>(pTransponder);
+    SatTransponder* pTrans = dynamic_cast<SatTransponder*>(pTransponder);
+    if (!pTrans) {
+        LOG(dvb, error, "sat frontend cannot tune to non-sat transponder");
+        return false;
+    }
     LOG(dvb, debug, "sat frontend tuning to transponder with frequency (sat pos/no): " + Poco::NumberFormatter::format(pTransponder->_frequency)
             + " (" + pTrans->_satPosition + "/" + Poco::NumberFormatter::format(pTrans->_satNum) + ")"
             + " ...");
@@ -1003,10 +999,16 @@ SatFrontend::tune(Transponder* pTransponder)
     }
     bool success = false;
     for (int i = firstSat; i <= lastSat; i++) {
-        if (pTrans->_satPosition != "" && getSatNum(pTrans->_satPosition) == InvalidSatNum && isSatNumKnown(i)) {
-            // transponder has orbital sat position but satellite is not known, yet, so don't tune to already known satellites
-            // (they have different orbital positions than the new position of this transponder)
-            continue;
+        if (pTrans->_satNum == InvalidSatNum) {
+            if (pTrans->_satPosition != "" && getSatNum(pTrans->_satPosition) == InvalidSatNum && isSatNumKnown(i)) {
+                // transponder has orbital sat position but satellite is not known, yet, so don't tune to already known satellites
+                // (they have different orbital positions than the new position of this transponder)
+                LOG(dvb, debug, "sat frontend skipping satellite number (orbital position " + pTrans->_satPosition + " of transponder known to be wrong sat number): " + Poco::NumberFormatter::format(i));
+                continue;
+            }
+            else {
+                LOG(dvb, debug, "sat frontend probing satellite number: " + Poco::NumberFormatter::format(i));
+            }
         }
         unsigned int ifreq;
         bool hiBand = _pLnb->isHiBand(pTrans->_frequency, ifreq);

@@ -30,6 +30,27 @@ namespace Dvb {
 
 class Descriptor;
 class Stream;
+class Section;
+
+
+class Table
+{
+public:
+    Table(Section& firstSection);
+    ~Table();
+
+    void read(Stream* pStream);
+    void parse();
+    int sectionCount();
+    Section* getFirstSection();
+    Section* getSection(int index);
+
+private:
+    Section*                    _pFirstSection;
+    std::vector<Section*>       _sections;
+};
+
+
 
 class Section : public BitField
 {
@@ -39,12 +60,15 @@ public:
     ~Section();
 
     void read(Stream* pStream);
-    virtual void parse();
+    virtual Section* clone();
+    virtual void parse() {}
 
     std::string name();
     Poco::UInt16 packetId();
     Poco::UInt8 tableId();
     Poco::UInt16 tableIdExtension();
+    Poco::UInt8 sectionNumber();
+    Poco::UInt8 lastSectionNumber();
 
     unsigned int length();
     unsigned int timeout();
@@ -53,8 +77,6 @@ private:
     std::string         _name;
     Poco::UInt16        _pid;
     Poco::UInt8         _tableId;
-    Poco::UInt8         _sectionNumber;
-    Poco::UInt8         _lastSectionNumber;
     const unsigned int  _sizeMax;
     unsigned int        _size;
     unsigned int        _timeout;
@@ -66,6 +88,7 @@ class PatSection : public Section
 public:
     PatSection();
 
+    virtual Section* clone();
     virtual void parse();
 
     Poco::UInt16 transportStreamId();
@@ -86,6 +109,7 @@ class PmtSection : public Section
 public:
     PmtSection(Poco::UInt16 pid);
 
+    virtual Section* clone();
     virtual void parse();
 
     Poco::UInt16 programNumber();
@@ -103,11 +127,18 @@ private:
 };
 
 
+class TsdtSection : public Section
+{
+
+};
+
+
 class SdtSection : public Section
 {
 public:
     SdtSection();
 
+    virtual Section* clone();
     virtual void parse();
 
     unsigned int serviceCount();
@@ -137,6 +168,7 @@ public:
 
     NitSection(Poco::UInt8 tableId);
 
+    virtual Section* clone();
     virtual void parse();
 
     Poco::UInt16 networkId();

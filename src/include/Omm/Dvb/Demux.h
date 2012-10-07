@@ -51,6 +51,7 @@ public:
     bool setSectionFilter(Stream* pStream, Poco::UInt8 tableId);
 
     bool readSection(Section* pSection);
+    bool readTable(Table* pTable);
 
 private:
     bool setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType);
