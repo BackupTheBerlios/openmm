@@ -51,6 +51,14 @@ class Service
     friend class Demux;
 
 public:
+    static const unsigned int InvalidPcrPid;
+    static const std::string StatusUndefined;
+    static const std::string StatusNotRunning;
+    static const std::string StatusStartsShortly;
+    static const std::string StatusPausing;
+    static const std::string StatusRunning;
+    static const std::string StatusOffAir;
+
 //    Service(const std::string& name, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int pmtid);
     Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid);
 
@@ -58,11 +66,16 @@ public:
     void readXml(Poco::XML::Node* pXmlService);
     void writeXml(Poco::XML::Element* pTransponder);
 
+    static std::string statusToString(Poco::UInt8 status);
+
 private:
     Transponder*                _pTransponder;
     std::string                 _name;
     unsigned int                _sid;
-    unsigned int                _pmtid;
+    unsigned int                _pmtPid;
+    unsigned int                _pcrPid;
+    std::string                 _status;
+    bool                        _scrambled;
 
     std::vector<Stream*>        _streams;
 };

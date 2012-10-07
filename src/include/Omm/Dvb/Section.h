@@ -143,10 +143,10 @@ public:
 
     unsigned int serviceCount();
     Poco::UInt16 serviceId(unsigned int serviceIndex);
-    Poco::UInt8 runningStatus(unsigned int serviceIndex);
+    std::string runningStatus(unsigned int serviceIndex);
     bool scrambled(unsigned int serviceIndex);
-//    std::string providerName(unsigned int serviceIndex);
-//    std::string serviceName(unsigned int serviceIndex);
+    std::string providerName(unsigned int serviceIndex);
+    std::string serviceName(unsigned int serviceIndex);
 //    unsigned int serviceDescriptorCount();
 //    Descriptor* serviceDescriptor(int serviceIndex);
 

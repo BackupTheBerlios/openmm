@@ -56,12 +56,22 @@ namespace Dvb {
 //{
 //}
 
+const unsigned int Service::InvalidPcrPid(0);
+const std::string Service::StatusUndefined("Undefined");
+const std::string Service::StatusNotRunning("NotRunning");
+const std::string Service::StatusStartsShortly("StartsShortly");
+const std::string Service::StatusPausing("Pausing");
+const std::string Service::StatusRunning("Running");
+const std::string Service::StatusOffAir("OffAir");
 
 Service::Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid) :
 _pTransponder(pTransponder),
 _name(name),
 _sid(sid),
-_pmtid(pmtid)
+_pmtPid(pmtid),
+_pcrPid(InvalidPcrPid),
+_status(StatusUndefined),
+_scrambled(false)
 {
 }
 
@@ -79,13 +89,33 @@ Service::readXml(Poco::XML::Node* pXmlService)
     LOG(dvb, debug, "read service ...");
 
     if (pXmlService->hasChildNodes()) {
-        Poco::XML::Node* pXmlStream = pXmlService->firstChild();
-        while (pXmlStream && pXmlStream->nodeName() == "stream") {
-            std::string type = static_cast<Poco::XML::Element*>(pXmlStream)->getAttribute("type");
-            int pid = Poco::NumberParser::parse(static_cast<Poco::XML::Element*>(pXmlStream)->getAttribute("pid"));
-            Stream* pStream = new Stream(type, pid);
-            addStream(pStream);
-            pXmlStream = pXmlStream->nextSibling();
+        Poco::XML::Node* pXmlParam = pXmlService->firstChild();
+        while (pXmlParam) {
+            if (pXmlParam->nodeName() == "stream") {
+                std::string type = static_cast<Poco::XML::Element*>(pXmlParam)->getAttribute("type");
+                int pid = Poco::NumberParser::parse(static_cast<Poco::XML::Element*>(pXmlParam)->getAttribute("pid"));
+                Stream* pStream = new Stream(type, pid);
+                addStream(pStream);
+            }
+            else if (pXmlParam->nodeName() == "status") {
+                Poco::XML::Node* pVal = pXmlParam->firstChild();
+                if (!pVal) {
+                    LOG(dvb, error, "dvb service status has no value");
+                }
+                else {
+                    _status = pVal->innerText();
+                }
+            }
+            else if (pXmlParam->nodeName() == "scrambled") {
+                Poco::XML::Node* pVal = pXmlParam->firstChild();
+                if (!pVal) {
+                    LOG(dvb, error, "dvb service scrambled has no value");
+                }
+                else {
+                    _scrambled = pVal->innerText() == "true" ? true : false;
+                }
+            }
+            pXmlParam = pXmlParam->nextSibling();
         }
     }
     else {
@@ -107,13 +137,45 @@ Service::writeXml(Poco::XML::Element* pTransponder)
     pTransponder->appendChild(pService);
     pService->setAttribute("name", _name);
     pService->setAttribute("sid", Poco::NumberFormatter::format(_sid));
-    pService->setAttribute("pmtid", Poco::NumberFormatter::format(_pmtid));
+    pService->setAttribute("pmtid", Poco::NumberFormatter::format(_pmtPid));
 
     for (std::vector<Stream*>::iterator it = _streams.begin(); it != _streams.end(); ++it) {
         (*it)->writeXml(pService);
     }
 
+    Poco::AutoPtr<Poco::XML::Element> pStatus = pDoc->createElement("status");
+    Poco::AutoPtr<Poco::XML::Text> pStatusVal = pDoc->createTextNode(_status);
+    pStatus->appendChild(pStatusVal);
+    pService->appendChild(pStatus);
+
+    Poco::AutoPtr<Poco::XML::Element> pScrambled = pDoc->createElement("scrambled");
+    Poco::AutoPtr<Poco::XML::Text> pScrambledVal = pDoc->createTextNode(std::string(_scrambled ? "true" : "false"));
+    pScrambled->appendChild(pScrambledVal);
+    pService->appendChild(pScrambled);
+
     LOG(dvb, debug, "wrote service.");
+}
+
+
+std::string
+Service::statusToString(Poco::UInt8 status)
+{
+    switch (status) {
+        case 0x00:
+            return StatusUndefined;
+        case 0x01:
+            return StatusNotRunning;
+        case 0x02:
+            return StatusStartsShortly;
+        case 0x03:
+            return StatusPausing;
+        case 0x04:
+            return StatusRunning;
+        case 0x05:
+            return StatusOffAir;
+        default:
+            return "";
+    }
 }
 
 

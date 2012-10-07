@@ -24,6 +24,7 @@
 #include "Stream.h"
 #include "Dvb/Section.h"
 #include "DvbLogger.h"
+#include "Dvb/Service.h"
 
 
 namespace Omm {
@@ -379,16 +380,14 @@ SdtSection::parse()
 //    //        LOG(dvb, trace, "sdt descriptor length: " + Poco::NumberFormatter::format(descLength));
 //            Poco::UInt8 descType = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 56, 8);
 //            LOG(dvb, trace, "sdt descriptor type: " + Poco::NumberFormatter::format(descType));
-//            Poco::UInt8 descProvNameLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 64, 8);
+        Poco::UInt8 descProvNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 64, 8);
 //    //        LOG(dvb, trace, "sdt descriptor provider name length: " + Poco::NumberFormatter::format(descProvNameLength));
-//            std::string providerName((char*)(sdtTable.getData()) + (sdtHeaderSize + sdtOffset + 72) / 8, descProvNameLength);
+        _serviceProviderName.push_back(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 72) / 8, descProvNameLength));
 //            LOG(dvb, trace, "sdt provider name: " + providerName);
-//            Poco::UInt8 descServiceNameLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 72 + descProvNameLength * 8, 8);
+        Poco::UInt8 descServiceNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 72 + descProvNameLength * 8, 8);
 //    //        LOG(dvb, trace, "sdt descriptor service name length: " + Poco::NumberFormatter::format(descServiceNameLength));
-//            std::string serviceName((char*)(sdtTable.getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength);
+        _serviceName.push_back(filter(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength)));
 //            LOG(dvb, trace, "sdt service name: " + serviceName);
-//
-//            serviceName = filter(serviceName);
 
         sdtOffset += 40 + sdtInfoLength * 8;
     }
@@ -409,10 +408,10 @@ SdtSection::serviceId(unsigned int serviceIndex)
 }
 
 
-Poco::UInt8
+std::string
 SdtSection::runningStatus(unsigned int serviceIndex)
 {
-    return _serviceRunningStatus[serviceIndex];
+    return Service::statusToString(_serviceRunningStatus[serviceIndex]);
 }
 
 
@@ -420,6 +419,20 @@ bool
 SdtSection::scrambled(unsigned int serviceIndex)
 {
     return _serviceScrambled[serviceIndex];
+}
+
+
+std::string
+SdtSection::providerName(unsigned int serviceIndex)
+{
+    return _serviceProviderName[serviceIndex];
+}
+
+
+std::string
+SdtSection::serviceName(unsigned int serviceIndex)
+{
+    return _serviceName[serviceIndex];
 }
 
 

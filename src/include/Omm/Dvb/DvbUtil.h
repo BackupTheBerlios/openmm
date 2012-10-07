@@ -27,6 +27,7 @@
 #include <Poco/BufferedStreamBuf.h>
 //#include <Poco/UnbufferedStreamBuf.h>
 #include <Poco/ByteOrder.h>
+#include <Poco/String.h>
 
 #include "../AvStream.h"
 
@@ -125,19 +126,34 @@ public:
         return res;
     }
 
-    void* getData()
+    void*
+    getData()
     {
         return _data;
     }
 
-    void* getData(unsigned int byteOffset)
+    void*
+    getData(unsigned int byteOffset)
     {
         return (Poco::UInt8*)(_data) + byteOffset;
     }
 
-    std::string getData(unsigned int byteOffset, unsigned int byteLength)
+    std::string
+    getData(unsigned int byteOffset, unsigned int byteLength)
     {
         return std::string((char*)(_data) + byteOffset, byteLength);
+    }
+
+    std::string
+    filter(const std::string& str)
+    {
+        std::string res(str);
+        for (int i = 0; i < res.length(); i++) {
+            if (!std::isprint(res[i])) {
+                res[i] = ' ';
+            }
+        }
+        return Poco::trim(res);
     }
 
 protected:

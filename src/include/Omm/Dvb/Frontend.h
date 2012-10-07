@@ -79,7 +79,7 @@ protected:
     void scanNit(Transponder* pTransponder, bool actual = false);
 //    void scanTransponderOld(Transponder* pTransponder);
 //    std::string trim(const std::string& str);
-    std::string filter(const std::string& str);
+//    std::string filter(const std::string& str);
 
     int                         _fileDescFrontend;
     struct dvb_frontend_info    _feInfo;

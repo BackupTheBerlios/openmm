@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <Poco/String.h>
+//#include <Poco/String.h>
 #include <Poco/NumberParser.h>
 #include <Poco/DOM/AbstractContainerNode.h>
 #include <Poco/DOM/DOMException.h>
@@ -49,6 +49,7 @@
 #include "Descriptor.h"
 #include "Section.h"
 #include "Stream.h"
+#include "Service.h"
 #include "TransponderData.h"
 #include "Transponder.h"
 #include "Demux.h"
@@ -134,6 +135,7 @@ Frontend::~Frontend()
 void
 Frontend::addTransponder(Transponder* pTransponder)
 {
+    LOG(dvb, debug, "add transponder with tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId));
     _transponders.push_back(pTransponder);
 }
 
@@ -505,9 +507,11 @@ Frontend::scanTransponder(Transponder* pTransponder)
 {
     LOG(dvb, trace, "************** Transponder **************");
     if (scanPatPmt(pTransponder)) {
-    //    scanSdt(pTransponder);
-    //    scanNit(pTransponder);
+        scanSdt(pTransponder);
+        // actual NIT
         scanNit(pTransponder, true);
+        // other NIT
+    //    scanNit(pTransponder);
         return true;
     }
     else {
@@ -535,11 +539,19 @@ Frontend::scanPatPmt(Transponder* pTransponder)
             LOG(dvb, trace, "--------------     PMT     --------------");
             LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pat.serviceId(serviceIndex)) +
                           ", pmt pid: " + Poco::NumberFormatter::format(pat.pmtPid(serviceIndex)));
-            PmtSection pmt(pat.pmtPid(serviceIndex));
-            if (pat.serviceId(serviceIndex) && _pDemux->readSection(&pmt)) {
-                for (int streamIndex = 0; streamIndex < pmt.streamCount(); streamIndex++) {
-                    LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(pmt.streamPid(streamIndex)) +
-                                  ", type: " + Stream::streamTypeToString(pmt.streamType(streamIndex)));
+            if (pat.serviceId(serviceIndex)) { // no NIT service
+                Service* pService = new Dvb::Service(pTransponder, "", pat.serviceId(serviceIndex), pat.pmtPid(serviceIndex));
+                pTransponder->addService(pService);
+                PmtSection pmt(pat.pmtPid(serviceIndex));
+                if (pat.serviceId(serviceIndex) && _pDemux->readSection(&pmt)) {
+                    for (int streamIndex = 0; streamIndex < pmt.streamCount(); streamIndex++) {
+                        LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(pmt.streamPid(streamIndex)) +
+                                    ", type: " + Stream::streamTypeToString(pmt.streamType(streamIndex)));
+                        pService->addStream(new Stream(Stream::streamTypeToString(pmt.streamType(streamIndex)), pmt.streamPid(streamIndex)));
+                    }
+                    pService->addStream(new Stream(Stream::ProgramMapTable, pmt.packetId()));
+                    pService->_pcrPid = pmt.pcrPid();
+                    pService->addStream(new Stream(Stream::ProgramClock, pmt.pcrPid()));
                 }
             }
         }
@@ -559,8 +571,15 @@ Frontend::scanSdt(Transponder* pTransponder)
     if (_pDemux->readSection(&sdt)) {
         for (int serviceIndex = 0; serviceIndex < sdt.serviceCount(); serviceIndex++) {
             LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(sdt.serviceId(serviceIndex)) +
-                          ", running status: " + Poco::NumberFormatter::format(sdt.runningStatus(serviceIndex)) +
+                          ", service name: " + sdt.serviceName(serviceIndex) +
+                          ", running status: " + sdt.runningStatus(serviceIndex) +
                           ", scrambled: " + Poco::NumberFormatter::format(sdt.scrambled(serviceIndex)));
+            Service* pService = pTransponder->getService(sdt.serviceId(serviceIndex));
+            if (pService) {
+                pService->_name = sdt.serviceName(serviceIndex);
+                pService->_status = sdt.runningStatus(serviceIndex);
+                pService->_scrambled = sdt.scrambled(serviceIndex);
+            }
         }
     }
 }
@@ -888,17 +907,17 @@ Frontend::scanNit(Transponder* pTransponder, bool actual)
 //}
 
 
-std::string
-Frontend::filter(const std::string& str)
-{
-    std::string res(str);
-    for (int i = 0; i < res.length(); i++) {
-        if (!std::isprint(res[i])) {
-            res[i] = ' ';
-        }
-    }
-    return Poco::trim(res);
-}
+//std::string
+//Frontend::filter(const std::string& str)
+//{
+//    std::string res(str);
+//    for (int i = 0; i < res.length(); i++) {
+//        if (!std::isprint(res[i])) {
+//            res[i] = ' ';
+//        }
+//    }
+//    return Poco::trim(res);
+//}
 
 
 Lnb::Lnb(const std::string& desc, unsigned long lowVal, unsigned long highVal, unsigned long switchVal) :
