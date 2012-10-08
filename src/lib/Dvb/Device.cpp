@@ -456,10 +456,10 @@ Device::freeStream(std::istream* pIstream)
     if (!pService) {
         return;
     }
-    Demux* pDemux = pService->_pTransponder->_pFrontend->_pDemux;
+    Demux* pDemux = pService->getTransponder()->_pFrontend->_pDemux;
     pDemux->runService(pService, false);
     pDemux->unselectService(pService);
-    Dvr* pDvr = pService->_pTransponder->_pFrontend->_pDvr;
+    Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
     if (_useDvrDevice) {
         pDvr->clearBuffer();
     }
@@ -498,7 +498,8 @@ Device::initServiceMap()
         for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
             for (std::vector<Transponder*>::iterator tit = (*fit)->_transponders.begin(); tit != (*fit)->_transponders.end(); ++tit) {
                 for (std::vector<Service*>::iterator sit = (*tit)->_services.begin(); sit != (*tit)->_services.end(); ++sit) {
-                    _serviceMap[(*sit)->_name].push_back(*tit);
+//                    _serviceMap[(*sit)->_name].push_back(*tit);
+                    _serviceMap[(*sit)->getName()].push_back(*tit);
                 }
             }
         }

@@ -47,7 +47,7 @@ class Service
 {
     friend class Transponder;
     friend class Frontend;
-    friend class Device;
+//    friend class Device;
     friend class Demux;
 
 public:
@@ -66,10 +66,14 @@ public:
     void readXml(Poco::XML::Node* pXmlService);
     void writeXml(Poco::XML::Element* pTransponder);
 
+    std::string getName();
+    Transponder* getTransponder();
+
     static std::string statusToString(Poco::UInt8 status);
 
 private:
     Transponder*                _pTransponder;
+    std::string                 _providerName;
     std::string                 _name;
     unsigned int                _sid;
     unsigned int                _pmtPid;

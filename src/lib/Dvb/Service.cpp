@@ -35,11 +35,13 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/NumberFormatter.h>
 
 #include "Log.h"
 #include "DvbLogger.h"
 #include "Stream.h"
 #include "Service.h"
+#include "Transponder.h"
 
 
 namespace Omm {
@@ -135,7 +137,8 @@ Service::writeXml(Poco::XML::Element* pTransponder)
     Poco::XML::Document* pDoc = pTransponder->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pService = pDoc->createElement("service");
     pTransponder->appendChild(pService);
-    pService->setAttribute("name", _name);
+//    pService->setAttribute("name", _name);
+    pService->setAttribute("name", getName());
     pService->setAttribute("sid", Poco::NumberFormatter::format(_sid));
     pService->setAttribute("pmtid", Poco::NumberFormatter::format(_pmtPid));
 
@@ -155,6 +158,26 @@ Service::writeXml(Poco::XML::Element* pTransponder)
 
     LOG(dvb, debug, "wrote service.");
 }
+
+
+std::string
+Service::getName()
+{
+    if (_name == "" || _name == ".") {
+        return "Service " + Poco::NumberFormatter::format(_sid) + " (TS " + Poco::NumberFormatter::format(_pTransponder->_transportStreamId) + ")";
+    }
+    else {
+        return _name;
+    }
+}
+
+
+Transponder*
+Service::getTransponder()
+{
+    return _pTransponder;
+}
+
 
 
 std::string

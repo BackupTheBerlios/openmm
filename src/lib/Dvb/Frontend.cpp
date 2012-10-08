@@ -57,6 +57,8 @@
 #include "Frontend.h"
 #include "Device.h"
 #include "Dvb/Transponder.h"
+#include "Dvb/Service.h"
+#include "Dvb/Section.h"
 
 
 namespace Omm {
@@ -548,18 +550,23 @@ void
 Frontend::scanSdt(Transponder* pTransponder)
 {
     LOG(dvb, trace, "--------------     SDT     --------------");
-    SdtSection sdt;
-    if (_pDemux->readSection(&sdt)) {
-        for (int serviceIndex = 0; serviceIndex < sdt.serviceCount(); serviceIndex++) {
-            LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(sdt.serviceId(serviceIndex)) +
-                          ", service name: " + sdt.serviceName(serviceIndex) +
-                          ", running status: " + sdt.runningStatus(serviceIndex) +
-                          ", scrambled: " + Poco::NumberFormatter::format(sdt.scrambled(serviceIndex)));
-            Service* pService = pTransponder->getService(sdt.serviceId(serviceIndex));
-            if (pService) {
-                pService->_name = sdt.serviceName(serviceIndex);
-                pService->_status = sdt.runningStatus(serviceIndex);
-                pService->_scrambled = sdt.scrambled(serviceIndex);
+    SdtSection sdtSection;
+    Table sdtTab(sdtSection);
+    if (_pDemux->readTable(&sdtTab)) {
+        for (int s = 0; s < sdtTab.sectionCount(); s++) {
+            SdtSection* pS = static_cast<SdtSection*>(sdtTab.getSection(s));
+            for (int serviceIndex = 0; serviceIndex < pS->serviceCount(); serviceIndex++) {
+                LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pS->serviceId(serviceIndex)) +
+                            ", service name: " + pS->serviceName(serviceIndex) +
+                            ", running status: " + pS->runningStatus(serviceIndex) +
+                            ", scrambled: " + Poco::NumberFormatter::format(pS->scrambled(serviceIndex)));
+                Service* pService = pTransponder->getService(pS->serviceId(serviceIndex));
+                if (pService) {
+                    pService->_providerName = pS->providerName(serviceIndex);
+                    pService->_name = pS->serviceName(serviceIndex);
+                    pService->_status = pS->runningStatus(serviceIndex);
+                    pService->_scrambled = pS->scrambled(serviceIndex);
+                }
             }
         }
     }

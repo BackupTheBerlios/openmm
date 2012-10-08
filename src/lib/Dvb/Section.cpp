@@ -368,23 +368,17 @@ SdtSection::parse()
     unsigned int totalSdtSectionSize = length() * 8 - sdtHeaderSize - 4 * 8;
     unsigned int sdtOffset = 0;
     while (sdtOffset < totalSdtSectionSize) {
-        Poco::UInt16 serviceId = getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset, 16);
-        _serviceIds.push_back(serviceId);
+        _serviceIds.push_back(getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset, 16));
         _serviceRunningStatus.push_back(getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 24, 3));
         _serviceScrambled.push_back(getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 27, 1));
         Poco::UInt16 sdtInfoLength = getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset + 28, 12);
-
 //            Poco::UInt8 descId = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 40, 8);
 //            Poco::UInt8 descLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 48, 8);
 //            Poco::UInt8 descType = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 56, 8);
         Poco::UInt8 descProvNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 64, 8);
         _serviceProviderName.push_back(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 72) / 8, descProvNameLength));
         Poco::UInt8 descServiceNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 72 + descProvNameLength * 8, 8);
-        std::string serviceName = filter(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength));
-        if (serviceName == "") {
-            serviceName = "serviceId " + Poco::NumberFormatter::format(serviceId);
-        }
-        _serviceName.push_back(serviceName);
+        _serviceName.push_back(filter(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength)));
 
         sdtOffset += 40 + sdtInfoLength * 8;
     }

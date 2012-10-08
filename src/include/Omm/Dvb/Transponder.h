@@ -55,6 +55,7 @@ class Transponder
     friend class TerrestrialFrontend;
     friend class CableFrontend;
     friend class AtscFrontend;
+    friend class Service;
 
 public:
     static const int InvalidTransportStreamId;
@@ -77,7 +78,7 @@ protected:
     std::vector<Dvb::Service*>          _services;
     Poco::AutoPtr<Poco::XML::Element>   _pXmlTransponder;
 
-//private:
+private:
     unsigned int                        _frequency;
     int                                 _transportStreamId;
 };
