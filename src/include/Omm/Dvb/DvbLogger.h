@@ -29,7 +29,7 @@
 #include <Poco/TextEncoding.h>
 #include <Poco/UTF8Encoding.h>
 
-#include "Log.h"
+#include "../Log.h"
 
 namespace Omm {
 namespace Dvb {

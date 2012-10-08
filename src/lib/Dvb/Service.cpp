@@ -172,6 +172,20 @@ Service::getName()
 }
 
 
+std::string
+Service::getStatus()
+{
+    return _status;
+}
+
+
+bool
+Service::getScrambled()
+{
+    return _scrambled;
+}
+
+
 Transponder*
 Service::getTransponder()
 {

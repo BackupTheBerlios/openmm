@@ -67,6 +67,8 @@ public:
     void writeXml(Poco::XML::Element* pTransponder);
 
     std::string getName();
+    std::string getStatus();
+    bool getScrambled();
     Transponder* getTransponder();
 
     static std::string statusToString(Poco::UInt8 status);

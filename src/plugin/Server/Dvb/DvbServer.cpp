@@ -24,6 +24,11 @@
 #include <Poco/Timer.h>
 #include <Poco/File.h>
 #include <fstream>
+#include <vector>
+
+#include <Omm/Dvb/DvbLogger.h>
+#include <Omm/Dvb/Transponder.h>
+#include <Omm/Dvb/Service.h>
 
 #include "DvbServer.h"
 
@@ -80,7 +85,14 @@ DvbModel::scan()
     std::ifstream xmlDevice(getBasePath().c_str());
     Omm::Dvb::Device::instance()->readXml(xmlDevice);
     for (Omm::Dvb::Device::ServiceIterator it = Omm::Dvb::Device::instance()->serviceBegin(); it != Omm::Dvb::Device::instance()->serviceEnd(); ++it) {
-        addPath(it->first);
+        for (std::vector<Omm::Dvb::Transponder*>::iterator tit = it->second.begin(); tit != it->second.end(); ++it) {
+            Omm::Dvb::Service* pService = (*tit)->getService(it->first);
+            if (pService && pService->getStatus() == Omm::Dvb::Service::StatusRunning && !pService->getScrambled()) {
+                // there is one transponder that can receive the service unscrambled
+                addPath(it->first);
+                break;
+            }
+        }
     }
 }
 

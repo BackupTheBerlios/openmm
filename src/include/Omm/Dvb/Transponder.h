@@ -46,6 +46,7 @@ namespace Omm {
 namespace Dvb {
 
 class Frontend;
+class Service;
 
 class Transponder
 {
@@ -62,7 +63,7 @@ public:
 
     Transponder(Frontend* pFrontend, unsigned int freq, int tsid);
 
-    void addService(Dvb::Service* pService);
+    void addService(Service* pService);
     Service* getService(unsigned int serviceId);
     Service* getService(const std::string& serviceName);
 
