@@ -368,26 +368,23 @@ SdtSection::parse()
     unsigned int totalSdtSectionSize = length() * 8 - sdtHeaderSize - 4 * 8;
     unsigned int sdtOffset = 0;
     while (sdtOffset < totalSdtSectionSize) {
-        _serviceIds.push_back(getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset, 16));
+        Poco::UInt16 serviceId = getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset, 16);
+        _serviceIds.push_back(serviceId);
         _serviceRunningStatus.push_back(getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 24, 3));
         _serviceScrambled.push_back(getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 27, 1));
         Poco::UInt16 sdtInfoLength = getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset + 28, 12);
 
-//    //        LOG(dvb, trace, "sdt descriptor total length: " + Poco::NumberFormatter::format(sdtInfoLength));
 //            Poco::UInt8 descId = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 40, 8);
-//    //        LOG(dvb, trace, "sdt descriptor tag: " + Poco::NumberFormatter::format(descId));
 //            Poco::UInt8 descLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 48, 8);
-//    //        LOG(dvb, trace, "sdt descriptor length: " + Poco::NumberFormatter::format(descLength));
 //            Poco::UInt8 descType = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 56, 8);
-//            LOG(dvb, trace, "sdt descriptor type: " + Poco::NumberFormatter::format(descType));
         Poco::UInt8 descProvNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 64, 8);
-//    //        LOG(dvb, trace, "sdt descriptor provider name length: " + Poco::NumberFormatter::format(descProvNameLength));
         _serviceProviderName.push_back(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 72) / 8, descProvNameLength));
-//            LOG(dvb, trace, "sdt provider name: " + providerName);
         Poco::UInt8 descServiceNameLength = getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 72 + descProvNameLength * 8, 8);
-//    //        LOG(dvb, trace, "sdt descriptor service name length: " + Poco::NumberFormatter::format(descServiceNameLength));
-        _serviceName.push_back(filter(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength)));
-//            LOG(dvb, trace, "sdt service name: " + serviceName);
+        std::string serviceName = filter(std::string((char*)(getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength));
+        if (serviceName == "") {
+            serviceName = "serviceId " + Poco::NumberFormatter::format(serviceId);
+        }
+        _serviceName.push_back(serviceName);
 
         sdtOffset += 40 + sdtInfoLength * 8;
     }
