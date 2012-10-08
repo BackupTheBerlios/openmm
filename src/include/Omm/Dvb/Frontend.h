@@ -77,9 +77,6 @@ protected:
     bool scanPatPmt(Transponder* pTransponder);
     void scanSdt(Transponder* pTransponder);
     void scanNit(Transponder* pTransponder, bool actual = false);
-//    void scanTransponderOld(Transponder* pTransponder);
-//    std::string trim(const std::string& str);
-//    std::string filter(const std::string& str);
 
     int                         _fileDescFrontend;
     struct dvb_frontend_info    _feInfo;
@@ -99,9 +96,7 @@ private:
     int                         _num;
     std::string                 _type;
     std::vector<Transponder*>   _initialTransponders;
-//    std::vector<Transponder*>   _scannedTransponders;
-    std::map<unsigned int, Transponder*>   _scannedTransponders;
-//    std::map<Poco::UInt16, std::map<Poco::UInt16, Transponder*> >   _scannedTransponders;
+    std::vector<Transponder*>   _scannedTransponders;
     std::vector<Transponder*>   _transponders;
     Demux*                      _pDemux;
     Dvr*                        _pDvr;

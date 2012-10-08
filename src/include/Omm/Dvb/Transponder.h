@@ -68,6 +68,8 @@ public:
     virtual void readXml(Poco::XML::Node* pXmlTransponder);
     virtual void writeXml(Poco::XML::Element* pFrontend);
 
+    bool equal(Transponder* pOtherTransponder);
+
 protected:
     virtual bool initTransponder(Poco::StringTokenizer& params) {}
 
@@ -75,7 +77,7 @@ protected:
     std::vector<Dvb::Service*>          _services;
     Poco::AutoPtr<Poco::XML::Element>   _pXmlTransponder;
 
-private:
+//private:
     unsigned int                        _frequency;
     int                                 _transportStreamId;
 };

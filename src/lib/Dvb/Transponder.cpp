@@ -41,7 +41,6 @@
 #include "Service.h"
 #include "Transponder.h"
 #include "Frontend.h"
-#include "Dvb/Frontend.h"
 
 
 namespace Omm {
@@ -141,6 +140,15 @@ Transponder::writeXml(Poco::XML::Element* pFrontend)
 
     LOG(dvb, debug, "wrote transponder.");
 }
+
+
+bool
+Transponder::equal(Transponder* pOtherTransponder)
+{
+//    LOG(dvb, trace, "test transponder with freq: " + Poco::NumberFormatter::format(_frequency) + " equals transponder with freq: " + Poco::NumberFormatter::format(pOtherTransponder->_frequency));
+    return (abs(_frequency - pOtherTransponder->_frequency) < 2000);
+}
+
 
 const std::string SatTransponder::POL_HORIZ("H");
 const std::string SatTransponder::POL_VERT("V");

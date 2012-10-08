@@ -56,6 +56,7 @@
 #include "Dvr.h"
 #include "Frontend.h"
 #include "Device.h"
+#include "Dvb/Transponder.h"
 
 
 namespace Omm {
@@ -434,39 +435,19 @@ Frontend::checkFrontend()
 }
 
 
-//bool
-//Frontend::addKownTransponder(Transponder* pTransponder)
-//{
-//    bool newTransponder = false;
-//
-//    std::map<unsigned int, Transponder*>::iterator pos = _scannedTransponders.find(pTransponder->_transportStreamId);
-////    std::map<Poco::UInt16, std::map<Poco::UInt16, Transponder*> >::iterator pos = _scannedTransponders.find(pTransponder->);
-//    if (pos == _scannedTransponders.end()) {
-//        LOG(dvb, trace, "new transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
-//        newTransponder = true;
-//        _scannedTransponders[pTransponder->_transportStreamId] = pTransponder;
-//    }
-//    else {
-//        LOG(dvb, trace, "known transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
-//    }
-//    return newTransponder;
-//}
-
-
 bool
 Frontend::addKnownTransponder(Transponder* pTransponder)
 {
-    bool newTransponder = false;
-    std::map<unsigned int, Transponder*>::iterator pos = _scannedTransponders.find(pTransponder->_transportStreamId);
-    if (pos == _scannedTransponders.end()) {
-        LOG(dvb, trace, "new transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
-        newTransponder = true;
-        _scannedTransponders[pTransponder->_transportStreamId] = pTransponder;
+    LOG(dvb, trace, "addKnownTransponder");
+    for (std::vector<Transponder*>::iterator it = _scannedTransponders.begin(); it != _scannedTransponders.end(); ++it) {
+        if ((*it)->equal(pTransponder)) {
+            LOG(dvb, trace, "known transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
+            return false;
+        }
     }
-    else {
-        LOG(dvb, trace, "known transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
-    }
-    return newTransponder;
+    LOG(dvb, trace, "new transponder (freq: " + Poco::NumberFormatter::format(pTransponder->_frequency) + ", tsid: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + ")");
+    _scannedTransponders.push_back(pTransponder);
+    return true;
 }
 
 
@@ -632,11 +613,11 @@ Frontend::scanNit(Transponder* pTransponder, bool actual)
                         );
                         additionalTransponders.push_back(pT);
                     }
-                    else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
-                        for (int i = 0; i < pD->centreFrequencyCount(); i++) {
-                            LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency(i)));
-                        }
-                    }
+//                    else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
+//                        for (int i = 0; i < pD->centreFrequencyCount(); i++) {
+//                            LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency(i)));
+//                        }
+//                    }
                 }
             }
         }
@@ -650,274 +631,6 @@ Frontend::scanNit(Transponder* pTransponder, bool actual)
         }
     }
 }
-
-
-//void
-//Frontend::scanTransponderOld(Transponder* pTransponder)
-//{
-//    LOG(dvb, trace, "************** PAT **************");
-//    Poco::UInt16 patPid = 0x00;
-//    Stream* pPat = new Stream(Stream::Other, patPid);
-//    _pDemux->selectStream(pPat, Demux::TargetDemux, true);
-//    Poco::UInt8 patTableId = 0x00;
-//    _pDemux->setSectionFilter(pPat, patTableId);
-//    _pDemux->runStream(pPat, true);
-//    Section patTable(patTableId);
-//    patTable.read(pPat);
-//    _pDemux->runStream(pPat, false);
-//    _pDemux->unselectStream(pPat);
-//
-//    LOG(dvb, trace, "pat table length: " + Poco::NumberFormatter::format(patTable.length()));
-//    Poco::UInt16 transportStreamId = patTable.getValue<Poco::UInt16>(24, 16);
-//    LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(transportStreamId));
-//    pTransponder->_transportStreamId = transportStreamId;
-//
-//    int serviceCount = (patTable.length() - 8 - 4) / 4;  // section header size = 8,  crc = 4, service section size = 4
-//    unsigned int headerSize = 8 * 8;
-//    unsigned int serviceSize = 4 * 8;
-//    while (serviceCount--) {
-//        LOG(dvb, trace, "************** PMT (Service) **************");
-//
-//        Poco::UInt16 serviceId = patTable.getValue<Poco::UInt16>(headerSize + serviceCount * serviceSize, 16);
-//        LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(serviceId));
-//
-//        Poco::UInt16 pmtPid = patTable.getValue<Poco::UInt16>(headerSize + serviceCount * serviceSize + 19, 13);
-//        LOG(dvb, trace, "pmt pid: " + Poco::NumberFormatter::format(pmtPid));
-//
-//        if (serviceId) {  // no NIT service
-//            Service* pService = new Dvb::Service(pTransponder, "", serviceId, pmtPid);
-//            pTransponder->addService(pService);
-//
-//            Stream* pPmt = new Stream(Stream::ProgramMapTable, pmtPid);
-//            _pDemux->selectStream(pPmt, Demux::TargetDemux, true);
-//            Poco::UInt8 pmtTableId = 0x02;
-//            _pDemux->setSectionFilter(pPmt, pmtTableId);
-//            _pDemux->runStream(pPmt, true);
-//            Section pmtTable(pmtTableId);
-//            try {
-//                pmtTable.read(pPmt, 5);
-//                LOG(dvb, debug, "pmt table length: " + Poco::NumberFormatter::format(pmtTable.length()));
-//                Poco::UInt16 programInfoLength = pmtTable.getValue<Poco::UInt16>(84, 12);
-//                LOG(dvb, trace, "program info length: " + Poco::NumberFormatter::format(programInfoLength));
-//                unsigned int headerSize = 96 + programInfoLength * 8;
-//                unsigned int totalStreamSectionSize = pmtTable.length() * 8 - headerSize - 4 * 8;
-//                unsigned int offset = 0;
-//                while (offset < totalStreamSectionSize) {
-//                    Poco::UInt8 streamType = pmtTable.getValue<Poco::UInt8>(headerSize + offset, 8);
-//                    LOG(dvb, trace, "stream type: " + Poco::NumberFormatter::format(streamType));
-//                    Poco::UInt16 streamPid = pmtTable.getValue<Poco::UInt16>(headerSize + offset + 11, 13);
-//                    LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(streamPid));
-//                    Poco::UInt16 esInfoLength = pmtTable.getValue<Poco::UInt16>(headerSize + offset + 28, 12);
-//                    LOG(dvb, trace, "es info length: " + Poco::NumberFormatter::format(esInfoLength));
-//                    offset += 40 + esInfoLength * 8;
-//
-//                    Stream* pStream = new Stream(Stream::streamTypeToString(streamType), streamPid);
-//                    pService->addStream(pStream);
-//                }
-//                pService->addStream(pPmt);
-//            }
-//            catch (Poco::TimeoutException& e) {
-//                LOG(dvb, error, "PMT table read timeout");
-//            }
-//            _pDemux->runStream(pPmt, false);
-//            _pDemux->unselectStream(pPmt);
-//        }
-//    }
-//    LOG(dvb, trace, "************** PAT/PMT finished **************");
-//
-//    Poco::UInt16 sdtPid = 0x11;
-//    Stream* pSdt = new Stream(Stream::Other, sdtPid);
-//    _pDemux->selectStream(pSdt, Demux::TargetDemux, true);
-//    Poco::UInt8 sdtTableId = 0x42;
-//    _pDemux->setSectionFilter(pSdt, sdtTableId);
-//    _pDemux->runStream(pSdt, true);
-//    Section sdtTable(sdtTableId);
-//    try {
-//        sdtTable.read(pSdt, 5);
-//        unsigned int sdtHeaderSize = 88;
-//        unsigned int totalSdtSectionSize = sdtTable.length() * 8 - sdtHeaderSize - 4 * 8;
-//        unsigned int sdtOffset = 0;
-//        while (sdtOffset < totalSdtSectionSize) {
-//            LOG(dvb, trace, "************** SDT (Service) **************");
-//
-//            Poco::UInt16 sdtServiceId = sdtTable.getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset, 16);
-//            LOG(dvb, trace, "std service id: " + Poco::NumberFormatter::format(sdtServiceId));
-//            Poco::UInt8 runningStatus = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 24, 3);
-//            LOG(dvb, trace, "sdt running status: " + Poco::NumberFormatter::format(runningStatus));
-//            Poco::UInt8 scrambled = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 27, 1);
-//            LOG(dvb, trace, "sdt scrambled: " + Poco::NumberFormatter::format(scrambled));
-//            Poco::UInt16 sdtInfoLength = sdtTable.getValue<Poco::UInt16>(sdtHeaderSize + sdtOffset + 28, 12);
-//    //        LOG(dvb, trace, "sdt descriptor total length: " + Poco::NumberFormatter::format(sdtInfoLength));
-//            Poco::UInt8 descId = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 40, 8);
-//    //        LOG(dvb, trace, "sdt descriptor tag: " + Poco::NumberFormatter::format(descId));
-//            Poco::UInt8 descLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 48, 8);
-//    //        LOG(dvb, trace, "sdt descriptor length: " + Poco::NumberFormatter::format(descLength));
-//            Poco::UInt8 descType = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 56, 8);
-//            LOG(dvb, trace, "sdt descriptor type: " + Poco::NumberFormatter::format(descType));
-//            Poco::UInt8 descProvNameLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 64, 8);
-//    //        LOG(dvb, trace, "sdt descriptor provider name length: " + Poco::NumberFormatter::format(descProvNameLength));
-//            std::string providerName((char*)(sdtTable.getData()) + (sdtHeaderSize + sdtOffset + 72) / 8, descProvNameLength);
-//            LOG(dvb, trace, "sdt provider name: " + providerName);
-//            Poco::UInt8 descServiceNameLength = sdtTable.getValue<Poco::UInt8>(sdtHeaderSize + sdtOffset + 72 + descProvNameLength * 8, 8);
-//    //        LOG(dvb, trace, "sdt descriptor service name length: " + Poco::NumberFormatter::format(descServiceNameLength));
-//            std::string serviceName((char*)(sdtTable.getData()) + (sdtHeaderSize + sdtOffset + 80 + descProvNameLength * 8) / 8, descServiceNameLength);
-//            LOG(dvb, trace, "sdt service name: " + serviceName);
-//
-//            Service* pService = pTransponder->getService(sdtServiceId);
-//            if (pService) {
-////                pService->_name = trim(serviceName);
-//                pService->_name = filter(serviceName);
-//            }
-//
-//            sdtOffset += 40 + sdtInfoLength * 8;
-//        }
-//    }
-//    catch (Poco::TimeoutException& e) {
-//        LOG(dvb, error, "SDT table read timeout");
-//    }
-//    _pDemux->runStream(pSdt, false);
-//    _pDemux->unselectStream(pSdt);
-//
-//    LOG(dvb, trace, "************** NIT **************");
-//    Poco::UInt16 nitPid = 0x10;
-//    Stream* pNit = new Stream(Stream::Other, nitPid);
-//    _pDemux->selectStream(pNit, Demux::TargetDemux, true);
-////            Poco::UInt8 nitTableId = 0x40;
-//    Poco::UInt8 nitTableId = 0x41;
-//    _pDemux->setSectionFilter(pNit, nitTableId);
-//    _pDemux->runStream(pNit, true);
-//    Section nitTable(nitTableId);
-//    std::vector<Transponder*> additionalTransponders;
-//    try {
-//        nitTable.read(pNit, 15);
-//        LOG(dvb, trace, "nit table length: " + Poco::NumberFormatter::format(nitTable.length()));
-//        Poco::UInt16 networkId = nitTable.getValue<Poco::UInt16>(24, 16);
-//        LOG(dvb, trace, "network id: " + Poco::NumberFormatter::format(networkId));
-//        Poco::UInt16 networkDescriptorsLength = nitTable.getValue<Poco::UInt16>(68, 12);
-////        LOG(dvb, trace, "network descriptors length: " + Poco::NumberFormatter::format(networkDescriptorsLength));
-//        unsigned int head = 80;
-//        unsigned int byteOffset = 0;
-//        while (byteOffset < networkDescriptorsLength) {
-//            Descriptor* pDescriptor = Descriptor::createDescriptor(nitTable.getData(10 + byteOffset));
-//            if (NetworkNameDescriptor* pd = dynamic_cast<NetworkNameDescriptor*>(pDescriptor)) {
-//                std::string networkName = pd->getNetworkName();
-//                LOG(dvb, trace, "network name: " + networkName);
-//            }
-//            if (pDescriptor) {
-//                byteOffset += pDescriptor->getDescriptorLength();
-//            }
-//            else {
-//                break;
-//            }
-//        }
-//        Poco::UInt16 transportStreamLoopLength = nitTable.getValue<Poco::UInt16>(head + networkDescriptorsLength * 8 + 4, 12);
-////        LOG(dvb, trace, "transport stream loop length: " + Poco::NumberFormatter::format(transportStreamLoopLength));
-//        head = head + networkDescriptorsLength * 8 + 16;
-//        byteOffset = 0;
-//        while (byteOffset < transportStreamLoopLength) {
-//            Poco::UInt16 transportStreamId = nitTable.getValue<Poco::UInt16>(head + byteOffset * 8, 16);
-//            LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(transportStreamId));
-//            Poco::UInt16 originalNetworkId = nitTable.getValue<Poco::UInt16>(head + byteOffset * 8 + 16, 16);
-//            LOG(dvb, trace, "originial network id: " + Poco::NumberFormatter::format(originalNetworkId));
-//            Poco::UInt16 transportDescriptorsLength = nitTable.getValue<Poco::UInt16>(head + byteOffset * 8 + 36, 12);
-////            LOG(dvb, trace, "transport descriptors length: " + Poco::NumberFormatter::format(transportDescriptorsLength));
-//
-//            unsigned int tHead = head + byteOffset * 8 + 48;
-//            unsigned int tByteOffset = 0;
-//            while (tByteOffset < transportDescriptorsLength) {
-//                Descriptor* pDescriptor = Descriptor::createDescriptor(nitTable.getData(tHead / 8 + tByteOffset));
-//                if (ServiceListDescriptor* pd = dynamic_cast<ServiceListDescriptor*>(pDescriptor)) {
-//                    LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pd->serviceCount()));
-//                    for (int i = 0; i < pd->serviceCount(); i++) {
-//                        LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pd->serviceId(i)));
-//                    }
-//                }
-//                else if (SatelliteDeliverySystemDescriptor* pD = dynamic_cast<SatelliteDeliverySystemDescriptor*>(pDescriptor)) {
-//                    LOG(dvb, trace, "frequency[kHz]: " + Poco::NumberFormatter::format(pD->frequency()));
-//                    SatTransponder* pT = new SatTransponder(this, pD->frequency(), transportStreamId);
-//                    pT->init(0, pD->symbolRate(), pD->polarization());
-//                    additionalTransponders.push_back(pT);
-//                }
-//                else if (TerrestrialDeliverySystemDescriptor* pD = dynamic_cast<TerrestrialDeliverySystemDescriptor*>(pDescriptor)) {
-//                    LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency()));
-//                }
-//                else if (FrequencyListDescriptor* pD = dynamic_cast<FrequencyListDescriptor*>(pDescriptor)) {
-//                    for (int i = 0; i < pD->centreFrequencyCount(); i++) {
-//                        LOG(dvb, trace, "centre frequency[Hz]: " + Poco::NumberFormatter::format(pD->centreFrequency(i)));
-//                    }
-//                }
-//                if (pDescriptor) {
-//                    tByteOffset += pDescriptor->getDescriptorLength();
-//                }
-//                else {
-//                    break;
-//                }
-//            }
-//
-//            byteOffset += transportDescriptorsLength + 6;
-//        }
-//    }
-//    catch (Poco::TimeoutException& e) {
-//        LOG(dvb, error, "NIT table read timeout");
-//    }
-//    _pDemux->runStream(pNit, false);
-//    _pDemux->unselectStream(pNit);
-//
-//    for (std::vector<Transponder*>::iterator it = additionalTransponders.begin(); it != additionalTransponders.end(); ++it) {
-//
-////        bool alreadyScanned = false;
-////        for (std::vector<Transponder*>::iterator tit = _scannedTransponders.begin(); tit != _scannedTransponders.end(); ++tit) {
-////            if ((*it)->_tid == (*tit)->_tid) {
-////                alreadyScanned = true;
-////                break;
-////            }
-////        }
-////        if (alreadyScanned) {
-////            continue;
-////        }
-//
-//        std::map<unsigned int, Transponder*>::iterator pos = _scannedTransponders.find((*it)->_transportStreamId);
-//        if (pos == _scannedTransponders.end()) {
-//            LOG(dvb, debug, "************** scan new transport stream with id: " + Poco::NumberFormatter::format((*it)->_transportStreamId) + ", freq: " + Poco::NumberFormatter::format((*it)->_frequency));
-//            _scannedTransponders[(*it)->_transportStreamId] = *it;
-//            if (tune(*it)) {
-//                scanTransponder(*it);
-//                _transponders.push_back(*it);
-//            }
-//        }
-//        else {
-//            LOG(dvb, debug, "************** transport stream with id already scanned: " + Poco::NumberFormatter::format((*it)->_transportStreamId) + ", freq: " + Poco::NumberFormatter::format((*it)->_frequency));
-//        }
-//    }
-//}
-
-
-//std::string
-//Frontend::trim(const std::string& str)
-//	/// Returns a copy of str with all leading and
-//	/// trailing whitespace removed.
-//{
-//	int first = 0;
-//	int last  = int(str.size()) - 1;
-//
-//	while (first <= last && std::iscntrl(str[first])) ++first;
-//	while (last >= first && std::iscntrl(str[last])) --last;
-//
-//	return std::string(str, first, last - first + 1);
-//}
-
-
-//std::string
-//Frontend::filter(const std::string& str)
-//{
-//    std::string res(str);
-//    for (int i = 0; i < res.length(); i++) {
-//        if (!std::isprint(res[i])) {
-//            res[i] = ' ';
-//        }
-//    }
-//    return Poco::trim(res);
-//}
 
 
 Lnb::Lnb(const std::string& desc, unsigned long lowVal, unsigned long highVal, unsigned long switchVal) :
