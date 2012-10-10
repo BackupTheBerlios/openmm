@@ -952,7 +952,21 @@ TerrestrialFrontend::tune(Transponder* pTransponder)
 {
     LOG(dvb, debug, "terrestrial frontend tuning to transponder with frequency: " + Poco::NumberFormatter::format(pTransponder->_frequency) + " ...");
 
-    TerrestrialTransponder* pTrans = static_cast<TerrestrialTransponder*>(pTransponder);
+    TerrestrialTransponder* pTrans = dynamic_cast<TerrestrialTransponder*>(pTransponder);
+    if (!pTrans) {
+        LOG(dvb, error, "terrestrial frontend cannot tune to non-terrestrial transponder");
+        return false;
+    }
+
+    LOG(dvb, trace, "terrestrial transponder parameters: " +
+            Poco::NumberFormatter::format(pTrans->_bandwidth) + ", " +
+            Poco::NumberFormatter::format(pTrans->_code_rate_HP) + ", " +
+            Poco::NumberFormatter::format(pTrans->_code_rate_LP) + ", " +
+            Poco::NumberFormatter::format(pTrans->_constellation) + ", " +
+            Poco::NumberFormatter::format(pTrans->_transmission_mode) + ", " +
+            Poco::NumberFormatter::format(pTrans->_guard_interval) + ", " +
+            Poco::NumberFormatter::format(pTrans->_hierarchy_information));
+
     struct dvb_frontend_parameters tuneto;
 
     tuneto.frequency = pTrans->_frequency;

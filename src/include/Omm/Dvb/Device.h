@@ -120,6 +120,8 @@ private:
     ~Device();
 
     void initServiceMap();
+    void clearServiceMap();
+    void clearAdapters();
 
     static Device*                                      _pInstance;
 

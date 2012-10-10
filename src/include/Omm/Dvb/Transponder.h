@@ -66,6 +66,7 @@ public:
     void addService(Service* pService);
     Service* getService(unsigned int serviceId);
     Service* getService(const std::string& serviceName);
+    unsigned int getFrequency();
 
     virtual void readXml(Poco::XML::Node* pXmlTransponder);
     virtual void writeXml(Poco::XML::Element* pFrontend);

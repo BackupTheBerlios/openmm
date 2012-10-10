@@ -79,6 +79,13 @@ Transponder::getService(unsigned int serviceId)
 }
 
 
+unsigned int
+Transponder::getFrequency()
+{
+    return _frequency;
+}
+
+
 Service*
 Transponder::getService(const std::string& serviceName)
 {

@@ -246,9 +246,11 @@ Device::serviceEnd()
 void
 Device::open()
 {
+    LOG(dvb, debug, "device open ...");
     for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
         (*it)->openAdapter();
     }
+    LOG(dvb, debug, "device open finished.");
 }
 
 
@@ -265,6 +267,8 @@ void
 Device::readXml(std::istream& istream)
 {
     LOG(dvb, debug, "read device ...");
+
+    clearAdapters();
 
     Poco::AutoPtr<Poco::XML::Document> pXmlDoc = new Poco::XML::Document;
     Poco::XML::InputSource xmlFile(istream);
@@ -494,16 +498,37 @@ Device::blockDvrDevice()
 void
 Device::initServiceMap()
 {
+    LOG(dvb, debug, "init service map ...");
+    clearServiceMap();
+
     for (std::vector<Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
         for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
             for (std::vector<Transponder*>::iterator tit = (*fit)->_transponders.begin(); tit != (*fit)->_transponders.end(); ++tit) {
                 for (std::vector<Service*>::iterator sit = (*tit)->_services.begin(); sit != (*tit)->_services.end(); ++sit) {
-//                    _serviceMap[(*sit)->_name].push_back(*tit);
                     _serviceMap[(*sit)->getName()].push_back(*tit);
+//                    LOG(dvb, trace, (*sit)->getName() + " service map has " + Poco::NumberFormatter::format(_serviceMap[(*sit)->getName()].size()) + " transponders");
+//                    LOG(dvb, trace, "first transponder has freq: " + Poco::NumberFormatter::format(_serviceMap[(*sit)->getName()][0]->getFrequency()));
                 }
             }
         }
     }
+    LOG(dvb, debug, "init service map finished.");
+}
+
+
+void
+Device::clearServiceMap()
+{
+    // TODO: delete whole adapter tree
+    _serviceMap.clear();
+}
+
+
+void
+Device::clearAdapters()
+{
+    // TODO: delete whole adapter tree
+    _adapters.clear();
 }
 
 
