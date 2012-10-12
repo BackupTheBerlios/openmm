@@ -53,6 +53,15 @@ public:
 };
 
 
+class ServiceDescriptor : public Descriptor
+{
+public:
+    Poco::UInt8 serviceType();
+    std::string providerName();
+    std::string serviceName();
+};
+
+
 class ServiceListDescriptor : public Descriptor
 {
 public:

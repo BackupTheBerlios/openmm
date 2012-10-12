@@ -51,7 +51,33 @@ class Service
     friend class Demux;
 
 public:
+    static const std::string TypeDigitalTelevision;
+    static const std::string TypeDigitalRadioSound;
+    static const std::string TypeTeletext;
+    static const std::string TypeNvodReference;
+    static const std::string TypeNodTimeShifted;
+    static const std::string TypeMosaic;
+    static const std::string TypeFmRadio;
+    static const std::string TypeDvbSrm;
+    static const std::string TypeAdvancedCodecDigitalRadioSound;
+    static const std::string TypeAdvancedCodecMosaic;
+    static const std::string TypeDataBroadcastService;
+    static const std::string TypeRcsMap;
+    static const std::string TypeRcsFls;
+    static const std::string TypeDvbMhp;
+    static const std::string TypeMpeg2HdDigitalTelevision;
+    static const std::string TypeAdvancedCodecSdDigitalTelevision;
+    static const std::string TypeAdvancedCodecSdNvodTimeShifted;
+    static const std::string TypeAdvancedCodecSdNvodReference;
+    static const std::string TypeAdvancedCodecHdDigitalTelevision;
+    static const std::string TypeAdvancedCodecHdNvodTimeShifted;
+    static const std::string TypeAdvancedCodecHdNvodReference;
+    static const std::string TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision;
+    static const std::string TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted;
+    static const std::string TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference;
+
     static const unsigned int InvalidPcrPid;
+
     static const std::string StatusUndefined;
     static const std::string StatusNotRunning;
     static const std::string StatusStartsShortly;
@@ -59,22 +85,27 @@ public:
     static const std::string StatusRunning;
     static const std::string StatusOffAir;
 
-//    Service(const std::string& name, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int pmtid);
     Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid);
 
     void addStream(Stream* pStream);
     void readXml(Poco::XML::Node* pXmlService);
     void writeXml(Poco::XML::Element* pTransponder);
 
+    std::string getType();
+    bool isAudio();
+    bool isSdVideo();
+    bool isHdVideo();
     std::string getName();
     std::string getStatus();
     bool getScrambled();
     Transponder* getTransponder();
 
+    static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);
 
 private:
     Transponder*                _pTransponder;
+    std::string                 _type;
     std::string                 _providerName;
     std::string                 _name;
     unsigned int                _sid;

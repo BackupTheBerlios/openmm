@@ -55,6 +55,10 @@ Descriptor::createDescriptor(void* data)
             LOG(dvb, debug, "create satellite delivery system descriptor");
             pRes = new SatelliteDeliverySystemDescriptor;
             break;
+        case 0x48:
+            LOG(dvb, debug, "create service descriptor");
+            pRes = new ServiceDescriptor;
+            break;
         case 0x5A:
             LOG(dvb, debug, "create terrestrial delivery system descriptor");
             pRes = new TerrestrialDeliverySystemDescriptor;
@@ -111,6 +115,30 @@ std::string
 NetworkNameDescriptor::getNetworkName()
 {
     return std::string((char*)content(), getContentLength());
+}
+
+
+Poco::UInt8
+ServiceDescriptor::serviceType()
+{
+    return *((Poco::UInt8*)content());
+}
+
+
+std::string
+ServiceDescriptor::providerName()
+{
+    Poco::UInt8 providerNameLength = *((Poco::UInt8*)content() + 1);
+    return filter(std::string((char*)content() + 2, providerNameLength));
+}
+
+
+std::string
+ServiceDescriptor::serviceName()
+{
+    Poco::UInt8 providerNameLength = *((Poco::UInt8*)content() + 1);
+    Poco::UInt8 serviceNameLength = *((Poco::UInt8*)content() + 2 + providerNameLength);
+    return filter(std::string((char*)content() + 3 + providerNameLength, serviceNameLength));
 }
 
 

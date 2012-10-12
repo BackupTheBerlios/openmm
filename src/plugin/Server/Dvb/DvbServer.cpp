@@ -94,7 +94,9 @@ DvbModel::scan()
         for (int i = 0; i < it->second.size(); i++) {
 //            LOGNS(Omm::Dvb, trace, debug, "add transponder with freq: " + Poco::NumberFormatter::format(it->second[i]->getFrequency()));
             Omm::Dvb::Service* pService = it->second[i]->getService(it->first);
-            if (pService && pService->getStatus() == Omm::Dvb::Service::StatusRunning && !pService->getScrambled()) {
+            if (pService && pService->getStatus() == Omm::Dvb::Service::StatusRunning
+                    && !pService->getScrambled()
+                    && (pService->isAudio() || pService->isSdVideo())) {
                 // there is one transponder that can receive the service unscrambled
                 addPath(it->first);
                 break;
@@ -117,7 +119,16 @@ DvbModel::scan()
 std::string
 DvbModel::getClass(const std::string& path)
 {
-    return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_BROADCAST);
+    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getTransponder(path)->getService(path);
+    if (pService->isAudio()) {
+        return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_BROADCAST);
+    }
+    else if (pService->isSdVideo() || pService->isHdVideo()) {
+        return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::VIDEO_BROADCAST);
+    }
+    else {
+        return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM);
+    }
 }
 
 
@@ -152,13 +163,23 @@ DvbModel::freeStream(std::istream* pIstream)
 std::string
 DvbModel::getMime(const std::string& path)
 {
-    return "video/mpeg";
+    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getTransponder(path)->getService(path);
+    if (pService->isAudio()) {
+        return Omm::Av::Mime::AUDIO_MPEG;
+    }
+    else if (pService->isSdVideo() || pService->isHdVideo()) {
+        return Omm::Av::Mime::VIDEO_MPEG;
+    }
+    else {
+        return "";
+    }
 }
 
 
 std::string
 DvbModel::getDlna(const std::string& path)
 {
+    // TODO: add DLNA string for mpeg audio streams
     return "DLNA.ORG_PN=MPEG_PS_PAL";
 }
 

@@ -145,19 +145,14 @@ public:
     Poco::UInt16 serviceId(unsigned int serviceIndex);
     std::string runningStatus(unsigned int serviceIndex);
     bool scrambled(unsigned int serviceIndex);
-    std::string providerName(unsigned int serviceIndex);
-    std::string serviceName(unsigned int serviceIndex);
-//    unsigned int serviceDescriptorCount();
-//    Descriptor* serviceDescriptor(int serviceIndex);
+    unsigned int serviceDescriptorCount(unsigned int serviceIndex);
+    Descriptor* serviceDescriptor(unsigned int serviceIndex, int serviceDescriptorIndex);
 
 private:
-    std::vector<Poco::UInt16>           _serviceIds;
-    std::vector<Poco::UInt8>            _serviceRunningStatus;
-    std::vector<bool>                   _serviceScrambled;
-    std::vector<std::string>            _serviceProviderName;
-    std::vector<std::string>            _serviceName;
-    std::vector<unsigned int>           _serviceDescriptorCount;
-    std::vector<Descriptor*>            _serviceDescriptors;
+    std::vector<Poco::UInt16>                   _serviceIds;
+    std::vector<Poco::UInt8>                    _serviceRunningStatus;
+    std::vector<bool>                           _serviceScrambled;
+    std::vector<std::vector<Descriptor*> >      _serviceDescriptors;
 };
 
 

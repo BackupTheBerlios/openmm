@@ -557,15 +557,21 @@ Frontend::scanSdt(Transponder* pTransponder)
             SdtSection* pS = static_cast<SdtSection*>(sdtTab.getSection(s));
             for (int serviceIndex = 0; serviceIndex < pS->serviceCount(); serviceIndex++) {
                 LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pS->serviceId(serviceIndex)) +
-                            ", service name: " + pS->serviceName(serviceIndex) +
                             ", running status: " + pS->runningStatus(serviceIndex) +
                             ", scrambled: " + Poco::NumberFormatter::format(pS->scrambled(serviceIndex)));
                 Service* pService = pTransponder->getService(pS->serviceId(serviceIndex));
                 if (pService) {
-                    pService->_providerName = pS->providerName(serviceIndex);
-                    pService->_name = pS->serviceName(serviceIndex);
                     pService->_status = pS->runningStatus(serviceIndex);
                     pService->_scrambled = pS->scrambled(serviceIndex);
+                    for (unsigned int d = 0; d < pS->serviceDescriptorCount(serviceIndex); d++) {
+                        Descriptor* pDescriptor = pS->serviceDescriptor(serviceIndex, d);
+                        if (ServiceDescriptor* pD = dynamic_cast<ServiceDescriptor*>(pDescriptor)) {
+                            pService->_type = Service::typeToString(pD->serviceType());
+                            pService->_providerName = pD->providerName();
+                            pService->_name = pD->serviceName();
+                            LOG(dvb, trace, "service name: " + pService->_name);
+                        }
+                    }
                 }
             }
         }

@@ -47,18 +47,34 @@
 namespace Omm {
 namespace Dvb {
 
-//Service::Service(const std::string& name, unsigned int vpid, unsigned int cpid, unsigned int apid, int sid, unsigned int tid, unsigned int pmtid) :
-//_name(name),
-//_vpid(vpid),
-//_cpid(cpid),
-//_apid(apid),
-//_sid(sid),
-//_tid(tid),
-//_pmtid(pmtid)
-//{
-//}
+
+const std::string Service::TypeDigitalTelevision("DigitalTelevision");
+const std::string Service::TypeDigitalRadioSound("DigitalRadioSound");
+const std::string Service::TypeTeletext("Teletext");
+const std::string Service::TypeNvodReference("NvodReference");
+const std::string Service::TypeNodTimeShifted("NodTimeShifted");
+const std::string Service::TypeMosaic("Mosaic");
+const std::string Service::TypeFmRadio("FmRadio");
+const std::string Service::TypeDvbSrm("DvbSrm");
+const std::string Service::TypeAdvancedCodecDigitalRadioSound("AdvancedCodecDigitalRadioSound");
+const std::string Service::TypeAdvancedCodecMosaic("AdvancedCodecMosaic");
+const std::string Service::TypeDataBroadcastService("DataBroadcastService");
+const std::string Service::TypeRcsMap("RcsMap");
+const std::string Service::TypeRcsFls("RcsFls");
+const std::string Service::TypeDvbMhp("DvbMhp");
+const std::string Service::TypeMpeg2HdDigitalTelevision("Mpeg2HdDigitalTelevision");
+const std::string Service::TypeAdvancedCodecSdDigitalTelevision("AdvancedCodecSdDigitalTelevision");
+const std::string Service::TypeAdvancedCodecSdNvodTimeShifted("AdvancedCodecSdNvodTimeShifted");
+const std::string Service::TypeAdvancedCodecSdNvodReference("AdvancedCodecSdNvodReference");
+const std::string Service::TypeAdvancedCodecHdDigitalTelevision("AdvancedCodecHdDigitalTelevision");
+const std::string Service::TypeAdvancedCodecHdNvodTimeShifted("AdvancedCodecHdNvodTimeShifted");
+const std::string Service::TypeAdvancedCodecHdNvodReference("AdvancedCodecHdNvodReference");
+const std::string Service::TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision("TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision");
+const std::string Service::TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted("TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted");
+const std::string Service::TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference("TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference");
 
 const unsigned int Service::InvalidPcrPid(0);
+
 const std::string Service::StatusUndefined("Undefined");
 const std::string Service::StatusNotRunning("NotRunning");
 const std::string Service::StatusStartsShortly("StartsShortly");
@@ -117,6 +133,24 @@ Service::readXml(Poco::XML::Node* pXmlService)
                     _scrambled = pVal->innerText() == "true" ? true : false;
                 }
             }
+            else if (pXmlParam->nodeName() == "providerName") {
+                Poco::XML::Node* pVal = pXmlParam->firstChild();
+                if (!pVal) {
+                    LOG(dvb, error, "dvb service providerName has no value");
+                }
+                else {
+                    _providerName = pVal->innerText();
+                }
+            }
+            else if (pXmlParam->nodeName() == "type") {
+                Poco::XML::Node* pVal = pXmlParam->firstChild();
+                if (!pVal) {
+                    LOG(dvb, error, "dvb service type has no value");
+                }
+                else {
+                    _type = pVal->innerText();
+                }
+            }
             pXmlParam = pXmlParam->nextSibling();
         }
     }
@@ -156,7 +190,45 @@ Service::writeXml(Poco::XML::Element* pTransponder)
     pScrambled->appendChild(pScrambledVal);
     pService->appendChild(pScrambled);
 
+    Poco::AutoPtr<Poco::XML::Element> pProviderName = pDoc->createElement("providerName");
+    Poco::AutoPtr<Poco::XML::Text> pProviderNameVal = pDoc->createTextNode(_providerName);
+    pProviderName->appendChild(pProviderNameVal);
+    pService->appendChild(pProviderName);
+
+    Poco::AutoPtr<Poco::XML::Element> pType = pDoc->createElement("type");
+    Poco::AutoPtr<Poco::XML::Text> pTypeVal = pDoc->createTextNode(_type);
+    pType->appendChild(pTypeVal);
+    pService->appendChild(pType);
+
     LOG(dvb, debug, "wrote service.");
+}
+
+
+std::string
+Service::getType()
+{
+    return _type;
+}
+
+
+bool
+Service::isAudio()
+{
+    return (_type == TypeDigitalRadioSound || _type == TypeFmRadio || _type == TypeAdvancedCodecDigitalRadioSound);
+}
+
+
+bool
+Service::isSdVideo()
+{
+    return (_type == TypeDigitalTelevision || _type == TypeAdvancedCodecSdDigitalTelevision);
+}
+
+
+bool
+Service::isHdVideo()
+{
+    return (_type == TypeMpeg2HdDigitalTelevision || _type == TypeAdvancedCodecHdDigitalTelevision);
 }
 
 
@@ -192,6 +264,63 @@ Service::getTransponder()
     return _pTransponder;
 }
 
+
+std::string
+Service::typeToString(Poco::UInt8 status)
+{
+    switch (status) {
+        case 0x01:
+            return TypeDigitalTelevision;
+        case 0x02:
+            return TypeDigitalRadioSound;
+        case 0x03:
+            return TypeTeletext;
+        case 0x04:
+            return TypeNvodReference;
+        case 0x05:
+            return TypeNodTimeShifted;
+        case 0x06:
+            return TypeMosaic;
+        case 0x07:
+            return TypeFmRadio;
+        case 0x08:
+            return TypeDvbSrm;
+        case 0x0A:
+            return TypeAdvancedCodecDigitalRadioSound;
+        case 0x0B:
+            return TypeAdvancedCodecMosaic;
+        case 0x0C:
+            return TypeDataBroadcastService;
+        case 0x0E:
+            return TypeRcsMap;
+        case 0x0F:
+            return TypeRcsFls;
+        case 0x10:
+            return TypeDvbMhp;
+        case 0x11:
+            return TypeMpeg2HdDigitalTelevision;
+        case 0x16:
+            return TypeAdvancedCodecSdDigitalTelevision;
+        case 0x17:
+            return TypeAdvancedCodecSdNvodTimeShifted;
+        case 0x18:
+            return TypeAdvancedCodecSdNvodReference;
+        case 0x19:
+            return TypeAdvancedCodecHdDigitalTelevision;
+        case 0x1A:
+            return TypeAdvancedCodecHdNvodTimeShifted;
+        case 0x1B:
+            return TypeAdvancedCodecHdNvodReference;
+        case 0x1C:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision;
+        case 0x1D:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted;
+        case 0x1E:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference;
+        default:
+            return "";
+    }
+}
 
 
 std::string
