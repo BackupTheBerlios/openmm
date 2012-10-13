@@ -50,6 +50,7 @@ const QString LoganLogger::CHAN_PLUGIN = "PLUGIN";
 const QString LoganLogger::CHAN_NET = "NET";
 const QString LoganLogger::CHAN_SYS = "SYS";
 const QString LoganLogger::CHAN_GUI = "GUI";
+const QString LoganLogger::CHAN_DVB = "DVB";
 
 
 LoganFileWatcher::LoganFileWatcher() :
@@ -181,6 +182,7 @@ LoganLogger::init()
     _logWidget.channelSelector->addItem(CHAN_NET);
     _logWidget.channelSelector->addItem(CHAN_SYS);
     _logWidget.channelSelector->addItem(CHAN_GUI);
+    _logWidget.channelSelector->addItem(CHAN_DVB);
 
     connect(_pMonitor, SIGNAL(newLine(const QString&)), this, SLOT(newLine(const QString&)));
     connect(_pMonitor, SIGNAL(fileClosed()), this, SLOT(clear()));

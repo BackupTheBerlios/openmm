@@ -35,8 +35,8 @@ Dvr::Dvr(Adapter* pAdapter, int num) :
 _pAdapter(pAdapter),
 _num(num),
 _pDvrStream(0),
-//_useByteQueue(true),
-_useByteQueue(false),
+_useByteQueue(true),
+//_useByteQueue(false),
 _fileDescDvr(-1),
 _byteQueue(100*1024),
 _bufferSize(50*1024),
@@ -81,9 +81,9 @@ Dvr::openDvr(bool blocking)
             LOG(dvb, error, "failed to open dvb rec stream.");
             return;
         }
-//        if (_useByteQueue) {
-//            startReadThread();
-//        }
+        if (_useByteQueue) {
+            startReadThread();
+        }
     }
 }
 
@@ -93,7 +93,9 @@ Dvr::closeDvr()
 {
     LOG(dvb, debug, "closing dvb rec device.");
 
-//    stopReadThread();
+    if (_useByteQueue) {
+        stopReadThread();
+    }
     if (_pDvrStream) {
         delete _pDvrStream;
         _pDvrStream = 0;
@@ -210,7 +212,7 @@ Dvr::readThread()
                     _byteQueue.write(buf, len);
                 }
                 else if (len < 0) {
-                    LOG(dvb, error, "dvr read thread failed to read from device");
+                    LOG(dvb, error, std::string("dvr read thread failed to read from device: ") + strerror(errno));
                     break;
                 }
             }

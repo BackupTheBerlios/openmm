@@ -44,11 +44,11 @@ signals:
 private slots:
     void fileChanged(const QString& path);
     void directoryChanged(const QString& path);
-    
+
 private:
     void openFile();
     void closeFile();
-    
+
     QFileSystemWatcher      _fileSystemWatcher;
     QFileInfo               _fileInfo;
     QFile                   _file;
@@ -59,7 +59,7 @@ private:
 class LoganLogger : public QWidget
 {
     Q_OBJECT
-  
+
 public:
     LoganLogger(LoganFileWatcher* pMonitor, QWidget* parent = 0);
     ~LoganLogger();
@@ -77,7 +77,7 @@ private slots:
     void searchBackwards();
     void searchForwards();
     void channelChanged(const QString& chan);
-  
+
 private:
     enum LogLevel {LEVEL_NONE, TRACE, DEBUG, INFO, NOTICE, WARN, ERROR, CRITICAL, FATAL};
 
@@ -105,6 +105,7 @@ private:
     const static QString CHAN_NET;
     const static QString CHAN_SYS;
     const static QString CHAN_GUI;
+    const static QString CHAN_DVB;
 
     void getDebugLevelPosition(const QString& line);
     void getIsLogEntry(const QString& line);

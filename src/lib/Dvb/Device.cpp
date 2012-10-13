@@ -191,11 +191,11 @@ Device* Device::_pInstance = 0;
 
 Device::Device() :
 _useDvrDevice(true),
-//_blockDvrDevice(false),
-_blockDvrDevice(true),
+_blockDvrDevice(false)
+//_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
 //_reopenDvrDevice(true)
-_reopenDvrDevice(false)
+//_reopenDvrDevice(false)
 // renderer in same process as dvb server: reopenDvrDevice = true then dvr device busy, reopenDvrDevice = false then stream sometimes broken
 // renderer in different process as dvb server: reopenDvrDevice = true ok, reopenDvrDevice = false then stream sometimes broken
 {
@@ -251,6 +251,17 @@ Device::open()
         (*it)->openAdapter();
     }
     LOG(dvb, debug, "device open finished.");
+}
+
+
+void
+Device::close()
+{
+    LOG(dvb, debug, "device close ...");
+    for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        (*it)->closeAdapter();
+    }
+    LOG(dvb, debug, "device close finished.");
 }
 
 
@@ -344,35 +355,6 @@ Device::addAdapter(Adapter* pAdapter)
 }
 
 
-//bool
-//Device::tune(Transponder* pTransponder)
-//{
-//    LOG(dvb, debug, "start tuning ...");
-//
-//    if (_adapters.size() == 0) {
-//        LOG(dvb, error, "no adapter found, tuning aborted.");
-//        return false;
-//    }
-////    if (!_adapters[0]->_pFrontend) {
-////        LOG(dvb, error, "no frontend found, tuning aborted.");
-////        return false;
-////    }
-//    if (_adapters[0]->_frontends.size() == 0) {
-//        LOG(dvb, error, "no frontend found, tuning aborted.");
-//        return false;
-//    }
-//    return _adapters[0]->_frontends[0]->tune(pTransponder);
-//}
-
-
-//void
-//Device::stopTune()
-//{
-//    _adapters[0]->_frontends[0]->stopTune();
-//    LOG(dvb, debug, "stopped tuning.");
-//}
-
-
 Transponder*
 Device::getTransponder(const std::string& serviceName)
 {
@@ -394,17 +376,18 @@ Device::getTransponder(const std::string& serviceName)
     //        playing a new stream, it could take a while until reading of stream
     //        is stopped, too (stop() and play() are typically async calls into
     //        the engine).
-    //        DvbModel needs a way to interrupt current stream and close file
-    //        handles.
-    //        UPDATE: this only happens when renderer and dvb server run in the
-    //        same process.
+    //        DvbModel needs a way to interrupt current stream and close file handles.
+    //        UPDATE: this only happens when renderer and dvb server run in the same process.
     //        UPDATE: man(2) close:
-    //        It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
-    //        same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
-    //        tended side effects.
-    //        UPDATE: as long as the same thread accesses the device, it is not busy. This happens, if the http request is
-    //        run in the same thread as the previous http request. Correction: even in same thread, dvr device cannot be
-    //        opened ("Device or resource busy").
+    //                It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
+    //                same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
+    //                tended side effects.
+    //        UPDATE: Even if the http request is run in the same thread as the previous http request, dvr device cannot be
+    //                opened ("Device or resource busy").
+    //        UPDATE: when run in main thread (test/tunedvb), opening and closing dvr works
+    //        UPDATE: when not run in main thread and dvr device is kept open, streams sometimes seam to be corrupt, but are not!
+    //                this is a vlc problem: recording the muxed transport streams can be played with mplayer and ts analysis with
+    //                dvbsnoop shows correct transport stream container.
 
 std::istream*
 Device::getStream(const std::string& serviceName)
@@ -426,29 +409,11 @@ Device::getStream(const std::string& serviceName)
     LOG(dvb, debug, "reading from dvr device ...");
     // TODO: return stream from Service (which gets it from own muxer)
     Dvr* pDvr = pFrontend->_pDvr;
+    pDvr->openDvr(blockDvrDevice());
     std::istream* pStream = pDvr->getStream();
     _streamMap[pStream] = pService;
     return pStream;
 }
-
-
-//std::istream*
-//Device::getStream()
-//{
-//    if (_useDvrDevice && _reopenDvrDevice) {
-//        _adapters[0]->getDvr()->openDvr(_blockDvrDevice);
-//    }
-//    _adapters[0]->getDemux()->start();
-//    if (_useDvrDevice) {
-//        _adapters[0]->getDvr()->startReadThread();
-//        _adapters[0]->getDvr()->prefillBuffer();
-//        return _adapters[0]->getDvr()->getStream();
-//    }
-//    else {
-//        return _adapters[0]->getDemux()->getAudioStream();
-////        return _adapters[0]->getDemux()->getVideoStream();
-//    }
-//}
 
 
 void
@@ -463,10 +428,13 @@ Device::freeStream(std::istream* pIstream)
     Demux* pDemux = pService->getTransponder()->_pFrontend->_pDemux;
     pDemux->runService(pService, false);
     pDemux->unselectService(pService);
-    Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
-    if (_useDvrDevice) {
+
+    LOG(dvb, debug, "stop reading from dvr device.");
+//    if (_useDvrDevice) {
+        Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
         pDvr->clearBuffer();
-    }
+        pDvr->closeDvr();
+//    }
     _streamMap.erase(pIstream);
 
     //    _adapters[0]->getDemux()->stop();

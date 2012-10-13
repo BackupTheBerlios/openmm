@@ -182,9 +182,9 @@ Frontend::openFrontend()
     }
 
 //    _pDemux->openDemux(false);
-    if (Device::instance()->useDvrDevice()) {
-        _pDvr->openDvr(Device::instance()->blockDvrDevice());
-    }
+//    if (Device::instance()->useDvrDevice()) {
+//        _pDvr->openDvr(Device::instance()->blockDvrDevice());
+//    }
 }
 
 
@@ -193,9 +193,9 @@ Frontend::closeFrontend()
 {
     LOG(dvb, debug, "closing frontend");
 
-    if (Device::instance()->useDvrDevice()) {
-        _pDvr->closeDvr();
-    }
+//    if (Device::instance()->useDvrDevice()) {
+//        _pDvr->closeDvr();
+//    }
 //    _pDemux->closeDemux();
 
     if (close(_fileDescFrontend)) {

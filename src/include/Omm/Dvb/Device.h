@@ -98,6 +98,7 @@ public:
 
 //    void init();
     void open();
+    void close();
     void scan(const std::string& initialTransponderData);
     void readXml(std::istream& istream);
     void writeXml(std::ostream& ostream);
@@ -131,7 +132,7 @@ private:
 
     bool                                                _useDvrDevice;
     bool                                                _blockDvrDevice;
-    bool                                                _reopenDvrDevice;
+//    bool                                                _reopenDvrDevice;
 };
 
 }  // namespace Omm
