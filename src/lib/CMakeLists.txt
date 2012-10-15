@@ -179,6 +179,20 @@ ommsys
 CACHE INTERNAL libommsys
 )
 
+add_library(ommutil
+Util/Util.cpp
+)
+
+target_link_libraries(ommutil
+ommsys
+${POCO_FOUNDATION}
+)
+
+set(OMM_UTIL
+ommutil
+CACHE INTERNAL libommutil
+)
+
 add_subdirectory(Gui)
 
 if(OMM_GUI AND RESGEN)
@@ -204,22 +218,6 @@ add_resources(${MEDIA_IMAGE_RESOURCE}
 "img/activity-off.png"
 "img/activity-on.png"
 )
-
-
-add_library(ommutil
-Util/Util.cpp
-)
-
-target_link_libraries(ommutil
-ommsys
-${POCO_FOUNDATION}
-)
-
-set(OMM_UTIL
-ommutil
-CACHE INTERNAL libommutil
-)
-
 
 add_library(ommupnpgui
 Upnp/UpnpGui.cpp

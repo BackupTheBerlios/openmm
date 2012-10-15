@@ -21,6 +21,7 @@
 
 #include "Net.h"
 #include "NetImplDarwin.h"
+#include "Log.h"
 
 #include <SystemConfiguration.h>
 #include <CoreFoundation.h>
@@ -62,7 +63,7 @@ public:
         CFRelease(_dynamicStoreRef);
     }
 
-    
+
     static void callback(const SCDynamicStoreRef storeRef, const CFArrayRef changedKeysRef, void* pInfo)
     {
         LOG(net, debug, "dynamic store detects network device change.");
@@ -83,7 +84,7 @@ public:
             }
         }
     }
-    
+
     SCDynamicStoreRef       _dynamicStoreRef;
     dispatch_queue_t        _dispatchQueue;
 };
