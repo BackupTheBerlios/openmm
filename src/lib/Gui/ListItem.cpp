@@ -65,6 +65,7 @@ View(pParent)
 {
     setName("list item view");
 
+    setBackgroundColor(Color("white"));
     _pImageView = new ImageView(this);
     _pImageView->setStretchFactor(-1.0);
     _pLabelView = new LabelView(this);
@@ -105,14 +106,6 @@ ListItemView::syncViewImpl()
         _pImageView->syncViewImpl();
     }
     LOG(gui, debug, "list item view sync view impl: " + getName() + " finished.");
-}
-
-
-void
-ListItemView::setHighlighted(bool highlighted)
-{
-    LOG(gui, debug, "list item view set highlighted: " + (highlighted ? std::string("true") : std::string("false")));
-    _pLabelView->setHighlighted(highlighted);
 }
 
 

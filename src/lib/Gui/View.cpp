@@ -124,8 +124,16 @@ void
 View::addSubview(View* pView)
 {
     _pImpl->addSubview(pView);
+    pView->_pParent = this;
     _subviews.push_back(pView);
     pView->_scaleFactor = _scaleFactor;
+}
+
+
+void
+View::raise()
+{
+    _pImpl->raise();
 }
 
 
@@ -143,6 +151,20 @@ View::hide(bool async)
 {
 //    LOG(gui, debug, "view hide.");
     _pImpl->hideView(async);
+}
+
+
+int
+View::posX()
+{
+    return _pImpl->posXView();
+}
+
+
+int
+View::posY()
+{
+    return _pImpl->posYView();
 }
 
 

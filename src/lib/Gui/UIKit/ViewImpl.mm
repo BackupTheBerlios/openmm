@@ -298,6 +298,13 @@ ViewImpl::setNativeView(void* pView)
 
 
 void
+ViewImpl::raise()
+{
+    [static_cast<UIView*>(getView()->getParent()->getNativeView()) bringSubviewToFront:static_cast<UIView*>(getNativeView())];
+}
+
+
+void
 ViewImpl::addSubview(View* pView)
 {
     [static_cast<UIView*>(getNativeView()) addSubview:static_cast<UIView*>(pView->getNativeView())];
@@ -329,6 +336,20 @@ ViewImpl::hideView(bool async)
         static_cast<UIView*>(getNativeView()).hidden = YES;
     }
 //    LOG(gui, debug, "view impl hide finished.");
+}
+
+
+int
+ViewImpl::posXView()
+{
+    return static_cast<UIView*>(getNativeView()).frame.origin.x;
+}
+
+
+int
+ViewImpl::posYView()
+{
+    return static_cast<UIView*>(getNativeView()).frame.origin.y;
 }
 
 

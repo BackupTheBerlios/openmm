@@ -116,6 +116,13 @@ ViewImpl::setNativeView(QWidget* pView)
 
 
 void
+ViewImpl::raise()
+{
+    _pNativeView->raise();
+}
+
+
+void
 ViewImpl::addSubview(View* pView)
 {
     static_cast<QWidget*>(pView->getNativeView())->setParent(_pNativeView);
@@ -147,6 +154,20 @@ ViewImpl::hideView(bool async)
         _pNativeView->hide();
     }
 //    LOG(gui, debug, "view impl hide finished.");
+}
+
+
+int
+ViewImpl::posXView()
+{
+    return _pNativeView->x();
+}
+
+
+int
+ViewImpl::posYView()
+{
+    return _pNativeView->y();
 }
 
 

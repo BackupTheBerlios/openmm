@@ -19,59 +19,93 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#include "Gui/GuiLogger.h"
+#include "Log.h"
+#include "SelectionView.h"
+//#include "SelectionViewImpl.h"
 
-#include "View.h"
-#include "Image.h"
-#include "Label.h"
 
 namespace Omm {
 namespace Gui {
 
-class HorizontalLayout;
 
 
-class ListItemModel : public Model
+SelectionView::SelectionView() :
+//View(0, false)
+View(0, true)
 {
-    friend class ListItemView;
+//    LOG(gui, debug, "selection view ctor.");
+    setName("selection view");
 
-public:
-    ListItemModel();
-    ListItemModel(const ListItemModel& model);
+    _minWidth = 50;
+    _minHeight = 10;
+    _prefWidth = 150;
+    _prefHeight = 20;
+    _height = _prefHeight;
 
-    void setLabelModel(LabelModel* pLabelModel);
-    void setImageModel(ImageModel* pImageModel);
+    setBackgroundColor(Color("blue"));
+//    resize(_prefWidth, 2);
 
-private:
-    ImageModel*     _pImageModel;
-    LabelModel*     _pLabelModel;
-};
+    _pBottom = new View;
+//    _pBottom->resize(_prefWidth, 2);
+//    _pBottom->move(0, _prefHeight - 2);
+    _pBottom->setBackgroundColor(Color("blue"));
+
+//    hide(true);
+}
 
 
-class ListItemView : public View
+void
+SelectionView::setChildView(View* pParent)
 {
-public:
-    ListItemView(View* pParent = 0);
-    virtual void setModel(Model* pModel = 0);
-
-private:
-    virtual void syncViewImpl();
-
-    ImageView*          _pImageView;
-    LabelView*          _pLabelView;
-    HorizontalLayout*   _pLayout;
-};
+    if (pParent) {
+        pParent->addSubview(this);
+        pParent->addSubview(_pBottom);
+    }
+}
 
 
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-//{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
+void
+SelectionView::raise()
+{
+    View::raise();
+    _pBottom->raise();
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
+void
+SelectionView::show(bool async)
+{
+    View::show(async);
+    _pBottom->show(async);
+}
 
-#endif
+
+void
+SelectionView::hide(bool async)
+{
+    View::hide(async);
+    _pBottom->hide(async);
+}
+
+
+void
+SelectionView::resize(int width, int height)
+{
+    _height = height;
+    View::resize(width, 2);
+    _pBottom->resize(width, 2);
+    _pBottom->move(posX(), posY() + height - 2);
+}
+
+
+void
+SelectionView::move(int x, int y)
+{
+    View::move(x, y);
+    _pBottom->move(x, y + _height - 2);
+}
+
+
+} // namespace Gui
+} // namespace Omm

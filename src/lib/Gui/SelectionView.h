@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2012                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,56 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#ifndef SelectionView_INCLUDED
+#define SelectionView_INCLUDED
 
-#include "View.h"
-#include "Image.h"
-#include "Label.h"
+#include "Gui/View.h"
+
 
 namespace Omm {
 namespace Gui {
 
-class HorizontalLayout;
 
 
-class ListItemModel : public Model
-{
-    friend class ListItemView;
-
-public:
-    ListItemModel();
-    ListItemModel(const ListItemModel& model);
-
-    void setLabelModel(LabelModel* pLabelModel);
-    void setImageModel(ImageModel* pImageModel);
-
-private:
-    ImageModel*     _pImageModel;
-    LabelModel*     _pLabelModel;
-};
-
-
-class ListItemView : public View
+class SelectionView : public View
 {
 public:
-    ListItemView(View* pParent = 0);
-    virtual void setModel(Model* pModel = 0);
+    SelectionView();
+
+    void setChildView(View* pParent);
+
+    virtual void raise();
+    virtual void show(bool async = true);
+    virtual void hide(bool async = true);
+    virtual void resize(int width, int height);
+    virtual void move(int x, int y);
 
 private:
-    virtual void syncViewImpl();
-
-    ImageView*          _pImageView;
-    LabelView*          _pLabelView;
-    HorizontalLayout*   _pLayout;
+    View*       _pBottom;
+    int         _height;
 };
-
-
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-//{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
 
 
 }  // namespace Omm

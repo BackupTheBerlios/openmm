@@ -19,59 +19,30 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#ifndef SelectionViewImpl_INCLUDED
+#define SelectionViewImpl_INCLUDED
 
-#include "View.h"
-#include "Image.h"
-#include "Label.h"
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class HorizontalLayout;
+class View;
 
-
-class ListItemModel : public Model
+class SelectionViewImpl : public ViewImpl
 {
-    friend class ListItemView;
-
-public:
-    ListItemModel();
-    ListItemModel(const ListItemModel& model);
-
-    void setLabelModel(LabelModel* pLabelModel);
-    void setImageModel(ImageModel* pImageModel);
+    friend class SelectionView;
 
 private:
-    ImageModel*     _pImageModel;
-    LabelModel*     _pLabelModel;
+    SelectionViewImpl(View* pView);
+    ~SelectionViewImpl();
+
+//    void resize(int width, int height);
 };
-
-
-class ListItemView : public View
-{
-public:
-    ListItemView(View* pParent = 0);
-    virtual void setModel(Model* pModel = 0);
-
-private:
-    virtual void syncViewImpl();
-
-    ImageView*          _pImageView;
-    LabelView*          _pLabelView;
-    HorizontalLayout*   _pLayout;
-};
-
-
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
-//{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
 
 
 }  // namespace Omm
 }  // namespace Gui
 
 #endif
+

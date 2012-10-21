@@ -100,34 +100,44 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 {
     _fullscreen = fullscreen;
     if (fullscreen) {
-//                 foreground-color: black;
-        _pFullscreenStyleSheet = new QString(
+                _pFullscreenStyleSheet = new QString(
             "* { \
                  font-size: 28pt; \
-                 background-color: black; \
-                 border-color: black; \
-                 border-width: 0; \
-                 color: darkred; \
-                 selection-color: white; \
-                 selection-background-color: darkblue; \
-            } \
-            QScrollArea { \
-                 background-color: black; \
-                 color: #afafaf; \
-            } \
-            QLabel { \
-                 background-color: black; \
-                 color: #afafaf; \
-            } \
-            QSlider { \
-                 background-color: black; \
-                 color: #afafaf; \
-            } \
-            QButton { \
-                 background-color: black; \
-                 color: #afafaf; \
             }"
             );
+
+//                 foreground-color: black;
+//        _pFullscreenStyleSheet = new QString(
+//            "* { \
+//                 font-size: 28pt; \
+//                 background-color: black; \
+//                 border-color: black; \
+//                 border-width: 0; \
+//                 color: darkred; \
+//                 selection-color: white; \
+//                 selection-background-color: darkblue; \
+//            } \
+//            QWidget { \
+//                 background-color: blue; \
+//                 color: #afafaf; \
+//            } \
+//            QScrollArea { \
+//                 background-color: black; \
+//                 color: #afafaf; \
+//            } \
+//            QLabel { \
+//                 background-color: black; \
+//                 color: #afafaf; \
+//            } \
+//            QSlider { \
+//                 background-color: black; \
+//                 color: #afafaf; \
+//            } \
+//            QButton { \
+//                 background-color: black; \
+//                 color: #afafaf; \
+//            }"
+//            );
     }
 //    showToolBar(!fullscreen);
 //    showStatusBar(!fullscreen);

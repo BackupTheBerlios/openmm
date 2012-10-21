@@ -31,6 +31,7 @@ ImageImpl.cpp
 WebBrowserImpl.cpp
 TextLineImpl.cpp
 DragImpl.cpp
+SelectionViewImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

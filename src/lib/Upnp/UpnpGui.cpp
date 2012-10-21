@@ -1013,6 +1013,7 @@ ControllerWidget::showOnlyBasicDeviceGroups(bool show)
 {
     addView(_pMediaRendererGroupWidget, "Player", !show);
     addView(_pPlaylistEditor, "Playlist Editor", !show);
+    addView(_pConfigBrowser, "Setup", !show);
 }
 
 
@@ -1022,6 +1023,7 @@ ControllerWidget::showOnlyRendererVisual(bool show)
     addView(_pMediaServerGroupWidget, "Media", !show);
     addView(_pMediaRendererGroupWidget, "Player", !show);
     addView(_pPlaylistEditor, "Playlist Editor", !show);
+    addView(_pConfigBrowser, "Setup", !show);
 }
 
 
@@ -1218,6 +1220,7 @@ MediaRendererGroupWidget::getItemModel(int row)
 void
 MediaRendererGroupWidget::selectedItem(int row)
 {
+    LOGNS(Gui, gui, debug, "media renderer group widget selected renderer: " + Poco::NumberFormatter::format(row));
     DeviceGroupWidget::selectedItem(row);
     _pControllerWidget->getControlPanel()->setModel(static_cast<MediaRendererDevice*>(getDevice(row)));
 }
@@ -1592,7 +1595,7 @@ MediaServerGroupWidget::selectedItem(int row)
         LOGNS(Gui, gui, debug, "media server group widget selected device has container as root object");
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->setName(pServer->getFriendlyName() + " root container");
-        if (!pRootObject->isRestricted()) {
+        if (!pRootObject->isRestricted() && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
             MediaContainerPlaylistCreator* pTopView = new MediaContainerPlaylistCreator(pContainer);
             pTopView->setTextLine("new playlist");
             pTopView->setName("top view");
@@ -1785,7 +1788,9 @@ MediaContainerWidget::selectedItem(int row)
         pContainer->setModel(pContainer);
         // don't rely on childCount attribute being present and fetch first children to get total child count
         pChildObject->getChildForRow(0);
-        if (!pChildObject->isRestricted() && !Av::AvClass::matchClass(pChildObject->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+        if (!pChildObject->isRestricted()
+                && !Av::AvClass::matchClass(pChildObject->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)
+                && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
             MediaContainerPlaylistCreator* pTopView = new MediaContainerPlaylistCreator(pContainer);
             pTopView->setTextLine("new playlist");
             pTopView->setName("top view");

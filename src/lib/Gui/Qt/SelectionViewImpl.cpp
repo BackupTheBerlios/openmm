@@ -19,59 +19,67 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ListItem_INCLUDED
-#define ListItem_INCLUDED
+#include <QtGui>
 
-#include "View.h"
-#include "Image.h"
-#include "Label.h"
+#include "SelectionViewImpl.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-class HorizontalLayout;
 
-
-class ListItemModel : public Model
+class QtSelectionView : public QWidget
 {
-    friend class ListItemView;
-
 public:
-    ListItemModel();
-    ListItemModel(const ListItemModel& model);
+//    void resizeEvent(QResizeEvent* pEvent)
+//    {
+//        if (pEvent->oldSize().height() > 0) {
+//            LOG(gui, debug, "selection view resize");
+//            mask(pEvent->size().width(), pEvent->size().height());
+//        }
+//    }
 
-    void setLabelModel(LabelModel* pLabelModel);
-    void setImageModel(ImageModel* pImageModel);
+//    void showEvent(QShowEvent* event)
+//    {
+//        mask(width(), height());
+////        repaint();
+////        QWidget::show();
+//    }
 
-private:
-    ImageModel*     _pImageModel;
-    LabelModel*     _pLabelModel;
+    void mask(int w, int h)
+    {
+        LOG(gui, debug, "selection view mask");
+
+        QRegion outerRegion(rect());
+        QRect innerRect(x() + 2, y() + 2, w - 4, h - 4);
+        QRegion innerRegion(innerRect);
+        setMask(outerRegion.xored(innerRegion));
+    }
 };
 
 
-class ListItemView : public View
+SelectionViewImpl::SelectionViewImpl(View* pView)
 {
-public:
-    ListItemView(View* pParent = 0);
-    virtual void setModel(Model* pModel = 0);
+//    LOG(gui, debug, "label view impl ctor");
+    QtSelectionView* pNativeView = new QtSelectionView;
 
-private:
-    virtual void syncViewImpl();
+//    pNativeView->hide();
+//    pNativeView->mask(pNativeView->width(), pNativeView->height());
 
-    ImageView*          _pImageView;
-    LabelView*          _pLabelView;
-    HorizontalLayout*   _pLayout;
-};
+    initViewImpl(pView, pNativeView);
+}
 
 
-//class ListItem : public Widget<ListItemView, ListItemController, ListItemModel>
+SelectionViewImpl::~SelectionViewImpl()
+{
+}
+
+
+//void
+//SelectionViewImpl::resize(int width, int height)
 //{
-//public:
-//    ListItem() : Widget<ListItemView, ListItemController, ListItemModel>() {}
-//};
-
+//    static_cast<QtSelectionView*>(_pNativeView)->mask(width, height);
+//}
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif

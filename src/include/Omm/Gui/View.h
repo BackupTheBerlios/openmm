@@ -72,9 +72,12 @@ public:
     View* getParent();
     void addSubview(View* pView);
 
-    void show(bool async = true);
-    void hide(bool async = true);
+    virtual void raise();
+    virtual void show(bool async = true);
+    virtual void hide(bool async = true);
 
+    int posX();
+    int posY();
     int width(SizeConstraint size = Current);
     int height(SizeConstraint size = Current);
     void setSizeConstraint(int width, int height, SizeConstraint size = Current);
@@ -85,7 +88,7 @@ public:
     virtual void resize(SizeConstraint size = Pref);
     virtual void resize(int width, int height);
     virtual void scale(float factor);
-    void move(int x, int y);
+    virtual void move(int x, int y);
 
     Model* getModel() const;
     virtual void setModel(Model* pModel = 0);

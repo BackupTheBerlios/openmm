@@ -29,6 +29,7 @@
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
 #include "Gui/Drag.h"
+#include "SelectionView.h"
 #include "Log.h"
 
 
@@ -176,7 +177,8 @@ ScrollAreaView(pParent),
 _itemViewHeight(50),
 _rowOffset(0),
 _bottomRows(2),
-_pHighlightedView(0),
+//_pHighlightedView(0),
+_pSelectionView(0),
 _highlightedRow(-1),
 _pTopView(0),
 _dragMode(DragNone)
@@ -210,9 +212,13 @@ void
 ListView::resetListView()
 {
     _rowOffset = 0;
-    if (_pHighlightedView) {
-        _pHighlightedView->setHighlighted(false);
-        _pHighlightedView = 0;
+//    if (_pHighlightedView) {
+//        _pHighlightedView->setHighlighted(false);
+//        _pHighlightedView = 0;
+//    }
+    if (_pSelectionView) {
+        delete _pSelectionView;
+        _pSelectionView = 0;
     }
     _highlightedRow = -1;
     scrollContentsTo(0, 0);
@@ -261,6 +267,7 @@ ListView::syncViewImpl()
     else {
         showItemsAt(_rowOffset, _rowOffset, visibleItemCount);
     }
+
 }
 
 
@@ -384,9 +391,9 @@ ListView::scrollToRowOffset(int rowOffset)
             scrollOneRow(rowDelta);
         }
     }
-    if (_pHighlightedView) {
-        _pHighlightedView->setHighlighted(itemIsVisible(_highlightedRow));
-    }
+//    if (_pHighlightedView) {
+//        _pHighlightedView->setHighlighted(itemIsVisible(_highlightedRow));
+//    }
 }
 
 
@@ -483,6 +490,14 @@ ListView::extendViewPool()
         }
 
 //        LOG(gui, debug, "allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
+    }
+    if (!_pSelectionView) {
+        _pSelectionView = new SelectionView;
+        _pSelectionView->setChildView(this);
+        _pSelectionView->hide(true);
+    }
+    else {
+        _pSelectionView->raise();
     }
 }
 
@@ -637,6 +652,9 @@ ListView::setItemViewWidth(int width)
     if (_pTopView) {
         _pTopView->setWidth(width);
     }
+    if (_pSelectionView) {
+        _pSelectionView->resize(width, getItemViewHeight());
+    }
     for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
         (*it)->setWidth(width);
     }
@@ -681,18 +699,24 @@ ListView::highlightItem(int row)
         scrollContentsTo(0, (row - viewPortHeightInRows() + _bottomRows + 1) * getItemViewHeight() - (getViewportHeight() % getItemViewHeight()));
     }
 
-    if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
-        View* pLastHighlightedView = visibleView(visibleIndex(_highlightedRow));
-        if (pLastHighlightedView) {
-            pLastHighlightedView->setHighlighted(false);
-        }
+
+    if (_pSelectionView) {
+        _pSelectionView->move(0, (_pTopView ? row + 1 : row) * getItemViewHeight());
+        _pSelectionView->show();
     }
 
-    View* pHighlightedView = visibleView(visibleIndex(row));
-    if (pHighlightedView) {
-        pHighlightedView->setHighlighted(true);
-        _pHighlightedView = pHighlightedView;
-    }
+//    if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
+//        View* pLastHighlightedView = visibleView(visibleIndex(_highlightedRow));
+//        if (pLastHighlightedView) {
+//            pLastHighlightedView->setHighlighted(false);
+//        }
+//    }
+//
+//    View* pHighlightedView = visibleView(visibleIndex(row));
+//    if (pHighlightedView) {
+//        pHighlightedView->setHighlighted(true);
+//        _pHighlightedView = pHighlightedView;
+//    }
     _highlightedRow = row;
 }
 

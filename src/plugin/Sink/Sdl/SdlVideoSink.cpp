@@ -23,6 +23,8 @@
 #include <Poco/Format.h>
 #include <Poco/NumberFormatter.h>
 
+#include <Omm/Log.h>
+
 #include "SdlVideoSink.h"
 
 
@@ -36,7 +38,7 @@ _pSdlScreen(sdlScreen)
     _data[0] = _pSDLOverlay->pixels[0];
     _data[1] = _pSDLOverlay->pixels[2];
     _data[2] = _pSDLOverlay->pixels[1];
-    
+
     _pitch[0] = _pSDLOverlay->pitches[0];
     _pitch[1] = _pSDLOverlay->pitches[2];
     _pitch[2] = _pSDLOverlay->pitches[1];
@@ -76,7 +78,7 @@ void
 SdlVideoSink::openWindow(bool fullScreen, int width, int height)
 {
     LOGNS(Omm::AvStream, avstream, debug, "SDL video sink opening window ...");
-    
+
     _fullScreen = fullScreen;
     _width = width;
     _height = height;
@@ -84,7 +86,7 @@ SdlVideoSink::openWindow(bool fullScreen, int width, int height)
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) {
         LOGNS(Omm::AvStream, avstream, error, "failed to init SDL: " + std::string(SDL_GetError()));
     }
-    
+
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
     if (_fullScreen) {
         flags |= SDL_FULLSCREEN;
@@ -92,16 +94,16 @@ SdlVideoSink::openWindow(bool fullScreen, int width, int height)
     else {
         flags |= SDL_RESIZABLE;
     }
-    
+
     int bitsPerPixel = 0;  // 0 = current display bits per pixel
 #ifdef __DARWIN__
     bitsPerPixel = 24;
 #endif
-    
+
     _pSdlScreen = SDL_SetVideoMode(getWidth(), getHeight(), bitsPerPixel, flags);
-    
+
     SDL_ShowCursor(SDL_DISABLE);
-    
+
     if (_pSdlScreen == 0) {
         LOGNS(Omm::AvStream, avstream, error, "could not open SDL window: " + std::string(SDL_GetError()));
         return;
@@ -145,7 +147,7 @@ SdlVideoSink::displayFrame(Omm::AvStream::Overlay* pOverlay)
     rect.y = y;
     rect.w = w;
     rect.h = h;
-    
+
     LOGNS(Omm::AvStream, avstream, debug, "sdl video sink display overlay frame");
     SDL_DisplayYUVOverlay(static_cast<SdlOverlay*>(pOverlay)->_pSDLOverlay, &rect);
 }

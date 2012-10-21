@@ -32,6 +32,7 @@ Image.cpp
 WebBrowser.cpp
 TextLine.cpp
 Drag.cpp
+SelectionView.cpp
 )
 
 target_link_libraries(ommgui

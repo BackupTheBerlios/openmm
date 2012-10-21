@@ -23,6 +23,8 @@
 #include <Poco/NumberFormatter.h>
 #include <Poco/RunnableAdapter.h>
 
+#include <Omm/Log.h>
+
 #include "AlsaAudioSink.h"
 
 
@@ -208,8 +210,7 @@ AlsaAudioSink::writeThread()
             snd_pcm_prepare(_pcmPlayback);
             LOGNS(Omm::AvStream, avstream, warning, "<<<<<<<<<<<<<<< " + getName() + " buffer underrun >>>>>>>>>>>>>>>");
         }
-        LOGNS(Omm::AvStream, avstream, trace("alsa audio sink write thread, bytes written: " +\
-            Poco::NumberFormatter::format(samplesWritten << 2));
+        LOGNS(Omm::AvStream, avstream, trace, "alsa audio sink write thread, bytes written: " + Poco::NumberFormatter::format(samplesWritten << 2));
     }
 
     LOGNS(Omm::AvStream, avstream, debug, "alsa audio sink write thread finished.");

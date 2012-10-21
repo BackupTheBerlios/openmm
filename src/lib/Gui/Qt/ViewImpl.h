@@ -53,9 +53,12 @@ public:
     uint32_t getNativeWindowId();
 #endif
     void setNativeView(QWidget* pView);
+    void raise();
     virtual void addSubview(View* pView);
     virtual void showView(bool async);
     virtual void hideView(bool async);
+    virtual int posXView();
+    virtual int posYView();
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);
@@ -86,6 +89,7 @@ private:
     void dropped(Drag* pDrag);
 
     QtEventFilter*              _pEventFilter;
+    QWidget*                    _pHighlightWidget;
 };
 
 

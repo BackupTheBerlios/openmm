@@ -433,7 +433,7 @@ Device::freeStream(std::istream* pIstream)
 //    if (_useDvrDevice) {
         Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
         pDvr->clearBuffer();
-        pDvr->closeDvr();
+//        pDvr->closeDvr();
 //    }
     _streamMap.erase(pIstream);
 

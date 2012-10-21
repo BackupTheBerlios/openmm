@@ -35,6 +35,7 @@ namespace Omm {
 namespace Gui {
 
 class ListItemController;
+class SelectionView;
 
 
 class ListController : public Controller
@@ -108,7 +109,8 @@ protected:
     int                                 _bottomRows;
     int                                 _itemViewHeight;
 
-    View*                               _pHighlightedView;
+//    View*                               _pHighlightedView;
+    SelectionView*                      _pSelectionView;
     int                                 _highlightedRow;
 
     View*                               _pTopView;

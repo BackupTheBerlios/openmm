@@ -20,6 +20,8 @@
 ***************************************************************************/
 #include <Poco/ClassLibrary.h>
 
+#include <Omm/Log.h>
+
 #include <SDL.h>
 // #include "SDL_mixer.h"
 

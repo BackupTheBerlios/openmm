@@ -50,7 +50,8 @@ ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
     pNativeView->setWidget(_pScrollWidget);
-    pNativeView->setBackgroundRole(QPalette::Base);
+    // FIXME: this prevents setting color of subviews of scrollarea
+//    pNativeView->setBackgroundRole(QPalette::Base);
 
     initViewImpl(pView, pNativeView, pSignalProxy);
 }
