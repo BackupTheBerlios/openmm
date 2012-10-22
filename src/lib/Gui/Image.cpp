@@ -84,6 +84,15 @@ ImageView::setAlignment(Alignment alignment)
 
 
 void
+ImageView::resize(int width, int height)
+{
+    LOG(gui, debug, "Image view resize");
+    View::resize(width, height);
+    static_cast<ImageViewImpl*>(_pImpl)->scaleBestFit(width, height);
+}
+
+
+void
 ImageView::syncViewImpl()
 {
 //    LOG(gui, debug, "Image view sync view: " + getName());
@@ -93,6 +102,8 @@ ImageView::syncViewImpl()
     ImageModel* pImageModel = static_cast<ImageModel*>(_pModel);
     ImageViewImpl* pImpl = static_cast<ImageViewImpl*>(_pImpl);
     pImpl->setData(pImageModel->getData());
+//    _prefWidth = pImpl->originalWidth();
+//    _prefHeight = pImpl->originalHeight();
 }
 
 

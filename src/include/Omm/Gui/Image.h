@@ -38,7 +38,7 @@ public:
     virtual const std::string& getData() const;
     void setData(const std::string& data);
     void setFile(const std::string& fileName);
-    
+
 private:
     std::string _data;
 };
@@ -47,11 +47,13 @@ private:
 class ImageView : public View
 {
     friend class ImageModel;
-    
+
 public:
     ImageView(View* pParent = 0);
 
     void setAlignment(Alignment alignment);
+
+    virtual void resize(int width, int height);
 
 //private:
     virtual void syncViewImpl();
@@ -62,7 +64,7 @@ class Image : public Widget<ImageView, Controller, ImageModel>
 {
 public:
     Image(View* pParent = 0) : Widget<ImageView, Controller, ImageModel>(pParent) {}
-    
+
     void setData(const std::string& data);
     void setFile(const std::string& fileName);
 };

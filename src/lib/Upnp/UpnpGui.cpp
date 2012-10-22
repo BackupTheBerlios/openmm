@@ -1710,7 +1710,7 @@ ListView(pParent),
 _pObjectModel(0),
 _pServerGroup(0)
 {
-//    setItemViewHeight(30);
+    setItemViewHeight(30);
 }
 
 
@@ -2205,7 +2205,7 @@ _stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
     _pActivityOffModel->setData(MediaImages::instance()->getResource("activity-off.png"));
     _pActivityOnModel = new Gui::ImageModel;
     _pActivityOnModel->setData(MediaImages::instance()->getResource("activity-on.png"));
-//    resize(15, 15);
+    resize(20, 20);
     setModel(_pActivityOffModel);
 }
 

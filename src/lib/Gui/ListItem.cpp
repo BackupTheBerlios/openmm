@@ -70,8 +70,9 @@ View(pParent)
     _pImageView->setStretchFactor(-1.0);
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
-    _pLabelView->setStretchFactor(-1.0);
-    _pLabelView->setSizeConstraint(220, 20, View::Pref);
+    // FIXME: not fixing width of label pushes out the buttons on the left in UpnpGui::MediaContainerWidget ListItemViews
+//    _pLabelView->setStretchFactor(-1.0);
+//    _pLabelView->setSizeConstraint(220, 20, View::Pref);
 
     _pLayout = new HorizontalLayout;
     setLayout(_pLayout);

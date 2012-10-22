@@ -539,9 +539,10 @@ ListView::clearVisibleViews()
 void
 ListView::addItemView(View* pView)
 {
-//    LOG(gui, debug, "list view add item view.");
+    LOG(gui, debug, "list view add item view.");
 
     pView->resize(getViewportWidth(), getItemViewHeight());
+    pView->setSizeConstraint(getViewportWidth(), getItemViewHeight(), View::Pref);
     addSubview(pView);
 }
 

@@ -34,6 +34,7 @@ ImageViewImpl::ImageViewImpl(View* pView)
 {
 //    LOG(gui, debug, "image view impl ctor");
     QLabel* pNativeView = new QLabel;
+//    pNativeView->setScaledContents(true);
     _pImage = new QPixmap;
 
     initViewImpl(pView, pNativeView);
@@ -50,7 +51,10 @@ ImageViewImpl::setData(const std::string& data)
 {
     QPixmap* pImage = static_cast<QPixmap*>(_pImage);
     pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
-    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
+//    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
+//    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaledToWidth(_pView->width()));
+//    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(_pView->width(View::Pref), _pView->height(View::Pref), Qt::KeepAspectRatio));
+    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(_pView->width(), _pView->height(), Qt::KeepAspectRatio));
 }
 
 
@@ -69,6 +73,40 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
             break;
     }
 }
+
+
+void
+ImageViewImpl::scaleBestFit(int width, int height)
+{
+    QPixmap* pImage = static_cast<QPixmap*>(_pImage);
+    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(width, height, Qt::KeepAspectRatio));
+}
+
+
+//int
+//ImageViewImpl::originalWidth()
+//{
+//    const QPixmap* pPixmap = static_cast<QLabel*>(_pNativeView)->pixmap();
+//    if (pPixmap) {
+//        return pPixmap->width();
+//    }
+//    else {
+//        return 0;
+//    }
+//}
+//
+//
+//int
+//ImageViewImpl::originalHeight()
+//{
+//    const QPixmap* pPixmap = static_cast<QLabel*>(_pNativeView)->pixmap();
+//    if (pPixmap) {
+//        return pPixmap->height();
+//    }
+//    else {
+//        return 0;
+//    }
+//}
 
 
 }  // namespace Omm

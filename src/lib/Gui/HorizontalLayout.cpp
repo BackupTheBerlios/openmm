@@ -39,7 +39,8 @@ HorizontalLayout::layoutView()
     int minSubviewWidth = 0;
     int minSubviewHeight = 0;
     int prefSubviewWidth = 0;
-    int prefSubviewHeight = 0;
+//    int prefSubviewHeight = 0;
+    int prefSubviewHeight = _pView->height(View::Pref);
     int maxSubviewWidth = 0;
     int maxSubviewHeight = 0;
 
@@ -51,7 +52,8 @@ HorizontalLayout::layoutView()
         minSubviewWidth += (*it)->width(View::Min);
         minSubviewHeight = std::max((*it)->height(View::Min), minSubviewHeight);
         prefSubviewWidth += (*it)->width(View::Pref);
-        prefSubviewHeight = std::max((*it)->height(View::Pref), prefSubviewHeight);
+//        prefSubviewHeight = std::max((*it)->height(View::Pref), prefSubviewHeight);
+        prefSubviewHeight = std::min((*it)->height(View::Pref), prefSubviewHeight);
         maxSubviewWidth += (*it)->width(View::Max);
         maxSubviewHeight = std::max((*it)->height(View::Max), maxSubviewHeight);
 
@@ -77,7 +79,8 @@ HorizontalLayout::layoutView()
     stretchFactor.push_back(_pView->width() / subviewWidthSum);
 
     int subviewWidth = 0;
-    int subviewHeight = prefSubviewHeight;
+    int subviewHeight = _pView->height(View::Pref);
+//    int subviewHeight = prefSubviewHeight;
 
     // resize super view
     _pView->resizeNoLayout(_pView->width(), (currentRow + 1) * subviewHeight);

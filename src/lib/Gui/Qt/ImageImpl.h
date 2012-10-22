@@ -44,6 +44,10 @@ private:
     void setData(const std::string& data);
     void setAlignment(View::Alignment alignment);
 
+    void scaleBestFit(int width, int height);
+//    int originalWidth();
+//    int originalHeight();
+
     QPixmap*     _pImage;
 };
 
