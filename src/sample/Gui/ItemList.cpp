@@ -33,6 +33,7 @@
 #include <Omm/Gui/GuiLogger.h>
 
 #include "ImageData.h"
+#include "Omm/Gui/Button.h"
 
 
 class ItemListModel : public Omm::Gui::ListModel
@@ -84,6 +85,9 @@ ItemListModel::createItemView()
 {
     Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
     pView->setName("list item view " + Poco::NumberFormatter::format(_viewCount++));
+    Omm::Gui::Button* pButton = new Omm::Gui::Button(pView);
+    pButton->setLabel("B");
+    pButton->setStretchFactor(-1.0);
     return pView;
 }
 

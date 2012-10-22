@@ -1937,22 +1937,25 @@ MediaObjectViewDestroyButtonController::pushed()
 }
 
 
-MediaObjectView::MediaObjectView(View* pParent)
+MediaObjectView::MediaObjectView(View* pParent) :
+ListItemView(pParent)
 {
     setName("media object view");
     _pPlaylistButton = new Gui::Button(this);
     _pPlaylistButton->setLabel("P");
-    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
+//    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
     _pPlaylistButton->setStretchFactor(-1.0);
-    _pPlaylistButton->resize(20, 15);
+//    _pPlaylistButton->resize(20, 15);
+    _pPlaylistButton->setSizeConstraint(20, 15, View::Pref);
     _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
 
-//    _pDestroyButton = new Gui::Button(this);
-//    _pDestroyButton->setLabel("D");
+    _pDestroyButton = new Gui::Button(this);
+    _pDestroyButton->setLabel("D");
 //    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
-//    _pDestroyButton->setStretchFactor(-1.0);
+    _pDestroyButton->setStretchFactor(-1.0);
 //    _pDestroyButton->resize(20, 15);
-//    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
+    _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
+    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
 }
 
 

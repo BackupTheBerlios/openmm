@@ -74,7 +74,12 @@ HorizontalLayout::layoutView()
             // "newline"
             subviewWidthSum = 0.0;
         }
-        subviewWidthSum += (*it)->width(View::Pref) * (1 + (*it)->stretchFactor());
+        if ((*it)->stretchFactor() == -1.0) {
+            subviewWidthSum += (*it)->width(View::Pref);
+        }
+        else {
+            subviewWidthSum += (*it)->width(View::Pref) * (1 + (*it)->stretchFactor());
+        }
     }
     stretchFactor.push_back(_pView->width() / subviewWidthSum);
 

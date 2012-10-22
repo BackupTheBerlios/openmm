@@ -86,7 +86,7 @@ ImageView::setAlignment(Alignment alignment)
 void
 ImageView::resize(int width, int height)
 {
-    LOG(gui, debug, "Image view resize");
+//    LOG(gui, debug, "Image view resize");
     View::resize(width, height);
     static_cast<ImageViewImpl*>(_pImpl)->scaleBestFit(width, height);
 }

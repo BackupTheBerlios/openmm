@@ -67,6 +67,7 @@ View(pParent)
 
     setBackgroundColor(Color("white"));
     _pImageView = new ImageView(this);
+    // FIXME: stretch factor -1.0 on image view gives wrong sum of width of subviews.
     _pImageView->setStretchFactor(-1.0);
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
