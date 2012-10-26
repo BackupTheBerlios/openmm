@@ -97,5 +97,19 @@ ScrollAreaView::scrollContentsTo(int x, int y)
 }
 
 
+void
+ScrollAreaView::showScrollBars(bool show)
+{
+    static_cast<ScrollAreaViewImpl*>(_pImpl)->showScrollBars(show);
+}
+
+
+//void
+//ScrollAreaView::setBackgroundColor(const Color& color)
+//{
+//    static_cast<ScrollAreaViewImpl*>(_pImpl)->setBackgroundColor(color);
+//}
+
+
 } // namespace Gui
 } // namespace Omm

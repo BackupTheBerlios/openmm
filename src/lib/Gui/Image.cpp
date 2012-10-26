@@ -70,6 +70,8 @@ View(pParent, false)
     _minWidth = 20;
     _minHeight = 20;
     _prefWidth = 50;
+//    _prefWidth = 50 * _scaleFactor;
+//    _prefWidth = 50 * _stretchFactor;
     _prefHeight = 50;
     _pImpl = new ImageViewImpl(this);
     setAlignment(View::AlignCenter);
@@ -87,6 +89,7 @@ void
 ImageView::resize(int width, int height)
 {
 //    LOG(gui, debug, "Image view resize");
+//    _prefWidth = 50 * _scaleFactor;
     View::resize(width, height);
     static_cast<ImageViewImpl*>(_pImpl)->scaleBestFit(width, height);
 }

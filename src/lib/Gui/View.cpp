@@ -355,6 +355,7 @@ View::setLayout(Layout* pLayout)
     _pLayout = pLayout;
     _pLayout->_pView = this;
     _pLayout->layoutView();
+//    _pLayout->layoutViewEquiDistant();
 }
 
 

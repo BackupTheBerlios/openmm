@@ -100,16 +100,43 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 {
     _fullscreen = fullscreen;
     if (fullscreen) {
-                _pFullscreenStyleSheet = new QString(
+//            _pFullscreenStyleSheet = new QString(
+//            "* { \
+//                 font-size: 36pt; \
+//            }"
+//            );
+
+        _pFullscreenStyleSheet = new QString(
             "* { \
-                 font-size: 28pt; \
+                font-size: 36pt; \
+                color: #5f5f5f; \
+            } \
+            QTabWidget { \
+                border-width: 0; \
+            } \
+            QScrollArea { \
+                background-color: black; \
+                color: #afafaf; \
+            } \
+            QLabel { \
+                background-color: black; \
+                color: #afafaf; \
+            } \
+            QSlider { \
+                background-color: black; \
+                color: #afafaf; \
+            } \
+            QButton { \
+                background-color: black; \
+                color: #afafaf; \
             }"
             );
+
 
 //                 foreground-color: black;
 //        _pFullscreenStyleSheet = new QString(
 //            "* { \
-//                 font-size: 28pt; \
+//                 font-size: 36pt; \
 //                 background-color: black; \
 //                 border-color: black; \
 //                 border-width: 0; \

@@ -51,6 +51,8 @@ public:
     int getScrollAreaHeight();
     void resizeScrollArea(int width, int height);
     void scrollContentsTo(int x, int y);
+    void showScrollBars(bool show = true);
+//    void setBackgroundColor(const Color& color);
 };
 
 

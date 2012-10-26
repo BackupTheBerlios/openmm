@@ -23,6 +23,7 @@
 #include <Poco/NumberFormatter.h>
 //include <qt4/QtGui/qabstractslider.h>
 
+#include "ColorImpl.h"
 #include "ScrollAreaImpl.h"
 #include "QtScrollAreaImpl.h"
 #include "Gui/ScrollArea.h"
@@ -49,7 +50,10 @@ ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 
     _pScrollWidget = new QWidget;
     _pScrollWidget->resize(pNativeView->viewport()->size());
+//    _pScrollWidget->setPalette(QPalette(QColor(255, 255, 255)));
     pNativeView->setWidget(_pScrollWidget);
+    pNativeView->setPalette(QPalette(QColor(255, 255, 255)));
+
     // FIXME: this prevents setting color of subviews of scrollarea
 //    pNativeView->setBackgroundRole(QPalette::Base);
 
@@ -119,6 +123,27 @@ ScrollAreaViewImpl::scrollContentsTo(int x, int y)
 //    static_cast<QScrollArea*>(_pNativeView)->scroll(x, y);
 //    static_cast<QScrollArea*>(_pNativeView)->scrollContentsBy(x, y);
 //    static_cast<QScrollArea*>(_pNativeView)->ensureVisible(x, y);
+}
+
+
+void
+ScrollAreaViewImpl::showScrollBars(bool show)
+{
+    if (!show) {
+        static_cast<QScrollArea*>(_pNativeView)->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        static_cast<QScrollArea*>(_pNativeView)->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    }
+    else {
+        static_cast<QScrollArea*>(_pNativeView)->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        static_cast<QScrollArea*>(_pNativeView)->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    }
+}
+
+
+void
+ScrollAreaViewImpl::setBackgroundColor(const Color& color)
+{
+    _pScrollWidget->setPalette(QPalette(*static_cast<QColor*>(color._pImpl->getNativeColor())));
 }
 
 

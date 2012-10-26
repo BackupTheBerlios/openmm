@@ -213,7 +213,7 @@ public:
     void setState(State newState);
 
     GuiVisual* getLocalRendererVisual();
-    MediaRendererView* getControlPanel();
+    Gui::View* getControlPanel();
     Gui::View* getStatusBar();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);

@@ -31,6 +31,11 @@ namespace Gui {
 class QtSelectionView : public QWidget
 {
 public:
+//    QtSelectionView()
+//    {
+////        setMask(rect());
+//    }
+
 //    void resizeEvent(QResizeEvent* pEvent)
 //    {
 //        if (pEvent->oldSize().height() > 0) {
@@ -46,15 +51,30 @@ public:
 ////        QWidget::show();
 //    }
 
-    void mask(int w, int h)
+    void paintEvent(QPaintEvent* pEvent)
     {
-        LOG(gui, debug, "selection view mask");
-
-        QRegion outerRegion(rect());
-        QRect innerRect(x() + 2, y() + 2, w - 4, h - 4);
-        QRegion innerRegion(innerRect);
-        setMask(outerRegion.xored(innerRegion));
+        QPainter painter(this);
+        QPen pen;
+        QColor col(0, 127, 127, 191);
+        pen.setWidth(4);
+        pen.setColor(col);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(pen);
+        QRect rec(x(), y(), width() - 4, height());
+        painter.drawRoundedRect(rec, 10.0, 8.0);
+//        painter.drawRoundedRect(rect(), 10.0, 8.0);
     }
+
+
+//    void mask(int w, int h)
+//    {
+//        LOG(gui, debug, "selection view mask");
+//
+//        QRegion outerRegion(rect());
+//        QRect innerRect(x() + 2, y() + 2, w - 4, h - 4);
+//        QRegion innerRegion(innerRect);
+//        setMask(outerRegion.xored(innerRegion));
+//    }
 };
 
 
@@ -67,6 +87,7 @@ SelectionViewImpl::SelectionViewImpl(View* pView)
 //    pNativeView->mask(pNativeView->width(), pNativeView->height());
 
     initViewImpl(pView, pNativeView);
+    pNativeView->setAutoFillBackground(false);
 }
 
 

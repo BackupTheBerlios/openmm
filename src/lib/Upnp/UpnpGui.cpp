@@ -946,9 +946,14 @@ ControllerWidget::getLocalRendererVisual()
 }
 
 
-MediaRendererView*
+Gui::View*
 ControllerWidget::getControlPanel()
 {
+//    View* pView = new View;
+//    pView->setBackgroundColor(Gui::Color("blue"));
+//    pView->resize(100, 20);
+//    return pView;
+//    _pControlPanel->resize(800, 80);
     return _pControlPanel;
 }
 
@@ -1099,6 +1104,12 @@ DeviceGroup(pDeviceGroupDelegate)
 {
     LOGNS(Gui, gui, debug, "device group widget ctor (delegate)");
     attachController(this);
+    if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        setBackgroundColor(Gui::Color(200, 200, 200, 255));
+    }
+//    else {
+//        _deviceGroupListView.setBackgroundColor(Gui::Color("white"));
+//    }
 }
 
 
@@ -1188,7 +1199,12 @@ _pControllerWidget(pControllerWidget)
     _deviceGroupListView.setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
 
-    _deviceGroupListView.setItemViewHeight(80);
+//    _deviceGroupListView.setItemViewHeight(80);
+#ifdef __IPHONE__
+    _deviceGroupListView.setItemViewHeight(88);
+#else
+    _deviceGroupListView.setItemViewHeight(44);
+#endif
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }
@@ -1320,6 +1336,7 @@ public:
         _image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
         setImage(&_image);
         setSizeConstraint(45, height(Gui::View::Pref), Gui::View::Pref);
+//        setSizeConstraint(45, 40, Gui::View::Pref);
 //        setEnabled(false);
     }
 
@@ -1490,24 +1507,69 @@ MediaRendererView::MediaRendererView()
 {
     setName("media renderer view");
 
+//    setBackgroundColor(Gui::Color("blue"));
+
     _pBackButton = new BackButton(this);
     _pPlayButton = new PlayButton(this);
     _pStopButton = new StopButton(this);
     _pForwButton = new ForwButton(this);
-
     _pVolSlider = new VolSlider(this);
     _pSeekSlider = new SeekSlider(this);
-
-//    _pRendererName = new RendererName(this);
     _pRendererName = new Gui::LabelView(this);
-    _pRendererName->setAlignment(Gui::View::AlignCenter);
-
+//    _pRendererName = new RendererName(this);
+//    _pRendererName->setAlignment(Gui::View::AlignCenter);
+    _pRendererName->setAlignment(Gui::View::AlignLeft);
     _pTrackName = new Gui::LabelView(this);
     _pTrackName->setAlignment(Gui::View::AlignCenter);
+//    _pTrackName->setAlignment(Gui::View::AlignLeft);
 
-    setSizeConstraint(800, 40, Gui::View::Pref);
-    resize(800, 40);
-    setLayout(&_layout);
+#ifdef __IPHONE__
+    _pBackButton->resize(40, 40);
+    _pBackButton->move(0, 2);
+    _pPlayButton->resize(40, 40);
+    _pPlayButton->move(40, 2);
+    _pStopButton->resize(40, 40);
+    _pStopButton->move(80, 2);
+    _pForwButton->resize(40, 40);
+    _pForwButton->move(120, 2);
+
+    _pVolSlider->resize(70, 40);
+    _pVolSlider->move(160, 2);
+    _pSeekSlider->resize(70, 40);
+    _pSeekSlider->move(230, 2);
+
+    _pRendererName->resize(120, 40);
+    _pRendererName->move(0, 44);
+    _pTrackName->resize(120, 40);
+    _pTrackName->move(122, 44);
+
+    resize(300, 88);
+#else
+    _pBackButton->resize(45, 40);
+    _pBackButton->move(0, 2);
+    _pPlayButton->resize(45, 40);
+    _pPlayButton->move(45, 2);
+    _pStopButton->resize(45, 40);
+    _pStopButton->move(90, 2);
+    _pForwButton->resize(45, 40);
+    _pForwButton->move(135, 2);
+
+    _pVolSlider->resize(100, 40);
+    _pVolSlider->move(180, 2);
+    _pSeekSlider->resize(100, 40);
+    _pSeekSlider->move(280, 2);
+
+    _pRendererName->resize(120, 40);
+    _pRendererName->move(384, 2);
+    _pTrackName->resize(120, 40);
+    _pTrackName->move(508, 2);
+
+    resize(620, 44);
+#endif
+
+//    setSizeConstraint(400, 40, Gui::View::Pref);
+//    resize(800, 20);
+//    setLayout(&_layout);
 }
 
 
@@ -1549,6 +1611,13 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 //    LOGNS(Gui, gui, debug, "media server group widget ctor");
     View::setName("media server group view");
     _deviceGroupListView.setName("media server group view");
+    if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        _deviceGroupListView.setItemViewHeight(80);
+    }
+    else {
+        _deviceGroupListView.setItemViewHeight(30);
+    }
+
     push(&_deviceGroupListView, "Media");
 
     _deviceGroupListView.attachController(this);
@@ -1702,6 +1771,10 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 MediaServerView::MediaServerView()
 {
     setName("media server view");
+    if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        setBackgroundColor(Gui::Color("black"));
+    }
+//    setSpacing(50);
 }
 
 
@@ -1710,7 +1783,17 @@ ListView(pParent),
 _pObjectModel(0),
 _pServerGroup(0)
 {
-    setItemViewHeight(30);
+    if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        setItemViewHeight(80);
+        showScrollBars(false);
+    }
+    else {
+#ifdef __IPHONE__
+        setItemViewHeight(50);
+#else
+        setItemViewHeight(30);
+#endif
+    }
 }
 
 
@@ -1941,21 +2024,27 @@ MediaObjectView::MediaObjectView(View* pParent) :
 ListItemView(pParent)
 {
     setName("media object view");
-    _pPlaylistButton = new Gui::Button(this);
-    _pPlaylistButton->setLabel("P");
-//    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
-    _pPlaylistButton->setStretchFactor(-1.0);
-//    _pPlaylistButton->resize(20, 15);
-    _pPlaylistButton->setSizeConstraint(20, 15, View::Pref);
-    _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
 
-    _pDestroyButton = new Gui::Button(this);
-    _pDestroyButton->setLabel("D");
-//    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
-    _pDestroyButton->setStretchFactor(-1.0);
-//    _pDestroyButton->resize(20, 15);
-    _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
-    _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
+        _pPlaylistButton = new Gui::Button(this);
+        _pPlaylistButton->setLabel("P");
+    //    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
+        _pPlaylistButton->setStretchFactor(-1.0);
+    //    _pPlaylistButton->resize(20, 15);
+        _pPlaylistButton->setSizeConstraint(20, 15, View::Pref);
+        _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
+
+        _pDestroyButton = new Gui::Button(this);
+        _pDestroyButton->setLabel("D");
+    //    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
+        _pDestroyButton->setStretchFactor(-1.0);
+    //    _pDestroyButton->resize(20, 15);
+        _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
+        _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
+    }
+    else {
+        setBackgroundColor(Gui::Color("black"));
+    }
 }
 
 

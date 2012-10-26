@@ -33,6 +33,9 @@ WebBrowserViewImpl::WebBrowserViewImpl(View* pView)
 {
 //    LOG(gui, debug, "WebBrowser view impl ctor");
     QWebView* pNativeView = new QWebView;
+    QWebSettings* pSettings = QWebSettings::globalSettings();
+    pSettings->setFontFamily(QWebSettings::StandardFont, "Helvetica");
+    pSettings->setFontSize(QWebSettings::DefaultFontSize, 12);
 
     initViewImpl(pView, pNativeView);
 }

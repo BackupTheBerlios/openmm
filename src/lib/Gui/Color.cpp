@@ -51,6 +51,15 @@ Color::Color(const std::string& colorName)
     else if (colorName == "black") {
         _pImpl = new ColorImpl(0, 0, 0, 255);
     }
+    else if (colorName == "grey") {
+        _pImpl = new ColorImpl(120, 120, 120, 255);
+    }
+}
+
+
+Color::Color(int red, int green, int blue, int alpha)
+{
+    _pImpl = new ColorImpl(red, green, blue, alpha);
 }
 
 

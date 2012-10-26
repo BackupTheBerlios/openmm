@@ -46,6 +46,7 @@
     if (self = [super init]) {
         _pImageViewImpl = pImpl;
 //        self.contentMode = UIViewContentModeCenter;
+        self.contentMode = UIViewContentModeScaleAspectFit;
         _pImageView = [UIImageView alloc];
     }
     return self;
@@ -61,7 +62,7 @@
 //    _pImageView.contentMode = UIViewContentModeCenter;
 //    _pImageView.frame = self.frame;
     _pImageView.center = self.center;
-//    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
+    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];
 }
@@ -128,6 +129,13 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
 //            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
             break;
     }
+}
+
+
+void
+ImageViewImpl::scaleBestFit(int width, int height)
+{
+    static_cast<OmmGuiImage*>(_pNativeView).contentMode = UIViewContentModeScaleAspectFit;
 }
 
 

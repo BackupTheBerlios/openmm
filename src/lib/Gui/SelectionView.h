@@ -45,6 +45,9 @@ public:
 
 private:
     View*       _pBottom;
+    View*       _pLeft;
+    View*       _pRight;
+    int         _lineWidth;
     int         _height;
 };
 

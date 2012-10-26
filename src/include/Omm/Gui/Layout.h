@@ -34,7 +34,8 @@ class Layout
     friend class View;
 
     virtual void layoutView() {}
-    
+    virtual void layoutViewEquiDistant() {}
+
 protected:
     View*     _pView;
 };

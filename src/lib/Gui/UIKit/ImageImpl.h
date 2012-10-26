@@ -40,7 +40,9 @@ private:
 
     void setData(const std::string& data);
     void setAlignment(View::Alignment alignment);
-    
+
+    void scaleBestFit(int width, int height);
+
     void* getImage();
 };
 

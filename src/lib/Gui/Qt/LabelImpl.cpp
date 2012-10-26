@@ -56,13 +56,13 @@ LabelViewImpl::setAlignment(View::Alignment alignment)
 {
     switch(alignment) {
         case View::AlignLeft:
-            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignLeft);
+            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
             break;
         case View::AlignCenter:
             static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignCenter);
             break;
         case View::AlignRight:
-            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
+            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
             break;
     }
 }

@@ -184,6 +184,7 @@ _pTopView(0),
 _dragMode(DragNone)
 {
     attachController(new ListScrollAreaController(this));
+//    setBackgroundColor(Color("white"));
 }
 
 

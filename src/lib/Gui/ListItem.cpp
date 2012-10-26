@@ -64,14 +64,19 @@ ListItemView::ListItemView(View* pParent) :
 View(pParent)
 {
     setName("list item view");
-
     setBackgroundColor(Color("white"));
+//    setBackgroundColor(Color("black"));
+
     _pImageView = new ImageView(this);
     // FIXME: stretch factor -1.0 on image view gives wrong sum of width of subviews.
     _pImageView->setStretchFactor(-1.0);
+
+//    View* pSpacer = new LabelView(this);
+//    pSpacer->setSizeConstraint(4, height(View::Pref), View::Pref);
+//    pSpacer->setBackgroundColor(Color("blue"));
+
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
-    // FIXME: not fixing width of label pushes out the buttons on the left in UpnpGui::MediaContainerWidget ListItemViews
 //    _pLabelView->setStretchFactor(-1.0);
 //    _pLabelView->setSizeConstraint(220, 20, View::Pref);
 
@@ -93,6 +98,13 @@ ListItemView::setModel(Model* pModel)
     _pLabelView->setModel(pListItemModel->_pLabelModel);
     View::setModel(pModel);
     LOG(gui, debug, "list item view set model finished.");
+}
+
+
+void
+ListItemView::setSpacing(int hSpace)
+{
+    _pImageView->setSizeConstraint(width(View::Pref) + hSpace, height(View::Pref));
 }
 
 

@@ -90,13 +90,13 @@ LabelViewImpl::setAlignment(View::Alignment alignment)
     // FIXME: set label alignment with UIKit
     switch(alignment) {
         case View::AlignLeft:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignLeft);
+            static_cast<UILabel*>(_pNativeView).textAlignment = UITextAlignmentLeft;
             break;
         case View::AlignCenter:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignCenter);
+            static_cast<UILabel*>(_pNativeView).textAlignment = UITextAlignmentCenter;
             break;
         case View::AlignRight:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
+            static_cast<UILabel*>(_pNativeView).textAlignment = UITextAlignmentRight;
             break;
     }
 }

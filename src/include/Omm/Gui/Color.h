@@ -34,9 +34,11 @@ class ColorImpl;
 class Color
 {
     friend class ViewImpl;
-    
+    friend class ScrollAreaViewImpl;
+
 public:
     Color(const std::string& colorName);
+    Color(int red, int green, int blue, int alpha);
 
     void* getNativeColor() const;
 

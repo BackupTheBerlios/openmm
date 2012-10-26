@@ -54,6 +54,7 @@ class ListItemView : public View
 public:
     ListItemView(View* pParent = 0);
     virtual void setModel(Model* pModel = 0);
+    void setSpacing(int hSpace);
 
 private:
     virtual void syncViewImpl();

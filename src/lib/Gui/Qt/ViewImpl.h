@@ -66,7 +66,7 @@ public:
     virtual void setFontSize(float fontSize);
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
-    void setBackgroundColor(const Color& color);
+    virtual void setBackgroundColor(const Color& color);
     void setAcceptDrops(bool accept);
 
 protected:
