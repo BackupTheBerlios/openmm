@@ -42,7 +42,8 @@ _prefWidth(100),
 _prefHeight(70),
 _maxWidth(200),
 _maxHeight(140),
-_stretchFactor(1.0)
+_stretchFactor(1.0),
+_scaleFactor(1.0)
 {
 //    LOG(gui, debug, "view ctor (parent).");
 

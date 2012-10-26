@@ -45,9 +45,10 @@
     LOGNS(Omm::Gui, gui, debug, "OmmGuiImage initWithImpl ...");
     if (self = [super init]) {
         _pImageViewImpl = pImpl;
+        _pImageView = [UIImageView alloc];
 //        self.contentMode = UIViewContentModeCenter;
         self.contentMode = UIViewContentModeScaleAspectFit;
-        _pImageView = [UIImageView alloc];
+        self.clearsContextBeforeDrawing = YES;
     }
     return self;
 }
@@ -63,6 +64,8 @@
 //    _pImageView.frame = self.frame;
     _pImageView.center = self.center;
     _pImageView.contentMode = UIViewContentModeScaleAspectFit;
+    _pImageView.clearsContextBeforeDrawing = YES;
+//    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];
 }
@@ -120,13 +123,13 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
     // FIXME: implement setAlignment() with UIImage
     switch(alignment) {
         case View::AlignLeft:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignLeft);
+//            static_cast<UIImageView*>(_pNativeView).textAlignment = UITextAlignmentLeft;
             break;
         case View::AlignCenter:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignCenter);
+//            static_cast<UIImageView*>(_pNativeView).textAlignment = UITextAlignmentCenter;
             break;
         case View::AlignRight:
-//            static_cast<QLabel*>(_pNativeView)->setAlignment(Qt::AlignRight);
+//            static_cast<UIImageView*>(_pNativeView).textAlignment = UITextAlignmentRight;
             break;
     }
 }

@@ -19,11 +19,13 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#define DoNotUseSelectionViewImpl
+
 #include "Gui/GuiLogger.h"
 #include "Log.h"
 #include "Gui/Label.h"
 #include "SelectionView.h"
-#ifndef __IPHONE__
+#ifndef DoNotUseSelectionViewImpl
 #include "SelectionViewImpl.h"
 #endif
 
@@ -31,10 +33,9 @@
 namespace Omm {
 namespace Gui {
 
-#define __IPHONE__
 
 SelectionView::SelectionView() :
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
 View(0, true)
 #else
 View(0, false)
@@ -50,10 +51,8 @@ View(0, false)
     _lineWidth = 3;
     _height = _prefHeight;
     Color selectionColor(114, 4, 4, 191);
-//    Color selectionColor(0, 127, 127, 191);
 
-#ifdef __IPHONE__
-//    setBackgroundColor(Color("grey"));
+#ifdef DoNotUseSelectionViewImpl
     setBackgroundColor(selectionColor);
 //    resize(_prefWidth, _lineWidth);
 
@@ -81,7 +80,7 @@ SelectionView::setChildView(View* pParent)
 {
     if (pParent) {
         pParent->addSubview(this);
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
         pParent->addSubview(_pBottom);
         pParent->addSubview(_pLeft);
         pParent->addSubview(_pRight);
@@ -94,7 +93,7 @@ void
 SelectionView::raise()
 {
     View::raise();
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
     _pBottom->raise();
     _pLeft->raise();
     _pRight->raise();
@@ -106,7 +105,7 @@ void
 SelectionView::show(bool async)
 {
     View::show(async);
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
     _pBottom->show(async);
     _pLeft->show(async);
     _pRight->show(async);
@@ -118,7 +117,7 @@ void
 SelectionView::hide(bool async)
 {
     View::hide(async);
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
     _pBottom->hide(async);
     _pLeft->hide(async);
     _pRight->hide(async);
@@ -130,7 +129,7 @@ void
 SelectionView::resize(int width, int height)
 {
     _height = height;
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
     View::resize(width, _lineWidth);
     _pBottom->resize(width, _lineWidth);
     _pBottom->move(posX(), posY() + height - _lineWidth);
@@ -148,7 +147,7 @@ void
 SelectionView::move(int x, int y)
 {
     View::move(x, y);
-#ifdef __IPHONE__
+#ifdef DoNotUseSelectionViewImpl
     _pBottom->move(x, y + _height - _lineWidth);
     _pLeft->move(x, y + _lineWidth);
     _pRight->move(x + width() - _lineWidth, y + _lineWidth);

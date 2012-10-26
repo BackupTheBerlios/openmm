@@ -174,7 +174,11 @@ ListScrollAreaController::keyPressed(KeyCode key)
 
 ListView::ListView(View* pParent) :
 ScrollAreaView(pParent),
+#ifdef __IPHONE__
 _itemViewHeight(50),
+#else
+_itemViewHeight(30),
+#endif
 _rowOffset(0),
 _bottomRows(2),
 //_pHighlightedView(0),

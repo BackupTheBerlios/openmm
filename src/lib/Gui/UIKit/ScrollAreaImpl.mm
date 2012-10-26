@@ -136,6 +136,14 @@ ScrollAreaViewImpl::scrollContentsTo(int x, int y)
 
 
 void
+ScrollAreaViewImpl::showScrollBars(bool show)
+{
+    static_cast<UIScrollView*>(getNativeView()).showsHorizontalScrollIndicator = show;
+    static_cast<UIScrollView*>(getNativeView()).showsVerticalScrollIndicator = show;
+}
+
+
+void
 ScrollAreaViewImpl::viewScrolled()
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());

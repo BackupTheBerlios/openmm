@@ -33,6 +33,7 @@ class HorizontalLayout : public Layout
 public:
     virtual void layoutView();
     virtual void layoutViewEquiDistant();
+    virtual void layoutViewMultiRow();
 };
 
 

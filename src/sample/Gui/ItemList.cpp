@@ -140,7 +140,7 @@ class Application : public Omm::Gui::Application
         ItemListModel* pListModel = new ItemListModel(10000);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setName("sample list view");
-        pList->setItemViewHeight(30);
+//        pList->setItemViewHeight(30);
 //        pList->setDragMode(Omm::Gui::ListView::DragSource);
         pList->setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
         Omm::Gui::TextLine* pHeaderView = new Omm::Gui::TextLine;

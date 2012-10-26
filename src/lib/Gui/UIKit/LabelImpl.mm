@@ -87,7 +87,6 @@ LabelViewImpl::setLabel(const std::string& label)
 void
 LabelViewImpl::setAlignment(View::Alignment alignment)
 {
-    // FIXME: set label alignment with UIKit
     switch(alignment) {
         case View::AlignLeft:
             static_cast<UILabel*>(_pNativeView).textAlignment = UITextAlignmentLeft;

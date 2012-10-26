@@ -34,6 +34,63 @@ namespace Gui {
 void
 HorizontalLayout::layoutView()
 {
+    // stretch subviews, so that they fit exactly into each row
+    int flexWidthSum = 0.0;
+    int fixedWidthSum = 0.0;
+    int i = 0;
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
+        if ((*it)->stretchFactor() == -1.0) {
+            fixedWidthSum += (*it)->width(View::Pref);
+        }
+        else {
+            flexWidthSum += (*it)->width(View::Pref);
+        }
+    }
+    float subviewStretchFactor = 1.0;
+    if (_pView->width() >= fixedWidthSum) {
+        subviewStretchFactor = (float)(_pView->width() - fixedWidthSum) / flexWidthSum;
+    }
+    else {
+        subviewStretchFactor = 0.0;
+    }
+
+    int subviewWidth = 0;
+
+    // layout the subviews by moving and resizing them
+    i = 0;
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
+//        int width = (*it)->width(View::Pref) * subviewStretchFactor * (1 + (*it)->stretchFactor());
+        int width = (*it)->width(View::Pref) * subviewStretchFactor * (*it)->stretchFactor();
+        if ((*it)->stretchFactor() == -1.0) {
+//            width = (*it)->width(View::Pref) * subviewStretchFactor;
+            width = (*it)->width(View::Pref);
+        }
+        (*it)->move(subviewWidth, 0);
+        (*it)->resize(width, _pView->height());
+        subviewWidth += width;
+    }
+//    LOG(gui, debug, "horizontal layout, lay out view finished.");
+}
+
+
+void
+HorizontalLayout::layoutViewEquiDistant()
+{
+    int subviewWidth = _pView->width() / _pView->subviewCount();
+    int subviewHeight = _pView->height();
+
+    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
+        (*it)->resize(subviewWidth, subviewHeight);
+        (*it)->move((it - _pView->beginSubview()) * (*it)->width(), 0);
+    }
+
+    LOG(gui, debug, "horizontal layout, laying out view finished.");
+}
+
+
+void
+HorizontalLayout::layoutViewMultiRow()
+{
 //    LOG(gui, debug, "horizontal layout, lay out view ...");
 
     int minSubviewWidth = 0;
@@ -106,21 +163,6 @@ HorizontalLayout::layoutView()
         subviewWidth += width;
     }
 //    LOG(gui, debug, "horizontal layout, lay out view finished.");
-}
-
-
-void
-HorizontalLayout::layoutViewEquiDistant()
-{
-    int subviewWidth = _pView->width() / _pView->subviewCount();
-    int subviewHeight = _pView->height();
-
-    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
-        (*it)->resize(subviewWidth, subviewHeight);
-        (*it)->move((it - _pView->beginSubview()) * (*it)->width(), 0);
-    }
-
-    LOG(gui, debug, "horizontal layout, laying out view finished.");
 }
 
 

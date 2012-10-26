@@ -1199,7 +1199,6 @@ _pControllerWidget(pControllerWidget)
     _deviceGroupListView.setName("media renderer group view");
     push(&_deviceGroupListView, "Player");
 
-//    _deviceGroupListView.setItemViewHeight(80);
 #ifdef __IPHONE__
     _deviceGroupListView.setItemViewHeight(88);
 #else
@@ -1614,9 +1613,9 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
     if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         _deviceGroupListView.setItemViewHeight(80);
     }
-    else {
-        _deviceGroupListView.setItemViewHeight(30);
-    }
+//    else {
+//        _deviceGroupListView.setItemViewHeight(30);
+//    }
 
     push(&_deviceGroupListView, "Media");
 
