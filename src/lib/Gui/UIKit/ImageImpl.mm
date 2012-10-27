@@ -48,6 +48,7 @@
         _pImageView = [UIImageView alloc];
 //        self.contentMode = UIViewContentModeCenter;
         self.contentMode = UIViewContentModeScaleAspectFit;
+        self.clipsToBounds = YES;
         self.clearsContextBeforeDrawing = YES;
     }
     return self;
@@ -58,13 +59,14 @@
 {
     LOGNS(Omm::Gui, gui, debug, "OmmGuiImage setData ...");
     UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
+    [_pImageView removeFromSuperview];
     [_pImageView initWithImage:pImage];
 //    [[_pImageView alloc] initWithImage:pImage];
 //    _pImageView.contentMode = UIViewContentModeCenter;
 //    _pImageView.frame = self.frame;
     _pImageView.center = self.center;
     _pImageView.contentMode = UIViewContentModeScaleAspectFit;
-    _pImageView.clearsContextBeforeDrawing = YES;
+//    _pImageView.clearsContextBeforeDrawing = YES;
 //    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
 //    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
     [self addSubview:_pImageView];
