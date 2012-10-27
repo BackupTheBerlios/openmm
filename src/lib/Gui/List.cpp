@@ -701,8 +701,12 @@ ListView::highlightItem(int row)
     if (row < _rowOffset) {
         scrollContentsTo(0, row * getItemViewHeight());
     }
-    if (row >= lastVisibleRow() - _bottomRows || (row >= lastVisibleRow() && row < pModel->totalItemCount())) {
-        scrollContentsTo(0, (row - viewPortHeightInRows() + _bottomRows + 1) * getItemViewHeight() - (getViewportHeight() % getItemViewHeight()));
+//    if (row >= lastVisibleRow() - _bottomRows || (row >= lastVisibleRow() && row < pModel->totalItemCount())) {
+    if (row >= lastVisibleRow() - _bottomRows || (row >= lastVisibleRow() - _bottomRows && row < pModel->totalItemCount())) {
+        int y = (row - viewPortHeightInRows() + _bottomRows + 1) * getItemViewHeight() - (getViewportHeight() % getItemViewHeight());
+        if (y > 0) {
+            scrollContentsTo(0, y);
+        }
     }
 
 
