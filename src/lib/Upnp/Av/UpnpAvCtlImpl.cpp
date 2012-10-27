@@ -168,7 +168,8 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 if (_pMediaRenderer) {
                     AbstractProperty* pArtist = object.getProperty(AvProperty::ARTIST);
                     AbstractProperty* pAlbum = object.getProperty(AvProperty::ALBUM);
-                    _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "");
+                    std::string objectClass = object.getClass();
+                    _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "", objectClass);
                 }
             }
         }

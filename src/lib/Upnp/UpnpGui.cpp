@@ -900,6 +900,7 @@ _pApplication(pApplication)
 //    _pStatusBar->resize(20, 20);
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
+    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TrackNotification>(*this, &ControllerWidget::newTrack));
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
 }
@@ -977,22 +978,27 @@ void
 ControllerWidget::newTransportState(TransportStateNotification* pNotification)
 {
     LOGNS(Gui, gui, debug, "controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
-    LOGNS(Gui, gui, debug, "local renderer uuid: " + _localRendererUuid);
-    if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING && pNotification->_uuid == _localRendererUuid) {
+    LOGNS(Gui, gui, debug, "new transport state, local renderer has uuid: " + _localRendererUuid);
+    if (pNotification->_uuid == _localRendererUuid && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+        showMainMenu();
+    }
+}
+
+
+void
+ControllerWidget::newTrack(TrackNotification* pNotification)
+{
+    if (pNotification->_uuid == _localRendererUuid) {
+        LOGNS(Gui, gui, debug, "new track on local renderer");
         Av::CtlMediaRenderer* pRenderer = static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getDevice(pNotification->_uuid));
         if (pRenderer) {
-            Av::CtlMediaObject2* pObject = pRenderer->getObject();
-            if (pObject) {
-                LOGNS(Gui, gui, debug, "local renderer plays object: " + pObject->getTitle() + ", class: " + pObject->getClass());
-                if (Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
-                    || Av::AvClass::matchClass(pObject->getClass(), Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)) {
-                    setCurrentView(_pVisual);
-                }
+            LOGNS(Gui, gui, debug, "new track on local renderer, playing object: " + pNotification->_title + ", class: " + pNotification->_objectClass);
+            if (Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
+                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)
+                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+                setCurrentView(_pVisual);
             }
         }
-    }
-    else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
-        showMainMenu();
     }
 }
 
@@ -1273,11 +1279,12 @@ MediaRendererDevice::newUri(const std::string& uri)
 
 
 void
-MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album)
+MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass)
 {
-    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album);
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album + ", " + objectClass);
     _trackName.setLabel(artist == "" ? title : artist + " - " + title);
     syncViews();
+    Poco::NotificationCenter::defaultCenter().postNotification(new TrackNotification(getUuid(), title, artist, album, objectClass));
 }
 
 

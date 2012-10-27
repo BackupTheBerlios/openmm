@@ -194,6 +194,19 @@ public:
 };
 
 
+class TrackNotification : public Poco::Notification
+{
+public:
+    TrackNotification(const std::string& uuid, const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass) : _uuid(uuid), _title(title), _artist(artist), _album(album), _objectClass(objectClass) {}
+
+    std::string         _uuid;
+    std::string         _title;
+    std::string         _artist;
+    std::string         _album;
+    std::string         _objectClass;
+};
+
+
 class PlaylistNotification : public Poco::Notification
 {
 public:
@@ -217,6 +230,7 @@ public:
     Gui::View* getStatusBar();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
     void newTransportState(TransportStateNotification* pNotification);
+    void newTrack(TrackNotification* pNotification);
     void newPlaylist(PlaylistNotification* pNotification);
     void showMainMenu();
     void showOnlyBasicDeviceGroups(bool show = false);
@@ -333,7 +347,7 @@ private:
     virtual void initController();
 
     virtual void newUri(const std::string& uri);
-    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album);
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass);
     virtual void newPosition(int duration, int position);
     virtual void newVolume(const int volume);
     virtual void newTransportState(const std::string& transportState);
