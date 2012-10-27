@@ -114,6 +114,7 @@ NavigatorViewImpl::showSearchBox(bool show)
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];
     searchBar.showsCancelButton = YES;
+    searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 //    searchBar.showsSearchResultsButton = YES;
     searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
 //    UISearchBar* searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 30.0, 10.0)];
@@ -121,11 +122,14 @@ NavigatorViewImpl::showSearchBox(bool show)
     searchBar.delegate = pNativeViewController;
 
 //    pNativeViewController.topViewController;
-    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
+//    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
 //    buttonItem.frame = CGRectMake(0.0, 0.0, 30.0, 10.0);
-
     // FIXME: adding a search bar slows down scrolling
-    pNativeViewController.topViewController.navigationItem.rightBarButtonItem = buttonItem;
+//    pNativeViewController.topViewController.navigationItem.rightBarButtonItem = buttonItem;
+
+
+//    pNativeViewController.navigationItem.titleView = searchBar;
+    [[pNativeViewController.navigationBar topItem] setTitleView:searchBar];
 
 //    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
 //    [pNativeViewController.navigationBar pushNavigationItem:searchBar];
