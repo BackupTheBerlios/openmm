@@ -54,6 +54,8 @@ Log::Log()
 #else
     _pUtilLogger = &Poco::Logger::create("UTIL", _pChannel, Poco::Message::PRIO_DEBUG);
     _pPluginLogger = &Poco::Logger::create("PLUGIN", _pChannel, Poco::Message::PRIO_DEBUG);
+//    _pUtilLogger = &Poco::Logger::create("UTIL", _pChannel, Poco::Message::PRIO_ERROR);
+//    _pPluginLogger = &Poco::Logger::create("PLUGIN", _pChannel, Poco::Message::PRIO_ERROR);
 #endif
 }
 

@@ -32,6 +32,7 @@ namespace Omm {
 namespace Av {
 
 
+class MediaRenderer;
 class DevAVTransportRendererImpl;
 class DevRenderingControlRendererImpl;
 class Visual;
@@ -43,6 +44,11 @@ class Engine //: public Util::ConfigurablePlugin
 
 public:
     enum TransportState {Stopped, Ended, Playing, Transitioning, PausedPlayback, PausedRecording, Recording, NoMediaPresent};
+    static const std::string StreamTypeOther;
+    static const std::string StreamTypeAudio;
+    static const std::string StreamTypeVideo;
+    static const std::string StreamTypePicture;
+    static const std::string StreamTypeText;
 
     Engine();
 
@@ -81,9 +87,8 @@ public:
     virtual Poco::UInt64 getPositionByte() = 0;
     virtual float getPositionPercentage() = 0;
     virtual float getPositionSecond() = 0;
-
     virtual float getLengthSeconds() = 0;
-
+    virtual std::string getStreamType() { return StreamTypeOther; }
     const std::string transportState();
 
     /*
@@ -104,6 +109,7 @@ protected:
     /// endOfStream is called by the engine implementation on end of track.
     /// this is different to entering transport state stopped, which is triggered by the user.
 
+//    MediaRenderer*                      _pRenderer;
     std::string                         _engineId;
     Omm::ui4                            _instanceId;
     Sys::Visual*                        _pVisual;
@@ -112,6 +118,17 @@ protected:
     std::vector<std::string>            _playlist;
     int                                 _trackNumberInPlaylist;
     Poco::Timer*                        _pEndOfStreamTimer;
+};
+
+
+class StreamTypeNotification : public Poco::Notification
+{
+public:
+    StreamTypeNotification(Omm::ui4 instanceId, const std::string& transportState, const std::string& streamType) : _instanceId(instanceId), _transportState(transportState), _streamType(streamType) {}
+
+    Omm::ui4            _instanceId;
+    std::string         _transportState;
+    std::string         _streamType;
 };
 
 

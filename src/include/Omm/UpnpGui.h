@@ -229,6 +229,7 @@ public:
     Gui::View* getControlPanel();
     Gui::View* getStatusBar();
     void setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer);
+    void newStreamType(Av::StreamTypeNotification* pNotification);
     void newTransportState(TransportStateNotification* pNotification);
     void newTrack(TrackNotification* pNotification);
     void newPlaylist(PlaylistNotification* pNotification);

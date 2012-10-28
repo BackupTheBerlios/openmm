@@ -28,6 +28,12 @@ namespace Omm {
 namespace Av {
 
 
+const std::string Engine::StreamTypeOther("StreamTypeOther");
+const std::string Engine::StreamTypeAudio("StreamTypeAudio");
+const std::string Engine::StreamTypeVideo("StreamTypeVideo");
+const std::string Engine::StreamTypePicture("StreamTypePicture");
+const std::string Engine::StreamTypeText("StreamTypeText");
+
 Engine::Engine() :
 _instanceId(0),
 _pAVTransportImpl(0),
@@ -203,7 +209,14 @@ Engine::transportStateChanged()
     Variant val;
     val.setValue(newTransportState);
     LOG(upnpav, debug, "engine sets new transport state: " + newTransportState);
+    // notify via upnp events over network of new transport state (usefull to update controllers view of remote renderers)
     _pAVTransportImpl->_pLastChange->setStateVar(_instanceId, AvTransportEventedStateVar::TRANSPORT_STATE, val);
+    // also notify locally within process of new transport state and stream type (usefull for gui to e.g. bring video window to front)
+    std::string streamType = StreamTypeOther;
+    if (newTransportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        streamType = getStreamType();
+    }
+    Poco::NotificationCenter::defaultCenter().postNotification(new StreamTypeNotification(_instanceId, newTransportState, streamType));
 }
 
 
@@ -255,6 +268,7 @@ void
 MediaRenderer::addEngine(Engine* pEngine)
 {
     Omm::ui4 instanceId = _pAVTransportImpl->_engines.size();
+//    pEngine->_pRenderer = this;
     pEngine->setInstancedId(instanceId);
     _pAVTransportImpl->addEngine(pEngine);
     pEngine->_pAVTransportImpl = _pAVTransportImpl;

@@ -45,6 +45,7 @@ Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
     _pSysLogger = &Poco::Logger::create("SYS", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pSysLogger = &Poco::Logger::create("SYS", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 

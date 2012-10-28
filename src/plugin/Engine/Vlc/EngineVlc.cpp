@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -179,6 +179,9 @@ VlcEngine::play()
 #endif
         handleException();
 
+//        libvlc_media_add_option_flag(_pVlcMedia, "sout=#description:dummy", 0);
+//        handleException();
+
         LOGNS(Omm::Av, upnpav, debug, "vlc engine: release media ...");
         libvlc_media_release(_pVlcMedia);
 
@@ -339,6 +342,41 @@ VlcEngine::getLengthSeconds()
     libvlc_media_get_duration( libvlc_media_t * p_md,
                                libvlc_exception_t * p_e )
     */
+}
+
+
+std::string
+VlcEngine::getStreamType()
+{
+    std::string res = Omm::Av::Engine::StreamTypeOther;
+
+    int videoTrackCount = libvlc_video_get_track_count(_pVlcPlayer);
+    handleException();
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine number of elementary video streams: " + Poco::NumberFormatter::format(videoTrackCount));
+
+    if (videoTrackCount) {
+        return Omm::Av::Engine::StreamTypeVideo;
+    }
+    return res;
+
+    // FIXME: libvlc_media_get_tracks_info() always returns 0 number of elementary streams
+//    libvlc_media_track_info_t** streams;
+//    int countStreams = libvlc_media_get_tracks_info(_pVlcMedia, streams);
+//    handleException();
+//    LOGNS(Omm::Av, upnpav, debug, "vlc engine number of elementary streams: " + Poco::NumberFormatter::format(countStreams));
+//    for (int i = 0; i < countStreams; i++) {
+//        LOGNS(Omm::Av, upnpav, debug, "vlc engine elementary stream type: " + Poco::NumberFormatter::format(streams[i]->i_type));
+//        if (streams[i]->i_type == libvlc_track_video) {
+//            // if stream contains one video elementary stream we're done.
+//            return Omm::Av::Engine::StreamTypeVideo;
+//        }
+//        else if (streams[i]->i_type == libvlc_track_audio) {
+//            // stream contains at least one audio stream, so it can be audio or video
+//            res = Omm::Av::Engine::StreamTypeAudio;
+//        }
+//        delete streams[i];
+//    }
+//    return res;
 }
 
 

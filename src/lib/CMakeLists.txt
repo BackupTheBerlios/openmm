@@ -32,6 +32,12 @@ set(OMM_LOG
 ommlog
 CACHE INTERNAL libommlog
 )
+
+install(TARGETS ommlog
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+)
 endif(NOT OMM_RELEASE)
 
 
@@ -249,7 +255,7 @@ endif(OMM_GUI AND RESGEN)
 add_subdirectory(Dvb)
 
 
-install(TARGETS ommlog ommnet ommupnp ommupnpav ommavstream ommsys ommutil
+install(TARGETS ommnet ommupnp ommupnpav ommavstream ommsys ommutil
 RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib

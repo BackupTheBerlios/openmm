@@ -36,6 +36,7 @@ Av::Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
     _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pUpnpAvLogger = &Poco::Logger::create("UPNP.AV", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 

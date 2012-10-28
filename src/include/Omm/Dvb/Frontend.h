@@ -24,6 +24,7 @@
 
 #include <linux/dvb/frontend.h>
 
+#include <Poco/Thread.h>
 #include <Poco/TextConverter.h>
 #include <Poco/TextEncoding.h>
 #include <Poco/UTF8Encoding.h>

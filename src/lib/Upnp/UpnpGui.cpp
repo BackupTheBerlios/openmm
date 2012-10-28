@@ -899,9 +899,10 @@ _pApplication(pApplication)
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
 
-    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
-    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TrackNotification>(*this, &ControllerWidget::newTrack));
-    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
+    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
+//    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
+//    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TrackNotification>(*this, &ControllerWidget::newTrack));
+//    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
 }
 
@@ -971,6 +972,20 @@ ControllerWidget::setDefaultRenderer(Omm::Av::MediaRenderer* pRenderer)
 {
     _localRendererUuid = pRenderer->getUuid();
     _pMediaRendererGroupWidget->setDefaultDevice(pRenderer);
+}
+
+
+void
+ControllerWidget::newStreamType(Av::StreamTypeNotification* pNotification)
+{
+    LOGNS(Gui, gui, debug, "controller widget stream type notification, instance id: "
+        + Poco::NumberFormatter::format(pNotification->_instanceId) + ", transport state: " + pNotification->_transportState + ", stream type: " + pNotification->_streamType);
+    if (pNotification->_streamType == Av::Engine::StreamTypeVideo && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        setCurrentView(_pVisual);
+    }
+    else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+        showMainMenu();
+    }
 }
 
 

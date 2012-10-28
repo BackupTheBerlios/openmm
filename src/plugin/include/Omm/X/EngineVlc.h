@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2009, 2010, 2011, 2012                                     |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -69,9 +69,8 @@ public:
     virtual Poco::UInt64 getPositionByte();
     virtual float getPositionPercentage();
     virtual float getPositionSecond();
-
     virtual float getLengthSeconds();
-
+    virtual std::string getStreamType();
     virtual TransportState getTransportState();
 
     /*
