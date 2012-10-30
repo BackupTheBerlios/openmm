@@ -104,20 +104,27 @@ QtNavigatorPanel::pop(View* pView)
         delete pButton;
         _buttonStack.pop();
     }
-    _pNavigatorView->exposeView(pView);
+    if (!_buttonStack.empty()) {
+        _pNavigatorView->exposeView(pView);
+    }
 }
 
 
 void
 QtNavigatorPanel::pop()
 {
+    if (_buttonStack.empty()) {
+        return;
+    }
     QtNavigatorPanelButton* pButton = _buttonStack.top();
     _pNavigatorView->popView(pButton->_pView);
     disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
     _pButtonLayout->removeWidget(pButton);
     delete pButton;
     _buttonStack.pop();
-    _pNavigatorView->exposeView(_buttonStack.top()->_pView);
+    if (!_buttonStack.empty()) {
+        _pNavigatorView->exposeView(_buttonStack.top()->_pView);
+    }
 }
 
 
@@ -191,6 +198,7 @@ NavigatorViewImpl::popView(View* pView)
 {
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
     _pStackedWidget->removeWidget(pWidget);
+    static_cast<NavigatorView*>(_pView)->_pViewStack.pop();
 }
 
 

@@ -989,42 +989,42 @@ ControllerWidget::newStreamType(Av::StreamTypeNotification* pNotification)
 }
 
 
-void
-ControllerWidget::newTransportState(TransportStateNotification* pNotification)
-{
-    LOGNS(Gui, gui, debug, "controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
-    LOGNS(Gui, gui, debug, "new transport state, local renderer has uuid: " + _localRendererUuid);
-    if (pNotification->_uuid == _localRendererUuid && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
-        showMainMenu();
-    }
-}
+//void
+//ControllerWidget::newTransportState(TransportStateNotification* pNotification)
+//{
+//    LOGNS(Gui, gui, debug, "controller widget device: " + pNotification->_uuid + " got new transport state: " + pNotification->_transportState);
+//    LOGNS(Gui, gui, debug, "new transport state, local renderer has uuid: " + _localRendererUuid);
+//    if (pNotification->_uuid == _localRendererUuid && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+//        showMainMenu();
+//    }
+//}
 
 
-void
-ControllerWidget::newTrack(TrackNotification* pNotification)
-{
-    if (pNotification->_uuid == _localRendererUuid) {
-        LOGNS(Gui, gui, debug, "new track on local renderer");
-        Av::CtlMediaRenderer* pRenderer = static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getDevice(pNotification->_uuid));
-        if (pRenderer) {
-            LOGNS(Gui, gui, debug, "new track on local renderer, playing object: " + pNotification->_title + ", class: " + pNotification->_objectClass);
-            if (Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
-                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)
-                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
-                setCurrentView(_pVisual);
-            }
-        }
-    }
-}
+//void
+//ControllerWidget::newTrack(TrackNotification* pNotification)
+//{
+//    if (pNotification->_uuid == _localRendererUuid) {
+//        LOGNS(Gui, gui, debug, "new track on local renderer");
+//        Av::CtlMediaRenderer* pRenderer = static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getDevice(pNotification->_uuid));
+//        if (pRenderer) {
+//            LOGNS(Gui, gui, debug, "new track on local renderer, playing object: " + pNotification->_title + ", class: " + pNotification->_objectClass);
+//            if (Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_ITEM)
+//                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::ITEM, Av::AvClass::VIDEO_BROADCAST)
+//                || Av::AvClass::matchClass(pNotification->_objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+//                setCurrentView(_pVisual);
+//            }
+//        }
+//    }
+//}
 
 
-void
-ControllerWidget::newPlaylist(PlaylistNotification* pNotification)
-{
-    // write resource of playlist container
-    // TODO: move this to playlist editor, assign a playlist container to playlist editor.
-//    pModel->writeResource(getControllerHttpUri());
-}
+//void
+//ControllerWidget::newPlaylist(PlaylistNotification* pNotification)
+//{
+//    // write resource of playlist container
+//    // TODO: move this to playlist editor, assign a playlist container to playlist editor.
+////    pModel->writeResource(getControllerHttpUri());
+//}
 
 
 void

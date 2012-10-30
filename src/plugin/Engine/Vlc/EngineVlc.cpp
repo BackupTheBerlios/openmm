@@ -360,6 +360,7 @@ VlcEngine::getStreamType()
     return res;
 
     // FIXME: libvlc_media_get_tracks_info() always returns 0 number of elementary streams
+    //        even with libvlc_media_add_option_flag(_pVlcMedia, "sout=#description:dummy", 0);
 //    libvlc_media_track_info_t** streams;
 //    int countStreams = libvlc_media_get_tracks_info(_pVlcMedia, streams);
 //    handleException();

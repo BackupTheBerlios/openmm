@@ -58,7 +58,7 @@ NavigatorView::push(View* pView, const std::string& name)
 void
 NavigatorView::pop()
 {
-    if (_pViewStack.size() > 1) {
+    if (!_pViewStack.empty()) {
         // NOTE: NavigatorView popView() needs to be callable from non-gui thread
         static_cast<NavigatorViewImpl*>(_pImpl)->popView();
         _pViewStack.pop();
@@ -69,6 +69,7 @@ NavigatorView::pop()
 void
 NavigatorView::popToRoot()
 {
+    LOG(gui, debug, "navigator pop to root, view stack size: " + Poco::NumberFormatter::format(_pViewStack.size()));
     while (_pViewStack.size() > 1) {
         pop();
     }

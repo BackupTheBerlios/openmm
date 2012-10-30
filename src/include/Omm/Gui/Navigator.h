@@ -40,6 +40,8 @@ protected:
 
 class NavigatorView : public View
 {
+    friend class NavigatorViewImpl;
+
 public:
     NavigatorView(View* pParent = 0);
     virtual ~NavigatorView();

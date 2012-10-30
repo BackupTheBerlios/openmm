@@ -183,6 +183,7 @@ _rowOffset(0),
 _bottomRows(2),
 //_pHighlightedView(0),
 _pSelectionView(0),
+_pSelectedModel(0),
 _highlightedRow(-1),
 _pTopView(0),
 _dragMode(DragNone)
@@ -222,9 +223,11 @@ ListView::resetListView()
 //        _pHighlightedView = 0;
 //    }
     if (_pSelectionView) {
-        delete _pSelectionView;
-        _pSelectionView = 0;
+        _pSelectionView->hide(false);
+//        delete _pSelectionView;
+//        _pSelectionView = 0;
     }
+    _pSelectedModel = 0;
     _highlightedRow = -1;
     scrollContentsTo(0, 0);
 }
@@ -252,6 +255,9 @@ ListView::syncViewImpl()
     LOG(gui, debug, "list view sync view impl of \"" + getName() + "\"");
     // whipe out everything
     clearVisibleViews();
+    if (_pSelectionView) {
+        _pSelectionView->hide();
+    }
 
     updateScrollWidgetSize(totalItemCount());
     int visibleItemCount = std::min(totalItemCount(), _rowOffset + viewPortHeightInRows()) - _rowOffset;
@@ -272,7 +278,6 @@ ListView::syncViewImpl()
     else {
         showItemsAt(_rowOffset, _rowOffset, visibleItemCount);
     }
-
 }
 
 
@@ -297,6 +302,10 @@ ListView::showItemsAt(int rowOffset, int itemOffset, int countItems)
         _itemControllers[pView]->setRow(itemOffset + index);
         moveItemView(rowOffset + index, pView);
         pView->show();
+        if (pItemModel == _pSelectedModel) {
+            _pSelectionView->show();
+            moveItemView(rowOffset + index, _pSelectionView);
+        }
     }
 }
 
@@ -727,6 +736,7 @@ ListView::highlightItem(int row)
 //        pHighlightedView->setHighlighted(true);
 //        _pHighlightedView = pHighlightedView;
 //    }
+    _pSelectedModel = pModel->getItemModel(row);
     _highlightedRow = row;
 }
 

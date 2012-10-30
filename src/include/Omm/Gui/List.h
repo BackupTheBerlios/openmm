@@ -111,6 +111,7 @@ protected:
 
 //    View*                               _pHighlightedView;
     SelectionView*                      _pSelectionView;
+    Model*                              _pSelectedModel;
     int                                 _highlightedRow;
 
     View*                               _pTopView;
