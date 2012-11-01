@@ -115,5 +115,18 @@ NetworkInterfaceManagerImpl::stop()
 }
 
 
+bool
+NetworkInterfaceManagerImpl::ignoreInterface(const std::string& interface)
+{
+    // pdp_ip0 is the WWAN interface and is enabled when iphone is not docked
+    if (interface == "pdp_ip0") {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
 }  // namespace Net
 } // namespace Omm

@@ -1606,6 +1606,8 @@ Subscription::setSid(const std::string& sid)
 void
 Subscription::addCallbackUri(const std::string& uri)
 {
+    LOG(event, debug, "add callback uri: " + uri);
+
     try {
         _callbackUris.push_back(Poco::URI(uri));
         if (_pSession) {
@@ -3464,8 +3466,8 @@ _pDeviceContainer(0),
 _pDeviceData(0),
 _pDevDeviceCode(0),
 _pCtlDeviceCode(0),
-//_subscribeToEvents(true),
-_subscribeToEvents(false)
+_subscribeToEvents(true)
+//_subscribeToEvents(false)
 {
 }
 
@@ -3516,7 +3518,7 @@ Device::initStateVars()
 
 
 void
-Device::initControllerEventing()
+Device::controllerSubscribeEventing()
 {
     if (!_subscribeToEvents) {
         return;
@@ -3538,7 +3540,7 @@ Device::initControllerEventing()
 
 
 void
-Device::deInitControllerEventing()
+Device::controllerUnsubscribeEventing()
 {
     if (!_subscribeToEvents) {
         return;
@@ -3958,7 +3960,7 @@ Controller::setState(State newState)
     else if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-                (*d)->deInitControllerEventing();
+                (*d)->controllerUnsubscribeEventing();
             }
         }
         DeviceManager::clear();
@@ -4112,7 +4114,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
                 LOG(upnp, information, "controller adds device, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
                 pTypedDevice->addCtlDeviceCode();
-                pTypedDevice->initControllerEventing();
+                pTypedDevice->controllerSubscribeEventing();
                 pTypedDevice->initController();
 
                 pDeviceGroup->addDevice(pTypedDevice);

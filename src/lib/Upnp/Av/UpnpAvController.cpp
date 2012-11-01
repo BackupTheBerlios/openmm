@@ -182,7 +182,7 @@ AvController::addDeviceContainer(DeviceContainer* pDeviceContainer)
         if (pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaRenderer:1" ||
             pDevice->getDeviceType() == "urn:schemas-upnp-org:device:MediaServer:1") {
             Controller::addDeviceContainer(pDeviceContainer);
-            pDevice->initControllerEventing();
+            pDevice->controllerSubscribeEventing();
         }
 
         LOG(upnpav, information, "AV controller add device finished, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());

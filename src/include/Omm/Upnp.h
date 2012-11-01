@@ -522,8 +522,8 @@ public:
     void addIcon(Icon* pIcon);
 
     void initStateVars();
-    void initControllerEventing();
-    void deInitControllerEventing();
+    void controllerSubscribeEventing();
+    void controllerUnsubscribeEventing();
 
     // some devices (e.g. media servers) need some action to be started and stopped
     virtual void start() {}

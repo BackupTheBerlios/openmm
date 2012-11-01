@@ -31,6 +31,8 @@ class NetworkInterfaceManagerImpl
 public:
     void start() {}
     void stop() {}
+
+    bool ignoreInterface(const std::string& interface) { return false; }
 };
 
 

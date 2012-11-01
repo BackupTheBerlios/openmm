@@ -127,7 +127,7 @@ NetworkInterfaceManager::findValidIpAddress()
             //
             // using forName can give the IPv6 address of the interface with the same name ...
             Poco::Net::IPAddress validIpAddress = (*it).address();
-            if (validIpAddress.family() == Poco::Net::IPAddress::IPv4) {
+            if (validIpAddress.family() == Poco::Net::IPAddress::IPv4 && !_pImpl->ignoreInterface(it->name())) {
                 validAddressFound = true;
                 _validIpAddress = validIpAddress;
             }

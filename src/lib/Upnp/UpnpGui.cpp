@@ -1771,21 +1771,42 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 {
     LOGNS(Gui, gui, debug, "media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
 
-    // get (object id of) container, that is on top of navigator
-    // can also be a MediaServerGroupWidget, thus the dynamic_cast
-    MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
-    if (pContainer && _pServerGroupWidget->getSelectedDevice() && _pServerGroupWidget->getSelectedDevice()->getUuid() == getUuid()) {
-        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
-        if (pObject) {
-            // clear cache (reset data model)
-            pObject->clear();
-            // if total item count of list model is 0, no items are fetched and thus total item count is not updated
-            // so we need to fetch first child in the current search context
-            pObject->getChildForRow(0);
-            // sync view
-            pContainer->syncView();
-        }
-    }
+    // FIXME: crashes / timeouts when updating system id on device discovery in controller
+    // FIXME: avoid handling system update id when device is discovered
+
+
+//    Av::CtlMediaObject2* pObject = getRootObject();
+//    if (pObject) {
+//        // clear cache (reset data model)
+//        pObject->clear();
+//        // if total item count of list model is 0, no items are fetched and thus total item count is not updated
+//        // so we need to fetch first child in the current search context
+//        pObject->getChildForRow(0);
+//        // sync view
+////        MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
+////        pContainer->syncView();
+//    }
+
+
+//    if (!_pServerGroupWidget) {
+//        return;
+//    }
+//
+//    // get (object id of) container, that is on top of navigator
+//    // can also be a MediaServerGroupWidget, thus the dynamic_cast
+//    MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
+//    if (pContainer && _pServerGroupWidget->getSelectedDevice() && _pServerGroupWidget->getSelectedDevice()->getUuid() == getUuid()) {
+//        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
+//        if (pObject) {
+//            // clear cache (reset data model)
+//            pObject->clear();
+//            // if total item count of list model is 0, no items are fetched and thus total item count is not updated
+//            // so we need to fetch first child in the current search context
+//            pObject->getChildForRow(0);
+//            // sync view
+//            pContainer->syncView();
+//        }
+//    }
 }
 
 

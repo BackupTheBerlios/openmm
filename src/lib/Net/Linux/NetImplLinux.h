@@ -37,6 +37,8 @@ public:
     void start();
     void stop();
 
+    bool ignoreInterface(const std::string& interface) { return false; }
+
 private:
     class Private;
 
