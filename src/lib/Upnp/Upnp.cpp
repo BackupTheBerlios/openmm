@@ -68,13 +68,13 @@ Log::Log()
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -3463,7 +3463,9 @@ Device::Device() :
 _pDeviceContainer(0),
 _pDeviceData(0),
 _pDevDeviceCode(0),
-_pCtlDeviceCode(0)
+_pCtlDeviceCode(0),
+//_subscribeToEvents(true),
+_subscribeToEvents(false)
 {
 }
 
@@ -3516,7 +3518,10 @@ Device::initStateVars()
 void
 Device::initControllerEventing()
 {
-    for(Device::ServiceIterator s = beginService(); s != endService(); ++s) {
+    if (!_subscribeToEvents) {
+        return;
+    }
+    for(ServiceIterator s = beginService(); s != endService(); ++s) {
         (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
         _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
@@ -3527,6 +3532,23 @@ Device::initControllerEventing()
         }
         catch (...) {
             LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
+        }
+    }
+}
+
+
+void
+Device::deInitControllerEventing()
+{
+    if (!_subscribeToEvents) {
+        return;
+    }
+    for(ServiceIterator s = beginService(); s != endService(); ++s) {
+        try {
+            (*s)->sendCancelSubscriptionRequest();
+        }
+        catch (...) {
+            LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
         }
     }
 }
@@ -3936,14 +3958,7 @@ Controller::setState(State newState)
     else if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-                for(Device::ServiceIterator s = (*d)->beginService(); s != (*d)->endService(); ++s) {
-                    try {
-                        (*s)->sendCancelSubscriptionRequest();
-                    }
-                    catch (...) {
-                        LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
-                    }
-                }
+                (*d)->deInitControllerEventing();
             }
         }
         DeviceManager::clear();

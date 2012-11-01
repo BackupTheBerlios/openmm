@@ -98,7 +98,7 @@ QtNavigatorPanel::pop(View* pView)
 {
     while(!_buttonStack.empty() && _buttonStack.top()->_pView != pView) {
         QtNavigatorPanelButton* pButton = _buttonStack.top();
-        _pNavigatorView->popView(pButton->_pView);
+        _pNavigatorView->removeView(pButton->_pView);
         disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
         _pButtonLayout->removeWidget(pButton);
         delete pButton;
@@ -117,7 +117,7 @@ QtNavigatorPanel::pop()
         return;
     }
     QtNavigatorPanelButton* pButton = _buttonStack.top();
-    _pNavigatorView->popView(pButton->_pView);
+    _pNavigatorView->removeView(pButton->_pView);
     disconnect(pButton, SIGNAL(pressed()), this, SLOT(buttonPushed()));
     _pButtonLayout->removeWidget(pButton);
     delete pButton;
@@ -141,6 +141,25 @@ QtNavigatorPanel::textEdited(const QString& text)
 {
     LOG(gui, debug, "search text changed: " + text.toStdString());
     _pNavigatorView->changedSearchText(text.toStdString());
+}
+
+
+long unsigned int
+QtNavigatorPanel::buttonCount()
+{
+    return _buttonStack.size();
+}
+
+
+View*
+QtNavigatorPanel::topView()
+{
+    if (_buttonStack.empty()) {
+        return 0;
+    }
+    else {
+        return _buttonStack.top()->_pView;
+    }
 }
 
 
@@ -174,15 +193,32 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
     _pStackedWidget->setCurrentWidget(pWidget);
     _pNavigatorPanel->push(pView, name);
     pWidget->show();
-//    pWidget->resize(_pStackedWidget->size());
-//    pView->resize(700, 400);
 }
 
 
 void
-NavigatorViewImpl::popView()
+NavigatorViewImpl::popView(bool keepRootView)
 {
+    if (keepRootView && _pNavigatorPanel->buttonCount() == 1) {
+        return;
+    }
     emit _pNavigatorPanel->pop();
+}
+
+
+void
+NavigatorViewImpl::popToRootView()
+{
+    while (_pNavigatorPanel->buttonCount() > 1) {
+        emit _pNavigatorPanel->pop();
+    }
+}
+
+
+View*
+NavigatorViewImpl::getVisibleView()
+{
+    return _pNavigatorPanel->topView();
 }
 
 
@@ -194,11 +230,10 @@ NavigatorViewImpl::showSearchBox(bool show)
 
 
 void
-NavigatorViewImpl::popView(View* pView)
+NavigatorViewImpl::removeView(View* pView)
 {
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
     _pStackedWidget->removeWidget(pWidget);
-    static_cast<NavigatorView*>(_pView)->_pViewStack.pop();
 }
 
 

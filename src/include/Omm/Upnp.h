@@ -523,6 +523,7 @@ public:
 
     void initStateVars();
     void initControllerEventing();
+    void deInitControllerEventing();
 
     // some devices (e.g. media servers) need some action to be started and stopped
     virtual void start() {}
@@ -548,6 +549,7 @@ private:
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
     Poco::NotificationCenter            _notificationCenter;
+    bool                                _subscribeToEvents;
 };
 
 

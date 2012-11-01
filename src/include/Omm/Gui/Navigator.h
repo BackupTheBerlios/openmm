@@ -47,13 +47,10 @@ public:
     virtual ~NavigatorView();
 
     void push(View* pView, const std::string& name = "");
-    void pop();
+    void pop(bool keepRootView = true);
     void popToRoot();
     View* getVisibleView();
     void showSearchBox(bool show = true);
-
-private:
-    std::stack<View*>       _pViewStack;
 };
 
 

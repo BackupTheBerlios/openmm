@@ -61,6 +61,8 @@ private slots:
     void pop();
     void buttonPushed();
     void textEdited(const QString& text);
+    long unsigned int buttonCount();
+    View* topView();
 
 private:
     std::stack<QtNavigatorPanelButton*>     _buttonStack;

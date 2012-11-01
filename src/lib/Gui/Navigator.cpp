@@ -49,37 +49,30 @@ NavigatorView::push(View* pView, const std::string& name)
 {
     LOG(gui, debug, "navigator push: " + name + " ...");
     static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
-    _pViewStack.push(pView);
     pView->resize(width(), height());
     LOG(gui, debug, "navigator push: " + name + " finished.");
 }
 
 
 void
-NavigatorView::pop()
+NavigatorView::pop(bool keepRootView)
 {
-    if (!_pViewStack.empty()) {
-        // NOTE: NavigatorView popView() needs to be callable from non-gui thread
-        static_cast<NavigatorViewImpl*>(_pImpl)->popView();
-        _pViewStack.pop();
-    }
+    // NOTE: NavigatorView popView() needs to be callable from non-gui thread
+    static_cast<NavigatorViewImpl*>(_pImpl)->popView(keepRootView);
 }
 
 
 void
 NavigatorView::popToRoot()
 {
-    LOG(gui, debug, "navigator pop to root, view stack size: " + Poco::NumberFormatter::format(_pViewStack.size()));
-    while (_pViewStack.size() > 1) {
-        pop();
-    }
+    static_cast<NavigatorViewImpl*>(_pImpl)->popToRootView();
 }
 
 
 View*
 NavigatorView::getVisibleView()
 {
-    return _pViewStack.top();
+    static_cast<NavigatorViewImpl*>(_pImpl)->getVisibleView();
 }
 
 

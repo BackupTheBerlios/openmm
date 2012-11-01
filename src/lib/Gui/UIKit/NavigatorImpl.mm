@@ -28,7 +28,7 @@
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmNavigationController : UINavigationController<UISearchBarDelegate>
+@interface OmmNavigationController : UINavigationController<UISearchBarDelegate, UINavigationControllerDelegate>
 {
     Omm::Gui::NavigatorViewImpl* _pNavigatorViewImpl;
 }
@@ -41,24 +41,37 @@
 - (void)setImpl:(Omm::Gui::NavigatorViewImpl*)pImpl
 {
     _pNavigatorViewImpl = pImpl;
+    self.delegate = self;
 }
 
 
-- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
+- (void)searchBar:(UISearchBar*)searchBar textDidChange:(NSString*)searchText
 {
     _pNavigatorViewImpl->textEdited(std::string([searchText UTF8String]));
 }
 
 
-- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+- (void)searchBarCancelButtonClicked:(UISearchBar*)searchBar
 {
     [searchBar resignFirstResponder];
+}
+
+
+- (void)navigationController:(UINavigationController*)navigationController didShowViewController:(UIViewController*)viewController animated:(BOOL)animated
+{
+    _pNavigatorViewImpl->removeViewsUpto(viewController);
 }
 
 
 - (void)popView
 {
     [self popViewControllerAnimated:YES];
+}
+
+
+- (void)popToRootView
+{
+    [self popToRootViewControllerAnimated:YES];
 }
 
 @end
@@ -95,14 +108,33 @@ NavigatorViewImpl::pushView(View* pView, const std::string name)
     pViewController.title = pName;
 
     [pNativeViewController pushViewController:pViewController animated:YES];
+    _viewStack.push(pView);
 }
 
 
 void
-NavigatorViewImpl::popView()
+NavigatorViewImpl::popView(bool keepRootView)
 {
+    // UIKit can't pop the root controller, so we have no choice here.
     OmmNavigationController* pNativeViewController = static_cast<OmmNavigationController*>(getNativeViewController());
     [pNativeViewController performSelectorOnMainThread:@selector(popView) withObject:nil waitUntilDone:YES];
+}
+
+
+void
+NavigatorViewImpl::popToRootView()
+{
+    OmmNavigationController* pNativeViewController = static_cast<OmmNavigationController*>(getNativeViewController());
+    [pNativeViewController performSelectorOnMainThread:@selector(popToRootView) withObject:nil waitUntilDone:YES];
+}
+
+
+View*
+NavigatorViewImpl::getVisibleView()
+{
+//    OmmNavigationController* pNativeViewController = static_cast<OmmNavigationController*>(getNativeViewController());
+//    UIViewController* topViewController = pNativeViewController.topViewController;
+    return _viewStack.top();
 }
 
 
@@ -143,6 +175,16 @@ NavigatorViewImpl::textEdited(const std::string& searchText)
 {
     LOG(gui, debug, "search text changed: " + searchText);
     IMPL_NOTIFY_CONTROLLER(NavigatorController, changedSearchText, searchText);
+}
+
+
+void
+NavigatorViewImpl::removeViewsUpto(void* pViewController)
+{
+    while (!_viewStack.empty() && pViewController != _viewStack.top()->getViewImpl()->getNativeViewController()) {
+        _viewStack.pop();
+        LOG(gui, debug, "navigator impl view stack pop view, stack size: " + Poco::NumberFormatter::format(_viewStack.size()));
+    }
 }
 
 

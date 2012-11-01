@@ -37,10 +37,16 @@ public:
     virtual ~NavigatorViewImpl();
 
     void pushView(View* pView, const std::string name);
-    void popView();
+    void popView(bool keepRootView);
+    void popToRootView();
+    View* getVisibleView();
     void showSearchBox(bool show = true);
 
     void textEdited(const std::string& searchText);
+    void removeViewsUpto(void* pViewController);
+
+private:
+    std::stack<View*>   _viewStack;
 };
 
 

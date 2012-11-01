@@ -44,18 +44,19 @@ public:
     virtual ~NavigatorViewImpl();
 
     void pushView(View* pView, const std::string name);
-    void popView();
+    void popView(bool keepRootView);
+    void popToRootView();
+    View* getVisibleView();
     void showSearchBox(bool show);
 
 private:
-    void popView(View* pView);
+    void removeView(View* pView);
     void exposeView(View* pView);
     void changedSearchText(const std::string& searchText);
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;
     QVBoxLayout*                _pNavigatorLayout;
-//    std::stack<View*>           _views;
 };
 
 
