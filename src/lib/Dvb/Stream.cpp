@@ -39,6 +39,7 @@
 #include "Log.h"
 #include "DvbLogger.h"
 #include "Stream.h"
+#include "Dvb/Stream.h"
 
 
 namespace Omm {
@@ -112,6 +113,35 @@ Stream::getType()
 }
 
 
+bool
+Stream::isAudio()
+{
+    if (_type == Audio ||
+        _type == AudioMpeg1_11172 ||
+        _type == AudioMpeg2_13818_3 ||
+        _type == AudioISO13818_7_ADTS ||
+        _type == AudioISO14496_3 ||
+        _type == AudioAtscAc3
+        ) {
+        return true;
+    }
+    return false;
+}
+
+
+bool
+Stream::isVideo()
+{
+    if (_type == Video ||
+        _type == VideoMpeg1_11172 ||
+        _type == VideoMpeg2_H262
+        ) {
+        return true;
+    }
+    return false;
+}
+
+
 unsigned int
 Stream::getPid()
 {
@@ -161,6 +191,13 @@ Stream::read(Poco::UInt8* buf, int size, int timeout)
 //            throw Poco::TimeoutException("dvb read stream timeout");
 //        }
 //    }
+}
+
+
+std::istream*
+Stream::getStream()
+{
+    return _pStream;
 }
 
 

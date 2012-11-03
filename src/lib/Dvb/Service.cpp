@@ -265,6 +265,30 @@ Service::getTransponder()
 }
 
 
+Stream*
+Service::getFirstAudioStream()
+{
+    for (std::vector<Stream*>::iterator it = _streams.begin(); it != _streams.end(); ++it) {
+        if ((*it)->isAudio()) {
+            return *it;
+        }
+    }
+    return 0;
+}
+
+
+Stream*
+Service::getFirstVideoStream()
+{
+    for (std::vector<Stream*>::iterator it = _streams.begin(); it != _streams.end(); ++it) {
+        if ((*it)->isVideo()) {
+            return *it;
+        }
+    }
+    return 0;
+}
+
+
 std::string
 Service::typeToString(Poco::UInt8 status)
 {

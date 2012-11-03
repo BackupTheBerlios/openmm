@@ -61,6 +61,7 @@
 #include "Transponder.h"
 #include "Frontend.h"
 #include "Demux.h"
+#include "Mux.h"
 #include "Dvr.h"
 #include "Device.h"
 
@@ -190,14 +191,16 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 Device* Device::_pInstance = 0;
 
 Device::Device() :
+//_useDvrDevice(false),
 _useDvrDevice(true),
-_blockDvrDevice(false)
+_blockDvrDevice(false),
 //_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
 //_reopenDvrDevice(true)
 //_reopenDvrDevice(false)
 // renderer in same process as dvb server: reopenDvrDevice = true then dvr device busy, reopenDvrDevice = false then stream sometimes broken
 // renderer in different process as dvb server: reopenDvrDevice = true ok, reopenDvrDevice = false then stream sometimes broken
+_pMux(0)
 {
 }
 
@@ -402,24 +405,35 @@ Device::getStream(const std::string& serviceName)
 
     Service* pService = pTransponder->getService(serviceName);
     Demux* pDemux = pFrontend->_pDemux;
-    // TODO: check if service not already selected on demuxer
-    pDemux->selectService(pService, Demux::TargetDvr);
-    pDemux->runService(pService, true);
 
-    LOG(dvb, debug, "reading from dvr device ...");
-    // TODO: return stream from Service (which gets it from own muxer)
-    Dvr* pDvr = pFrontend->_pDvr;
-    pDvr->openDvr(blockDvrDevice());
-    std::istream* pStream = pDvr->getStream();
-    _streamMap[pStream] = pService;
-    return pStream;
+    // TODO: check if service not already selected on demuxer
+    if (useDvrDevice()) {
+        pDemux->selectService(pService, Demux::TargetDvr);
+        pDemux->runService(pService, true);
+        LOG(dvb, debug, "reading from dvr device ...");
+        Dvr* pDvr = pFrontend->_pDvr;
+        pDvr->openDvr(blockDvrDevice());
+        std::istream* pStream = pDvr->getStream();
+        _streamMap[pStream] = pService;
+        return pStream;
+    }
+    else {
+        pDemux->selectService(pService, Demux::TargetDemux);
+        pDemux->runService(pService, true);
+        _pMux = new Mux;
+        _pMux->addStream(pService->getFirstAudioStream());
+        _pMux->addStream(pService->getFirstVideoStream());
+        _pMux->start();
+        return _pMux->getMux();
+    //    return pService->getFirstAudioStream()->getStream();
+//        return pService->getFirstVideoStream()->getStream();
+    }
 }
 
 
 void
 Device::freeStream(std::istream* pIstream)
 {
-
     // TODO: only stop and free service stream (not complete demux)
     Service* pService = _streamMap[pIstream];
     if (!pService) {
@@ -430,22 +444,17 @@ Device::freeStream(std::istream* pIstream)
     pDemux->unselectService(pService);
 
     LOG(dvb, debug, "stop reading from dvr device.");
-//    if (_useDvrDevice) {
+    if (useDvrDevice()) {
         Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
         pDvr->clearBuffer();
 //        pDvr->closeDvr();
-//    }
+    }
+    else {
+        _pMux->stop();
+        delete _pMux;
+        _pMux = 0;
+    }
     _streamMap.erase(pIstream);
-
-    //    _adapters[0]->getDemux()->stop();
-//    if (_useDvrDevice) {
-//        _adapters[0]->getDvr()->stopReadThread();
-//        _adapters[0]->getDvr()->clearBuffer();
-//        if (_reopenDvrDevice) {
-////            _adapters[0]->getDvr()->setBlocking(false);
-//            _adapters[0]->getDvr()->closeDvr();
-//        }
-//    }
 }
 
 

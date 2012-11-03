@@ -38,7 +38,7 @@ namespace Dvb {
 class BitField
 {
 public:
-    BitField() {}
+    BitField() : _data(0) {}
     BitField(void* data) : _data(data) {}
 
     template<typename T>
@@ -91,13 +91,79 @@ public:
     }
 
     template<typename T>
+    void setValue(unsigned int offset, unsigned int length, T val)
+    {
+        unsigned int byteOffsetLeft = offset >> 3;
+
+        if (length <= 8) {
+            Poco::UInt8 mask = 0xff;
+            unsigned int bitOffsetLeft = offset % 8;
+            if (bitOffsetLeft) {
+                Poco::UInt8 leftMask = 0xff >> bitOffsetLeft;
+                mask &= leftMask;
+            }
+            unsigned int bitOffsetRight = (offset + length) % 8;
+            if (bitOffsetRight) {
+                bitOffsetRight = 8 - bitOffsetRight;
+                Poco::UInt8 rightMask = 0xff << bitOffsetRight;
+                mask &= rightMask;
+                val <<= bitOffsetRight;
+            }
+            // cut of bits of val that are outside mask
+            val &= mask;
+            // set masked bits to 0
+            *((Poco::UInt8*)(_data) + byteOffsetLeft) &= ~mask;
+            // finally set bits
+            *((Poco::UInt8*)(_data) + byteOffsetLeft) |= val;
+        }
+        else {
+#ifdef POCO_ARCH_LITTLE_ENDIAN
+            val = Poco::ByteOrder::flipBytes(val);
+#endif
+            unsigned int bitOffsetRight = (offset + length) % 8;
+            if (bitOffsetRight) {
+                bitOffsetRight = 8 - bitOffsetRight;
+            }
+
+            val <<= bitOffsetRight;
+            Poco::UInt8 buf[sizeof(T)];
+            *((T*)buf) = val;
+
+            // write the bytes in the middle
+            memcpy((Poco::UInt8*)(_data) + byteOffsetLeft + 1, buf + 1, sizeof(T) - 2);
+            // write left and right byte
+            unsigned int bitOffsetLeft = offset % 8;
+            Poco::UInt8 leftMask = 0xff >> bitOffsetLeft;
+            *((Poco::UInt8*)(_data) + byteOffsetLeft) &= ~leftMask;
+            *((Poco::UInt8*)(_data) + byteOffsetLeft) |= buf[0] & leftMask;
+            Poco::UInt8 rightMask = 0xff << bitOffsetRight;
+            *((Poco::UInt8*)(_data) + byteOffsetLeft + sizeof(T) - 1) &= ~rightMask;
+            *((Poco::UInt8*)(_data) + byteOffsetLeft + sizeof(T) - 1) |= buf[sizeof(T) - 1] & rightMask;
+        }
+    }
+
+    template<typename T>
     T getBytes(unsigned int byteOffset)
     {
         T val = *((T*)(void*)((Poco::UInt8*)(_data) + byteOffset));
 #ifdef POCO_ARCH_LITTLE_ENDIAN
-        val = Poco::ByteOrder::flipBytes(val);
+        // FIXME: also need to check sizeof(T), because inline methods flipBytes() are only provided for sizeof(T) > 1 ?
+        if (sizeof(T) > 1) {
+            val = Poco::ByteOrder::flipBytes(val);
+        }
 #endif
         return val;
+    }
+
+    template<typename T>
+    void setBytes(unsigned int byteOffset, T val)
+    {
+#ifdef POCO_ARCH_LITTLE_ENDIAN
+        if (sizeof(T) > 1) {
+            val = Poco::ByteOrder::flipBytes(val);
+        }
+#endif
+       *((T*)(void*)((Poco::UInt8*)(_data) + byteOffset)) = val;
     }
 
     template<typename T>

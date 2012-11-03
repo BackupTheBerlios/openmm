@@ -1639,7 +1639,8 @@ Subscription::getEventKey()
 void
 Subscription::sendEventMessage(const std::string& eventMessage)
 {
-    // TODO: queue the eventMessages for sending ...?
+    // TODO: queue the eventMessages for sending ...? (don't block device thread)
+    // FIXME: timeout should be 30 sec for event notifications (see 4.2.1 Eventing: Event messages: NOTIFY)
     Poco::Net::HTTPRequest request("NOTIFY", _pSessionUri->getPath(), "HTTP/1.1");
     request.set("HOST", _pSessionUri->getAuthority());
     request.setContentType("text/xml");

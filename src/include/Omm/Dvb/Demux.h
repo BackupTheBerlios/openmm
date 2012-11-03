@@ -54,9 +54,6 @@ public:
     bool readTable(Table* pTable);
 
 private:
-    bool setPid(int fileDesc, unsigned int pid, dmx_pes_type_t pesType);
-    bool setSectionFilter(Stream* pStream, uint8_t filter[18], uint8_t mask[18]);
-
     Adapter*                    _pAdapter;
     std::string                 _deviceName;
     int                         _num;

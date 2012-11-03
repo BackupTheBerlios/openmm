@@ -33,6 +33,10 @@
 
 int
 main(int argc, char** argv) {
+    // record 2MiB from each stream
+    const int bufSize = 2 * 1024 * 1024;
+//    const int bufSize = 100 * 1024;
+
     Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
     Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
 //    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
@@ -44,7 +48,9 @@ main(int argc, char** argv) {
     pDevice->readXml(dvbXml);
     pDevice->open();
 
-    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+//    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
+        
         Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(it->first);
         if (pTransponder) {
             Omm::Dvb::Service* pService = pTransponder->getService(it->first);
@@ -54,8 +60,6 @@ main(int argc, char** argv) {
                 std::istream* pDvbStream = pDevice->getStream(it->first);
                 if (pDvbStream) {
                     std::ofstream serviceStream((it->first + std::string(".ts")).c_str());
-                    // record 2MiB from each stream
-                    const int bufSize = 2 * 1024 * 1024;
                     char buf[bufSize];
                     pDvbStream->read(buf, bufSize);
                     pDevice->freeStream(pDvbStream);
@@ -63,7 +67,7 @@ main(int argc, char** argv) {
                 }
             }
         }
-    }
+//    }
     pDevice->close();
 
     return 0;

@@ -49,6 +49,7 @@ class SignalCheckThread;
 class Lnb;
 class Frontend;
 class Demux;
+class Mux;
 class Dvr;
 class Adapter;
 
@@ -78,7 +79,6 @@ public:
 private:
     int                         _num;
     std::string                 _deviceName;
-//    Frontend*           _pFrontend;
     std::vector<Frontend*>      _frontends;
     bool                        _recPsi;
 };
@@ -96,7 +96,6 @@ public:
     ServiceIterator serviceBegin();
     ServiceIterator serviceEnd();
 
-//    void init();
     void open();
     void close();
     void scan(const std::string& initialTransponderData);
@@ -106,11 +105,8 @@ public:
     void addAdapter(Adapter* pAdapter);
 
     Transponder* getTransponder(const std::string& serviceName);
-//    bool tune(Transponder* pTransponder);
-//    void stopTune();
 
     std::istream* getStream(const std::string& serviceName);
-//    std::istream* getStream();
     void freeStream(std::istream* pIstream);
 
     bool useDvrDevice();
@@ -133,6 +129,8 @@ private:
     bool                                                _useDvrDevice;
     bool                                                _blockDvrDevice;
 //    bool                                                _reopenDvrDevice;
+
+    Mux*                                                _pMux;
 };
 
 }  // namespace Omm

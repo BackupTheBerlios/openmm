@@ -88,10 +88,13 @@ public:
     void writeXml(Poco::XML::Element* pService);
 
     std::string getType();
+    bool isAudio();
+    bool isVideo();
     unsigned int getPid();
     int getFileDesc();
     void read(Poco::UInt8* buf, int size, int timeout = 0);
     /// timeout in secs, timeout = 0 means unlimited
+    std::istream* getStream();
 
     static Poco::UInt8 streamTypeFromString(const std::string& val);
     static std::string streamTypeToString(Poco::UInt8 val);

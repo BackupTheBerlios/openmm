@@ -99,6 +99,8 @@ public:
     std::string getStatus();
     bool getScrambled();
     Transponder* getTransponder();
+    Stream* getFirstAudioStream();
+    Stream* getFirstVideoStream();
 
     static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);
