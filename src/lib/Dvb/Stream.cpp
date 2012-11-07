@@ -39,7 +39,8 @@
 #include "Log.h"
 #include "DvbLogger.h"
 #include "Stream.h"
-#include "Dvb/Stream.h"
+#include "ElementaryStream.h"
+#include "Mux.h"
 
 
 namespace Omm {
@@ -79,7 +80,8 @@ Stream::Stream(const std::string& type, Poco::UInt16 pid) :
 _type(type),
 _pid(pid),
 _fileDesc(-1),
-_pStream(0)
+_pStream(0),
+_logSequence(0)
 {
 }
 
@@ -198,6 +200,116 @@ std::istream*
 Stream::getStream()
 {
     return _pStream;
+}
+
+
+void
+Stream::skipToElementaryStreamPacketHeader(Poco::UInt8* skippedBytes, int timeout)
+{
+    skippedBytes = new Poco::UInt8[ElementaryStreamPacket::getMaxSize()];
+    Poco::UInt8* skippedBytesBuf = skippedBytes;
+
+    LOG(dvb, trace, "skipping to PES header ...");
+
+    unsigned int skippedBytesCount = 0;
+    const unsigned int warnAfterBytesSkipped = ElementaryStreamPacket::getMaxSize() / 1024;
+    const unsigned int exitAfterBytesSkipped = ElementaryStreamPacket::getMaxSize();
+    bool foundStartCodePrefix = false;
+    Poco::UInt8 byte;
+
+    while (!foundStartCodePrefix) {
+        try {
+            read(&byte, 1, timeout);
+            if (byte == 0x00) {
+                read(&byte, 1, timeout);
+                if (byte == 0x00) {
+                    read(&byte, 1, timeout);
+                    if (byte == 0x01) {
+                        foundStartCodePrefix = true;
+                    }
+                    else {
+                        skippedBytesCount++;
+                        if (skippedBytes) {
+                            *skippedBytes = byte;
+                            skippedBytes++;
+                        }
+                    }
+                }
+                else {
+                    skippedBytesCount++;
+                    if (skippedBytes) {
+                        *skippedBytes = byte;
+                        skippedBytes++;
+                    }
+                }
+            }
+            else {
+                skippedBytesCount++;
+                if (skippedBytes) {
+                    *skippedBytes = byte;
+                    skippedBytes++;
+                }
+            }
+        }
+        catch(Poco::Exception& e) {
+            LOG(dvb, error, "timeout while skipping to PES header (" + e.displayText() + ")");
+            throw Poco::Exception("timeout while skipping to PES header");
+        }
+        if (!foundStartCodePrefix && (skippedBytesCount % warnAfterBytesSkipped == 0)) {
+            LOG(dvb, warning, "could not find PES header after skipping bytes: " + Poco::NumberFormatter::format(skippedBytesCount));
+        }
+        if (!foundStartCodePrefix && (skippedBytesCount >= exitAfterBytesSkipped)) {
+            LOG(dvb, error, "could not find PES header after reading max bytes: " + Poco::NumberFormatter::format(skippedBytesCount));
+            break;
+//            throw Poco::Exception("could not find PES header after reading max bytes: " + Poco::NumberFormatter::format(skippedBytesCount));
+        }
+    }
+    if (foundStartCodePrefix) {
+        LOG(dvb, trace, "found PES header after skipping bytes: " + Poco::NumberFormatter::format(skippedBytesCount));
+    }
+
+    std::ofstream pes((Poco::NumberFormatter::format(_pid) + ".pes." + Poco::NumberFormatter::format(_logSequence++)).c_str());
+    pes.write((char*)(void*)skippedBytesBuf, skippedBytesCount);
+}
+
+
+ElementaryStreamPacket*
+Stream::getElementaryStreamPacket(int timeout)
+{
+    std::ofstream pes((Poco::NumberFormatter::format(_pid) + ".pes." + Poco::NumberFormatter::format(_logSequence++)).c_str());
+
+    LOG(dvb, trace, "read PES packet ...");
+
+    try {
+        ElementaryStreamPacket* pPacket = new ElementaryStreamPacket;
+        read((Poco::UInt8*)pPacket->getDataAfterStartcodePrefix(), 3, timeout);
+        pes.write((char*)pPacket->getDataAfterStartcodePrefix(), 3);
+
+        LOG(dvb, trace, "read packet of type: " + Poco::NumberFormatter::formatHex(pPacket->getStreamId()) + ", size: " + Poco::NumberFormatter::format(pPacket->getSize()));
+        if (pPacket->getSize()) {
+            read((Poco::UInt8*)pPacket->getDataStart(), pPacket->getSize(), timeout);
+            pes.write((char*)pPacket->getDataStart(), pPacket->getSize());
+
+            Poco::UInt8 startCodePrefix[3];
+//            read(startCodePrefix, 3, timeout);
+            read(startCodePrefix, 6, timeout);
+            pes.write((char*)startCodePrefix, 6);
+
+            if (startCodePrefix[0] != 0x00 || startCodePrefix[1] != 0x00 || startCodePrefix[2] != 0x01) {
+                LOG(dvb, warning, "no start code prefix found after pes packet with fixed size");
+                return 0;
+            }
+        }
+        else {
+            skipToElementaryStreamPacketHeader((Poco::UInt8*)(pPacket->getDataStart()), timeout);
+        }
+        LOG(dvb, trace, "PES packet successfully read.");
+        return pPacket;
+    }
+    catch(Poco::Exception& e) {
+        LOG(dvb, error, "timeout while reading PES packet (" + e.displayText() + ")");
+        return 0;
+    }
 }
 
 
@@ -338,6 +450,13 @@ Stream::streamTypeToString(Poco::UInt8 val)
             return Mpeg2UserPrivate;
     }
 }
+
+
+Multiplex::Multiplex() :
+Stream(Other, 0x2000)
+{
+}
+
 
 }  // namespace Omm
 }  // namespace Dvb

@@ -41,6 +41,7 @@
 
 #include "DvbLogger.h"
 #include "Stream.h"
+#include "TransportStream.h"
 #include "Section.h"
 #include "Service.h"
 #include "Demux.h"
@@ -52,7 +53,12 @@ namespace Dvb {
 
 Demux::Demux(Adapter* pAdapter, int num) :
 _pAdapter(pAdapter),
-_num(num)
+_num(num),
+_pMultiplex(0),
+_pReadThread(0),
+_readThreadRunnable(*this, &Demux::readThread),
+_readThreadRunning(false),
+_readTimeout(1)
 {
     _deviceName = _pAdapter->_deviceName + "/demux" + Poco::NumberFormatter::format(_num);
 }
@@ -268,6 +274,110 @@ Demux::readTable(Table* pTable)
     return success;
 }
 
+
+
+TransportStreamPacket*
+Demux::getTransportStreamPacket(int timeout)
+{
+    if (!_pMultiplex) {
+        LOG(dvb, error, "frontend not tuned, cannot get multiplex.");
+        return 0;
+    }
+
+    try {
+        TransportStreamPacket* pPacket = new TransportStreamPacket;
+        _pMultiplex->read((Poco::UInt8*)pPacket->getData(), pPacket->getSize(), timeout);
+        if (pPacket->getBytes<Poco::UInt8>(0) != pPacket->getSyncByte()) {
+            LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
+            return 0;
+        }
+        else {
+            return pPacket;
+        }
+    }
+    catch(Poco::Exception& e) {
+        LOG(dvb, error, "timeout while reading TS packet (" + e.displayText() + ")");
+        return 0;
+    }
+}
+
+
+void
+Demux::addService(Service* pService)
+{
+    _pServices.insert(pService);
+}
+
+
+void
+Demux::delService(Service* pService)
+{
+    _pServices.erase(pService);
+}
+
+
+void
+Demux::startReadThread()
+{
+    LOG(dvb, debug, "start read thread ...");
+
+    if (!_pReadThread) {
+        _readThreadRunning = true;
+        _pReadThread = new Poco::Thread;
+        _pReadThread->start(_readThreadRunnable);
+    }
+}
+
+
+void
+Demux::stopReadThread()
+{
+    LOG(dvb, debug, "stop read thread ...");
+
+    if (_pReadThread) {
+        _readThreadLock.lock();
+        _readThreadRunning = false;
+        _readThreadLock.unlock();
+        if (!_pReadThread->tryJoin(_readTimeout * 1000)) {
+            LOG(dvb, error, "failed to join read thread");
+        }
+        delete _pReadThread;
+        _pReadThread = 0;
+    }
+
+    LOG(dvb, debug, "read thread stopped.");
+}
+
+
+bool
+Demux::readThreadRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_readThreadLock);
+    return _readThreadRunning;
+}
+
+
+void
+Demux::readThread()
+{
+    LOG(dvb, debug, "read thread started.");
+
+    while (readThreadRunning()) {
+        TransportStreamPacket* pTsPacket = getTransportStreamPacket(_readTimeout);
+        if (!pTsPacket) {
+            break;
+        }
+        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+            Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
+            if ((*it)->hasPacketIdentifier(pid) || pid == 0) {
+                (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
+            }
+        }
+        delete pTsPacket;
+    }
+
+    LOG(dvb, debug, "read thread finished.");
+}
 
 }  // namespace Omm
 }  // namespace Dvb

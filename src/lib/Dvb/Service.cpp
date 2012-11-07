@@ -42,6 +42,7 @@
 #include "Stream.h"
 #include "Service.h"
 #include "Transponder.h"
+#include "Dvb/Service.h"
 
 
 namespace Omm {
@@ -89,8 +90,16 @@ _sid(sid),
 _pmtPid(pmtid),
 _pcrPid(InvalidPcrPid),
 _status(StatusUndefined),
-_scrambled(false)
+_scrambled(false),
+_byteQueue(100*1024)
 {
+    _pOutStream = new ByteQueueIStream(_byteQueue);
+}
+
+
+Service::~Service()
+{
+    delete _pOutStream;
 }
 
 
@@ -286,6 +295,25 @@ Service::getFirstVideoStream()
         }
     }
     return 0;
+}
+
+
+bool
+Service::hasPacketIdentifier(Poco::UInt16 pid)
+{
+    for (std::vector<Stream*>::const_iterator it = _streams.begin(); it != _streams.end(); ++it) {
+        if (pid == (*it)->getPid()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+std::istream*
+Service::getStream()
+{
+    return _pOutStream;
 }
 
 

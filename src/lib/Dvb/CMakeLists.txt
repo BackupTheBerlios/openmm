@@ -32,6 +32,8 @@ Frontend.cpp
 Demux.cpp
 Mux.cpp
 Dvr.cpp
+TransportStream.cpp
+ElementaryStream.cpp
 )
 
 add_library(ommdvb

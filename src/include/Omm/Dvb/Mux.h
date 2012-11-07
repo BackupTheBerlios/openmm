@@ -78,33 +78,6 @@ private:
 };
 
 
-class TransportStreamPacket : public BitField
-{
-public:
-    enum { ScrambledNone = 0x00, ScrambledReserved = 0x01, ScrambledEvenKey = 0x10, ScrambledOddKey = 0x11 };
-    enum { AdaptionFieldPayloadOnly = 0x01, AdaptionFieldOnly = 0x10, AdaptionFieldAndPayload = 0x11 };
-
-    TransportStreamPacket();
-    ~TransportStreamPacket();
-
-    void writePayloadFromStream(Stream* pStream, int timeout);
-    int getSize();
-
-    void setTransportErrorIndicator(bool uncorrectableError);
-    void setPayloadUnitStartIndicator(bool PesOrPsi);
-    void setTransportPriority(bool high);
-    void setPacketIdentifier(Poco::UInt16 pid);
-    void setScramblingControl(Poco::UInt8 scramble);
-    void setAdaptionFieldExists(Poco::UInt8 exists);
-    void setContinuityCounter(Poco::UInt8 counter);
-
-private:
-    const Poco::UInt8   _syncByte;
-    const int           _size;
-    const int           _headerSize;
-    const int           _payloadSize;
-};
-
 }  // namespace Omm
 }  // namespace Dvb
 

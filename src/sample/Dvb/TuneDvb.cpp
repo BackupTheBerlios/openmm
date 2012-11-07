@@ -33,9 +33,12 @@
 
 int
 main(int argc, char** argv) {
-    // record 2MiB from each stream
-    const int bufSize = 2 * 1024 * 1024;
-//    const int bufSize = 100 * 1024;
+    // record 10 MiB of full multiplex
+//    const std::streamsize bufSize = 6 * 1024 * 1024;
+    // record 2 MiB of each stream (video)
+    const std::streamsize bufSize = 2 * 1024 * 1024;
+    // record 100 KiB of each stream (audio)
+//    const std::streamsize bufSize = 100 * 1024;
 
     Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
     Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
@@ -50,14 +53,17 @@ main(int argc, char** argv) {
 
 //    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
         Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
-        
+
         Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(it->first);
         if (pTransponder) {
             Omm::Dvb::Service* pService = pTransponder->getService(it->first);
             if (pService && pService->getStatus() == Omm::Dvb::Service::StatusRunning && !pService->getScrambled()
                     && (pService->isAudio() || pService->isSdVideo())) {
                 LOGNS(Omm::Dvb, dvb, debug, "recording service: " + it->first);
-                std::istream* pDvbStream = pDevice->getStream(it->first);
+                // only get elementary streams of service muxed to a transport stream
+//                std::istream* pDvbStream = pDevice->getStream(it->first);
+                // get full transport stream with service
+                std::istream* pDvbStream = pDevice->getStream(it->first, true);
                 if (pDvbStream) {
                     std::ofstream serviceStream((it->first + std::string(".ts")).c_str());
                     char buf[bufSize];

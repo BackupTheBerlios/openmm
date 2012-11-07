@@ -19,67 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Demux_INCLUDED
-#define Demux_INCLUDED
+#ifndef ElementaryStream_INCLUDED
+#define ElementaryStream_INCLUDED
 
-#include <linux/dvb/dmx.h>
-#include <sys/poll.h>
+#include "DvbUtil.h"
 
 namespace Omm {
 namespace Dvb {
 
-class Adapter;
-class TransportStreamPacket;
-class Multiplex;
 
-class Demux
+class ElementaryStreamPacket : public BitField
 {
-    friend class Adapter;
-    friend class Device;
-
 public:
-    enum Target { TargetDemux, TargetDvr };
+    ElementaryStreamPacket();
 
-    Demux(Adapter* pAdapter, int num);
-    ~Demux();
+    Poco::UInt8 getStreamId();
+    Poco::UInt16 getSize();
+    static const int getMaxSize();
+    void* getDataAfterStartcodePrefix();
+    void* getDataStart();
 
-
-    bool selectService(Service* pService, Target target, bool blocking = true);
-    bool unselectService(Service* pService);
-    bool runService(Service* pService, bool run = true);
-
-    bool selectStream(Stream* pStream, Target target, bool blocking = true);
-    bool unselectStream(Stream* pStream);
-    bool runStream(Stream* pStream, bool run = true);
-    bool setSectionFilter(Stream* pStream, Poco::UInt8 tableId);
-
-    bool readSection(Section* pSection);
-    bool readTable(Table* pTable);
-
-    TransportStreamPacket* getTransportStreamPacket(int timeout = 0);
-
-    void addService(Service* pService);
-    void delService(Service* pService);
-    void startReadThread();
-    void stopReadThread();
-    bool readThreadRunning();
+    bool isAudio();
+    bool isVideo();
 
 private:
-    void readThread();
-
-    Adapter*                            _pAdapter;
-    std::string                         _deviceName;
-    int                                 _num;
-
-    Multiplex*                          _pMultiplex;
-    std::set<Service*>                  _pServices;
-
-    Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Demux>        _readThreadRunnable;
-    bool                                _readThreadRunning;
-    Poco::FastMutex                     _readThreadLock;
-    const int                           _readTimeout;
+    static const int    _maxSize;
+    Poco::UInt16        _size;
 };
+
 
 }  // namespace Omm
 }  // namespace Dvb

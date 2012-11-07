@@ -19,69 +19,78 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Demux_INCLUDED
-#define Demux_INCLUDED
+#include <vector>
+#include <Poco/Types.h>
+#include <string.h>
 
-#include <linux/dvb/dmx.h>
-#include <sys/poll.h>
+#include "DvbLogger.h"
+#include "ElementaryStream.h"
+
 
 namespace Omm {
 namespace Dvb {
 
-class Adapter;
-class TransportStreamPacket;
-class Multiplex;
 
-class Demux
+const int ElementaryStreamPacket::_maxSize = 0x10000;
+
+ElementaryStreamPacket::ElementaryStreamPacket() :
+//_maxSize(0x10000),
+_size(0)
 {
-    friend class Adapter;
-    friend class Device;
-
-public:
-    enum Target { TargetDemux, TargetDvr };
-
-    Demux(Adapter* pAdapter, int num);
-    ~Demux();
+    _data = new Poco::UInt8[_maxSize];
+    setBytes<Poco::UInt16>(0, 0);
+    setBytes<Poco::UInt8>(0, 1);
+}
 
 
-    bool selectService(Service* pService, Target target, bool blocking = true);
-    bool unselectService(Service* pService);
-    bool runService(Service* pService, bool run = true);
+Poco::UInt8
+ElementaryStreamPacket::getStreamId()
+{
+    return getBytes<Poco::UInt8>(3);
+}
 
-    bool selectStream(Stream* pStream, Target target, bool blocking = true);
-    bool unselectStream(Stream* pStream);
-    bool runStream(Stream* pStream, bool run = true);
-    bool setSectionFilter(Stream* pStream, Poco::UInt8 tableId);
 
-    bool readSection(Section* pSection);
-    bool readTable(Table* pTable);
+Poco::UInt16
+ElementaryStreamPacket::getSize()
+{
+    return getBytes<Poco::UInt16>(4);
+}
 
-    TransportStreamPacket* getTransportStreamPacket(int timeout = 0);
 
-    void addService(Service* pService);
-    void delService(Service* pService);
-    void startReadThread();
-    void stopReadThread();
-    bool readThreadRunning();
+const int
+ElementaryStreamPacket::getMaxSize()
+{
+    return _maxSize;
+}
 
-private:
-    void readThread();
 
-    Adapter*                            _pAdapter;
-    std::string                         _deviceName;
-    int                                 _num;
+void*
+ElementaryStreamPacket::getDataAfterStartcodePrefix()
+{
+    return (Poco::UInt8*)(_data) + 3;
+}
 
-    Multiplex*                          _pMultiplex;
-    std::set<Service*>                  _pServices;
 
-    Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Demux>        _readThreadRunnable;
-    bool                                _readThreadRunning;
-    Poco::FastMutex                     _readThreadLock;
-    const int                           _readTimeout;
-};
+void*
+ElementaryStreamPacket::getDataStart()
+{
+    return (Poco::UInt8*)(_data) + 6;
+}
+
+
+bool
+ElementaryStreamPacket::isAudio()
+{
+    return (getStreamId() >= 0xC0 && getStreamId() <= 0xDF);
+}
+
+
+bool
+ElementaryStreamPacket::isVideo()
+{
+    return (getStreamId() >= 0xE0 && getStreamId() <= 0xEF);
+}
+
 
 }  // namespace Omm
 }  // namespace Dvb
-
-#endif

@@ -106,7 +106,7 @@ public:
 
     Transponder* getTransponder(const std::string& serviceName);
 
-    std::istream* getStream(const std::string& serviceName);
+    std::istream* getStream(const std::string& serviceName, bool fullMultiplex = true);
     void freeStream(std::istream* pIstream);
 
     bool useDvrDevice();
@@ -130,6 +130,7 @@ private:
     bool                                                _blockDvrDevice;
 //    bool                                                _reopenDvrDevice;
 
+    // TODO: move _pMux into Demux, because every Demuxer needs it's own Muxer
     Mux*                                                _pMux;
 };
 

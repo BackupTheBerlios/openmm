@@ -21,11 +21,14 @@
 
 #include <vector>
 #include <Poco/Types.h>
+#include <string.h>
 
 #include "DvbLogger.h"
 #include "DvbUtil.h"
 #include "Mux.h"
 #include "Device.h"
+#include "ElementaryStream.h"
+#include "TransportStream.h"
 
 
 namespace Omm {
@@ -89,36 +92,6 @@ _readTimeout(1)
 
 
 void
-InStream::readThread()
-{
-    LOG(dvb, debug, "read thread started.");
-
-    const int bufferSize = 2048;
-    char buf[bufferSize];
-    Poco::UInt8 continuityCounter = 0;
-    while (readThreadRunning()) {
-//        _pStream->getStream()->read(buf, bufferSize);
-//        _pMux->_byteQueue.write(buf, bufferSize);
-
-        TransportStreamPacket tsPacket;
-        tsPacket.setTransportErrorIndicator(false);
-        tsPacket.setPayloadUnitStartIndicator(false);
-        tsPacket.setTransportPriority(false);
-        tsPacket.setPacketIdentifier(_pStream->getPid());
-        tsPacket.setScramblingControl(TransportStreamPacket::ScrambledNone);
-        tsPacket.setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
-        tsPacket.setContinuityCounter(continuityCounter);
-        tsPacket.writePayloadFromStream(_pStream, _readTimeout);
-        _pMux->_byteQueue.write((char*)tsPacket.getData(), tsPacket.getSize());
-        continuityCounter++;
-        continuityCounter %= 16;
-    }
-
-    LOG(dvb, debug, "read thread finished.");
-}
-
-
-void
 InStream::startReadThread()
 {
     LOG(dvb, debug, "start read thread ...");
@@ -159,83 +132,77 @@ InStream::readThreadRunning()
 }
 
 
-TransportStreamPacket::TransportStreamPacket() :
-_syncByte(0x47),
-_size(188),
-_headerSize(4),
-_payloadSize(188 - 4)
-{
-    _data = new Poco::UInt8[_size];
-    setBytes<Poco::UInt8>(0, _syncByte);
-}
-
-
-TransportStreamPacket::~TransportStreamPacket()
-{
-    delete (Poco::UInt8*)_data;
-}
-
-
 void
-TransportStreamPacket::writePayloadFromStream(Stream* pStream, int timeout)
+InStream::readThread()
 {
-    pStream->read((Poco::UInt8*)_data + _headerSize, _payloadSize, timeout);
-}
+    LOG(dvb, debug, "read thread started.");
 
+    const int timeout = 1; // one sec read timeout for PES stream
 
-int
-TransportStreamPacket::getSize()
-{
-    return _size;
-}
+    _pStream->skipToElementaryStreamPacketHeader(0, timeout);
 
+//    const int bufferSize = 2048;
+//    char buf[bufferSize];
+//    Poco::UInt8* buf;
 
-void
-TransportStreamPacket::setTransportErrorIndicator(bool uncorrectableError)
-{
-    setValue<Poco::UInt8>(8, 1, uncorrectableError ? 1 : 0);
-}
+    TransportStreamPacket tsPacket;
+    tsPacket.setTransportErrorIndicator(false);
+    tsPacket.setTransportPriority(false);
+    tsPacket.setPacketIdentifier(_pStream->getPid());
+    // TODO: set TS packet scrambled mode according to stream scrambled mode
+    tsPacket.setScramblingControl(TransportStreamPacket::ScrambledNone);
 
+    Poco::UInt8 continuityCounter = 0;
+    int payloadOffset = 0;
+    while (readThreadRunning()) {
+//        _pStream->getStream()->read(buf, bufferSize);
+//        _pMux->_byteQueue.write(buf, bufferSize);
+        ElementaryStreamPacket* pPesPacket = _pStream->getElementaryStreamPacket(timeout);
+        if (!pPesPacket) {
+            break;
+        }
 
-void
-TransportStreamPacket::setPayloadUnitStartIndicator(bool PesOrPsi)
-{
-    setValue<Poco::UInt8>(9, 1, PesOrPsi ? 1 : 0);
-}
+        if (pPesPacket->isAudio() || pPesPacket->isVideo()) {
+            LOG(dvb, debug, "found PES audio/video packet");
+            // stuff TS packet and write out
+            tsPacket.setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldAndPayload);
+            tsPacket.stuffPayload(payloadOffset);
+            payloadOffset = 0;
+            tsPacket.setContinuityCounter(continuityCounter);
+            // write TS packet to output of muxer
+            _pMux->_byteQueue.write((char*)tsPacket.getData(), tsPacket.getSize());
+            continuityCounter++;
+            continuityCounter %= 16;
 
+            // begin TS packet sequence with new PES packet
+            tsPacket.clearPayload();
+            tsPacket.setPayloadUnitStartIndicator(true);
+        }
+        else {
+            tsPacket.setPayloadUnitStartIndicator(false);
+        }
+        // write PES data to TS packet
+//        tsPacket.writePayloadFromStream(_pStream, _readTimeout);
+        int payloadAvailable = tsPacket.getPayloadSize() - payloadOffset;
+        if (pPesPacket->getSize() < payloadAvailable) {
+            tsPacket.setData(payloadOffset, pPesPacket->getSize(), pPesPacket->getData());
+            payloadOffset += pPesPacket->getSize();
+        }
+        else {
+            tsPacket.setData(payloadOffset, payloadAvailable, pPesPacket->getData());
+            payloadOffset = 0;
+            // tsPacket has no more payload available, write it to output stream
+            // TODO: set adaption field when stuffing is needed
+            tsPacket.setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
+            tsPacket.setContinuityCounter(continuityCounter);
+            // write TS packet to output of muxer
+            _pMux->_byteQueue.write((char*)tsPacket.getData(), tsPacket.getSize());
+            continuityCounter++;
+            continuityCounter %= 16;
+        }
+    }
 
-void
-TransportStreamPacket::setTransportPriority(bool high)
-{
-    setValue<Poco::UInt8>(10, 1, high ? 1 : 0);
-}
-
-
-void
-TransportStreamPacket::setPacketIdentifier(Poco::UInt16 pid)
-{
-    setValue<Poco::UInt16>(11, 13, pid);
-}
-
-
-void
-TransportStreamPacket::setScramblingControl(Poco::UInt8 scramble)
-{
-    setValue<Poco::UInt8>(24, 2, scramble);
-}
-
-
-void
-TransportStreamPacket::setAdaptionFieldExists(Poco::UInt8 exists)
-{
-    setValue<Poco::UInt8>(26, 2, exists);
-}
-
-
-void
-TransportStreamPacket::setContinuityCounter(Poco::UInt8 counter)
-{
-    setValue<Poco::UInt8>(28, 4, counter);
+    LOG(dvb, debug, "read thread finished.");
 }
 
 

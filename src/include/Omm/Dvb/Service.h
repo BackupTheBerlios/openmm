@@ -37,6 +37,8 @@
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DocumentFragment.h>
 
+#include "../AvStream.h"
+
 namespace Omm {
 namespace Dvb {
 
@@ -86,6 +88,7 @@ public:
     static const std::string StatusOffAir;
 
     Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid);
+    ~Service();
 
     void addStream(Stream* pStream);
     void readXml(Poco::XML::Node* pXmlService);
@@ -101,6 +104,8 @@ public:
     Transponder* getTransponder();
     Stream* getFirstAudioStream();
     Stream* getFirstVideoStream();
+    bool hasPacketIdentifier(Poco::UInt16 pid);
+    std::istream* getStream();
 
     static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);
@@ -117,6 +122,9 @@ private:
     bool                        _scrambled;
 
     std::vector<Stream*>        _streams;
+
+    std::istream*               _pOutStream;
+    AvStream::ByteQueue         _byteQueue;
 };
 
 }  // namespace Omm

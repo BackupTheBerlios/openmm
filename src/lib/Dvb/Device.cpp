@@ -64,6 +64,7 @@
 #include "Mux.h"
 #include "Dvr.h"
 #include "Device.h"
+#include "Dvb/Demux.h"
 
 
 namespace Omm {
@@ -191,8 +192,8 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 Device* Device::_pInstance = 0;
 
 Device::Device() :
-//_useDvrDevice(false),
-_useDvrDevice(true),
+_useDvrDevice(false),
+//_useDvrDevice(true),
 _blockDvrDevice(false),
 //_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
@@ -393,7 +394,7 @@ Device::getTransponder(const std::string& serviceName)
     //                dvbsnoop shows correct transport stream container.
 
 std::istream*
-Device::getStream(const std::string& serviceName)
+Device::getStream(const std::string& serviceName, bool fullMultiplex)
 {
     Transponder* pTransponder = getTransponder(serviceName);
     Frontend* pFrontend = pTransponder->_pFrontend;
@@ -403,9 +404,10 @@ Device::getStream(const std::string& serviceName)
         return 0;
     }
 
-    Service* pService = pTransponder->getService(serviceName);
     Demux* pDemux = pFrontend->_pDemux;
 
+    Service* pService = pTransponder->getService(serviceName);
+    std::istream* pStream = 0;
     // TODO: check if service not already selected on demuxer
     if (useDvrDevice()) {
         pDemux->selectService(pService, Demux::TargetDvr);
@@ -413,9 +415,17 @@ Device::getStream(const std::string& serviceName)
         LOG(dvb, debug, "reading from dvr device ...");
         Dvr* pDvr = pFrontend->_pDvr;
         pDvr->openDvr(blockDvrDevice());
-        std::istream* pStream = pDvr->getStream();
-        _streamMap[pStream] = pService;
-        return pStream;
+        pStream = pDvr->getStream();
+    }
+    else if (fullMultiplex) {
+        pDemux->addService(pService);
+        pDemux->_pMultiplex = new Multiplex;
+        pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux);
+        pDemux->runStream(pDemux->_pMultiplex);
+        pDemux->startReadThread();
+        LOG(dvb, debug, "reading full TS ...");
+//        pStream = pDemux->_pMultiplex->getStream();
+        pStream = pService->getStream();
     }
     else {
         pDemux->selectService(pService, Demux::TargetDemux);
@@ -424,10 +434,14 @@ Device::getStream(const std::string& serviceName)
         _pMux->addStream(pService->getFirstAudioStream());
         _pMux->addStream(pService->getFirstVideoStream());
         _pMux->start();
-        return _pMux->getMux();
+        LOG(dvb, debug, "reading from TS muxer ...");
+        pStream = _pMux->getMux();
+
     //    return pService->getFirstAudioStream()->getStream();
 //        return pService->getFirstVideoStream()->getStream();
     }
+    _streamMap[pStream] = pService;
+    return pStream;
 }
 
 
@@ -439,20 +453,33 @@ Device::freeStream(std::istream* pIstream)
     if (!pService) {
         return;
     }
-    Demux* pDemux = pService->getTransponder()->_pFrontend->_pDemux;
-    pDemux->runService(pService, false);
-    pDemux->unselectService(pService);
 
-    LOG(dvb, debug, "stop reading from dvr device.");
-    if (useDvrDevice()) {
-        Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
-        pDvr->clearBuffer();
-//        pDvr->closeDvr();
+    Demux* pDemux = pService->getTransponder()->_pFrontend->_pDemux;
+
+    if (pDemux->_pMultiplex) {
+        pDemux->stopReadThread();
+        pDemux->runStream(pDemux->_pMultiplex, false);
+        pDemux->unselectStream(pDemux->_pMultiplex);
+        delete pDemux->_pMultiplex;
+        pDemux->_pMultiplex = 0;
+        pDemux->delService(pService);
     }
     else {
-        _pMux->stop();
-        delete _pMux;
-        _pMux = 0;
+        pDemux->runService(pService, false);
+        pDemux->unselectService(pService);
+
+        if (useDvrDevice()) {
+            LOG(dvb, debug, "stop reading from dvr device.");
+            Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
+            pDvr->clearBuffer();
+    //        pDvr->closeDvr();
+        }
+        else {
+            LOG(dvb, debug, "stopping TS muxer.");
+            _pMux->stop();
+            delete _pMux;
+            _pMux = 0;
+        }
     }
     _streamMap.erase(pIstream);
 }

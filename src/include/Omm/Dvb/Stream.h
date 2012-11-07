@@ -47,6 +47,9 @@
 namespace Omm {
 namespace Dvb {
 
+class ElementaryStreamPacket;
+
+
 class Stream
 {
     friend class Demux;
@@ -96,6 +99,9 @@ public:
     /// timeout in secs, timeout = 0 means unlimited
     std::istream* getStream();
 
+    void skipToElementaryStreamPacketHeader(Poco::UInt8* skippedBytes, int timeout = 0);
+    ElementaryStreamPacket* getElementaryStreamPacket(int timeout = 0);
+
     static Poco::UInt8 streamTypeFromString(const std::string& val);
     static std::string streamTypeToString(Poco::UInt8 val);
 
@@ -106,6 +112,17 @@ private:
     int                 _fileDesc;
     struct pollfd       _fileDescPoll[1];
     UnixFileIStream*    _pStream;
+
+    int                 _logSequence;
+};
+
+
+class Multiplex : public Stream
+{
+    friend class Demux;
+
+public:
+    Multiplex();
 };
 
 

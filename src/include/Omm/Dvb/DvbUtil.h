@@ -198,6 +198,12 @@ public:
         return _data;
     }
 
+    void
+    setData(void* pData)
+    {
+        _data = pData;
+    }
+
     void*
     getData(unsigned int byteOffset)
     {
@@ -208,6 +214,12 @@ public:
     getData(unsigned int byteOffset, unsigned int byteLength)
     {
         return std::string((char*)(_data) + byteOffset, byteLength);
+    }
+
+    void
+    setData(unsigned int byteOffset, unsigned int byteLength, void* data)
+    {
+        ::memcpy((Poco::UInt8*)(_data) + byteOffset, data, byteLength);
     }
 
     std::string
