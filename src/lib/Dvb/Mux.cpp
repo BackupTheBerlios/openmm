@@ -86,7 +86,7 @@ _pMux(pMux),
 _pReadThread(0),
 _readThreadRunnable(*this, &InStream::readThread),
 _readThreadRunning(false),
-_readTimeout(1)
+_readTimeout(1000)
 {
 }
 

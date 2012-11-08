@@ -90,6 +90,8 @@ class Device
     friend class SignalCheckThread;
 
 public:
+    typedef enum {ModeDvr, ModeMultiplex, ModeElementaryStreams} Mode;
+
     static Device* instance();
 
     typedef std::map<std::string, std::vector<Transponder*> >::iterator ServiceIterator;
@@ -106,10 +108,10 @@ public:
 
     Transponder* getTransponder(const std::string& serviceName);
 
-    std::istream* getStream(const std::string& serviceName, bool fullMultiplex = true);
+    std::istream* getStream(const std::string& serviceName);
     void freeStream(std::istream* pIstream);
 
-    bool useDvrDevice();
+    Mode getMode();
     bool blockDvrDevice();
 
 private:
@@ -126,7 +128,8 @@ private:
     std::map<std::string, std::vector<Transponder*> >   _serviceMap;
     std::map<std::istream*, Service*>                   _streamMap;
 
-    bool                                                _useDvrDevice;
+    Mode                                                _mode;
+//    bool                                                _useDvrDevice;
     bool                                                _blockDvrDevice;
 //    bool                                                _reopenDvrDevice;
 

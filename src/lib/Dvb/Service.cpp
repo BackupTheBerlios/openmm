@@ -91,7 +91,7 @@ _pmtPid(pmtid),
 _pcrPid(InvalidPcrPid),
 _status(StatusUndefined),
 _scrambled(false),
-_byteQueue(100*1024)
+_byteQueue(2*1024)
 {
     _pOutStream = new ByteQueueIStream(_byteQueue);
 }

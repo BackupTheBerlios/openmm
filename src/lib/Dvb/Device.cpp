@@ -65,6 +65,7 @@
 #include "Dvr.h"
 #include "Device.h"
 #include "Dvb/Demux.h"
+#include "Dvb/Device.h"
 
 
 namespace Omm {
@@ -192,8 +193,8 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 Device* Device::_pInstance = 0;
 
 Device::Device() :
-_useDvrDevice(false),
-//_useDvrDevice(true),
+_mode(ModeDvr),
+//_mode(ModeMultiplex),
 _blockDvrDevice(false),
 //_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
@@ -394,7 +395,7 @@ Device::getTransponder(const std::string& serviceName)
     //                dvbsnoop shows correct transport stream container.
 
 std::istream*
-Device::getStream(const std::string& serviceName, bool fullMultiplex)
+Device::getStream(const std::string& serviceName)
 {
     Transponder* pTransponder = getTransponder(serviceName);
     Frontend* pFrontend = pTransponder->_pFrontend;
@@ -409,7 +410,7 @@ Device::getStream(const std::string& serviceName, bool fullMultiplex)
     Service* pService = pTransponder->getService(serviceName);
     std::istream* pStream = 0;
     // TODO: check if service not already selected on demuxer
-    if (useDvrDevice()) {
+    if (getMode() == ModeDvr) {
         pDemux->selectService(pService, Demux::TargetDvr);
         pDemux->runService(pService, true);
         LOG(dvb, debug, "reading from dvr device ...");
@@ -417,7 +418,7 @@ Device::getStream(const std::string& serviceName, bool fullMultiplex)
         pDvr->openDvr(blockDvrDevice());
         pStream = pDvr->getStream();
     }
-    else if (fullMultiplex) {
+    else if (getMode() == ModeMultiplex) {
         pDemux->addService(pService);
         pDemux->_pMultiplex = new Multiplex;
         pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux);
@@ -468,7 +469,7 @@ Device::freeStream(std::istream* pIstream)
         pDemux->runService(pService, false);
         pDemux->unselectService(pService);
 
-        if (useDvrDevice()) {
+        if (getMode() == ModeDvr) {
             LOG(dvb, debug, "stop reading from dvr device.");
             Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
             pDvr->clearBuffer();
@@ -485,10 +486,11 @@ Device::freeStream(std::istream* pIstream)
 }
 
 
-bool
-Device::useDvrDevice()
+
+Device::Mode
+Device::getMode()
 {
-    return _useDvrDevice;
+    return _mode;
 }
 
 

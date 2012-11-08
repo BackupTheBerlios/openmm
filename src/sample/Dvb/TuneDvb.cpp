@@ -61,9 +61,7 @@ main(int argc, char** argv) {
                     && (pService->isAudio() || pService->isSdVideo())) {
                 LOGNS(Omm::Dvb, dvb, debug, "recording service: " + it->first);
                 // only get elementary streams of service muxed to a transport stream
-//                std::istream* pDvbStream = pDevice->getStream(it->first);
-                // get full transport stream with service
-                std::istream* pDvbStream = pDevice->getStream(it->first, true);
+                std::istream* pDvbStream = pDevice->getStream(it->first);
                 if (pDvbStream) {
                     std::ofstream serviceStream((it->first + std::string(".ts")).c_str());
                     char buf[bufSize];
