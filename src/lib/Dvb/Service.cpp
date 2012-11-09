@@ -40,9 +40,10 @@
 #include "Log.h"
 #include "DvbLogger.h"
 #include "Stream.h"
+#include "TransportStream.h"
+#include "Section.h"
 #include "Service.h"
 #include "Transponder.h"
-#include "Dvb/Service.h"
 
 
 namespace Omm {
@@ -94,11 +95,28 @@ _scrambled(false),
 _byteQueue(2*1024)
 {
     _pOutStream = new ByteQueueIStream(_byteQueue);
+    _pPat = PatSection::create();
+    _pPat->setTableIdExtension(0x0001);  // artificial transport stream id for a TS with one service
+    _pPat->addService(_sid, _pmtPid, 0);
+    _pPat->setLength(13);
+    _pPat->setCrc();
+    // pack PAT into a TS packet and don't forget the pointer field
+    _pTsPacket = new TransportStreamPacket;
+    _pTsPacket->setTransportErrorIndicator(false);
+    _pTsPacket->setPayloadUnitStartIndicator(true);
+    _pTsPacket->setTransportPriority(false);
+    _pTsPacket->setPacketIdentifier(0x0000);
+    _pTsPacket->setScramblingControl(TransportStreamPacket::ScrambledNone);
+    _pTsPacket->setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
+    _pTsPacket->setPointerField(0x00);
+    _pTsPacket->setData(5, 183, _pPat->getData());
 }
 
 
 Service::~Service()
 {
+    delete _pTsPacket;
+    delete _pPat;
     delete _pOutStream;
 }
 

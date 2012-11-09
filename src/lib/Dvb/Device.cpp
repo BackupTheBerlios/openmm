@@ -193,8 +193,8 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 Device* Device::_pInstance = 0;
 
 Device::Device() :
-_mode(ModeDvr),
-//_mode(ModeMultiplex),
+//_mode(ModeDvr),
+_mode(ModeMultiplex),
 _blockDvrDevice(false),
 //_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length

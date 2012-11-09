@@ -46,6 +46,8 @@
 #include "Service.h"
 #include "Demux.h"
 #include "Device.h"
+#include "Dvb/Service.h"
+#include "Dvb/TransportStream.h"
 
 
 namespace Omm {
@@ -362,21 +364,32 @@ Demux::readThread()
 {
     LOG(dvb, debug, "read thread started.");
 
+    long unsigned int tsPacketCounter = 0;
+    Poco::UInt8 continuityCounter = 0;
     while (readThreadRunning()) {
         TransportStreamPacket* pTsPacket = getTransportStreamPacket(_readTimeout);
         if (!pTsPacket) {
             break;
         }
+        tsPacketCounter++;
+        Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-            Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
             if ((*it)->hasPacketIdentifier(pid) || pid == 0) {
-                (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
+                if (pid == 0) {
+                    (*it)->_pTsPacket->setContinuityCounter(continuityCounter);
+                    (*it)->_byteQueue.write((char*)(*it)->_pTsPacket->getData(), (*it)->_pTsPacket->getSize());
+                    continuityCounter++;
+                    continuityCounter %= 16;
+                }
+                else {
+                    (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
+                }
             }
         }
         delete pTsPacket;
     }
-
     LOG(dvb, debug, "read thread finished.");
+    LOG(dvb, debug, "demux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets total");
 }
 
 }  // namespace Omm

@@ -44,6 +44,8 @@ namespace Dvb {
 
 class Transponder;
 class Stream;
+class PatSection;
+class TransportStreamPacket;
 
 class Service
 {
@@ -125,6 +127,8 @@ private:
 
     std::istream*               _pOutStream;
     AvStream::ByteQueue         _byteQueue;
+    PatSection*                 _pPat;
+    TransportStreamPacket*      _pTsPacket;
 };
 
 }  // namespace Omm

@@ -151,6 +151,13 @@ TransportStreamPacket::setContinuityCounter(Poco::UInt8 counter)
 
 
 void
+TransportStreamPacket::setPointerField(Poco::UInt8 pointer)
+{
+    setBytes<Poco::UInt8>(_headerSize, pointer);
+}
+
+
+void
 TransportStreamPacket::setAdaptionFieldLength(Poco::UInt8 length)
 {
     setValue<Poco::UInt8>(32, 8, length);

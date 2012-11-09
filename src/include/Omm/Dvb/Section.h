@@ -60,6 +60,7 @@ public:
     ~Section();
 
     void read(Stream* pStream);
+    void stuff();
     virtual Section* clone();
     virtual void parse() {}
 
@@ -70,10 +71,23 @@ public:
     Poco::UInt8 sectionNumber();
     Poco::UInt8 lastSectionNumber();
 
-    unsigned int length();
+    void setTableId(Poco::UInt8 tid);
+    void setSyntaxIndicator(bool syntaxIndicator);
+    void setFixed();
+    void setLength(Poco::UInt16 sectionLength);
+    void setTableIdExtension(Poco::UInt16 tidExt);
+    void setVersionNumber(Poco::UInt8 version);
+    void setCurrentNextIndicator(bool currentNext);
+    void setSectionNumber(Poco::UInt8 section);
+    void setLastSectionNumber(Poco::UInt8 lastSection);
+    void setCrc();
+
+    unsigned int size();
     unsigned int timeout();
 
 private:
+    static const unsigned int crc32Table[];
+    
     std::string         _name;
     Poco::UInt16        _pid;
     Poco::UInt8         _tableId;
@@ -90,12 +104,15 @@ public:
 
     virtual Section* clone();
     virtual void parse();
+    static PatSection* create();
 
     Poco::UInt16 transportStreamId();
 
     unsigned int serviceCount();
     Poco::UInt16 serviceId(unsigned int serviceIndex);
     Poco::UInt16 pmtPid(unsigned int serviceIndex);
+
+    void addService(Poco::UInt16 serviceId, Poco::UInt16 pmtPid, unsigned int index);
 
 private:
     unsigned int                        _serviceCount;

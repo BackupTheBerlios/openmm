@@ -58,6 +58,7 @@ public:
     void setScramblingControl(Poco::UInt8 scramble);
     void setAdaptionFieldExists(Poco::UInt8 exists);
     void setContinuityCounter(Poco::UInt8 counter);
+    void setPointerField(Poco::UInt8 pointer);
 
     // optional header adaption fields
     void setAdaptionFieldLength(Poco::UInt8 length);
