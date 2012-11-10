@@ -124,6 +124,8 @@ private:
     bool                        _scrambled;
 
     std::vector<Stream*>        _streams;
+    std::set<Poco::UInt16>      _pids;
+    // makes calls to hastPacketIdentifier() more efficient
 
     std::istream*               _pOutStream;
     AvStream::ByteQueue         _byteQueue;

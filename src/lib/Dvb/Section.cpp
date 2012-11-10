@@ -280,15 +280,23 @@ Section::setLastSectionNumber(Poco::UInt8 lastSection)
 void
 Section::setCrc()
 {
+    // FIXME: Poco::Checksum gives wrong checksums ...?!
 //    Poco::Checksum crc;
+//    char* data = (char*) getData();
 ////    Poco::Checksum crc(Poco::Checksum::TYPE_CRC32);
 ////    Poco::Checksum crc(Poco::Checksum::TYPE_ADLER32);
 //    crc.update((const char*)getData(), _size - 4);
+//    unsigned int crc32 = crc.checksum();
+//
 ////    getData()(_size - 4, crc.checksum());
-//    setBytes<Poco::UInt32>(_size - 4, Poco::ByteOrder::flipBytes(crc.checksum()));
+////    setBytes<Poco::UInt32>(_size - 4, Poco::ByteOrder::flipBytes(crc.checksum()));
+//	data[_size - 4] = crc32 >> 24;
+//	data[_size - 3] = crc32 >> 16;
+//	data[_size - 2] = crc32 >> 8;
+//	data[_size - 1] = crc32;
 
-    char* data = (char*) getData();
     unsigned int crc32 = 0xffffffff;
+    char* data = (char*) getData();
     for (int i = 0; i < (_size - 4); ++i) {
 		unsigned char byte = data[i];
 		crc32 = (crc32 << 8) ^ crc32Table[(crc32 >> 24) ^ byte];

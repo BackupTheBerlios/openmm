@@ -51,8 +51,8 @@ main(int argc, char** argv) {
     pDevice->readXml(dvbXml);
     pDevice->open();
 
-    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
-//        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
+//    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
 
         Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(it->first);
         if (pTransponder) {
@@ -71,7 +71,7 @@ main(int argc, char** argv) {
                 }
             }
         }
-    }
+//    }
     pDevice->close();
 
     return 0;

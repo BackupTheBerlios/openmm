@@ -23,6 +23,7 @@
 #include <sys/ioctl.h>
 
 #include <Poco/NumberParser.h>
+#include <Poco/Timestamp.h>
 #include <Poco/DOM/AbstractContainerNode.h>
 #include <Poco/DOM/DOMException.h>
 #include <Poco/DOM/DOMParser.h>
@@ -364,6 +365,7 @@ Demux::readThread()
 {
     LOG(dvb, debug, "read thread started.");
 
+    Poco::Timestamp t;
     long unsigned int tsPacketCounter = 0;
     Poco::UInt8 continuityCounter = 0;
     while (readThreadRunning()) {
@@ -371,25 +373,25 @@ Demux::readThread()
         if (!pTsPacket) {
             break;
         }
-        tsPacketCounter++;
         Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
+        tsPacketCounter++;
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-            if ((*it)->hasPacketIdentifier(pid) || pid == 0) {
-                if (pid == 0) {
-                    (*it)->_pTsPacket->setContinuityCounter(continuityCounter);
-                    (*it)->_byteQueue.write((char*)(*it)->_pTsPacket->getData(), (*it)->_pTsPacket->getSize());
-                    continuityCounter++;
-                    continuityCounter %= 16;
-                }
-                else {
-                    (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
-                }
+            if (pid == 0) {
+                (*it)->_pTsPacket->setContinuityCounter(continuityCounter);
+                continuityCounter++;
+                continuityCounter %= 16;
+                (*it)->_byteQueue.write((char*)(*it)->_pTsPacket->getData(), (*it)->_pTsPacket->getSize());
+            }
+            else if ((*it)->hasPacketIdentifier(pid)) {
+                (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
             }
         }
         delete pTsPacket;
     }
+    LOG(dvb, debug, "demux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets total in "
+            + Poco::NumberFormatter::format(t.elapsed() / 1000) + " msec ("
+            + Poco::NumberFormatter::format((float)tsPacketCounter * 1000 / t.elapsed(), 2) + " packets/msec)");
     LOG(dvb, debug, "read thread finished.");
-    LOG(dvb, debug, "demux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets total");
 }
 
 }  // namespace Omm

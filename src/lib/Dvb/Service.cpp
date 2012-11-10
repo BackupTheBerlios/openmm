@@ -125,6 +125,7 @@ void
 Service::addStream(Stream* pStream)
 {
     _streams.push_back(pStream);
+    _pids.insert(pStream->getPid());
 }
 
 
@@ -319,12 +320,7 @@ Service::getFirstVideoStream()
 bool
 Service::hasPacketIdentifier(Poco::UInt16 pid)
 {
-    for (std::vector<Stream*>::const_iterator it = _streams.begin(); it != _streams.end(); ++it) {
-        if (pid == (*it)->getPid()) {
-            return true;
-        }
-    }
-    return false;
+    return _pids.find(pid) != _pids.end();
 }
 
 
