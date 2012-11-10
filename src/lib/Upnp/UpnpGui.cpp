@@ -926,7 +926,8 @@ ControllerWidget::setState(State newState)
         // stop position info timer for all renderer devices that controller knows of (renderers continue to play)
         for (int r = 0; r < _pMediaRendererGroupWidget->getDeviceCount(); r++) {
             MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pMediaRendererGroupWidget->getDevice(r));
-            pRenderer->startPositionTimer(false);
+            // TODO: deactivated position timer for now, should fix it.
+//            pRenderer->startPositionTimer(false);
         }
         // clear device views and remove controller's device containers
         _pMediaServerGroupWidget->popToRoot();
@@ -1335,7 +1336,8 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
     _transportState = transportState;
     syncViews();
-    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
+    // TODO: deactivated position timer for now, should fix it.
+//    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
 }
 

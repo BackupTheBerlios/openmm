@@ -331,6 +331,15 @@ Service::getStream()
 }
 
 
+void
+Service::flushStream()
+{
+    _byteQueue.clear();
+    delete _pOutStream;
+    _pOutStream = new ByteQueueIStream(_byteQueue);
+}
+
+
 std::string
 Service::typeToString(Poco::UInt8 status)
 {

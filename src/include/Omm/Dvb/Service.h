@@ -108,6 +108,7 @@ public:
     Stream* getFirstVideoStream();
     bool hasPacketIdentifier(Poco::UInt16 pid);
     std::istream* getStream();
+    void flushStream();
 
     static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);

@@ -388,6 +388,10 @@ Demux::readThread()
         }
         delete pTsPacket;
     }
+    for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+        (*it)->flushStream();
+    }
+
     LOG(dvb, debug, "demux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets total in "
             + Poco::NumberFormatter::format(t.elapsed() / 1000) + " msec ("
             + Poco::NumberFormatter::format((float)tsPacketCounter * 1000 / t.elapsed(), 2) + " packets/msec)");
