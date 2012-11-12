@@ -53,6 +53,7 @@ class ElementaryStreamPacket;
 class Stream
 {
     friend class Demux;
+    friend class Device;
 
 public:
     static const std::string Video;

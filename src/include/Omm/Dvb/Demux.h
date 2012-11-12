@@ -31,6 +31,7 @@ namespace Dvb {
 class Adapter;
 class TransportStreamPacket;
 class Multiplex;
+class Remux;
 
 class Demux
 {
@@ -56,29 +57,18 @@ public:
     bool readSection(Section* pSection);
     bool readTable(Table* pTable);
 
-    TransportStreamPacket* getTransportStreamPacket(int timeout = 0);
-
     void addService(Service* pService);
     void delService(Service* pService);
     void startReadThread();
     void stopReadThread();
-    bool readThreadRunning();
 
 private:
-    void readThread();
-
     Adapter*                            _pAdapter;
     std::string                         _deviceName;
     int                                 _num;
 
     Multiplex*                          _pMultiplex;
-    std::set<Service*>                  _pServices;
-
-    Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Demux>        _readThreadRunnable;
-    bool                                _readThreadRunning;
-    Poco::FastMutex                     _readThreadLock;
-    const int                           _readTimeout;
+    Remux*                              _pRemux;
 };
 
 }  // namespace Omm

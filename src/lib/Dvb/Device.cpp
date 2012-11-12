@@ -197,8 +197,8 @@ Device* Device::_pInstance = 0;
 
 Device::Device() :
 //_mode(ModeDvr),
-//_mode(ModeMultiplex),
-_mode(ModeDvrMultiplex),
+_mode(ModeMultiplex),
+//_mode(ModeDvrMultiplex),
 //_blockDvrDevice(false),
 _blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
@@ -423,9 +423,10 @@ Device::getStream(const std::string& serviceName)
         pStream = pDvr->getStream();
     }
     else if (getMode() == ModeMultiplex) {
-        pDemux->addService(pService);
         pDemux->_pMultiplex = new Multiplex;
         pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux, true);
+        pDemux->_pRemux = new Remux(pDemux->_pMultiplex->_fileDesc);
+        pDemux->addService(pService);
         pDemux->runStream(pDemux->_pMultiplex);
         pDemux->startReadThread();
         LOG(dvb, debug, "reading full TS ...");
@@ -478,9 +479,11 @@ Device::freeStream(std::istream* pIstream)
         pDemux->stopReadThread();
         pDemux->runStream(pDemux->_pMultiplex, false);
         pDemux->unselectStream(pDemux->_pMultiplex);
+        pDemux->delService(pService);
+        delete pDemux->_pRemux;
+        pDemux->_pRemux = 0;
         delete pDemux->_pMultiplex;
         pDemux->_pMultiplex = 0;
-        pDemux->delService(pService);
     }
     else if (getMode() == ModeDvrMultiplex) {
         Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;

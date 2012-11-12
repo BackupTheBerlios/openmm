@@ -35,13 +35,11 @@ namespace Dvb {
 
 Remux::Remux(int multiplex) :
 _multiplex(multiplex),
-//_byteQueue(2*1024),
 _pReadThread(0),
 _readThreadRunnable(*this, &Remux::readThread),
 _readThreadRunning(false),
 _readTimeout(1000)
 {
-//    _pOutStream = new ByteQueueIStream(_byteQueue);
     _fileDescPoll[0].fd = multiplex;
     _fileDescPoll[0].events = POLLIN;
 }
@@ -49,15 +47,7 @@ _readTimeout(1000)
 
 Remux::~Remux()
 {
-//    delete _pOutStream;
 }
-
-
-//std::istream*
-//Remux::getMux()
-//{
-//    return _pOutStream;
-//}
 
 
 TransportStreamPacket*

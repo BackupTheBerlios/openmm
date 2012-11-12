@@ -42,7 +42,6 @@ public:
     ~Remux();
 
     void addStream(Stream* pStream);
-//    std::istream* getMux();
 
     void start();
     void stop();
@@ -58,8 +57,6 @@ private:
 
     int                                 _multiplex;
     std::set<Service*>                  _pServices;
-//    std::istream*                       _pOutStream;
-//    AvStream::ByteQueue                 _byteQueue;
 
     Poco::Thread*                       _pReadThread;
     Poco::RunnableAdapter<Remux>        _readThreadRunnable;
