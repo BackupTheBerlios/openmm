@@ -322,7 +322,17 @@ Demux::delService(Service* pService)
 void
 Demux::startReadThread()
 {
-    LOG(dvb, debug, "start read thread ...");
+    LOG(dvb, debug, "start TS remux thread ...");
+
+//    std::ofstream rawTs("raw.ts");
+////    const int bufSize = 188 * 10000 * 3;
+//    const int bufSize = 188 * 1000 * 3;
+////    const int bufSize = 188 * 100 * 3;
+//    Poco::UInt8 buf[bufSize];
+//    _pMultiplex->read(buf, bufSize, 0);
+//    rawTs.write((const char*)buf, bufSize);
+//    LOG(dvb, debug, "TS remux thread finished.");
+//    return;
 
     if (!_pReadThread) {
         _readThreadRunning = true;
@@ -335,20 +345,20 @@ Demux::startReadThread()
 void
 Demux::stopReadThread()
 {
-    LOG(dvb, debug, "stop read thread ...");
+    LOG(dvb, debug, "stop TS remux thread ...");
 
     if (_pReadThread) {
         _readThreadLock.lock();
         _readThreadRunning = false;
         _readThreadLock.unlock();
         if (!_pReadThread->tryJoin(_readTimeout * 1000)) {
-            LOG(dvb, error, "failed to join read thread");
+            LOG(dvb, error, "failed to join TS remux thread");
         }
         delete _pReadThread;
         _pReadThread = 0;
     }
 
-    LOG(dvb, debug, "read thread stopped.");
+    LOG(dvb, debug, "TS remux thread stopped.");
 }
 
 
@@ -363,18 +373,27 @@ Demux::readThreadRunning()
 void
 Demux::readThread()
 {
-    LOG(dvb, debug, "read thread started.");
+    LOG(dvb, debug, "TS remux thread started.");
 
     Poco::Timestamp t;
     long unsigned int tsPacketCounter = 0;
     Poco::UInt8 continuityCounter = 0;
+
     while (readThreadRunning()) {
         TransportStreamPacket* pTsPacket = getTransportStreamPacket(_readTimeout);
         if (!pTsPacket) {
             break;
         }
-        Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
         tsPacketCounter++;
+
+//        rawTs.write((char*)pTsPacket->getData(), pTsPacket->getSize());
+//        if (tsPacketCounter == 100) {
+//            break;
+//        }
+//        continue;
+
+        Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
+//        LOG(dvb, information, "demux received packet no: " + Poco::NumberFormatter::format(tsPacketCounter) + ", pid: " + Poco::NumberFormatter::format(pid));
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
             if (pid == 0) {
                 (*it)->_pTsPacket->setContinuityCounter(continuityCounter);
@@ -392,10 +411,10 @@ Demux::readThread()
         (*it)->flushStream();
     }
 
-    LOG(dvb, debug, "demux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets total in "
+    LOG(dvb, information, "remux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets in "
             + Poco::NumberFormatter::format(t.elapsed() / 1000) + " msec ("
             + Poco::NumberFormatter::format((float)tsPacketCounter * 1000 / t.elapsed(), 2) + " packets/msec)");
-    LOG(dvb, debug, "read thread finished.");
+    LOG(dvb, debug, "TS remux thread finished.");
 }
 
 }  // namespace Omm

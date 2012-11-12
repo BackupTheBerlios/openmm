@@ -66,6 +66,9 @@
 #include "Device.h"
 #include "Dvb/Demux.h"
 #include "Dvb/Device.h"
+#include "Dvb/Transponder.h"
+#include "Dvb/Dvr.h"
+#include "Dvb/Remux.h"
 
 
 namespace Omm {
@@ -194,9 +197,10 @@ Device* Device::_pInstance = 0;
 
 Device::Device() :
 //_mode(ModeDvr),
-_mode(ModeMultiplex),
-_blockDvrDevice(false),
-//_blockDvrDevice(true),
+//_mode(ModeMultiplex),
+_mode(ModeDvrMultiplex),
+//_blockDvrDevice(false),
+_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
 //_reopenDvrDevice(true)
 //_reopenDvrDevice(false)
@@ -421,11 +425,23 @@ Device::getStream(const std::string& serviceName)
     else if (getMode() == ModeMultiplex) {
         pDemux->addService(pService);
         pDemux->_pMultiplex = new Multiplex;
-        pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux);
+        pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux, true);
         pDemux->runStream(pDemux->_pMultiplex);
         pDemux->startReadThread();
         LOG(dvb, debug, "reading full TS ...");
 //        pStream = pDemux->_pMultiplex->getStream();
+        pStream = pService->getStream();
+    }
+    else if (getMode() == ModeDvrMultiplex) {
+        Dvr* pDvr = pFrontend->_pDvr;
+        pDvr->openDvr(true);
+        pDvr->_pRemux->addService(pService);
+        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
+            pDemux->selectService(*it, Demux::TargetDvr);
+            pDemux->runService(*it, true);
+        }
+        pDvr->_pRemux->start();
+        LOG(dvb, debug, "reading full TS from dvr device ...");
         pStream = pService->getStream();
     }
     else {
@@ -455,7 +471,8 @@ Device::freeStream(std::istream* pIstream)
         return;
     }
 
-    Demux* pDemux = pService->getTransponder()->_pFrontend->_pDemux;
+    Transponder* pTransponder = pService->getTransponder();
+    Demux* pDemux = pTransponder->_pFrontend->_pDemux;
 
     if (pDemux->_pMultiplex) {
         pDemux->stopReadThread();
@@ -464,6 +481,18 @@ Device::freeStream(std::istream* pIstream)
         delete pDemux->_pMultiplex;
         pDemux->_pMultiplex = 0;
         pDemux->delService(pService);
+    }
+    else if (getMode() == ModeDvrMultiplex) {
+        Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
+        pDvr->_pRemux->stop();
+        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
+            pDemux->runService(*it, false);
+            pDemux->unselectService(*it);
+        }
+        LOG(dvb, debug, "stop reading from dvr device.");
+        pDvr->_pRemux->delService(pService);
+        pDvr->clearBuffer();
+        pDvr->closeDvr();
     }
     else {
         pDemux->runService(pService, false);

@@ -31,6 +31,7 @@ Transponder.cpp
 Frontend.cpp
 Demux.cpp
 Mux.cpp
+Remux.cpp
 Dvr.cpp
 TransportStream.cpp
 ElementaryStream.cpp

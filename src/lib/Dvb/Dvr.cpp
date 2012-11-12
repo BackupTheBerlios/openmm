@@ -26,6 +26,7 @@
 #include "DvbUtil.h"
 #include "Dvr.h"
 #include "Device.h"
+#include "Remux.h"
 
 
 namespace Omm {
@@ -35,6 +36,7 @@ Dvr::Dvr(Adapter* pAdapter, int num) :
 _pAdapter(pAdapter),
 _num(num),
 _pDvrStream(0),
+_pRemux(0),
 _useByteQueue(true),
 //_useByteQueue(false),
 _fileDescDvr(-1),
@@ -69,7 +71,13 @@ Dvr::openDvr(bool blocking)
             LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
             return;
         }
-        if (_useByteQueue) {
+        if (Device::instance()->getMode() == Device::ModeDvrMultiplex) {
+            _pRemux = new Remux(_fileDescDvr);
+            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
+//            _pDvrStream = _pRemux->getMux();
+//            _pRemux->start();
+        }
+        else if (_useByteQueue) {
             _fileDescPoll[0].fd = _fileDescDvr;
             _fileDescPoll[0].events = POLLIN;
             _pDvrStream = new ByteQueueIStream(_byteQueue);
@@ -95,6 +103,10 @@ Dvr::closeDvr()
 
     if (_useByteQueue) {
         stopReadThread();
+    }
+    if (_pRemux) {
+        delete _pRemux;
+        _pRemux = 0;
     }
     if (_pDvrStream) {
         delete _pDvrStream;
@@ -151,7 +163,7 @@ Dvr::setBlocking(bool blocking)
 void
 Dvr::startReadThread()
 {
-    LOG(dvb, debug, "start read thread ...");
+    LOG(dvb, debug, "start dvr read thread ...");
 
     if (!_pReadThread) {
         _readThreadRunning = true;
@@ -164,7 +176,7 @@ Dvr::startReadThread()
 void
 Dvr::stopReadThread()
 {
-    LOG(dvb, debug, "stop read thread ...");
+    LOG(dvb, debug, "stop dvr read thread ...");
 
     if (_pReadThread) {
         _readThreadLock.lock();
@@ -177,7 +189,7 @@ Dvr::stopReadThread()
         _pReadThread = 0;
     }
 
-    LOG(dvb, debug, "read thread stopped.");
+    LOG(dvb, debug, "dvr read thread stopped.");
 }
 
 
@@ -201,7 +213,7 @@ Dvr::getStream()
 void
 Dvr::readThread()
 {
-    LOG(dvb, debug, "read thread started.");
+    LOG(dvb, debug, "dvr read thread started.");
 
     char buf[_bufferSize];
     while (readThreadRunning()) {
@@ -219,7 +231,7 @@ Dvr::readThread()
         }
     }
 
-    LOG(dvb, debug, "read thread finished.");
+    LOG(dvb, debug, "dvr read thread finished.");
 }
 
 }  // namespace Omm

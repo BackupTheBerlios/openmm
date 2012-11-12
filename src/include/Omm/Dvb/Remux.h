@@ -19,58 +19,56 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Dvr_INCLUDED
-#define Dvr_INCLUDED
+#ifndef Remux_INCLUDED
+#define Remux_INCLUDED
 
 #include <sys/poll.h>
+
+#include <Poco/Thread.h>
+
+#include "Service.h"
+//#include "Stream.h"
+//#include "../AvStream.h"
 
 
 namespace Omm {
 namespace Dvb {
 
-class Adapter;
-class Remux;
 
-class Dvr
+class Remux
 {
-    friend class Adapter;
-    friend class Device;
-
 public:
-    Dvr(Adapter* pAdapter, int num);
-    ~Dvr();
+    Remux(int multiplex);
+    ~Remux();
 
-    void openDvr(bool blocking = true);
-    void closeDvr();
-    void clearBuffer();
-    void prefillBuffer();
-    void startReadThread();
-    void stopReadThread();
-    bool readThreadRunning();
-    void setBlocking(bool blocking = true);
+    void addStream(Stream* pStream);
+//    std::istream* getMux();
 
-    std::istream* getStream();
+    void start();
+    void stop();
+
+    TransportStreamPacket* getTransportStreamPacket(int timeout = 0);
+
+    void addService(Service* pService);
+    void delService(Service* pService);
 
 private:
     void readThread();
+    bool readThreadRunning();
 
-    Adapter*                            _pAdapter;
-    std::string                         _deviceName;
-    int                                 _num;
-    int                                 _fileDescDvr;
-    AvStream::ByteQueue                 _byteQueue;
-    const int                           _bufferSize;
-    std::istream*                       _pDvrStream;
-    Remux*                              _pRemux;
+    int                                 _multiplex;
+    std::set<Service*>                  _pServices;
+//    std::istream*                       _pOutStream;
+//    AvStream::ByteQueue                 _byteQueue;
 
-    bool                                _useByteQueue;
-    struct pollfd                       _fileDescPoll[1];
-    const int                           _pollTimeout;  // wait for _pollTimeout millisec for new data on dvr device
     Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Dvr>          _readThreadRunnable;
+    Poco::RunnableAdapter<Remux>        _readThreadRunnable;
     bool                                _readThreadRunning;
     Poco::FastMutex                     _readThreadLock;
+    struct pollfd                       _fileDescPoll[1];
+    const int                           _readTimeout;
 };
+
 
 }  // namespace Omm
 }  // namespace Dvb

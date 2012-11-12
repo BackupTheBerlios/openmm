@@ -90,7 +90,7 @@ class Device
     friend class SignalCheckThread;
 
 public:
-    typedef enum {ModeDvr, ModeMultiplex, ModeElementaryStreams} Mode;
+    typedef enum {ModeDvr, ModeMultiplex, ModeDvrMultiplex, ModeElementaryStreams} Mode;
 
     static Device* instance();
 

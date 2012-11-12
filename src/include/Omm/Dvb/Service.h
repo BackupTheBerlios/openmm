@@ -53,6 +53,7 @@ class Service
     friend class Frontend;
 //    friend class Device;
     friend class Demux;
+    friend class Remux;
 
 public:
     static const std::string TypeDigitalTelevision;

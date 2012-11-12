@@ -118,7 +118,7 @@ _frontendTimeout(2000000)
 {
     _deviceName = _pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(_num);
     _pDemux = new Demux(pAdapter, 0);
-    if (Device::instance()->getMode() == Device::ModeDvr) {
+    if (Device::instance()->getMode() == Device::ModeDvr || Device::instance()->getMode() == Device::ModeDvrMultiplex) {
         _pDvr = new Dvr(pAdapter, 0);
     }
     _pTextConverter = new Poco::TextConverter(_sourceEncoding, _targetEncoding);
@@ -129,7 +129,7 @@ Frontend::~Frontend()
 {
     closeFrontend();
     delete _pDemux;
-    if (Device::instance()->getMode() == Device::ModeDvr) {
+    if (Device::instance()->getMode() == Device::ModeDvr || Device::instance()->getMode() == Device::ModeDvrMultiplex) {
         delete _pDvr;
     }
 }
