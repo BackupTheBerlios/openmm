@@ -93,9 +93,14 @@ _pcrPid(InvalidPcrPid),
 _status(StatusUndefined),
 _scrambled(false),
 //_byteQueue(1024 * 1024)
-_byteQueue(2 * 1024)
-//_byteQueue(1024)
-//_byteQueue(188)
+_byteQueue(2 * 1024),
+//_byteQueue(1024),
+//_byteQueue(188),
+_packetQueueTimeout(1000),
+_packetQueueSize(10000),
+_pQueueThread(0),
+_queueThreadRunnable(*this, &Service::queueThread),
+_queueThreadRunning(false)
 {
     _pOutStream = new ByteQueueIStream(_byteQueue);
     _pPat = PatSection::create();
@@ -104,21 +109,21 @@ _byteQueue(2 * 1024)
     _pPat->setLength(13);
     _pPat->setCrc();
     // pack PAT into a TS packet and don't forget the pointer field
-    _pTsPacket = new TransportStreamPacket;
-    _pTsPacket->setTransportErrorIndicator(false);
-    _pTsPacket->setPayloadUnitStartIndicator(true);
-    _pTsPacket->setTransportPriority(false);
-    _pTsPacket->setPacketIdentifier(0x0000);
-    _pTsPacket->setScramblingControl(TransportStreamPacket::ScrambledNone);
-    _pTsPacket->setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
-    _pTsPacket->setPointerField(0x00);
-    _pTsPacket->setData(5, 183, _pPat->getData());
+    _pPatTsPacket = new TransportStreamPacket;
+    _pPatTsPacket->setTransportErrorIndicator(false);
+    _pPatTsPacket->setPayloadUnitStartIndicator(true);
+    _pPatTsPacket->setTransportPriority(false);
+    _pPatTsPacket->setPacketIdentifier(0x0000);
+    _pPatTsPacket->setScramblingControl(TransportStreamPacket::ScrambledNone);
+    _pPatTsPacket->setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
+    _pPatTsPacket->setPointerField(0x00);
+    _pPatTsPacket->setData(5, 183, _pPat->getData());
 }
 
 
 Service::~Service()
 {
-    delete _pTsPacket;
+    delete _pPatTsPacket;
     delete _pPat;
     delete _pOutStream;
 }
@@ -337,9 +342,96 @@ Service::getStream()
 void
 Service::flushStream()
 {
+//    _packetQueueLock.lock();
+//    while (_packetQueue.size()) {
+//        if (_packetQueue.front()->getPacketIdentifier()) {
+//            delete _packetQueue.front();
+//        }
+//        _packetQueue.pop();
+//    }
+//    _packetQueueLock.unlock();
     _byteQueue.clear();
     delete _pOutStream;
     _pOutStream = new ByteQueueIStream(_byteQueue);
+}
+
+
+void
+Service::queueTsPacket(TransportStreamPacket* pPacket)
+{
+    Poco::ScopedLock<Poco::FastMutex> queueLock(_packetQueueLock);
+
+    if (_packetQueue.size() < _packetQueueSize) {
+        _packetQueue.push(pPacket);
+        _queueReadCondition.broadcast();
+    }
+    else {
+        LOG(dvb, error, "service queue full, discard packet.");
+        delete pPacket;
+    }
+}
+
+
+void
+Service::startQueueThread()
+{
+    LOG(dvb, debug, "start service queue thread ...");
+
+    if (!_pQueueThread) {
+        _queueThreadRunning = true;
+        _pQueueThread = new Poco::Thread;
+        _pQueueThread->start(_queueThreadRunnable);
+    }
+}
+
+
+void
+Service::stopQueueThread()
+{
+    LOG(dvb, debug, "stop service queue thread ...");
+
+    if (_pQueueThread) {
+        _packetQueueLock.lock();
+        _queueThreadRunning = false;
+        _packetQueueLock.unlock();
+        if (!_pQueueThread->tryJoin(_packetQueueTimeout)) {
+            LOG(dvb, error, "failed to join service queue thread");
+        }
+        delete _pQueueThread;
+        _pQueueThread = 0;
+    }
+
+    LOG(dvb, debug, "service queue thread stopped.");
+}
+
+
+bool
+Service::queueThreadRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_packetQueueLock);
+    return _queueThreadRunning;
+}
+
+
+void
+Service::queueThread()
+{
+    LOG(dvb, debug, "service queue thread started.");
+
+    while (queueThreadRunning()) {
+        _packetQueueLock.lock();
+        if (_packetQueue.size() == 0) {
+            _queueReadCondition.wait<Poco::FastMutex>(_packetQueueLock);
+        }
+        TransportStreamPacket* pPacket = _packetQueue.front();
+        _packetQueue.pop();
+        _packetQueueLock.unlock();
+        _byteQueue.write((char*)pPacket->getData(), pPacket->getSize());
+        if (pPacket->getPacketIdentifier()) {
+            // don't delete PAT packets, there is only one for each service (_pPatTsPacket)
+            delete pPacket;
+        }
+    }
 }
 
 

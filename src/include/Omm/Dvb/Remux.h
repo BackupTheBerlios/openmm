@@ -25,6 +25,7 @@
 #include <sys/poll.h>
 
 #include <Poco/Thread.h>
+#include <Poco/Mutex.h>
 
 #include "Service.h"
 //#include "Stream.h"

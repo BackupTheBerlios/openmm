@@ -196,9 +196,10 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 Device* Device::_pInstance = 0;
 
 Device::Device() :
-//_mode(ModeDvr),
-_mode(ModeMultiplex),
+_mode(ModeDvr),
+//_mode(ModeMultiplex),
 //_mode(ModeDvrMultiplex),
+//
 //_blockDvrDevice(false),
 _blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
@@ -427,10 +428,10 @@ Device::getStream(const std::string& serviceName)
         pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux, true);
         pDemux->_pRemux = new Remux(pDemux->_pMultiplex->_fileDesc);
         pDemux->addService(pService);
+        pService->startQueueThread();
         pDemux->runStream(pDemux->_pMultiplex);
         pDemux->startReadThread();
         LOG(dvb, debug, "reading full TS ...");
-//        pStream = pDemux->_pMultiplex->getStream();
         pStream = pService->getStream();
     }
     else if (getMode() == ModeDvrMultiplex) {
@@ -441,6 +442,7 @@ Device::getStream(const std::string& serviceName)
             pDemux->selectService(*it, Demux::TargetDvr);
             pDemux->runService(*it, true);
         }
+        pService->startQueueThread();
         pDvr->_pRemux->start();
         LOG(dvb, debug, "reading full TS from dvr device ...");
         pStream = pService->getStream();
@@ -478,6 +480,7 @@ Device::freeStream(std::istream* pIstream)
     if (pDemux->_pMultiplex) {
         pDemux->stopReadThread();
         pDemux->runStream(pDemux->_pMultiplex, false);
+        pService->stopQueueThread();
         pDemux->unselectStream(pDemux->_pMultiplex);
         pDemux->delService(pService);
         delete pDemux->_pRemux;
@@ -488,6 +491,7 @@ Device::freeStream(std::istream* pIstream)
     else if (getMode() == ModeDvrMultiplex) {
         Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
         pDvr->_pRemux->stop();
+        pService->stopQueueThread();
         for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
             pDemux->runService(*it, false);
             pDemux->unselectService(*it);

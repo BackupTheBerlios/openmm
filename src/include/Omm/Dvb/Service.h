@@ -22,6 +22,8 @@
 #ifndef Service_INCLUDED
 #define Service_INCLUDED
 
+#include <queue>
+
 #include <Poco/DOM/DOMException.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -36,6 +38,9 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DocumentFragment.h>
+#include <Poco/Thread.h>
+#include <Poco/Mutex.h>
+#include <Poco/Condition.h>
 
 #include "../AvStream.h"
 
@@ -111,28 +116,43 @@ public:
     std::istream* getStream();
     void flushStream();
 
+    void queueTsPacket(TransportStreamPacket* pPacket);
+    void startQueueThread();
+    void stopQueueThread();
+
     static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);
 
 private:
-    Transponder*                _pTransponder;
-    std::string                 _type;
-    std::string                 _providerName;
-    std::string                 _name;
-    unsigned int                _sid;
-    unsigned int                _pmtPid;
-    unsigned int                _pcrPid;
-    std::string                 _status;
-    bool                        _scrambled;
+    void queueThread();
+    bool queueThreadRunning();
 
-    std::vector<Stream*>        _streams;
-    std::set<Poco::UInt16>      _pids;
+    Transponder*                        _pTransponder;
+    std::string                         _type;
+    std::string                         _providerName;
+    std::string                         _name;
+    unsigned int                        _sid;
+    unsigned int                        _pmtPid;
+    unsigned int                        _pcrPid;
+    std::string                         _status;
+    bool                                _scrambled;
+
+    std::vector<Stream*>                _streams;
+    std::set<Poco::UInt16>              _pids;
     // makes calls to hastPacketIdentifier() more efficient
 
-    std::istream*               _pOutStream;
-    AvStream::ByteQueue         _byteQueue;
-    PatSection*                 _pPat;
-    TransportStreamPacket*      _pTsPacket;
+    std::istream*                       _pOutStream;
+    AvStream::ByteQueue                 _byteQueue;
+    PatSection*                         _pPat;
+    TransportStreamPacket*              _pPatTsPacket;
+    std::queue<TransportStreamPacket*>  _packetQueue;
+    const int                           _packetQueueTimeout;
+    const int                           _packetQueueSize;
+    Poco::FastMutex                     _packetQueueLock;
+    Poco::Thread*                       _pQueueThread;
+    Poco::RunnableAdapter<Service>      _queueThreadRunnable;
+    bool                                _queueThreadRunning;
+    Poco::Condition                     _queueReadCondition;
 };
 
 }  // namespace Omm

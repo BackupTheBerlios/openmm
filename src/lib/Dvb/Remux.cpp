@@ -66,30 +66,12 @@ Remux::getTransportStreamPacket(int timeout)
                     return pPacket;
                 }
             }
-            else {
+            else if (len == -1) {
                 LOG(dvb, error, std::string("remux read thread failed to read from device: ") + strerror(errno));
                 return 0;
             }
         }
     }
-
-
-//    try {
-//        TransportStreamPacket* pPacket = new TransportStreamPacket;
-//        ::read(_multiplex, (Poco::UInt8*)pPacket->getData(), pPacket->getSize());
-////        _pMultiplex->read((Poco::UInt8*)pPacket->getData(), pPacket->getSize(), timeout);
-//        if (pPacket->getBytes<Poco::UInt8>(0) != pPacket->getSyncByte()) {
-//            LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
-//            return 0;
-//        }
-//        else {
-//            return pPacket;
-//        }
-//    }
-//    catch(Poco::Exception& e) {
-//        LOG(dvb, error, "timeout while reading TS packet (" + e.displayText() + ")");
-//        return 0;
-//    }
 }
 
 
@@ -165,19 +147,19 @@ Remux::readThread()
         }
         tsPacketCounter++;
         Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
+
 //        LOG(dvb, information, "remux received packet no: " + Poco::NumberFormatter::format(tsPacketCounter) + ", pid: " + Poco::NumberFormatter::format(pid));
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
             if (pid == 0) {
-                (*it)->_pTsPacket->setContinuityCounter(continuityCounter);
+                (*it)->_pPatTsPacket->setContinuityCounter(continuityCounter);
                 continuityCounter++;
                 continuityCounter %= 16;
-                (*it)->_byteQueue.write((char*)(*it)->_pTsPacket->getData(), (*it)->_pTsPacket->getSize());
+                (*it)->queueTsPacket((*it)->_pPatTsPacket);
             }
             else if ((*it)->hasPacketIdentifier(pid)) {
-                (*it)->_byteQueue.write((char*)pTsPacket->getData(), pTsPacket->getSize());
+                (*it)->queueTsPacket(pTsPacket);
             }
         }
-        delete pTsPacket;
     }
     for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
         (*it)->flushStream();

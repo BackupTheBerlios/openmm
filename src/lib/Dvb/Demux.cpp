@@ -297,7 +297,7 @@ Demux::delService(Service* pService)
 void
 Demux::startReadThread()
 {
-    LOG(dvb, debug, "start TS remux thread ...");
+//    LOG(dvb, debug, "start TS remux thread ...");
 
     if (_pRemux) {
         _pRemux->start();
@@ -308,13 +308,13 @@ Demux::startReadThread()
 void
 Demux::stopReadThread()
 {
-    LOG(dvb, debug, "stop TS remux thread ...");
+//    LOG(dvb, debug, "stop TS remux thread ...");
 
     if (_pRemux) {
         _pRemux->stop();
     }
 
-    LOG(dvb, debug, "TS remux thread stopped.");
+//    LOG(dvb, debug, "TS remux thread stopped.");
 }
 
 
