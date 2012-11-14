@@ -37,8 +37,8 @@ _pAdapter(pAdapter),
 _num(num),
 _pDvrStream(0),
 _pRemux(0),
-_useByteQueue(true),
-//_useByteQueue(false),
+//_useByteQueue(true),
+_useByteQueue(false),
 _fileDescDvr(-1),
 _byteQueue(100*1024),
 _bufferSize(50*1024),
@@ -71,7 +71,7 @@ Dvr::openDvr(bool blocking)
             LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
             return;
         }
-        if (Device::instance()->getMode() == Device::ModeDvrMultiplex) {
+        if (Device::instance()->getMode() == Device::ModeDvrMultiplex || Device::instance()->getMode() == Device::ModeDvr) {
             _pRemux = new Remux(_fileDescDvr);
             _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
 //            _pDvrStream = _pRemux->getMux();

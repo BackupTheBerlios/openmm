@@ -40,7 +40,7 @@ main(int argc, char** argv) {
 //    unsigned int serviceStreamPacketCount = 2;
     // record 2 MiB of each stream (video)
 //    const std::streamsize bufSize = 2 * 1024 * 1024;
-    unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
+    unsigned int serviceStreamPacketCount = 40; // get 10,000 packets of service stream (not full multiplex)
     // record 100 KiB of each stream (audio)
 //    const std::streamsize bufSize = 100 * 1024;
 //    unsigned int serviceStreamPacketCount = 10;
