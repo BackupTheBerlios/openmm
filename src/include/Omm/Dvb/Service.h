@@ -114,11 +114,12 @@ public:
     Stream* getFirstVideoStream();
     bool hasPacketIdentifier(Poco::UInt16 pid);
     std::istream* getStream();
-    void flushStream();
+    void flush();
 
     void queueTsPacket(TransportStreamPacket* pPacket);
     void startQueueThread();
     void stopQueueThread();
+    void waitForStopQueueThread();
 
     static std::string typeToString(Poco::UInt8 status);
     static std::string statusToString(Poco::UInt8 status);

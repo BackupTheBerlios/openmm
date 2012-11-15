@@ -40,7 +40,7 @@ main(int argc, char** argv) {
 //    unsigned int serviceStreamPacketCount = 2;
     // record 2 MiB of each stream (video)
 //    const std::streamsize bufSize = 2 * 1024 * 1024;
-    unsigned int serviceStreamPacketCount = 40; // get 10,000 packets of service stream (not full multiplex)
+//    unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
     // record 100 KiB of each stream (audio)
 //    const std::streamsize bufSize = 100 * 1024;
 //    unsigned int serviceStreamPacketCount = 10;
@@ -56,11 +56,12 @@ main(int argc, char** argv) {
     pDevice->readXml(dvbXml);
     pDevice->open();
 
-//    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+        unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
 //        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
-//        std::string serviceName = it->first;
+        std::string serviceName = it->first;
 //        std::string serviceName("3sat");
-        std::string serviceName("EinsPlus");
+//        std::string serviceName("EinsPlus");
 
         Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(serviceName);
         if (pTransponder) {
@@ -83,7 +84,7 @@ main(int argc, char** argv) {
                     pDevice->freeStream(pDvbStream);
                 }
             }
-//        }
+        }
     }
     pDevice->close();
 

@@ -180,11 +180,9 @@ Frontend::openFrontend()
         LOG(dvb, error, "frontend device is not a DVB-S or DVB-T device, not yet supported");
         closeFrontend();
     }
-
-//    _pDemux->openDemux(false);
-//    if (Device::instance()->useDvrDevice()) {
-//        _pDvr->openDvr(Device::instance()->blockDvrDevice());
-//    }
+    else {
+        _pDvr->openDvr();
+    }
 }
 
 
@@ -193,11 +191,7 @@ Frontend::closeFrontend()
 {
     LOG(dvb, debug, "closing frontend");
 
-//    if (Device::instance()->useDvrDevice()) {
-//        _pDvr->closeDvr();
-//    }
-//    _pDemux->closeDemux();
-
+    _pDvr->closeDvr();
     if (close(_fileDescFrontend)) {
         LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
     }

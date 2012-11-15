@@ -112,7 +112,7 @@ public:
     void freeStream(std::istream* pIstream);
 
     Mode getMode();
-    bool blockDvrDevice();
+//    bool blockDvrDevice();
 
 private:
     Device();
@@ -130,7 +130,7 @@ private:
 
     Mode                                                _mode;
 //    bool                                                _useDvrDevice;
-    bool                                                _blockDvrDevice;
+//    bool                                                _blockDvrDevice;
 //    bool                                                _reopenDvrDevice;
 
     // TODO: move _pMux into Demux, because every Demuxer needs it's own Muxer

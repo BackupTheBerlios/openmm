@@ -42,19 +42,17 @@ public:
     Remux(int multiplex);
     ~Remux();
 
-    void addStream(Stream* pStream);
+    void addService(Service* pService);
+    void delService(Service* pService);
 
     void start();
     void stop();
 
-    TransportStreamPacket* getTransportStreamPacket(int timeout = 0);
-
-    void addService(Service* pService);
-    void delService(Service* pService);
-
 private:
+    TransportStreamPacket* getTransportStreamPacket();
     void readThread();
     bool readThreadRunning();
+    void flush();
 
     int                                 _multiplex;
     std::set<Service*>                  _pServices;

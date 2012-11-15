@@ -39,7 +39,7 @@ _pDvrStream(0),
 _pRemux(0),
 //_useByteQueue(true),
 _useByteQueue(false),
-_fileDescDvr(-1),
+//_fileDescDvr(-1),
 _byteQueue(100*1024),
 _bufferSize(50*1024),
 _pollTimeout(1),
@@ -57,81 +57,106 @@ Dvr::~Dvr()
 
 
 void
-Dvr::openDvr(bool blocking)
+Dvr::openDvr()
 {
-    LOG(dvb, debug, "opening dvb rec device.");
-
-    if (_pDvrStream) {
-        LOG(dvb, debug, "dvb rec device already open.");
-        return;
+    if ((_fileDescDvr = open(_deviceName.c_str(), O_RDONLY | O_NONBLOCK)) < 0) {
+        LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
     }
-    else {
-        int flags = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
-        if ((_fileDescDvr = open(_deviceName.c_str(), flags)) < 0) {
-            LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
-            return;
-        }
-        if (Device::instance()->getMode() == Device::ModeDvrMultiplex || Device::instance()->getMode() == Device::ModeDvr) {
-            _pRemux = new Remux(_fileDescDvr);
-            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
-//            _pDvrStream = _pRemux->getMux();
-//            _pRemux->start();
-        }
-        else if (_useByteQueue) {
-            _fileDescPoll[0].fd = _fileDescDvr;
-            _fileDescPoll[0].events = POLLIN;
-            _pDvrStream = new ByteQueueIStream(_byteQueue);
-        }
-        else {
-            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
-        }
-        if (!_pDvrStream) {
-            LOG(dvb, error, "failed to open dvb rec stream.");
-            return;
-        }
-        if (_useByteQueue) {
-            startReadThread();
-        }
-    }
+    _pRemux = new Remux(_fileDescDvr);
 }
 
 
 void
 Dvr::closeDvr()
 {
-    LOG(dvb, debug, "closing dvb rec device.");
-
-    if (_useByteQueue) {
-        stopReadThread();
-    }
-    if (_pRemux) {
-        delete _pRemux;
-        _pRemux = 0;
-    }
-    if (_pDvrStream) {
-        delete _pDvrStream;
-        _pDvrStream = 0;
-        if (close(_fileDescDvr)) {
-            LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
-        }
-        _fileDescDvr = -1;
-    }
-    else {
-        LOG(dvb, debug, "dvb rec device already closed.");
+    delete _pRemux;
+    if (close(_fileDescDvr)) {
+        LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
     }
 }
+
+
+//void
+////Dvr::openDvr(bool blocking)
+//Dvr::openDvr()
+//{
+//    LOG(dvb, debug, "opening dvb rec device.");
+//
+//    if (_pDvrStream) {
+//        LOG(dvb, debug, "dvb rec device already open.");
+//        return;
+//    }
+//    else {
+////        int flags = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
+//        int flags = O_RDONLY | O_NONBLOCK;
+//        if ((_fileDescDvr = open(_deviceName.c_str(), flags)) < 0) {
+//            LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+//            return;
+//        }
+//        if (Device::instance()->getMode() == Device::ModeDvrMultiplex || Device::instance()->getMode() == Device::ModeDvr) {
+//            _pRemux = new Remux(_fileDescDvr);
+//            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
+////            _pDvrStream = _pRemux->getMux();
+////            _pRemux->start();
+//        }
+//        else if (_useByteQueue) {
+//            _fileDescPoll[0].fd = _fileDescDvr;
+//            _fileDescPoll[0].events = POLLIN;
+//            _pDvrStream = new ByteQueueIStream(_byteQueue);
+//        }
+//        else {
+//            _pDvrStream = new UnixFileIStream(_fileDescDvr, _bufferSize);
+//        }
+//        if (!_pDvrStream) {
+//            LOG(dvb, error, "failed to open dvb rec stream.");
+//            return;
+//        }
+//        if (_useByteQueue) {
+//            startReadThread();
+//        }
+//    }
+//}
+//
+//
+//void
+//Dvr::closeDvr()
+//{
+//    LOG(dvb, debug, "closing dvb rec device.");
+//
+//    if (_useByteQueue) {
+//        stopReadThread();
+//    }
+//    if (_pRemux) {
+//        delete _pRemux;
+//        _pRemux = 0;
+//    }
+//    if (_pDvrStream) {
+//        delete _pDvrStream;
+//        _pDvrStream = 0;
+//        if (close(_fileDescDvr)) {
+//            LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+//        }
+//        _fileDescDvr = -1;
+//    }
+//    else {
+//        LOG(dvb, debug, "dvb rec device already closed.");
+//    }
+//}
 
 
 void
 Dvr::clearBuffer()
 {
-    if (_pDvrStream) {
+//    if (_pDvrStream) {
         const int bufsize(_bufferSize);
         char buf[bufsize];
-        while (int bytes = _pDvrStream->readsome(buf, bufsize)) {
+//        while (int bytes = _pDvrStream->readsome(buf, bufsize)) {
+        int bytes = 0;
+        do {
+            bytes = ::read(_fileDescDvr, buf, bufsize);
             LOG(dvb, debug, "clear buffer: " + Poco::NumberFormatter::format(bytes) + " bytes");
-        }
-    }
+        } while (bytes > 0);
+//    }
 }
 
 
@@ -146,18 +171,18 @@ Dvr::prefillBuffer()
 }
 
 
-void
-Dvr::setBlocking(bool blocking)
-{
-    LOG(dvb, debug, "set dvb rec device to " + std::string(blocking ? "blocking" : "non-blocking"));
-
-    if (_pDvrStream) {
-        long fcntlFlag = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
-        if (fcntl(_fileDescDvr, F_SETFL, fcntlFlag) < 0) {
-            LOG(dvb, error, "failed to set dvb rec device \"" + _deviceName + "\" to " + (blocking ? "blocking" : "non-blocking") + ":" + strerror(errno));
-        }
-    }
-}
+//void
+//Dvr::setBlocking(bool blocking)
+//{
+//    LOG(dvb, debug, "set dvb rec device to " + std::string(blocking ? "blocking" : "non-blocking"));
+//
+//    if (_pDvrStream) {
+//        long fcntlFlag = blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK;
+//        if (fcntl(_fileDescDvr, F_SETFL, fcntlFlag) < 0) {
+//            LOG(dvb, error, "failed to set dvb rec device \"" + _deviceName + "\" to " + (blocking ? "blocking" : "non-blocking") + ":" + strerror(errno));
+//        }
+//    }
+//}
 
 
 void

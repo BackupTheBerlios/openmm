@@ -201,7 +201,7 @@ _mode(ModeDvr),
 //_mode(ModeDvrMultiplex),
 //
 //_blockDvrDevice(false),
-_blockDvrDevice(true),
+//_blockDvrDevice(true),
 // _blockDvrDevice = true then reopen device fails (see _reopenDvrDevice), _blockDvrDevice = false then stream has zero length
 //_reopenDvrDevice(true)
 //_reopenDvrDevice(false)
@@ -399,6 +399,63 @@ Device::getTransponder(const std::string& serviceName)
     //                this is a vlc problem: recording the muxed transport streams can be played with mplayer and ts analysis with
     //                dvbsnoop shows correct transport stream container.
 
+
+//std::istream*
+//Device::getStream(const std::string& serviceName)
+//{
+//    Transponder* pTransponder = getTransponder(serviceName);
+//    Frontend* pFrontend = pTransponder->_pFrontend;
+//    // TODO: check if not already tuned to transponder
+//    bool tuneSuccess = pFrontend->tune(pTransponder);
+//    if (!tuneSuccess) {
+//        return 0;
+//    }
+//
+//    Demux* pDemux = pFrontend->_pDemux;
+//    Dvr* pDvr = pFrontend->_pDvr;
+    // ... if (ModeDvr) ...
+//    else if (getMode() == ModeMultiplex) {
+//        pDemux->_pMultiplex = new Multiplex;
+//        pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux, true);
+//        pDemux->_pRemux = new Remux(pDemux->_pMultiplex->_fileDesc);
+//        pDemux->addService(pService);
+//        pService->startQueueThread();
+//        pDemux->runStream(pDemux->_pMultiplex);
+//        pDemux->startReadThread();
+//        LOG(dvb, debug, "reading full TS ...");
+//        pStream = pService->getStream();
+//    }
+//    else if (getMode() == ModeDvrMultiplex) {
+//        Dvr* pDvr = pFrontend->_pDvr;
+////        pDvr->openDvr(true);
+//        pDvr->_pRemux->addService(pService);
+//        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
+//            pDemux->selectService(*it, Demux::TargetDvr);
+//            pDemux->runService(*it, true);
+//        }
+//        pService->startQueueThread();
+//        pDvr->_pRemux->start();
+//        LOG(dvb, debug, "reading full TS from dvr device ...");
+//        pStream = pService->getStream();
+//    }
+//    else {
+//        pDemux->selectService(pService, Demux::TargetDemux);
+//        pDemux->runService(pService, true);
+//        _pMux = new Mux;
+//        _pMux->addStream(pService->getFirstAudioStream());
+//        _pMux->addStream(pService->getFirstVideoStream());
+//        _pMux->start();
+//        LOG(dvb, debug, "reading from TS muxer ...");
+//        pStream = _pMux->getMux();
+//
+//    //    return pService->getFirstAudioStream()->getStream();
+////        return pService->getFirstVideoStream()->getStream();
+//    }
+//    _streamMap[pStream] = pService;
+//    return pStream;
+//}
+
+
 std::istream*
 Device::getStream(const std::string& serviceName)
 {
@@ -411,59 +468,20 @@ Device::getStream(const std::string& serviceName)
     }
 
     Demux* pDemux = pFrontend->_pDemux;
+    Dvr* pDvr = pFrontend->_pDvr;
 
     Service* pService = pTransponder->getService(serviceName);
     std::istream* pStream = 0;
     // TODO: check if service not already selected on demuxer
-    if (getMode() == ModeDvr) {
-        LOG(dvb, debug, "reading from dvr device ...");
-        Dvr* pDvr = pFrontend->_pDvr;
-        pDvr->openDvr(true);
-        pDvr->_pRemux->addService(pService);
-        pService->startQueueThread();
-        pDemux->selectService(pService, Demux::TargetDvr);
-        pDemux->runService(pService, true);
-        pDvr->_pRemux->start();
-        pStream = pService->getStream();
-//        pStream = pDvr->getStream();
-    }
-    else if (getMode() == ModeMultiplex) {
-        pDemux->_pMultiplex = new Multiplex;
-        pDemux->selectStream(pDemux->_pMultiplex, Demux::TargetDemux, true);
-        pDemux->_pRemux = new Remux(pDemux->_pMultiplex->_fileDesc);
-        pDemux->addService(pService);
-        pService->startQueueThread();
-        pDemux->runStream(pDemux->_pMultiplex);
-        pDemux->startReadThread();
-        LOG(dvb, debug, "reading full TS ...");
-        pStream = pService->getStream();
-    }
-    else if (getMode() == ModeDvrMultiplex) {
-        Dvr* pDvr = pFrontend->_pDvr;
-        pDvr->openDvr(true);
-        pDvr->_pRemux->addService(pService);
-        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
-            pDemux->selectService(*it, Demux::TargetDvr);
-            pDemux->runService(*it, true);
-        }
-        pService->startQueueThread();
-        pDvr->_pRemux->start();
-        LOG(dvb, debug, "reading full TS from dvr device ...");
-        pStream = pService->getStream();
-    }
-    else {
-        pDemux->selectService(pService, Demux::TargetDemux);
-        pDemux->runService(pService, true);
-        _pMux = new Mux;
-        _pMux->addStream(pService->getFirstAudioStream());
-        _pMux->addStream(pService->getFirstVideoStream());
-        _pMux->start();
-        LOG(dvb, debug, "reading from TS muxer ...");
-        pStream = _pMux->getMux();
 
-    //    return pService->getFirstAudioStream()->getStream();
-//        return pService->getFirstVideoStream()->getStream();
-    }
+    LOG(dvb, debug, "reading from dvr device ...");
+    pDvr->_pRemux->addService(pService);
+    pDemux->selectService(pService, Demux::TargetDvr);
+
+    pDvr->_pRemux->start();
+    pDemux->runService(pService, true);
+
+    pStream = pService->getStream();
     _streamMap[pStream] = pService;
     return pStream;
 }
@@ -481,51 +499,63 @@ Device::freeStream(std::istream* pIstream)
     Transponder* pTransponder = pService->getTransponder();
     Demux* pDemux = pTransponder->_pFrontend->_pDemux;
 
-    if (pDemux->_pMultiplex) {
-        pDemux->stopReadThread();
-        pDemux->runStream(pDemux->_pMultiplex, false);
-        pService->stopQueueThread();
-        pDemux->unselectStream(pDemux->_pMultiplex);
-        pDemux->delService(pService);
-        delete pDemux->_pRemux;
-        pDemux->_pRemux = 0;
-        delete pDemux->_pMultiplex;
-        pDemux->_pMultiplex = 0;
-    }
-    else if (getMode() == ModeDvrMultiplex) {
-        Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
-        pDvr->_pRemux->stop();
-        pService->stopQueueThread();
-        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
-            pDemux->runService(*it, false);
-            pDemux->unselectService(*it);
-        }
-        LOG(dvb, debug, "stop reading from dvr device.");
-        pDvr->_pRemux->delService(pService);
-        pDvr->clearBuffer();
-        pDvr->closeDvr();
-    }
-    else {
-        pDemux->runService(pService, false);
-        pDemux->unselectService(pService);
+    LOG(dvb, debug, "stop reading from dvr device.");
+    Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
 
-        if (getMode() == ModeDvr) {
-            LOG(dvb, debug, "stop reading from dvr device.");
-            Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
-            pDvr->_pRemux->stop();
-            pService->stopQueueThread();
-            pDvr->_pRemux->delService(pService);
-            pDvr->clearBuffer();
-//            pDvr->closeDvr();
-        }
-        else {
-            LOG(dvb, debug, "stopping TS muxer.");
-            _pMux->stop();
-            delete _pMux;
-            _pMux = 0;
-        }
-    }
+    pDvr->_pRemux->stop();
+    pDemux->runService(pService, false);
+
+    pDemux->unselectService(pService);
+    pDvr->_pRemux->delService(pService);
     _streamMap.erase(pIstream);
+
+
+//    if (pDemux->_pMultiplex) {
+//        pDemux->stopReadThread();
+//        pDemux->runStream(pDemux->_pMultiplex, false);
+//        pService->stopQueueThread();
+//
+//        pDemux->unselectStream(pDemux->_pMultiplex);
+//        pDemux->delService(pService);
+//        delete pDemux->_pRemux;
+//        pDemux->_pRemux = 0;
+//        delete pDemux->_pMultiplex;
+//        pDemux->_pMultiplex = 0;
+//    }
+//    else if (getMode() == ModeDvrMultiplex) {
+//        Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
+//        pDvr->_pRemux->stop();
+//        pService->stopQueueThread();
+//        for (std::vector<Dvb::Service*>::iterator it = pTransponder->_services.begin(); it != pTransponder->_services.end(); ++it) {
+//            pDemux->runService(*it, false);
+//            pDemux->unselectService(*it);
+//        }
+//        LOG(dvb, debug, "stop reading from dvr device.");
+//        pDvr->_pRemux->delService(pService);
+//        pDvr->clearBuffer();
+////        pDvr->closeDvr();
+//    }
+//    else {
+//        pDemux->runService(pService, false);
+//        pDemux->unselectService(pService);
+//
+//        if (getMode() == ModeDvr) {
+//            LOG(dvb, debug, "stop reading from dvr device.");
+//            Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
+//            pDvr->_pRemux->stop();
+//            pService->stopQueueThread();
+//            pDvr->_pRemux->delService(pService);
+//            pDvr->clearBuffer();
+////            pDvr->closeDvr();
+//        }
+//        else {
+//            LOG(dvb, debug, "stopping TS muxer.");
+//            _pMux->stop();
+//            delete _pMux;
+//            _pMux = 0;
+//        }
+//    }
+//    _streamMap.erase(pIstream);
 }
 
 
@@ -537,11 +567,11 @@ Device::getMode()
 }
 
 
-bool
-Device::blockDvrDevice()
-{
-    return _blockDvrDevice;
-}
+//bool
+//Device::blockDvrDevice()
+//{
+//    return _blockDvrDevice;
+//}
 
 
 void

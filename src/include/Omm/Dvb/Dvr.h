@@ -40,14 +40,15 @@ public:
     Dvr(Adapter* pAdapter, int num);
     ~Dvr();
 
-    void openDvr(bool blocking = true);
+//    void openDvr(bool blocking = true);
+    void openDvr();
     void closeDvr();
     void clearBuffer();
     void prefillBuffer();
     void startReadThread();
     void stopReadThread();
     bool readThreadRunning();
-    void setBlocking(bool blocking = true);
+//    void setBlocking(bool blocking = true);
 
     std::istream* getStream();
 

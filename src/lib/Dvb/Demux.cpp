@@ -102,6 +102,7 @@ Demux::unselectService(Service* pService)
 bool
 Demux::runService(Service* pService, bool run)
 {
+    LOG(dvb, debug, "demuxer " + std::string(run ? "start" : "stop") + " service: " + pService->getName());
     for (std::vector<Stream*>::iterator it = pService->_streams.begin(); it != pService->_streams.end(); ++it) {
         if (!runStream(*it, run)) {
             LOG(dvb, error, "demuxer failed to run service: " + pService->_name);

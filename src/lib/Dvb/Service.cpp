@@ -340,7 +340,7 @@ Service::getStream()
 
 
 void
-Service::flushStream()
+Service::flush()
 {
 //    _packetQueueLock.lock();
 //    while (_packetQueue.size()) {
@@ -394,14 +394,22 @@ Service::stopQueueThread()
         _packetQueueLock.lock();
         _queueThreadRunning = false;
         _packetQueueLock.unlock();
+    }
+
+    LOG(dvb, debug, "service queue thread stopped.");
+}
+
+
+void
+Service::waitForStopQueueThread()
+{
+    if (_pQueueThread) {
         if (!_pQueueThread->tryJoin(_packetQueueTimeout)) {
             LOG(dvb, error, "failed to join service queue thread");
         }
         delete _pQueueThread;
         _pQueueThread = 0;
     }
-
-    LOG(dvb, debug, "service queue thread stopped.");
 }
 
 

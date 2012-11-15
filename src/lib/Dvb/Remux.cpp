@@ -50,31 +50,6 @@ Remux::~Remux()
 }
 
 
-TransportStreamPacket*
-Remux::getTransportStreamPacket(int timeout)
-{
-    TransportStreamPacket* pPacket = new TransportStreamPacket;
-    if (poll(_fileDescPoll, 1, timeout)) {
-        if (_fileDescPoll[0].revents & POLLIN){
-            int len = ::read(_multiplex, (Poco::UInt8*)pPacket->getData(), pPacket->getSize());
-            if (len > 0) {
-                if (pPacket->getBytes<Poco::UInt8>(0) != pPacket->getSyncByte()) {
-                    LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
-                    return 0;
-                }
-                else {
-                    return pPacket;
-                }
-            }
-            else if (len == -1) {
-                LOG(dvb, error, std::string("remux read thread failed to read from device: ") + strerror(errno));
-                return 0;
-            }
-        }
-    }
-}
-
-
 void
 Remux::addService(Service* pService)
 {
@@ -95,6 +70,9 @@ Remux::start()
     LOG(dvb, debug, "start TS remux thread ...");
 
     if (!_pReadThread) {
+        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+            (*it)->startQueueThread();
+        }
         _readThreadRunning = true;
         _pReadThread = new Poco::Thread;
         _pReadThread->start(_readThreadRunnable);
@@ -111,14 +89,35 @@ Remux::stop()
         _readThreadLock.lock();
         _readThreadRunning = false;
         _readThreadLock.unlock();
+        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+            (*it)->stopQueueThread();
+        }
         if (!_pReadThread->tryJoin(_readTimeout)) {
             LOG(dvb, error, "failed to join TS remux thread");
         }
+        flush();
         delete _pReadThread;
         _pReadThread = 0;
+        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+            (*it)->waitForStopQueueThread();
+            (*it)->flush();
+        }
     }
 
     LOG(dvb, debug, "TS remux thread stopped.");
+}
+
+
+void
+Remux::flush()
+{
+    const int bufsize = 100 * 188;
+    char buf[bufsize];
+    int bytes = 0;
+    do {
+        bytes = ::read(_multiplex, buf, bufsize);
+        LOG(dvb, debug, "flush remux buffer: " + Poco::NumberFormatter::format(bytes) + " bytes");
+    } while (bytes > 0);
 }
 
 
@@ -127,6 +126,46 @@ Remux::readThreadRunning()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_readThreadLock);
     return _readThreadRunning;
+}
+
+
+TransportStreamPacket*
+Remux::getTransportStreamPacket()
+{
+    TransportStreamPacket* pPacket = new TransportStreamPacket;
+    int bytesRead = 0;
+    int bytesToRead = pPacket->getSize();
+    while (bytesToRead > 0) {
+        int pollRes = poll(_fileDescPoll, 1, _readTimeout);
+        if (pollRes > 0) {
+            if (_fileDescPoll[0].revents & POLLIN){
+                bytesRead += ::read(_multiplex, (Poco::UInt8*)pPacket->getData() + bytesRead, bytesToRead);
+                if (bytesRead > 0) {
+                    bytesToRead -= bytesRead;
+                    if (pPacket->getBytes<Poco::UInt8>(0) != pPacket->getSyncByte()) {
+                        LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
+                        return 0;
+                    }
+                }
+                else if (bytesRead == -1) {
+                    LOG(dvb, error, "remux read thread failed to read from device: " + std::string(strerror(errno)));
+                    return 0;
+                }
+            }
+            else {
+                LOG(dvb, warning, "remux read thread wrong poll event");
+            }
+        }
+        else if (pollRes == 0) {
+            LOG(dvb, error, "remux read thread timed out reading TS packet");
+            return 0;
+        }
+        else if (pollRes == -1) {
+            LOG(dvb, error, "remux read thread failed to read TS packet: " + std::string(strerror(errno)));
+            return 0;
+        }
+    }
+    return pPacket;
 }
 
 
@@ -140,7 +179,7 @@ Remux::readThread()
     Poco::UInt8 continuityCounter = 0;
 
     while (readThreadRunning()) {
-        TransportStreamPacket* pTsPacket = getTransportStreamPacket(_readTimeout);
+        TransportStreamPacket* pTsPacket = getTransportStreamPacket();
         if (!pTsPacket) {
             LOG(dvb, error, "TS remux thread could not read packet.");
             break;
@@ -160,9 +199,6 @@ Remux::readThread()
                 (*it)->queueTsPacket(pTsPacket);
             }
         }
-    }
-    for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-        (*it)->flushStream();
     }
 
     LOG(dvb, information, "remux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets in "
