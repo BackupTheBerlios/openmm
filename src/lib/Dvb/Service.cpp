@@ -96,7 +96,7 @@ _scrambled(false),
 _byteQueue(2 * 1024),
 //_byteQueue(1024),
 //_byteQueue(188),
-_packetQueueTimeout(1000),
+_packetQueueTimeout(10),
 _packetQueueSize(10000),
 _pQueueThread(0),
 _queueThreadRunnable(*this, &Service::queueThread),
@@ -342,7 +342,7 @@ Service::getStream()
 void
 Service::flush()
 {
-    _packetQueueLock.lock();
+    _serviceLock.lock();
     LOG(dvb, debug, "flush count packets from service queue: " + Poco::NumberFormatter::format(_packetQueue.size()));
     while (_packetQueue.size()) {
         if (_packetQueue.front()->getPacketIdentifier()) {
@@ -350,7 +350,7 @@ Service::flush()
         }
         _packetQueue.pop();
     }
-    _packetQueueLock.unlock();
+    _serviceLock.unlock();
     LOG(dvb, debug, "flush count bytes from service byte queue: " + Poco::NumberFormatter::format(_byteQueue.size()));
     _byteQueue.clear();
     delete _pOutStream;
@@ -361,9 +361,10 @@ Service::flush()
 void
 Service::queueTsPacket(TransportStreamPacket* pPacket)
 {
-    Poco::ScopedLock<Poco::FastMutex> queueLock(_packetQueueLock);
+    Poco::ScopedLock<Poco::FastMutex> queueLock(_serviceLock);
 
     if (_packetQueue.size() < _packetQueueSize) {
+//        LOG(dvb, trace, "service queue, queue packet");
         _packetQueue.push(pPacket);
         _queueReadCondition.broadcast();
     }
@@ -393,9 +394,9 @@ Service::stopQueueThread()
     LOG(dvb, debug, "stop service queue thread ...");
 
     if (_pQueueThread) {
-        _packetQueueLock.lock();
+        _serviceLock.lock();
         _queueThreadRunning = false;
-        _packetQueueLock.unlock();
+        _serviceLock.unlock();
     }
 
     LOG(dvb, debug, "service queue thread stopped.");
@@ -418,7 +419,7 @@ Service::waitForStopQueueThread()
 bool
 Service::queueThreadRunning()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_packetQueueLock);
+    Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
     return _queueThreadRunning;
 }
 
@@ -429,13 +430,15 @@ Service::queueThread()
     LOG(dvb, debug, "service queue thread started.");
 
     while (queueThreadRunning()) {
-        _packetQueueLock.lock();
+        _serviceLock.lock();
         if (_packetQueue.size() == 0) {
-            _queueReadCondition.wait<Poco::FastMutex>(_packetQueueLock);
+//            LOG(dvb, trace, "service queue thread wait for packet");
+            _queueReadCondition.wait<Poco::FastMutex>(_serviceLock);
         }
         TransportStreamPacket* pPacket = _packetQueue.front();
         _packetQueue.pop();
-        _packetQueueLock.unlock();
+        _serviceLock.unlock();
+//        LOG(dvb, trace, "service queue thread write packet");
         _byteQueue.write((char*)pPacket->getData(), pPacket->getSize());
         if (pPacket->getPacketIdentifier()) {
             // don't delete PAT packets, there is only one for each service (_pPatTsPacket)

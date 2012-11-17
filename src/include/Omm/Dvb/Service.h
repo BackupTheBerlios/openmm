@@ -149,11 +149,11 @@ private:
     std::queue<TransportStreamPacket*>  _packetQueue;
     const int                           _packetQueueTimeout;
     const int                           _packetQueueSize;
-    Poco::FastMutex                     _packetQueueLock;
     Poco::Thread*                       _pQueueThread;
     Poco::RunnableAdapter<Service>      _queueThreadRunnable;
     bool                                _queueThreadRunning;
     Poco::Condition                     _queueReadCondition;
+    Poco::FastMutex                     _serviceLock;
 };
 
 }  // namespace Omm

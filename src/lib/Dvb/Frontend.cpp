@@ -59,6 +59,7 @@
 #include "Dvb/Transponder.h"
 #include "Dvb/Service.h"
 #include "Dvb/Section.h"
+#include "Dvb/Remux.h"
 
 
 namespace Omm {

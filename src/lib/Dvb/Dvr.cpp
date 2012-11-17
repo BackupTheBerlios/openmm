@@ -63,12 +63,15 @@ Dvr::openDvr()
         LOG(dvb, error, "failed to open dvb rec device \"" + _deviceName + "\": " + strerror(errno));
     }
     _pRemux = new Remux(_fileDescDvr);
+    _pRemux->startRemux();
 }
 
 
 void
 Dvr::closeDvr()
 {
+    _pRemux->stopRemux();
+    _pRemux->flush();
     delete _pRemux;
     if (close(_fileDescDvr)) {
         LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
@@ -223,6 +226,24 @@ Dvr::readThreadRunning()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_readThreadLock);
     return _readThreadRunning;
+}
+
+
+void
+Dvr::addService(Service* pService)
+{
+    if (_pRemux) {
+        _pRemux->addService(pService);
+    }
+}
+
+
+void
+Dvr::delService(Service* pService)
+{
+    if (_pRemux) {
+        _pRemux->delService(pService);
+    }
 }
 
 

@@ -30,6 +30,7 @@ namespace Dvb {
 
 class Adapter;
 class Remux;
+class Service;
 
 class Dvr
 {
@@ -49,6 +50,9 @@ public:
     void stopReadThread();
     bool readThreadRunning();
 //    void setBlocking(bool blocking = true);
+
+    void addService(Service* pService);
+    void delService(Service* pService);
 
     std::istream* getStream();
 

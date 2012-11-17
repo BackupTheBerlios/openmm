@@ -301,7 +301,7 @@ Demux::startReadThread()
 //    LOG(dvb, debug, "start TS remux thread ...");
 
     if (_pRemux) {
-        _pRemux->start();
+        _pRemux->startRemux();
     }
 }
 
@@ -312,7 +312,7 @@ Demux::stopReadThread()
 //    LOG(dvb, debug, "stop TS remux thread ...");
 
     if (_pRemux) {
-        _pRemux->stop();
+        _pRemux->stopRemux();
     }
 
 //    LOG(dvb, debug, "TS remux thread stopped.");

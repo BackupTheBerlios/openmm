@@ -23,6 +23,8 @@
 #include <Poco/StreamCopier.h>
 #include <sstream>
 
+#include <Poco/Timestamp.h>
+
 #include <Omm/Util.h>
 #include <Omm/Dvb/DvbLogger.h>
 #include <Omm/Dvb/Device.h>
@@ -33,7 +35,7 @@
 
 int
 main(int argc, char** argv) {
-    const unsigned int streamBufPacketCount = 1000;
+    const unsigned int streamBufPacketCount = 500;
 
     // record 10 MiB of full multiplex
 //    const std::streamsize bufSize = 6 * 1024 * 1024;
@@ -46,8 +48,8 @@ main(int argc, char** argv) {
 //    unsigned int serviceStreamPacketCount = 10;
 
     Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
+    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
+//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
     pAdapter->addFrontend(pFrontend);
     Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
     pDevice->addAdapter(pAdapter);
@@ -57,11 +59,16 @@ main(int argc, char** argv) {
     pDevice->open();
 
     for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
-        unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
-//        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
         std::string serviceName = it->first;
+
+//        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
+
 //        std::string serviceName("3sat");
 //        std::string serviceName("EinsPlus");
+
+//        unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
+        Poco::Timestamp t;
+        Poco::Timestamp::TimeDiff maxTime = 5000000;  // get max 5,000,000 microsec
 
         Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(serviceName);
         if (pTransponder) {
@@ -75,8 +82,9 @@ main(int argc, char** argv) {
                     std::ofstream serviceStream((serviceName + std::string(".ts")).c_str());
                     const std::streamsize bufSize = 188 * streamBufPacketCount;
                     char buf[bufSize];
-                    LOGNS(Omm::Dvb, dvb, debug, "reading stream packets total: " + Poco::NumberFormatter::format(serviceStreamPacketCount * streamBufPacketCount));
-                    while (serviceStreamPacketCount--) {
+//                    LOGNS(Omm::Dvb, dvb, debug, "reading stream packets total: " + Poco::NumberFormatter::format(serviceStreamPacketCount * streamBufPacketCount));
+//                    while (serviceStreamPacketCount--) {
+                    while (t.elapsed() < maxTime) {
                         pDvbStream->read(buf, bufSize);
                         serviceStream.write(buf, bufSize);
                         LOGNS(Omm::Dvb, dvb, debug, "received stream packets: " + Poco::NumberFormatter::format(streamBufPacketCount));

@@ -62,13 +62,9 @@
 #include "Frontend.h"
 #include "Demux.h"
 #include "Mux.h"
+#include "Remux.h"
 #include "Dvr.h"
 #include "Device.h"
-#include "Dvb/Demux.h"
-#include "Dvb/Device.h"
-#include "Dvb/Transponder.h"
-#include "Dvb/Dvr.h"
-#include "Dvb/Remux.h"
 
 
 namespace Omm {
@@ -469,17 +465,18 @@ Device::getStream(const std::string& serviceName)
 
     Demux* pDemux = pFrontend->_pDemux;
     Dvr* pDvr = pFrontend->_pDvr;
+//    Remux* pRemux = pDvr->_pRemux;
 
     Service* pService = pTransponder->getService(serviceName);
     std::istream* pStream = 0;
     // TODO: check if service not already selected on demuxer
 
     LOG(dvb, debug, "reading from dvr device ...");
-    pDvr->_pRemux->addService(pService);
+//    pDvr->_pRemux->startRemux();
+    pDvr->addService(pService);
     pDemux->selectService(pService, Demux::TargetDvr, false);
-
-    pDvr->_pRemux->start();
     pDemux->runService(pService, true);
+//    pService->startQueueThread();
 
     pStream = pService->getStream();
     _streamMap[pStream] = pService;
@@ -503,13 +500,15 @@ Device::freeStream(std::istream* pIstream)
 
     LOG(dvb, debug, "stop reading from dvr device.");
     Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
+//    Remux* pRemux = pDvr->_pRemux;
 
-    pDvr->_pRemux->stop();
+//    pDvr->_pRemux->stopRemux();
+//    pService->stopQueueThread();
     pDemux->runService(pService, false);
-
-    pDvr->_pRemux->flush();
+//    pDvr->_pRemux->flush();
     pDemux->unselectService(pService);
-    pDvr->_pRemux->delService(pService);
+    pDvr->delService(pService);
+
     _streamMap.erase(pIstream);
 
 

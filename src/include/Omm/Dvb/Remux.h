@@ -45,8 +45,9 @@ public:
     void addService(Service* pService);
     void delService(Service* pService);
 
-    void start();
-    void stop();
+    void startRemux();
+    void stopRemux();
+    void waitForStopRemux();
     void flush();
 
 private:
@@ -57,10 +58,10 @@ private:
     int                                 _multiplex;
     std::set<Service*>                  _pServices;
 
+    Poco::FastMutex                     _remuxLock;
     Poco::Thread*                       _pReadThread;
     Poco::RunnableAdapter<Remux>        _readThreadRunnable;
     bool                                _readThreadRunning;
-    Poco::FastMutex                     _readThreadLock;
     struct pollfd                       _fileDescPoll[1];
     const int                           _readTimeout;
 };
