@@ -47,12 +47,12 @@ public:
 
     void start();
     void stop();
+    void flush();
 
 private:
     TransportStreamPacket* getTransportStreamPacket();
     void readThread();
     bool readThreadRunning();
-    void flush();
 
     int                                 _multiplex;
     std::set<Service*>                  _pServices;

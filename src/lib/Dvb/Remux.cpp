@@ -92,15 +92,14 @@ Remux::stop()
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
             (*it)->stopQueueThread();
         }
-        if (!_pReadThread->tryJoin(_readTimeout)) {
+        // wait for threads to stop
+        if (_pReadThread->isRunning() && !_pReadThread->tryJoin(_readTimeout)) {
             LOG(dvb, error, "failed to join TS remux thread");
         }
-        flush();
         delete _pReadThread;
         _pReadThread = 0;
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
             (*it)->waitForStopQueueThread();
-            (*it)->flush();
         }
     }
 
@@ -111,13 +110,22 @@ Remux::stop()
 void
 Remux::flush()
 {
-    const int bufsize = 100 * 188;
+    const int bufsize = 1000 * 188;
     char buf[bufsize];
     int bytes = 0;
     do {
         bytes = ::read(_multiplex, buf, bufsize);
-        LOG(dvb, debug, "flush remux buffer: " + Poco::NumberFormatter::format(bytes) + " bytes");
+        if (bytes >= 0) {
+            LOG(dvb, debug, "flush remux input stream: " + Poco::NumberFormatter::format(bytes) + " bytes");
+        }
+        else if (bytes == -1) {
+            LOG(dvb, warning, "flush remux input stream: " + std::string(strerror(errno)));
+        }
     } while (bytes > 0);
+
+    for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+        (*it)->flush();
+    }
 }
 
 

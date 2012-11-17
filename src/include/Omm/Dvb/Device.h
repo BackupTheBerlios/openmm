@@ -128,6 +128,8 @@ private:
     std::map<std::string, std::vector<Transponder*> >   _serviceMap;
     std::map<std::istream*, Service*>                   _streamMap;
 
+    Poco::FastMutex                                     _deviceLock;
+
     Mode                                                _mode;
 //    bool                                                _useDvrDevice;
 //    bool                                                _blockDvrDevice;

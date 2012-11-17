@@ -46,8 +46,8 @@ main(int argc, char** argv) {
 //    unsigned int serviceStreamPacketCount = 10;
 
     Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
+//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
+    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
     pAdapter->addFrontend(pFrontend);
     Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
     pDevice->addAdapter(pAdapter);

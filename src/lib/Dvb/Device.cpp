@@ -106,7 +106,6 @@ Adapter::openAdapter()
     for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
         (*it)->openFrontend();
     }
-//    _pFrontend->openFrontend();
 
 }
 
@@ -114,7 +113,6 @@ Adapter::openAdapter()
 void
 Adapter::closeAdapter()
 {
-//    _pFrontend->closeFrontend();
     for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
         (*it)->closeFrontend();
     }
@@ -459,6 +457,8 @@ Device::getTransponder(const std::string& serviceName)
 std::istream*
 Device::getStream(const std::string& serviceName)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
+
     Transponder* pTransponder = getTransponder(serviceName);
     Frontend* pFrontend = pTransponder->_pFrontend;
     // TODO: check if not already tuned to transponder
@@ -476,7 +476,7 @@ Device::getStream(const std::string& serviceName)
 
     LOG(dvb, debug, "reading from dvr device ...");
     pDvr->_pRemux->addService(pService);
-    pDemux->selectService(pService, Demux::TargetDvr);
+    pDemux->selectService(pService, Demux::TargetDvr, false);
 
     pDvr->_pRemux->start();
     pDemux->runService(pService, true);
@@ -490,6 +490,8 @@ Device::getStream(const std::string& serviceName)
 void
 Device::freeStream(std::istream* pIstream)
 {
+    Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
+
     // TODO: only stop and free service stream (not complete demux)
     Service* pService = _streamMap[pIstream];
     if (!pService) {
@@ -505,6 +507,7 @@ Device::freeStream(std::istream* pIstream)
     pDvr->_pRemux->stop();
     pDemux->runService(pService, false);
 
+    pDvr->_pRemux->flush();
     pDemux->unselectService(pService);
     pDvr->_pRemux->delService(pService);
     _streamMap.erase(pIstream);

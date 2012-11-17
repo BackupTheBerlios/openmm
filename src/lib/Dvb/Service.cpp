@@ -342,14 +342,16 @@ Service::getStream()
 void
 Service::flush()
 {
-//    _packetQueueLock.lock();
-//    while (_packetQueue.size()) {
-//        if (_packetQueue.front()->getPacketIdentifier()) {
-//            delete _packetQueue.front();
-//        }
-//        _packetQueue.pop();
-//    }
-//    _packetQueueLock.unlock();
+    _packetQueueLock.lock();
+    LOG(dvb, debug, "flush count packets from service queue: " + Poco::NumberFormatter::format(_packetQueue.size()));
+    while (_packetQueue.size()) {
+        if (_packetQueue.front()->getPacketIdentifier()) {
+            delete _packetQueue.front();
+        }
+        _packetQueue.pop();
+    }
+    _packetQueueLock.unlock();
+    LOG(dvb, debug, "flush count bytes from service byte queue: " + Poco::NumberFormatter::format(_byteQueue.size()));
     _byteQueue.clear();
     delete _pOutStream;
     _pOutStream = new ByteQueueIStream(_byteQueue);
@@ -404,7 +406,7 @@ void
 Service::waitForStopQueueThread()
 {
     if (_pQueueThread) {
-        if (!_pQueueThread->tryJoin(_packetQueueTimeout)) {
+        if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(_packetQueueTimeout)) {
             LOG(dvb, error, "failed to join service queue thread");
         }
         delete _pQueueThread;
