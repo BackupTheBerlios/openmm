@@ -58,6 +58,17 @@ DvbModel::init()
 }
 
 
+void
+DvbModel::deInit()
+{
+    LOGNS(Omm::Dvb, dvb, debug, "dvb model deInit ...");
+
+    Omm::Dvb::Device::instance()->close();
+
+    LOGNS(Omm::Dvb, dvb, debug, "dvb model deInit finished.");
+}
+
+
 std::string
 DvbModel::getModelClass()
 {

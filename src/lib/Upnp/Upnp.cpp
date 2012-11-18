@@ -2910,6 +2910,9 @@ _state(Stopped)
 
 DeviceManager::~DeviceManager()
 {
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        delete *it;
+    }
     delete _pSocket;
 }
 

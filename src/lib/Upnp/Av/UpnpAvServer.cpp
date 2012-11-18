@@ -81,10 +81,12 @@ _systemUpdateIdTimerInterval(0)
 
 MediaServer::~MediaServer()
 {
-    LOG(upnpav, information, "stopping media server ...");
-    _pHttpServer->stop();
+    LOG(upnpav, debug, "delete media server " + getFriendlyName());
+
     delete _pHttpServer;
-    LOG(upnpav, information, "done");
+    delete _pDevContentDirectoryServerImpl->_pRoot;
+    delete _pDevContentDirectoryServerImpl;
+//    LOG(upnpav, information, "done");
 }
 
 
@@ -98,6 +100,8 @@ MediaServer::setRoot(ServerContainer* pRoot)
 void
 MediaServer::start()
 {
+    LOG(upnpav, information, "start media server " + getFriendlyName());
+
     Poco::Net::HTTPServerParams* pParams = new Poco::Net::HTTPServerParams;
     _pHttpServer = new Poco::Net::HTTPServer(new ItemRequestHandlerFactory(this), _socket, pParams);
     _pHttpServer->start();
@@ -109,6 +113,8 @@ MediaServer::start()
 void
 MediaServer::stop()
 {
+    LOG(upnpav, information, "stop media server " + getFriendlyName());
+
     startPollSystemUpdateId(false);
     _pHttpServer->stop();
 }
@@ -837,6 +843,15 @@ _childrenPlaylistSize(0)
     setIsContainer(true);
     setIsRestricted(false);
     _pServer->_pServerContainer = this;
+}
+
+
+ServerContainer::~ServerContainer()
+{
+    if (_pDataModel) {
+        _pDataModel->deInit();
+        delete _pDataModel;
+    }
 }
 
 

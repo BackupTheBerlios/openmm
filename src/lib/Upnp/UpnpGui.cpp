@@ -128,6 +128,13 @@ _appStandardPort(4009)
 }
 
 
+UpnpApplication::~UpnpApplication()
+{
+    delete _pLocalDeviceServer;
+    delete _pHttpServer;
+}
+
+
 void
 UpnpApplication::defineOptions(Poco::Util::OptionSet& options)
 {

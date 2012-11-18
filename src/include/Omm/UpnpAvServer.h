@@ -242,6 +242,7 @@ class ServerContainer : public ServerObject //, public Util::ConfigurablePlugin
 
 public:
     ServerContainer(MediaServer* pServer);
+    virtual ~ServerContainer();
 
     enum Layout {Flat, DirStruct, PropertyGroups};
     static const std::string  LAYOUT_FLAT;
@@ -415,6 +416,7 @@ public:
     void setMetaDirPath(const std::string& path);
 
     virtual void init() {}
+    virtual void deInit() {}
     virtual std::string getModelClass() { return ""; }
     virtual CsvList getQueryProperties() { return CsvList(""); }
 

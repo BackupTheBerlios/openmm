@@ -36,6 +36,7 @@ public:
     DvbModel();
 
     virtual void init();
+    virtual void deInit();
     virtual std::string getModelClass();
     virtual Omm::ui4 getSystemUpdateId(bool checkMod);
     virtual void scan();

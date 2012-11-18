@@ -111,6 +111,7 @@ public:
     static const std::string CONFIG_DEV_QUERY;
 
     UpnpApplication(int argc, char** argv);
+    ~UpnpApplication();
 
     void setLockInstance(bool lock = true);
     void setIgnoreConfig(bool ignore = true);
