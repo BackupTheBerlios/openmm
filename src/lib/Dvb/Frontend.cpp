@@ -114,7 +114,8 @@ Frontend::Frontend(Adapter* pAdapter, int num) :
 _fileDescFrontend(-1),
 _pAdapter(pAdapter),
 _num(num),
-_frontendTimeout(2000000)
+_frontendTimeout(2000000),
+_pTunedTransponder(0)
 {
     _deviceName = _pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(_num);
     _pDemux = new Demux(pAdapter, 0);
@@ -327,6 +328,13 @@ bool
 Frontend::typeSupported()
 {
     return getType() == DVBS || getType() == DVBT;
+}
+
+
+bool
+Frontend::isTuned(Transponder* pTransponder)
+{
+    return _pTunedTransponder == pTransponder;
 }
 
 
@@ -739,6 +747,7 @@ SatFrontend::tune(Transponder* pTransponder)
         }
         success = waitForLock(_frontendTimeout);
         if (success) {
+            _pTunedTransponder = pTrans;
             pTrans->_satNum = i;
             if (pTrans->_satPosition != "") {
                 setSatNum(pTrans->_satPosition, pTrans->_satNum);
@@ -957,7 +966,11 @@ TerrestrialFrontend::tune(Transponder* pTransponder)
         LOG(dvb, debug, "terrestrial frontend tuning failed.");
         return false;
     }
-    return waitForLock(_frontendTimeout);
+    bool success = waitForLock(_frontendTimeout);
+    if (success) {
+        _pTunedTransponder = pTrans;
+    }
+    return success;
 }
 
 
@@ -980,7 +993,11 @@ CableFrontend::tune(Transponder* pTransponder)
         LOG(dvb, debug, "cable frontend tuning failed.");
         return false;
     }
-    return waitForLock(_frontendTimeout);
+    bool success = waitForLock(_frontendTimeout);
+    if (success) {
+        _pTunedTransponder = pTrans;
+    }
+    return success;
 }
 
 
@@ -1003,7 +1020,11 @@ AtscFrontend::tune(Transponder* pTransponder)
         LOG(dvb, debug, "atsc frontend tuning failed.");
         return false;
     }
-    return waitForLock(_frontendTimeout);
+    bool success = waitForLock(_frontendTimeout);
+    if (success) {
+        _pTunedTransponder = pTrans;
+    }
+    return success;
 }
 
 

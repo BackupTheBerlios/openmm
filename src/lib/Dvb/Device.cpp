@@ -389,10 +389,11 @@ Device::getStream(const std::string& serviceName)
 
     Transponder* pTransponder = getTransponder(serviceName);
     Frontend* pFrontend = pTransponder->_pFrontend;
-    // TODO: check if not already tuned to transponder
-    bool tuneSuccess = pFrontend->tune(pTransponder);
-    if (!tuneSuccess) {
-        return 0;
+    if (!pFrontend->isTuned(pTransponder)) {
+        bool tuneSuccess = pFrontend->tune(pTransponder);
+        if (!tuneSuccess) {
+            return 0;
+        }
     }
 
     Demux* pDemux = pFrontend->_pDemux;

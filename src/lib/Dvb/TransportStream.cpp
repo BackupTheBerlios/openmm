@@ -39,7 +39,8 @@ const int TransportStreamPacket::PayloadSize = 188 - 4;
 TransportStreamPacket::TransportStreamPacket() :
 _adaptionFieldSize(0),
 _adaptionFieldPcrSet(false),
-_adaptionFieldSplicingPointSet(false)
+_adaptionFieldSplicingPointSet(false),
+_refCounter(0)
 {
     _data = new Poco::UInt8[Size];
     setBytes<Poco::UInt8>(0, SyncByte);

@@ -23,6 +23,7 @@
 #define TransportStream_INCLUDED
 
 #include <Poco/Thread.h>
+#include "Poco/AtomicCounter.h"
 
 #include "DvbUtil.h"
 
@@ -77,10 +78,21 @@ public:
     void setSpliceCountdown(Poco::UInt8 countdown);
     void setStuffingBytes(int count);
 
+    void incRefCounter() const
+    {
+        ++_refCounter;
+    }
+
+    void decRefCounter() const
+    {
+        if (--_refCounter == 0) delete this;
+    }
+
 private:
-    int                 _adaptionFieldSize;
-    bool                _adaptionFieldPcrSet;
-    bool                _adaptionFieldSplicingPointSet;
+    int                             _adaptionFieldSize;
+    bool                            _adaptionFieldPcrSet;
+    bool                            _adaptionFieldSplicingPointSet;
+    mutable Poco::AtomicCounter     _refCounter;
 };
 
 

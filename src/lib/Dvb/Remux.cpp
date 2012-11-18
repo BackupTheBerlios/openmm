@@ -20,8 +20,9 @@
  ***************************************************************************/
 
 #include <vector>
-#include <Poco/Types.h>
 #include <string.h>
+
+#include <Poco/Types.h>
 
 #include "DvbLogger.h"
 #include "Remux.h"
@@ -153,11 +154,13 @@ Remux::getTransportStreamPacket()
                     bytesToRead -= bytesRead;
                     if (pPacket->getBytes<Poco::UInt8>(0) != TransportStreamPacket::SyncByte) {
                         LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
+                        delete pPacket;
                         return 0;
                     }
                 }
                 else if (bytesRead == -1) {
                     LOG(dvb, error, "remux read thread failed to read from device: " + std::string(strerror(errno)));
+                    delete pPacket;
                     return 0;
                 }
             }
@@ -167,10 +170,12 @@ Remux::getTransportStreamPacket()
         }
         else if (pollRes == 0) {
             LOG(dvb, warning, "remux read thread timed out");
+            delete pPacket;
             return 0;
         }
         else if (pollRes == -1) {
             LOG(dvb, error, "remux read thread failed to read TS packet: " + std::string(strerror(errno)));
+            delete pPacket;
             return 0;
         }
     }
@@ -208,8 +213,12 @@ Remux::readThread()
                 (*it)->queueTsPacket((*it)->_pPatTsPacket);
             }
             else if ((*it)->hasPacketIdentifier(pid)) {
+                pTsPacket->incRefCounter();
                 (*it)->queueTsPacket(pTsPacket);
             }
+//            else {
+//                delete pTsPacket;
+//            }
         }
     }
 

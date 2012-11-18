@@ -126,11 +126,6 @@ private:
     std::map<std::istream*, Service*>                   _streamMap;
 
     Poco::FastMutex                                     _deviceLock;
-
-//    Mode                                                _mode;
-
-//    // TODO: move _pMux into Demux, because every Demuxer needs it's own Muxer
-//    Mux*                                                _pMux;
 };
 
 }  // namespace Omm

@@ -427,7 +427,7 @@ Service::flush()
     while (_packetQueue.size()) {
         TransportStreamPacket* pPacket = _packetQueue.front();
         if (pPacket && pPacket->getPacketIdentifier()) {
-            delete _packetQueue.front();
+            pPacket->decRefCounter();
         }
         _packetQueue.pop();
     }
@@ -526,9 +526,9 @@ Service::queueThread()
 //        LOG(dvb, trace, "service queue thread write packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
         _byteQueue.write((char*)pPacket->getData(), TransportStreamPacket::Size);
 //        LOG(dvb, trace, "service queue thread wrote packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
+        // don't delete PAT packets, there is only one for each service (_pPatTsPacket)
         if (pPacket->getPacketIdentifier()) {
-            // don't delete PAT packets, there is only one for each service (_pPatTsPacket)
-            delete pPacket;
+            pPacket->decRefCounter();
         }
     }
 

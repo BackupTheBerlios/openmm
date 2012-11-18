@@ -64,6 +64,7 @@ public:
     const std::string getType();
     const std::string getName();
     bool typeSupported();
+    bool isTuned(Transponder* pTransponder);
     virtual bool tune(Transponder* pTransponder) {}
     virtual Transponder* createTransponder(unsigned int freq, unsigned int tsid) {}
 
@@ -79,33 +80,34 @@ protected:
     void scanSdt(Transponder* pTransponder);
     void scanNit(Transponder* pTransponder, bool actual = false);
 
-    int                         _fileDescFrontend;
-    struct dvb_frontend_info    _feInfo;
-    Poco::Timestamp::TimeDiff   _frontendTimeout;
+    int                                 _fileDescFrontend;
+    struct dvb_frontend_info            _feInfo;
+    Poco::Timestamp::TimeDiff           _frontendTimeout;
     Poco::AutoPtr<Poco::XML::Element>   _pXmlFrontend;
+    Transponder*                        _pTunedTransponder;
 
 private:
     void checkFrontend();
     bool addKnownTransponder(Transponder* pTransponder);
 
-    Adapter*                    _pAdapter;
-    std::string                 _deviceName;
-    std::string                 _name;
-    int                         _num;
-    std::string                 _type;
-    std::vector<Transponder*>   _initialTransponders;
-    std::vector<Transponder*>   _scannedTransponders;
-    std::vector<Transponder*>   _transponders;
-    Demux*                      _pDemux;
-    Dvr*                        _pDvr;
+    Adapter*                            _pAdapter;
+    std::string                         _deviceName;
+    std::string                         _name;
+    int                                 _num;
+    std::string                         _type;
+    std::vector<Transponder*>           _initialTransponders;
+    std::vector<Transponder*>           _scannedTransponders;
+    std::vector<Transponder*>           _transponders;
+    Demux*                              _pDemux;
+    Dvr*                                _pDvr;
 
-    Poco::Thread                _t;
-    SignalCheckThread*          _pt;
-    Poco::FastMutex             _tuneLock;
+    Poco::Thread                        _t;
+    SignalCheckThread*                  _pt;
+    Poco::FastMutex                     _tuneLock;
 
-    Poco::UTF8Encoding          _sourceEncoding;
-    Poco::UTF8Encoding          _targetEncoding;
-    Poco::TextConverter*        _pTextConverter;
+    Poco::UTF8Encoding                  _sourceEncoding;
+    Poco::UTF8Encoding                  _targetEncoding;
+    Poco::TextConverter*                _pTextConverter;
 };
 
 
