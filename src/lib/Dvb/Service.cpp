@@ -92,11 +92,8 @@ _pmtPid(pmtid),
 _pcrPid(InvalidPcrPid),
 _status(StatusUndefined),
 _scrambled(false),
-//_byteQueue(1024 * 1024)
 _byteQueue(2 * 1024),
-//_byteQueue(1024),
-//_byteQueue(188),
-_packetQueueTimeout(10),
+_packetQueueTimeout(100),
 _packetQueueSize(10000),
 _pQueueThread(0),
 _queueThreadRunnable(*this, &Service::queueThread),
@@ -141,6 +138,9 @@ void
 Service::readXml(Poco::XML::Node* pXmlService)
 {
     LOG(dvb, debug, "read service ...");
+
+    // FIXME: better not add PAT stream here, but in the remuxer
+    addStream(new Stream(Stream::Other, 0));
 
     if (pXmlService->hasChildNodes()) {
         Poco::XML::Node* pXmlParam = pXmlService->firstChild();
@@ -247,6 +247,86 @@ Service::getType()
 }
 
 
+std::string
+Service::typeToString(Poco::UInt8 status)
+{
+    switch (status) {
+        case 0x01:
+            return TypeDigitalTelevision;
+        case 0x02:
+            return TypeDigitalRadioSound;
+        case 0x03:
+            return TypeTeletext;
+        case 0x04:
+            return TypeNvodReference;
+        case 0x05:
+            return TypeNodTimeShifted;
+        case 0x06:
+            return TypeMosaic;
+        case 0x07:
+            return TypeFmRadio;
+        case 0x08:
+            return TypeDvbSrm;
+        case 0x0A:
+            return TypeAdvancedCodecDigitalRadioSound;
+        case 0x0B:
+            return TypeAdvancedCodecMosaic;
+        case 0x0C:
+            return TypeDataBroadcastService;
+        case 0x0E:
+            return TypeRcsMap;
+        case 0x0F:
+            return TypeRcsFls;
+        case 0x10:
+            return TypeDvbMhp;
+        case 0x11:
+            return TypeMpeg2HdDigitalTelevision;
+        case 0x16:
+            return TypeAdvancedCodecSdDigitalTelevision;
+        case 0x17:
+            return TypeAdvancedCodecSdNvodTimeShifted;
+        case 0x18:
+            return TypeAdvancedCodecSdNvodReference;
+        case 0x19:
+            return TypeAdvancedCodecHdDigitalTelevision;
+        case 0x1A:
+            return TypeAdvancedCodecHdNvodTimeShifted;
+        case 0x1B:
+            return TypeAdvancedCodecHdNvodReference;
+        case 0x1C:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision;
+        case 0x1D:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted;
+        case 0x1E:
+            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference;
+        default:
+            return "";
+    }
+}
+
+
+std::string
+Service::statusToString(Poco::UInt8 status)
+{
+    switch (status) {
+        case 0x00:
+            return StatusUndefined;
+        case 0x01:
+            return StatusNotRunning;
+        case 0x02:
+            return StatusStartsShortly;
+        case 0x03:
+            return StatusPausing;
+        case 0x04:
+            return StatusRunning;
+        case 0x05:
+            return StatusOffAir;
+        default:
+            return "";
+    }
+}
+
+
 bool
 Service::isAudio()
 {
@@ -345,7 +425,8 @@ Service::flush()
     _serviceLock.lock();
     LOG(dvb, debug, "flush count packets from service queue: " + Poco::NumberFormatter::format(_packetQueue.size()));
     while (_packetQueue.size()) {
-        if (_packetQueue.front()->getPacketIdentifier()) {
+        TransportStreamPacket* pPacket = _packetQueue.front();
+        if (pPacket && pPacket->getPacketIdentifier()) {
             delete _packetQueue.front();
         }
         _packetQueue.pop();
@@ -393,13 +474,12 @@ Service::stopQueueThread()
 {
     LOG(dvb, debug, "stop service queue thread ...");
 
-    if (_pQueueThread) {
-        _serviceLock.lock();
-        _queueThreadRunning = false;
-        _serviceLock.unlock();
-    }
+    Poco::ScopedLock<Poco::FastMutex> queueLock(_serviceLock);
 
-    LOG(dvb, debug, "service queue thread stopped.");
+    _queueThreadRunning = false;
+    _byteQueue.clear();
+    _packetQueue.push(0);
+    _queueReadCondition.broadcast();
 }
 
 
@@ -438,93 +518,21 @@ Service::queueThread()
         TransportStreamPacket* pPacket = _packetQueue.front();
         _packetQueue.pop();
         _serviceLock.unlock();
-//        LOG(dvb, trace, "service queue thread write packet");
-        _byteQueue.write((char*)pPacket->getData(), pPacket->getSize());
+        if (!pPacket) {
+            LOG(dvb, trace, "service queue thread got NULL packet, end of stream");
+            // null packet means end of stream
+            break;
+        }
+//        LOG(dvb, trace, "service queue thread write packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
+        _byteQueue.write((char*)pPacket->getData(), TransportStreamPacket::Size);
+//        LOG(dvb, trace, "service queue thread wrote packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
         if (pPacket->getPacketIdentifier()) {
             // don't delete PAT packets, there is only one for each service (_pPatTsPacket)
             delete pPacket;
         }
     }
-}
 
-
-std::string
-Service::typeToString(Poco::UInt8 status)
-{
-    switch (status) {
-        case 0x01:
-            return TypeDigitalTelevision;
-        case 0x02:
-            return TypeDigitalRadioSound;
-        case 0x03:
-            return TypeTeletext;
-        case 0x04:
-            return TypeNvodReference;
-        case 0x05:
-            return TypeNodTimeShifted;
-        case 0x06:
-            return TypeMosaic;
-        case 0x07:
-            return TypeFmRadio;
-        case 0x08:
-            return TypeDvbSrm;
-        case 0x0A:
-            return TypeAdvancedCodecDigitalRadioSound;
-        case 0x0B:
-            return TypeAdvancedCodecMosaic;
-        case 0x0C:
-            return TypeDataBroadcastService;
-        case 0x0E:
-            return TypeRcsMap;
-        case 0x0F:
-            return TypeRcsFls;
-        case 0x10:
-            return TypeDvbMhp;
-        case 0x11:
-            return TypeMpeg2HdDigitalTelevision;
-        case 0x16:
-            return TypeAdvancedCodecSdDigitalTelevision;
-        case 0x17:
-            return TypeAdvancedCodecSdNvodTimeShifted;
-        case 0x18:
-            return TypeAdvancedCodecSdNvodReference;
-        case 0x19:
-            return TypeAdvancedCodecHdDigitalTelevision;
-        case 0x1A:
-            return TypeAdvancedCodecHdNvodTimeShifted;
-        case 0x1B:
-            return TypeAdvancedCodecHdNvodReference;
-        case 0x1C:
-            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicHdTelevision;
-        case 0x1D:
-            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicTimeShifted;
-        case 0x1E:
-            return TypeAdvancedCodecFrameCompatiblePlanoStereoscopicReference;
-        default:
-            return "";
-    }
-}
-
-
-std::string
-Service::statusToString(Poco::UInt8 status)
-{
-    switch (status) {
-        case 0x00:
-            return StatusUndefined;
-        case 0x01:
-            return StatusNotRunning;
-        case 0x02:
-            return StatusStartsShortly;
-        case 0x03:
-            return StatusPausing;
-        case 0x04:
-            return StatusRunning;
-        case 0x05:
-            return StatusOffAir;
-        default:
-            return "";
-    }
+    LOG(dvb, debug, "service queue thread stopped.");
 }
 
 

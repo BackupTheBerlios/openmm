@@ -56,7 +56,6 @@ class Service
 {
     friend class Transponder;
     friend class Frontend;
-//    friend class Device;
     friend class Demux;
     friend class Remux;
 
@@ -103,6 +102,9 @@ public:
     void writeXml(Poco::XML::Element* pTransponder);
 
     std::string getType();
+    static std::string typeToString(Poco::UInt8 status);
+    static std::string statusToString(Poco::UInt8 status);
+
     bool isAudio();
     bool isSdVideo();
     bool isHdVideo();
@@ -113,16 +115,13 @@ public:
     Stream* getFirstAudioStream();
     Stream* getFirstVideoStream();
     bool hasPacketIdentifier(Poco::UInt16 pid);
+
     std::istream* getStream();
     void flush();
-
     void queueTsPacket(TransportStreamPacket* pPacket);
     void startQueueThread();
     void stopQueueThread();
     void waitForStopQueueThread();
-
-    static std::string typeToString(Poco::UInt8 status);
-    static std::string statusToString(Poco::UInt8 status);
 
 private:
     void queueThread();

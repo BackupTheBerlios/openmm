@@ -31,6 +31,7 @@
 #include <Omm/Dvb/Frontend.h>
 #include <Omm/Dvb/Transponder.h>
 #include <Omm/Dvb/Service.h>
+#include <Omm/Dvb/TransportStream.h>
 
 
 int
@@ -58,13 +59,13 @@ main(int argc, char** argv) {
     pDevice->readXml(dvbXml);
     pDevice->open();
 
-    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
-        std::string serviceName = it->first;
+//    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+//        std::string serviceName = it->first;
 
 //        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
 
 //        std::string serviceName("3sat");
-//        std::string serviceName("EinsPlus");
+        std::string serviceName("EinsPlus");
 
 //        unsigned int serviceStreamPacketCount = 10; // get 10,000 packets of service stream (not full multiplex)
         Poco::Timestamp t;
@@ -80,7 +81,7 @@ main(int argc, char** argv) {
                 std::istream* pDvbStream = pDevice->getStream(serviceName);
                 if (pDvbStream) {
                     std::ofstream serviceStream((serviceName + std::string(".ts")).c_str());
-                    const std::streamsize bufSize = 188 * streamBufPacketCount;
+                    const std::streamsize bufSize = Omm::Dvb::TransportStreamPacket::Size * streamBufPacketCount;
                     char buf[bufSize];
 //                    LOGNS(Omm::Dvb, dvb, debug, "reading stream packets total: " + Poco::NumberFormatter::format(serviceStreamPacketCount * streamBufPacketCount));
 //                    while (serviceStreamPacketCount--) {
@@ -93,7 +94,7 @@ main(int argc, char** argv) {
                 }
             }
         }
-    }
+//    }
     pDevice->close();
 
     return 0;

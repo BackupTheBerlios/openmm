@@ -41,7 +41,6 @@ public:
     Dvr(Adapter* pAdapter, int num);
     ~Dvr();
 
-//    void openDvr(bool blocking = true);
     void openDvr();
     void closeDvr();
     void clearBuffer();
@@ -49,7 +48,6 @@ public:
     void startReadThread();
     void stopReadThread();
     bool readThreadRunning();
-//    void setBlocking(bool blocking = true);
 
     void addService(Service* pService);
     void delService(Service* pService);
@@ -63,18 +61,7 @@ private:
     std::string                         _deviceName;
     int                                 _num;
     int                                 _fileDescDvr;
-    AvStream::ByteQueue                 _byteQueue;
-    const int                           _bufferSize;
-    std::istream*                       _pDvrStream;
     Remux*                              _pRemux;
-
-    bool                                _useByteQueue;
-    struct pollfd                       _fileDescPoll[1];
-    const int                           _pollTimeout;  // wait for _pollTimeout millisec for new data on dvr device
-    Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Dvr>          _readThreadRunnable;
-    bool                                _readThreadRunning;
-    Poco::FastMutex                     _readThreadLock;
 };
 
 }  // namespace Omm

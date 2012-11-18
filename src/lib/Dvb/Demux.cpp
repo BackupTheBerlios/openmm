@@ -74,8 +74,7 @@ Demux::~Demux()
 bool
 Demux::selectService(Service* pService, Target target, bool blocking)
 {
-    // FIXME: only add stream, if service doesn't have it already
-    pService->addStream(new Stream(Stream::Other, 0));
+    // FIXME: only select stream, if service doesn't have it already
     for (std::vector<Stream*>::iterator it = pService->_streams.begin(); it != pService->_streams.end(); ++it) {
         if (!selectStream(*it, target, blocking)) {
             LOG(dvb, error, "demuxer failed to select service: " + pService->_name);
@@ -117,18 +116,9 @@ bool
 Demux::selectStream(Stream* pStream, Target target, bool blocking)
 {
     dmx_pes_type_t pesType;
-//    if (pStream->_type == Stream::Audio) {
-//        pesType = DMX_PES_AUDIO;
-//    }
-//    else if (pStream->_type == Stream::Video) {
-//        pesType = DMX_PES_VIDEO;
-//    }
-//    else if (pStream->_type == Stream::ProgramClock) {
-//        pesType = DMX_PES_PCR;
-//    }
-//    else {
-        pesType = DMX_PES_OTHER;
-//    }
+    // other PES types (audio, video) are only relevant for full featured cards,
+    // when feeding elementary streams into decoder
+    pesType = DMX_PES_OTHER;
 
     struct dmx_pes_filter_params pesfilter;
     pesfilter.pid = pStream->_pid;

@@ -31,17 +31,18 @@ namespace Omm {
 namespace Dvb {
 
 
+const Poco::UInt8 TransportStreamPacket::SyncByte = 0x47;
+const int TransportStreamPacket::Size = 188;
+const int TransportStreamPacket::HeaderSize = 4;
+const int TransportStreamPacket::PayloadSize = 188 - 4;
+
 TransportStreamPacket::TransportStreamPacket() :
-_syncByte(0x47),
-_size(188),
-_headerSize(4),
 _adaptionFieldSize(0),
-_payloadSize(188 - 4),
 _adaptionFieldPcrSet(false),
 _adaptionFieldSplicingPointSet(false)
 {
-    _data = new Poco::UInt8[_size];
-    setBytes<Poco::UInt8>(0, _syncByte);
+    _data = new Poco::UInt8[Size];
+    setBytes<Poco::UInt8>(0, SyncByte);
 }
 
 
@@ -54,43 +55,22 @@ TransportStreamPacket::~TransportStreamPacket()
 void
 TransportStreamPacket::writePayloadFromStream(Stream* pStream, int timeout)
 {
-    pStream->read((Poco::UInt8*)_data + _headerSize, _payloadSize, timeout);
-}
-
-
-const Poco::UInt8
-TransportStreamPacket::getSyncByte()
-{
-    return _syncByte;
-}
-
-
-const int
-TransportStreamPacket::getSize()
-{
-    return _size;
-}
-
-
-int
-TransportStreamPacket::getPayloadSize()
-{
-    return _payloadSize;
+    pStream->read((Poco::UInt8*)_data + HeaderSize, PayloadSize, timeout);
 }
 
 
 void
 TransportStreamPacket::clearPayload()
 {
-    ::memset((Poco::UInt8*)(_data) + _headerSize, 0xff, _payloadSize);
+    ::memset((Poco::UInt8*)(_data) + HeaderSize, 0xff, PayloadSize);
 }
 
 
 void
 TransportStreamPacket::stuffPayload(int actualPayloadSize)
 {
-    ::memmove((Poco::UInt8*)(_data) + _headerSize, (Poco::UInt8*)(_data) + _headerSize + _adaptionFieldSize, actualPayloadSize);
-    setStuffingBytes(_payloadSize - _adaptionFieldSize - actualPayloadSize);
+    ::memmove((Poco::UInt8*)(_data) + HeaderSize, (Poco::UInt8*)(_data) + HeaderSize + _adaptionFieldSize, actualPayloadSize);
+    setStuffingBytes(PayloadSize - _adaptionFieldSize - actualPayloadSize);
 }
 
 
@@ -153,7 +133,7 @@ TransportStreamPacket::setContinuityCounter(Poco::UInt8 counter)
 void
 TransportStreamPacket::setPointerField(Poco::UInt8 pointer)
 {
-    setBytes<Poco::UInt8>(_headerSize, pointer);
+    setBytes<Poco::UInt8>(HeaderSize, pointer);
 }
 
 

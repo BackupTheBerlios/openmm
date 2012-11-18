@@ -39,13 +39,15 @@ public:
     enum { ScrambledNone = 0x00, ScrambledReserved = 0x01, ScrambledEvenKey = 0x10, ScrambledOddKey = 0x11 };
     enum { AdaptionFieldPayloadOnly = 0x01, AdaptionFieldOnly = 0x10, AdaptionFieldAndPayload = 0x11 };
 
+    static const Poco::UInt8   SyncByte;
+    static const int           Size;
+    static const int           HeaderSize;
+    static const int           PayloadSize;
+
     TransportStreamPacket();
     ~TransportStreamPacket();
 
     void writePayloadFromStream(Stream* pStream, int timeout);
-    const Poco::UInt8 getSyncByte();
-    const int getSize();
-    int getPayloadSize();
     void clearPayload();
     void stuffPayload(int actualPayloadSize);
 
@@ -76,10 +78,6 @@ public:
     void setStuffingBytes(int count);
 
 private:
-    const Poco::UInt8   _syncByte;
-    const int           _size;
-    const int           _headerSize;
-    const int           _payloadSize;
     int                 _adaptionFieldSize;
     bool                _adaptionFieldPcrSet;
     bool                _adaptionFieldSplicingPointSet;

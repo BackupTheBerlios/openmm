@@ -29,6 +29,7 @@
 #include "Device.h"
 #include "ElementaryStream.h"
 #include "TransportStream.h"
+#include "Dvb/TransportStream.h"
 
 
 namespace Omm {
@@ -170,7 +171,7 @@ InStream::readThread()
             payloadOffset = 0;
             tsPacket.setContinuityCounter(continuityCounter);
             // write TS packet to output of muxer
-            _pMux->_byteQueue.write((char*)tsPacket.getData(), tsPacket.getSize());
+            _pMux->_byteQueue.write((char*)tsPacket.getData(), TransportStreamPacket::Size);
             continuityCounter++;
             continuityCounter %= 16;
 
@@ -183,7 +184,7 @@ InStream::readThread()
         }
         // write PES data to TS packet
 //        tsPacket.writePayloadFromStream(_pStream, _readTimeout);
-        int payloadAvailable = tsPacket.getPayloadSize() - payloadOffset;
+        int payloadAvailable = TransportStreamPacket::PayloadSize - payloadOffset;
         if (pPesPacket->getSize() < payloadAvailable) {
             tsPacket.setData(payloadOffset, pPesPacket->getSize(), pPesPacket->getData());
             payloadOffset += pPesPacket->getSize();
@@ -196,7 +197,7 @@ InStream::readThread()
             tsPacket.setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
             tsPacket.setContinuityCounter(continuityCounter);
             // write TS packet to output of muxer
-            _pMux->_byteQueue.write((char*)tsPacket.getData(), tsPacket.getSize());
+            _pMux->_byteQueue.write((char*)tsPacket.getData(), TransportStreamPacket::Size);
             continuityCounter++;
             continuityCounter %= 16;
         }

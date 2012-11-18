@@ -27,6 +27,7 @@
 #include "Remux.h"
 #include "Device.h"
 #include "TransportStream.h"
+#include "Dvb/TransportStream.h"
 
 
 namespace Omm {
@@ -76,9 +77,6 @@ Remux::startRemux()
     LOG(dvb, debug, "start TS remux thread ...");
 
     if (!_pReadThread) {
-//        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-//            (*it)->startQueueThread();
-//        }
         _readThreadRunning = true;
         _pReadThread = new Poco::Thread;
         _pReadThread->start(_readThreadRunnable);
@@ -95,18 +93,6 @@ Remux::stopRemux()
         _remuxLock.lock();
         _readThreadRunning = false;
         _remuxLock.unlock();
-//        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-//            (*it)->stopQueueThread();
-//        }
-        // wait for threads to stop
-//        if (_pReadThread->isRunning() && !_pReadThread->tryJoin(_readTimeout)) {
-//            LOG(dvb, error, "failed to join TS remux thread");
-//        }
-//        delete _pReadThread;
-//        _pReadThread = 0;
-//        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-//            (*it)->waitForStopQueueThread();
-//        }
     }
 
     LOG(dvb, debug, "TS remux thread stopped.");
@@ -129,7 +115,7 @@ Remux::waitForStopRemux()
 void
 Remux::flush()
 {
-    const int bufsize = 1000 * 188;
+    const int bufsize = 1000 * TransportStreamPacket::Size;
     char buf[bufsize];
     int bytes = 0;
     do {
@@ -141,10 +127,6 @@ Remux::flush()
             LOG(dvb, warning, "flush remux input stream: " + std::string(strerror(errno)));
         }
     } while (bytes > 0);
-
-//    for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-//        (*it)->flush();
-//    }
 }
 
 
@@ -161,7 +143,7 @@ Remux::getTransportStreamPacket()
 {
     TransportStreamPacket* pPacket = new TransportStreamPacket;
     int bytesRead = 0;
-    int bytesToRead = pPacket->getSize();
+    int bytesToRead = TransportStreamPacket::Size;
     while (bytesToRead > 0) {
         int pollRes = poll(_fileDescPoll, 1, _readTimeout);
         if (pollRes > 0) {
@@ -169,7 +151,7 @@ Remux::getTransportStreamPacket()
                 bytesRead += ::read(_multiplex, (Poco::UInt8*)pPacket->getData() + bytesRead, bytesToRead);
                 if (bytesRead > 0) {
                     bytesToRead -= bytesRead;
-                    if (pPacket->getBytes<Poco::UInt8>(0) != pPacket->getSyncByte()) {
+                    if (pPacket->getBytes<Poco::UInt8>(0) != TransportStreamPacket::SyncByte) {
                         LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(pPacket->getBytes<Poco::UInt8>(0)));
                         return 0;
                     }
@@ -184,7 +166,7 @@ Remux::getTransportStreamPacket()
             }
         }
         else if (pollRes == 0) {
-            LOG(dvb, warning, "remux read thread timed out reading TS packet");
+            LOG(dvb, warning, "remux read thread timed out");
             return 0;
         }
         else if (pollRes == -1) {
@@ -199,6 +181,7 @@ Remux::getTransportStreamPacket()
 void
 Remux::readThread()
 {
+    // TODO: the remuxer loop is very performance critical, some more optimizing is needed
     LOG(dvb, debug, "remux thread started.");
 
     Poco::Timestamp t;
@@ -208,9 +191,8 @@ Remux::readThread()
     while (readThreadRunning()) {
         TransportStreamPacket* pTsPacket = getTransportStreamPacket();
         if (!pTsPacket) {
-            LOG(dvb, warning, "remux thread could not read packet.");
+//            LOG(dvb, warning, "remux thread could not read packet.");
             continue;
-//            break;
         }
         tsPacketCounter++;
         Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
@@ -218,6 +200,8 @@ Remux::readThread()
 //        LOG(dvb, information, "remux received packet no: " + Poco::NumberFormatter::format(tsPacketCounter) + ", pid: " + Poco::NumberFormatter::format(pid));
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
             if (pid == 0) {
+//            if (!(tsPacketCounter & 0xff)) {
+//            if (tsPacketCounter % 200 == 0) {
                 (*it)->_pPatTsPacket->setContinuityCounter(continuityCounter);
                 continuityCounter++;
                 continuityCounter %= 16;

@@ -85,11 +85,8 @@ protected:
     Poco::AutoPtr<Poco::XML::Element>   _pXmlFrontend;
 
 private:
-//    void diseqc(unsigned int satNum, Channel::Polarization pol, bool hiBand);
-//    bool tuneFrontend(unsigned int freq, unsigned int symbolRate);
     void checkFrontend();
     bool addKnownTransponder(Transponder* pTransponder);
-    /// addKownTransponder() returns true if transponder is new (has not been scanned yet)
 
     Adapter*                    _pAdapter;
     std::string                 _deviceName;

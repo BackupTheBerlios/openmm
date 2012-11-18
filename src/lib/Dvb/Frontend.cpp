@@ -115,13 +115,10 @@ _fileDescFrontend(-1),
 _pAdapter(pAdapter),
 _num(num),
 _frontendTimeout(2000000)
-//_frontendTimeout(1000000)
 {
     _deviceName = _pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(_num);
     _pDemux = new Demux(pAdapter, 0);
-    if (Device::instance()->getMode() == Device::ModeDvr || Device::instance()->getMode() == Device::ModeDvrMultiplex) {
-        _pDvr = new Dvr(pAdapter, 0);
-    }
+    _pDvr = new Dvr(pAdapter, 0);
     _pTextConverter = new Poco::TextConverter(_sourceEncoding, _targetEncoding);
 }
 
@@ -130,9 +127,7 @@ Frontend::~Frontend()
 {
     closeFrontend();
     delete _pDemux;
-    if (Device::instance()->getMode() == Device::ModeDvr || Device::instance()->getMode() == Device::ModeDvrMultiplex) {
-        delete _pDvr;
-    }
+    delete _pDvr;
 }
 
 
@@ -691,32 +686,6 @@ Frontend(pAdapter, num)
                               5150, 0, 0);
     _pLnb = _lnbs["UNIVERSAL"];
 }
-
-
-//bool
-//SatFrontend::tune(Transponder* pTransponder)
-//{
-//    SatTransponder* pTrans = static_cast<SatTransponder*>(pTransponder);
-//    LOG(dvb, debug, "sat frontend tuning to transponder with frequency (sat pos/no): " + Poco::NumberFormatter::format(pTransponder->_frequency)
-//            + " (" + pTrans->_satPosition + "/" + Poco::NumberFormatter::format(pTrans->_satNum) + ")"
-//            + " ...");
-//
-//    unsigned int ifreq;
-//    bool hiBand = _pLnb->isHiBand(pTrans->_frequency, ifreq);
-//    diseqc(0, pTrans->_polarization, hiBand);
-//
-//    struct dvb_frontend_parameters tuneto;
-//    tuneto.frequency = ifreq;
-//    tuneto.inversion = INVERSION_AUTO;
-//    tuneto.u.qpsk.symbol_rate = pTrans->_symbolRate;
-//    tuneto.u.qpsk.fec_inner = FEC_AUTO;
-//
-//    if (ioctl(_fileDescFrontend, FE_SET_FRONTEND, &tuneto) == -1) {
-//        LOG(dvb, debug, "sat frontend tuning failed.");
-//        return false;
-//    }
-//    return waitForLock(_frontendTimeout);
-//}
 
 
 bool

@@ -111,9 +111,6 @@ public:
     std::istream* getStream(const std::string& serviceName);
     void freeStream(std::istream* pIstream);
 
-    Mode getMode();
-//    bool blockDvrDevice();
-
 private:
     Device();
     ~Device();
@@ -130,13 +127,10 @@ private:
 
     Poco::FastMutex                                     _deviceLock;
 
-    Mode                                                _mode;
-//    bool                                                _useDvrDevice;
-//    bool                                                _blockDvrDevice;
-//    bool                                                _reopenDvrDevice;
+//    Mode                                                _mode;
 
-    // TODO: move _pMux into Demux, because every Demuxer needs it's own Muxer
-    Mux*                                                _pMux;
+//    // TODO: move _pMux into Demux, because every Demuxer needs it's own Muxer
+//    Mux*                                                _pMux;
 };
 
 }  // namespace Omm
