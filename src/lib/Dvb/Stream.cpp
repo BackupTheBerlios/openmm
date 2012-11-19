@@ -80,7 +80,7 @@ Stream::Stream(const std::string& type, Poco::UInt16 pid) :
 _type(type),
 _pid(pid),
 _fileDesc(-1),
-_pStream(0),
+//_pStream(0),
 _logSequence(0)
 {
 }
@@ -144,7 +144,7 @@ Stream::isVideo()
 }
 
 
-unsigned int
+Poco::UInt16
 Stream::getPid()
 {
     return _pid;
@@ -196,11 +196,11 @@ Stream::read(Poco::UInt8* buf, int size, int timeout)
 }
 
 
-std::istream*
-Stream::getStream()
-{
-    return _pStream;
-}
+//std::istream*
+//Stream::getStream()
+//{
+//    return _pStream;
+//}
 
 
 void

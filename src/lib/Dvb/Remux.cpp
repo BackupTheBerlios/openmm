@@ -186,7 +186,7 @@ Remux::getTransportStreamPacket()
 void
 Remux::readThread()
 {
-    // TODO: the remuxer loop is very performance critical, some more optimizing is needed
+    // TODO: the remuxer loop is very performance critical (some more optimizing is needed)
     LOG(dvb, debug, "remux thread started.");
 
     Poco::Timestamp t;
@@ -216,10 +216,8 @@ Remux::readThread()
                 pTsPacket->incRefCounter();
                 (*it)->queueTsPacket(pTsPacket);
             }
-//            else {
-//                delete pTsPacket;
-//            }
         }
+        // TODO: delete packets that are not delivered to a service (should not occure ...)?
     }
 
     LOG(dvb, information, "remux received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets in "

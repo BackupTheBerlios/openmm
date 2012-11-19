@@ -403,7 +403,7 @@ Device::getStream(const std::string& serviceName)
     std::istream* pStream = 0;
     // TODO: check if service not already selected on demuxer
 
-    LOG(dvb, debug, "reading from dvr device ...");
+    LOG(dvb, debug, "reading service stream " + serviceName + " ...");
     pDvr->addService(pService);
     pDemux->selectService(pService, Demux::TargetDvr, false);
     pDemux->runService(pService, true);
@@ -428,7 +428,7 @@ Device::freeStream(std::istream* pIstream)
     Transponder* pTransponder = pService->getTransponder();
     Demux* pDemux = pTransponder->_pFrontend->_pDemux;
 
-    LOG(dvb, debug, "stop reading from dvr device.");
+    LOG(dvb, debug, "stop reading service stream " + pService->getName() + ".");
     Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
 
     pDemux->runService(pService, false);

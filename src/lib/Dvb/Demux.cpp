@@ -21,6 +21,8 @@
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <linux/dvb/dmx.h>
+#include <sys/poll.h>
 
 #include <Poco/NumberParser.h>
 #include <Poco/Timestamp.h>
@@ -48,8 +50,6 @@
 #include "Demux.h"
 #include "Remux.h"
 #include "Device.h"
-#include "Dvb/Service.h"
-#include "Dvb/TransportStream.h"
 
 
 namespace Omm {
@@ -57,9 +57,9 @@ namespace Dvb {
 
 Demux::Demux(Adapter* pAdapter, int num) :
 _pAdapter(pAdapter),
-_num(num),
-_pMultiplex(0),
-_pRemux(0)
+_num(num)
+//_pMultiplex(0),
+//_pRemux(0)
 {
     _deviceName = _pAdapter->_deviceName + "/demux" + Poco::NumberFormatter::format(_num);
 }
@@ -115,6 +115,11 @@ Demux::runService(Service* pService, bool run)
 bool
 Demux::selectStream(Stream* pStream, Target target, bool blocking)
 {
+    if (!incPidRefCount(pStream->_pid)) {
+        // pid already selected by another service
+        return true;
+    }
+
     dmx_pes_type_t pesType;
     // other PES types (audio, video) are only relevant for full featured cards,
     // when feeding elementary streams into decoder
@@ -143,9 +148,10 @@ Demux::selectStream(Stream* pStream, Target target, bool blocking)
         success = false;
     }
     if (success) {
-        pStream->_pStream = new UnixFileIStream(pStream->_fileDesc);
+//        pStream->_pStream = new UnixFileIStream(pStream->_fileDesc);
         pStream->_fileDescPoll[0].fd = pStream->_fileDesc;
         pStream->_fileDescPoll[0].events = POLLIN;
+        LOG(dvb, debug, "demuxer selected stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
         return true;
     }
     else {
@@ -158,15 +164,21 @@ Demux::selectStream(Stream* pStream, Target target, bool blocking)
 bool
 Demux::unselectStream(Stream* pStream)
 {
+    if (!decPidRefCount(pStream->_pid)) {
+        // pid still selected by another service
+        return true;
+    }
+
     bool success = true;
     if (close(pStream->_fileDesc)) {
         LOG(dvb, error, "closing elementary stream: " + std::string(strerror(errno)));
         success = false;
     }
     if (success) {
-        delete pStream->_pStream;
-        pStream->_pStream = 0;
+//        delete pStream->_pStream;
+//        pStream->_pStream = 0;
         pStream->_fileDesc = -1;
+        LOG(dvb, debug, "demuxer unselected stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
         return true;
     }
     else {
@@ -179,6 +191,10 @@ Demux::unselectStream(Stream* pStream)
 bool
 Demux::runStream(Stream* pStream, bool run)
 {
+    if (pidRefCount(pStream->_pid) > 1) {
+        return true;
+    }
+
     bool success = true;
     if (run) {
         if (ioctl(pStream->_fileDesc, DMX_START) == -1) {
@@ -193,6 +209,7 @@ Demux::runStream(Stream* pStream, bool run)
         }
     }
     if (success) {
+        LOG(dvb, debug, "demuxer " + std::string(run ? "start" : "stop") + " stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
         return true;
     }
     else {
@@ -267,45 +284,55 @@ Demux::readTable(Table* pTable)
 }
 
 
-void
-Demux::addService(Service* pService)
+int
+Demux::pidRefCount(Poco::UInt16 pid)
 {
-    if (_pRemux) {
-        _pRemux->addService(pService);
+    if (_pidRefCount.find(pid) == _pidRefCount.end()) {
+        return 0;
+    }
+    else {
+        return _pidRefCount[pid];
     }
 }
 
 
-void
-Demux::delService(Service* pService)
+bool
+Demux::incPidRefCount(Poco::UInt16 pid)
 {
-    if (_pRemux) {
-        _pRemux->delService(pService);
+    std::map<Poco::UInt16, int>::const_iterator it = _pidRefCount.find(pid);
+    if (it == _pidRefCount.end()) {
+        _pidRefCount[pid] = 1;
+        LOG(dvb, debug, "demux inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+        return true;
+    }
+    else {
+        _pidRefCount[pid]++;
+        LOG(dvb, debug, "demux inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+        return false;
     }
 }
 
 
-void
-Demux::startReadThread()
+bool
+Demux::decPidRefCount(Poco::UInt16 pid)
 {
-//    LOG(dvb, debug, "start TS remux thread ...");
-
-    if (_pRemux) {
-        _pRemux->startRemux();
+    std::map<Poco::UInt16, int>::iterator it = _pidRefCount.find(pid);
+    if (it == _pidRefCount.end()) {
+        LOG(dvb, debug, "cannot decrease demux pid refcount");
+        return false;
     }
-}
-
-
-void
-Demux::stopReadThread()
-{
-//    LOG(dvb, debug, "stop TS remux thread ...");
-
-    if (_pRemux) {
-        _pRemux->stopRemux();
+    else {
+        if (_pidRefCount[pid] == 1) {
+            _pidRefCount.erase(it);
+            LOG(dvb, debug, "demux dec erase pid " + Poco::NumberFormatter::format(pid));
+            return true;
+        }
+        else {
+            _pidRefCount[pid]--;
+            LOG(dvb, debug, "demux dec pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+            return false;
+        }
     }
-
-//    LOG(dvb, debug, "TS remux thread stopped.");
 }
 
 

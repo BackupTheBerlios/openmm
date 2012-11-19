@@ -22,8 +22,8 @@
 #ifndef Demux_INCLUDED
 #define Demux_INCLUDED
 
-#include <linux/dvb/dmx.h>
-#include <sys/poll.h>
+#include <map>
+
 
 namespace Omm {
 namespace Dvb {
@@ -57,18 +57,19 @@ public:
     bool readSection(Section* pSection);
     bool readTable(Table* pTable);
 
-    void addService(Service* pService);
-    void delService(Service* pService);
-    void startReadThread();
-    void stopReadThread();
-
 private:
+    int pidRefCount(Poco::UInt16 pid);
+    bool incPidRefCount(Poco::UInt16 pid);
+    bool decPidRefCount(Poco::UInt16 pid);
+
     Adapter*                            _pAdapter;
     std::string                         _deviceName;
     int                                 _num;
+    std::map<Poco::UInt16, int>         _pidRefCount;
 
-    Multiplex*                          _pMultiplex;
-    Remux*                              _pRemux;
+    // currently not used:
+//    Multiplex*                          _pMultiplex;
+//    Remux*                              _pRemux;
 };
 
 }  // namespace Omm

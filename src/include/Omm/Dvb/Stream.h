@@ -94,11 +94,11 @@ public:
     std::string getType();
     bool isAudio();
     bool isVideo();
-    unsigned int getPid();
+    Poco::UInt16 getPid();
     int getFileDesc();
     void read(Poco::UInt8* buf, int size, int timeout = 0);
     /// timeout in secs, timeout = 0 means unlimited
-    std::istream* getStream();
+//    std::istream* getStream();
 
     void skipToElementaryStreamPacketHeader(Poco::UInt8* skippedBytes, int timeout = 0);
     ElementaryStreamPacket* getElementaryStreamPacket(int timeout = 0);
@@ -112,7 +112,7 @@ private:
 
     int                 _fileDesc;
     struct pollfd       _fileDescPoll[1];
-    UnixFileIStream*    _pStream;
+//    UnixFileIStream*    _pStream;
 
     int                 _logSequence;
 };
