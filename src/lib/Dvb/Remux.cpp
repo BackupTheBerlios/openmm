@@ -169,7 +169,7 @@ Remux::getTransportStreamPacket()
             }
         }
         else if (pollRes == 0) {
-            LOG(dvb, warning, "remux read thread timed out");
+            LOG(dvb, trace, "remux read thread timeout");
             delete pPacket;
             return 0;
         }
@@ -201,18 +201,17 @@ Remux::readThread()
         }
         tsPacketCounter++;
         Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
-
 //        LOG(dvb, information, "remux received packet no: " + Poco::NumberFormatter::format(tsPacketCounter) + ", pid: " + Poco::NumberFormatter::format(pid));
         for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
-            if (pid == 0) {
-//            if (!(tsPacketCounter & 0xff)) {
+            if (!(tsPacketCounter & 0xff)) {
 //            if (tsPacketCounter % 200 == 0) {
+//            if (t.elapsed() % 100000 == 0) { // PAT has 15,000 bps, that's 9 PAT packets per second
                 (*it)->_pPatTsPacket->setContinuityCounter(continuityCounter);
                 continuityCounter++;
                 continuityCounter %= 16;
                 (*it)->queueTsPacket((*it)->_pPatTsPacket);
             }
-            else if ((*it)->hasPacketIdentifier(pid)) {
+            if ((*it)->hasPacketIdentifier(pid)) {
                 pTsPacket->incRefCounter();
                 (*it)->queueTsPacket(pTsPacket);
             }

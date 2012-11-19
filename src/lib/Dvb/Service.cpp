@@ -139,9 +139,6 @@ Service::readXml(Poco::XML::Node* pXmlService)
 {
     LOG(dvb, debug, "read service ...");
 
-    // FIXME: better not add PAT stream here, but in the remuxer
-    addStream(new Stream(Stream::Other, 0));
-
     if (pXmlService->hasChildNodes()) {
         Poco::XML::Node* pXmlParam = pXmlService->firstChild();
         while (pXmlParam) {
