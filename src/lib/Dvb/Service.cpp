@@ -160,6 +160,15 @@ Service::readXml(Poco::XML::Node* pXmlService)
                     _status = pVal->innerText();
                 }
             }
+            else if (pXmlParam->nodeName() == "programClockPid") {
+                Poco::XML::Node* pVal = pXmlParam->firstChild();
+                if (!pVal) {
+                    LOG(dvb, error, "dvb service programClockPid has no value");
+                }
+                else {
+                    _pcrPid = Poco::NumberParser::parse(pVal->innerText());
+                }
+            }
             else if (pXmlParam->nodeName() == "scrambled") {
                 Poco::XML::Node* pVal = pXmlParam->firstChild();
                 if (!pVal) {
@@ -215,6 +224,11 @@ Service::writeXml(Poco::XML::Element* pTransponder)
     for (std::vector<Stream*>::iterator it = _streams.begin(); it != _streams.end(); ++it) {
         (*it)->writeXml(pService);
     }
+
+    Poco::AutoPtr<Poco::XML::Element> pPcrPid = pDoc->createElement("programClockPid");
+    Poco::AutoPtr<Poco::XML::Text> pPcrPidVal = pDoc->createTextNode(Poco::NumberFormatter::format(_pcrPid));
+    pPcrPid->appendChild(pPcrPidVal);
+    pService->appendChild(pPcrPid);
 
     Poco::AutoPtr<Poco::XML::Element> pStatus = pDoc->createElement("status");
     Poco::AutoPtr<Poco::XML::Text> pStatusVal = pDoc->createTextNode(_status);

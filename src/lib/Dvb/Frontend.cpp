@@ -536,7 +536,7 @@ Frontend::scanPatPmt(Transponder* pTransponder)
                     }
                     pService->addStream(new Stream(Stream::ProgramMapTable, pmt.packetId()));
                     pService->_pcrPid = pmt.pcrPid();
-                    pService->addStream(new Stream(Stream::ProgramClock, pmt.pcrPid()));
+//                    pService->addStream(new Stream(Stream::ProgramClock, pmt.pcrPid()));
                 }
             }
         }
