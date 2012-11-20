@@ -35,6 +35,8 @@
 namespace Omm {
 namespace Dvb {
 
+class ElementaryTransportStream;
+
 
 class Remux
 {
@@ -55,15 +57,32 @@ private:
     void readThread();
     bool readThreadRunning();
 
-    int                                 _multiplex;
-    std::set<Service*>                  _pServices;
+    int                                                 _multiplex;
+    std::set<Service*>                                  _pServices;
+    std::map<Poco::UInt16, ElementaryTransportStream*>  _pStreams;
 
-    Poco::FastMutex                     _remuxLock;
-    Poco::Thread*                       _pReadThread;
-    Poco::RunnableAdapter<Remux>        _readThreadRunnable;
-    bool                                _readThreadRunning;
-    struct pollfd                       _fileDescPoll[1];
-    const int                           _readTimeout;
+    Poco::FastMutex                                     _remuxLock;
+    Poco::Thread*                                       _pReadThread;
+    Poco::RunnableAdapter<Remux>                        _readThreadRunnable;
+    bool                                                _readThreadRunning;
+    struct pollfd                                       _fileDescPoll[1];
+    const int                                           _readTimeout;
+};
+
+
+class ElementaryTransportStream
+{
+public:
+private:
+    void dispatchThread();
+    bool dispatchThreadRunning();
+
+    Poco::UInt16                                        _pid;
+    std::queue<TransportStreamPacket*>                  _packetQueue;
+    Poco::FastMutex                                     _streamLock;
+    Poco::Thread*                                       _pDispatchThread;
+    Poco::RunnableAdapter<ElementaryTransportStream>    _dispatchThreadRunnable;
+    bool                                                _dispatchThreadRunning;
 };
 
 

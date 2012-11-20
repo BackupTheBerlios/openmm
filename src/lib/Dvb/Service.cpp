@@ -520,6 +520,10 @@ Service::queueThread()
 {
     LOG(dvb, debug, "service queue thread started.");
 
+    Poco::Timestamp t;
+    long unsigned int tsPacketCounter = 0;
+    Poco::UInt8 continuityCounter = 0;
+
     while (queueThreadRunning()) {
         _serviceLock.lock();
         if (_packetQueue.size() == 0) {
@@ -534,6 +538,16 @@ Service::queueThread()
             // null packet means end of stream
             break;
         }
+        tsPacketCounter++;
+//        if (!(tsPacketCounter & 0xff)) {
+        if (!(tsPacketCounter & 0x7f)) {
+//        if (t.elapsed() % 100000 == 0) { // PAT has 15,000 bps, that's 9 PAT packets per second
+            // inject PAT packet
+            _pPatTsPacket->setContinuityCounter(continuityCounter);
+            continuityCounter++;
+            continuityCounter %= 16;
+            _byteQueue.write((char*)_pPatTsPacket->getData(), TransportStreamPacket::Size);
+        }
 //        LOG(dvb, trace, "service queue thread write packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
         _byteQueue.write((char*)pPacket->getData(), TransportStreamPacket::Size);
 //        LOG(dvb, trace, "service queue thread wrote packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
@@ -542,8 +556,10 @@ Service::queueThread()
             pPacket->decRefCounter();
         }
     }
-
-    LOG(dvb, debug, "service queue thread stopped.");
+    LOG(dvb, information, "service " + _name + " received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets in "
+            + Poco::NumberFormatter::format(t.elapsed() / 1000) + " msec ("
+            + Poco::NumberFormatter::format((float)tsPacketCounter * 1000 / t.elapsed(), 2) + " packets/msec)");
+    LOG(dvb, debug, "service queue thread finished.");
 }
 
 
