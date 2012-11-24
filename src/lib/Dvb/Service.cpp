@@ -134,16 +134,34 @@ _scrambled(service._scrambled),
 _streams(service._streams),
 _pids(service._pids),
 _byteQueue(2 * 1024),
-_pPat(new PatSection(*service._pPat)),
-_pPatTsPacket(new TransportStreamPacket(*service._pPatTsPacket)),
+//_pPat(new PatSection(*service._pPat)),
+//_pPatTsPacket(new TransportStreamPacket(*service._pPatTsPacket)),
 _packetQueueTimeout(100),
 _packetQueueSize(10000),
 _pQueueThread(0),
 _queueThreadRunnable(*this, &Service::queueThread),
 _queueThreadRunning(false)
 {
-    ::memcpy(_pPat->getData(), service._pPat->getData(), service._pPat->size());
-    ::memcpy(_pPatTsPacket->getData(), service._pPatTsPacket->getData(), TransportStreamPacket::Size);
+    // these ad hoc copy ctors for PAT and PAT-TS packet crash on stop of service
+//    ::memcpy(_pPat->getData(), service._pPat->getData(), service._pPat->size());
+//    ::memcpy(_pPatTsPacket->getData(), service._pPatTsPacket->getData(), TransportStreamPacket::Size);
+
+    // TODO: make proper copy constructors for PatSection, Section, and BitField
+    _pPat = PatSection::create();
+    _pPat->setTableIdExtension(0x0001);  // artificial transport stream id for a TS with one service
+    _pPat->addService(_sid, _pmtPid, 0);
+    _pPat->setLength(13);
+    _pPat->setCrc();
+    // pack PAT into a TS packet and don't forget the pointer field
+    _pPatTsPacket = new TransportStreamPacket;
+    _pPatTsPacket->setTransportErrorIndicator(false);
+    _pPatTsPacket->setPayloadUnitStartIndicator(true);
+    _pPatTsPacket->setTransportPriority(false);
+    _pPatTsPacket->setPacketIdentifier(0x0000);
+    _pPatTsPacket->setScramblingControl(TransportStreamPacket::ScrambledNone);
+    _pPatTsPacket->setAdaptionFieldExists(TransportStreamPacket::AdaptionFieldPayloadOnly);
+    _pPatTsPacket->setPointerField(0x00);
+    _pPatTsPacket->setData(5, 183, _pPat->getData());
 }
 
 
