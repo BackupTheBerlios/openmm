@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <Poco/NumberParser.h>
+#include <Poco/NumberFormatter.h>
+#include <Poco/TeeStream.h>
 #include <Poco/DOM/AbstractContainerNode.h>
 #include <Poco/DOM/DOMException.h>
 #include <Poco/DOM/DOMParser.h>
@@ -35,7 +37,9 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/NumberFormatter.h>
+
+#include <queue>
+#include <stack>
 
 #include "Log.h"
 #include "DvbLogger.h"
@@ -85,6 +89,7 @@ const std::string Service::StatusRunning("Running");
 const std::string Service::StatusOffAir("OffAir");
 
 Service::Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid) :
+_clone(false),
 _pTransponder(pTransponder),
 _name(name),
 _sid(sid),
@@ -99,7 +104,6 @@ _pQueueThread(0),
 _queueThreadRunnable(*this, &Service::queueThread),
 _queueThreadRunning(false)
 {
-    _pOutStream = new ByteQueueIStream(_byteQueue);
     _pPat = PatSection::create();
     _pPat->setTableIdExtension(0x0001);  // artificial transport stream id for a TS with one service
     _pPat->addService(_sid, _pmtPid, 0);
@@ -118,11 +122,35 @@ _queueThreadRunning(false)
 }
 
 
+Service::Service(const Service& service) :
+_clone(true),
+_pTransponder(service._pTransponder),
+_name(service._name),
+_sid(service._sid),
+_pmtPid(service._pmtPid),
+_pcrPid(service._pcrPid),
+_status(service._status),
+_scrambled(service._scrambled),
+_streams(service._streams),
+_pids(service._pids),
+_byteQueue(2 * 1024),
+_pPat(new PatSection(*service._pPat)),
+_pPatTsPacket(new TransportStreamPacket(*service._pPatTsPacket)),
+_packetQueueTimeout(100),
+_packetQueueSize(10000),
+_pQueueThread(0),
+_queueThreadRunnable(*this, &Service::queueThread),
+_queueThreadRunning(false)
+{
+    ::memcpy(_pPat->getData(), service._pPat->getData(), service._pPat->size());
+    ::memcpy(_pPatTsPacket->getData(), service._pPatTsPacket->getData(), TransportStreamPacket::Size);
+}
+
+
 Service::~Service()
 {
     delete _pPatTsPacket;
     delete _pPat;
-    delete _pOutStream;
 }
 
 
@@ -213,7 +241,6 @@ Service::writeXml(Poco::XML::Element* pTransponder)
     Poco::XML::Document* pDoc = pTransponder->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pService = pDoc->createElement("service");
     pTransponder->appendChild(pService);
-//    pService->setAttribute("name", _name);
     pService->setAttribute("name", getName());
     pService->setAttribute("sid", Poco::NumberFormatter::format(_sid));
     pService->setAttribute("pmtid", Poco::NumberFormatter::format(_pmtPid));
@@ -426,7 +453,14 @@ Service::hasPacketIdentifier(Poco::UInt16 pid)
 std::istream*
 Service::getStream()
 {
-    return _pOutStream;
+    return new ByteQueueIStream(_byteQueue);
+}
+
+
+int
+Service::countStreams()
+{
+    return _outStreams.size();
 }
 
 
@@ -445,18 +479,20 @@ Service::flush()
     _serviceLock.unlock();
     LOG(dvb, debug, "flush count bytes from service byte queue: " + Poco::NumberFormatter::format(_byteQueue.size()));
     _byteQueue.clear();
-    delete _pOutStream;
-    _pOutStream = new ByteQueueIStream(_byteQueue);
 }
 
 
 void
 Service::queueTsPacket(TransportStreamPacket* pPacket)
 {
+    // NOTE: queueTsPacket() is called synchronously by remux thread, e.g. no lock for packet ref counter necessary
     Poco::ScopedLock<Poco::FastMutex> queueLock(_serviceLock);
+//    LOG(dvb, debug, "queue packet to service " + _name + std::string(_clone ? "(clone)" : ""));
 
     if (_packetQueue.size() < _packetQueueSize) {
 //        LOG(dvb, trace, "service queue, queue packet");
+        pPacket->incRefCounter();
+//        pPacket->_refCounter++;
         _packetQueue.push(pPacket);
         _queueReadCondition.broadcast();
     }
@@ -539,23 +575,23 @@ Service::queueThread()
             break;
         }
         tsPacketCounter++;
-//        if (!(tsPacketCounter & 0xff)) {
+//        LOG(dvb, information, "service " + _name + std::string(_clone ? "(clone)" : "")
+//                + " write packet no: " + Poco::NumberFormatter::format(tsPacketCounter)
+//                + ", queue size: " + Poco::NumberFormatter::format(_packetQueue.size())
+//                + ", pid: " + Poco::NumberFormatter::format(pPacket->getPacketIdentifier()));
+
         if (!(tsPacketCounter & 0x7f)) {
-//        if (t.elapsed() % 100000 == 0) { // PAT has 15,000 bps, that's 9 PAT packets per second
+//        if (t.elapsed() % 100000 == 0) { // PAT has 15,000 bps, that's 9 PAT packets per second (let's make 10)
             // inject PAT packet
             _pPatTsPacket->setContinuityCounter(continuityCounter);
             continuityCounter++;
             continuityCounter %= 16;
             _byteQueue.write((char*)_pPatTsPacket->getData(), TransportStreamPacket::Size);
         }
-//        LOG(dvb, trace, "service queue thread write packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
         _byteQueue.write((char*)pPacket->getData(), TransportStreamPacket::Size);
-//        LOG(dvb, trace, "service queue thread wrote packet, byte queue size: " + Poco::NumberFormatter::format(_byteQueue.size()));
-        // don't delete PAT packets, there is only one for each service (_pPatTsPacket)
-        if (pPacket->getPacketIdentifier()) {
-            pPacket->decRefCounter();
-        }
+        pPacket->decRefCounter();
     }
+
     LOG(dvb, information, "service " + _name + " received " + Poco::NumberFormatter::format(tsPacketCounter) + " TS packets in "
             + Poco::NumberFormatter::format(t.elapsed() / 1000) + " msec ("
             + Poco::NumberFormatter::format((float)tsPacketCounter * 1000 / t.elapsed(), 2) + " packets/msec)");

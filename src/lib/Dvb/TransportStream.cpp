@@ -40,7 +40,7 @@ TransportStreamPacket::TransportStreamPacket() :
 _adaptionFieldSize(0),
 _adaptionFieldPcrSet(false),
 _adaptionFieldSplicingPointSet(false),
-_refCounter(0)
+_refCounter(1)
 {
     _data = new Poco::UInt8[Size];
     setBytes<Poco::UInt8>(0, SyncByte);

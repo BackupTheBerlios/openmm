@@ -23,6 +23,7 @@
 #define Service_INCLUDED
 
 #include <queue>
+#include <stack>
 
 #include <Poco/DOM/DOMException.h>
 #include <Poco/DOM/DOMParser.h>
@@ -95,6 +96,7 @@ public:
     static const std::string StatusOffAir;
 
     Service(Transponder* pTransponder, const std::string& name, unsigned int sid, unsigned int pmtid);
+    Service(const Service& service);
     ~Service();
 
     void addStream(Stream* pStream);
@@ -117,6 +119,7 @@ public:
     bool hasPacketIdentifier(Poco::UInt16 pid);
 
     std::istream* getStream();
+    int countStreams();
     void flush();
     void queueTsPacket(TransportStreamPacket* pPacket);
     void startQueueThread();
@@ -127,6 +130,7 @@ private:
     void queueThread();
     bool queueThreadRunning();
 
+    bool                                _clone;
     Transponder*                        _pTransponder;
     std::string                         _type;
     std::string                         _providerName;
@@ -138,10 +142,10 @@ private:
     bool                                _scrambled;
 
     std::vector<Stream*>                _streams;
+    // set of service pids makes calls to hastPacketIdentifier() more efficient
     std::set<Poco::UInt16>              _pids;
-    // makes calls to hastPacketIdentifier() more efficient
 
-    std::istream*                       _pOutStream;
+    std::stack<std::istream*>           _outStreams;
     AvStream::ByteQueue                 _byteQueue;
     PatSection*                         _pPat;
     TransportStreamPacket*              _pPatTsPacket;

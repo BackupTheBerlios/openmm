@@ -35,7 +35,7 @@
 namespace Omm {
 namespace Dvb {
 
-class ElementaryTransportStream;
+//class ElementaryTransportStream;
 
 
 class Remux
@@ -44,7 +44,7 @@ public:
     Remux(int multiplex);
     ~Remux();
 
-    void addService(Service* pService);
+    Service* addService(Service* pService);
     void delService(Service* pService);
 
     void startRemux();
@@ -58,8 +58,8 @@ private:
     bool readThreadRunning();
 
     int                                                 _multiplex;
-    std::set<Service*>                                  _pServices;
-    std::map<Poco::UInt16, ElementaryTransportStream*>  _pStreams;
+    std::vector<Service*>                               _services;
+//    std::map<Poco::UInt16, ElementaryTransportStream*>  _pStreams;
 
     Poco::FastMutex                                     _remuxLock;
     Poco::Thread*                                       _pReadThread;
@@ -70,20 +70,20 @@ private:
 };
 
 
-class ElementaryTransportStream
-{
-public:
-private:
-    void dispatchThread();
-    bool dispatchThreadRunning();
-
-    Poco::UInt16                                        _pid;
-    std::queue<TransportStreamPacket*>                  _packetQueue;
-    Poco::FastMutex                                     _streamLock;
-    Poco::Thread*                                       _pDispatchThread;
-    Poco::RunnableAdapter<ElementaryTransportStream>    _dispatchThreadRunnable;
-    bool                                                _dispatchThreadRunning;
-};
+//class ElementaryTransportStream
+//{
+//public:
+//private:
+//    void dispatchThread();
+//    bool dispatchThreadRunning();
+//
+//    Poco::UInt16                                        _pid;
+//    std::queue<TransportStreamPacket*>                  _packetQueue;
+//    Poco::FastMutex                                     _streamLock;
+//    Poco::Thread*                                       _pDispatchThread;
+//    Poco::RunnableAdapter<ElementaryTransportStream>    _dispatchThreadRunnable;
+//    bool                                                _dispatchThreadRunning;
+//};
 
 
 }  // namespace Omm

@@ -49,7 +49,7 @@ public:
     void stopReadThread();
     bool readThreadRunning();
 
-    void addService(Service* pService);
+    Service* addService(Service* pService);
     void delService(Service* pService);
 
     std::istream* getStream();

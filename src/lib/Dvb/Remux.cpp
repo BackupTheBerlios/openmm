@@ -52,12 +52,19 @@ Remux::~Remux()
 }
 
 
-void
+Service*
 Remux::addService(Service* pService)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
+    std::vector<Service*>::iterator it = std::find(_services.begin(), _services.end(), pService);
+    if (it != _services.end()) {
+//        // service already added to remux, need a clone
+        LOG(dvb, debug, "clone service " + pService->getName());
+        pService = new Service(*pService);
+    }
     pService->startQueueThread();
-    _pServices.insert(pService);
+    _services.push_back(pService);
+    return pService;
 }
 
 
@@ -65,10 +72,16 @@ void
 Remux::delService(Service* pService)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
-    _pServices.erase(pService);
+    std::vector<Service*>::iterator it = std::find(_services.begin(), _services.end(), pService);
+    if (it != _services.end()) {
+        _services.erase(it);
+    }
     pService->stopQueueThread();
     pService->waitForStopQueueThread();
     pService->flush();
+    if (pService->_clone) {
+        delete pService;
+    }
 }
 
 
@@ -165,7 +178,7 @@ Remux::getTransportStreamPacket()
                 }
             }
             else {
-                LOG(dvb, warning, "remux read thread wrong poll event");
+                LOG(dvb, warning, "remux read thread uncatched poll event");
             }
         }
         else if (pollRes == 0) {
@@ -186,7 +199,7 @@ Remux::getTransportStreamPacket()
 void
 Remux::readThread()
 {
-    // TODO: the remuxer loop is very performance critical (some more optimizing is needed)
+    // NOTE: the remuxer loop is very performance critical (do more optimizing?)
     LOG(dvb, debug, "remux thread started.");
 
     while (readThreadRunning()) {
@@ -196,14 +209,12 @@ Remux::readThread()
             continue;
         }
         Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
-//        LOG(dvb, information, "remux received packet no: " + Poco::NumberFormatter::format(tsPacketCounter) + ", pid: " + Poco::NumberFormatter::format(pid));
-        for (std::set<Service*>::const_iterator it = _pServices.begin(); it != _pServices.end(); ++it) {
+        for (std::vector<Service*>::const_iterator it = _services.begin(); it != _services.end(); ++it) {
             if ((*it)->hasPacketIdentifier(pid)) {
-                pTsPacket->incRefCounter();
                 (*it)->queueTsPacket(pTsPacket);
             }
         }
-        // TODO: delete packets that are not delivered to a service (should not occure ...)?
+        pTsPacket->decRefCounter();
     }
 
     LOG(dvb, debug, "remux thread finished.");

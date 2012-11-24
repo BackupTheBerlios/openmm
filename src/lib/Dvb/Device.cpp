@@ -400,15 +400,13 @@ Device::getStream(const std::string& serviceName)
     Dvr* pDvr = pFrontend->_pDvr;
 
     Service* pService = pTransponder->getService(serviceName);
-    std::istream* pStream = 0;
-    // TODO: check if service not already selected on demuxer
 
     LOG(dvb, debug, "reading service stream " + serviceName + " ...");
-    pDvr->addService(pService);
+    pService = pDvr->addService(pService);
     pDemux->selectService(pService, Demux::TargetDvr, false);
     pDemux->runService(pService, true);
 
-    pStream = pService->getStream();
+    std::istream* pStream = pService->getStream();
     _streamMap[pStream] = pService;
     return pStream;
 }
@@ -419,7 +417,6 @@ Device::freeStream(std::istream* pIstream)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
 
-    // TODO: only stop and free service stream (not complete demux)
     Service* pService = _streamMap[pIstream];
     if (!pService) {
         return;
@@ -436,6 +433,7 @@ Device::freeStream(std::istream* pIstream)
     pDvr->delService(pService);
 
     _streamMap.erase(pIstream);
+    delete pIstream;
 }
 
 

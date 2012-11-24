@@ -70,11 +70,14 @@ Dvr::closeDvr()
 }
 
 
-void
+Service*
 Dvr::addService(Service* pService)
 {
     if (_pRemux) {
-        _pRemux->addService(pService);
+        return _pRemux->addService(pService);
+    }
+    else {
+        return 0;
     }
 }
 

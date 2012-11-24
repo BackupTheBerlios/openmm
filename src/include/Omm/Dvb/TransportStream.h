@@ -23,6 +23,8 @@
 #define TransportStream_INCLUDED
 
 #include <Poco/Thread.h>
+#include <Poco/Mutex.h>
+#include <Poco/ScopedLock.h>
 #include "Poco/AtomicCounter.h"
 
 #include "DvbUtil.h"
@@ -85,7 +87,9 @@ public:
 
     void decRefCounter() const
     {
-        if (--_refCounter == 0) delete this;
+        if (!(--_refCounter)) {
+            delete this;
+        }
     }
 
 private:
