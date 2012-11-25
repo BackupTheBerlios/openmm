@@ -19,9 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
+#include <Poco/StringTokenizer.h>
+
 #include <Omm/Dvb/Device.h>
 #include <Omm/Dvb/Frontend.h>
 
@@ -31,8 +30,20 @@ main(int argc, char** argv)
 {
     Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
 
-    pDevice->addInitialTransponders(Omm::Dvb::Frontend::DVBT, "de-Baden-Wuerttemberg");
-    pDevice->addInitialTransponders(Omm::Dvb::Frontend::DVBS, "Astra-19.2E");
+    if (argc <= 1) {
+        Omm::Dvb::Frontend::listInitialTransponderData();
+        return 1;
+    }
+    else {
+        for (int i = 1; i < argc; ++i) {
+            Poco::StringTokenizer initialTransponders(argv[i], "/");
+            if (initialTransponders.count() != 2) {
+                std::cerr << "usage: scandvb <frontend-type1>/<transponder-list1> ... " << std::endl;
+                return 1;
+            }
+            pDevice->addInitialTransponders(initialTransponders[0], initialTransponders[1]);
+        }
+    }
 
     pDevice->detectAdapters();
     pDevice->scan();

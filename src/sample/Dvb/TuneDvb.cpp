@@ -45,10 +45,8 @@ main(int argc, char** argv)
     pDevice->readXml(dvbXml);
     pDevice->open();
 
-//    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
-//        std::string serviceName = it->first;
-//        Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin();
-        std::string serviceName("EinsPlus");
+    for (Omm::Dvb::Device::ServiceIterator it = pDevice->serviceBegin(); it != pDevice->serviceEnd(); ++it) {
+        std::string serviceName = it->first;
 
         Poco::Timestamp t;
         Poco::Timestamp::TimeDiff maxTime = 5000000;  // get max 5,000,000 microsec
@@ -74,7 +72,7 @@ main(int argc, char** argv)
                 }
             }
         }
-//    }
+    }
     pDevice->close();
 
     return 0;

@@ -70,7 +70,7 @@ public:
     virtual bool tune(Transponder* pTransponder) {}
     virtual Transponder* createTransponder(unsigned int freq, unsigned int tsid) {}
 
-    void listInitialTransponderData();
+    static void listInitialTransponderData();
     void getInitialTransponderKeys(const std::string& countryCode, std::vector<std::string>& keys);
     void getInitialTransponderData(const std::string& key);
 
