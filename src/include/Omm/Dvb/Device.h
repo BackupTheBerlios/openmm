@@ -23,6 +23,10 @@
 #define Device_INCLUDED
 
 #include <cstring>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
 
 #include <Poco/Timestamp.h>
 #include <Poco/Thread.h>
@@ -65,6 +69,7 @@ public:
     Adapter(int num);
     ~Adapter();
 
+    void detectFrontends();
     void addFrontend(Frontend* pFrontend);
     void openAdapter();
     void closeAdapter();
@@ -98,9 +103,12 @@ public:
     ServiceIterator serviceBegin();
     ServiceIterator serviceEnd();
 
+    void detectAdapters();
+    void addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders);
     void open();
     void close();
-    void scan(const std::string& initialTransponderData);
+    void scan();
+//    void scan(const std::string& initialTransponderData);
     void readXml(std::istream& istream);
     void writeXml(std::ostream& ostream);
 
@@ -124,6 +132,7 @@ private:
     std::vector<Adapter*>                               _adapters;
     std::map<std::string, std::vector<Transponder*> >   _serviceMap;
     std::map<std::istream*, Service*>                   _streamMap;
+    std::map<std::string, std::set<std::string> >       _initialTransponders;
 
     Poco::FastMutex                                     _deviceLock;
 };

@@ -503,14 +503,12 @@ Service::flush()
 void
 Service::queueTsPacket(TransportStreamPacket* pPacket)
 {
-    // NOTE: queueTsPacket() is called synchronously by remux thread, e.g. no lock for packet ref counter necessary
     Poco::ScopedLock<Poco::FastMutex> queueLock(_serviceLock);
 //    LOG(dvb, debug, "queue packet to service " + _name + std::string(_clone ? "(clone)" : ""));
 
     if (_packetQueue.size() < _packetQueueSize) {
 //        LOG(dvb, trace, "service queue, queue packet");
         pPacket->incRefCounter();
-//        pPacket->_refCounter++;
         _packetQueue.push(pPacket);
         _queueReadCondition.broadcast();
     }

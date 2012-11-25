@@ -27,22 +27,16 @@
 
 
 int
-main(int argc, char** argv) {
-    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::TerrestrialFrontend(pAdapter, 0);
-//    Omm::Dvb::Frontend* pFrontend = new Omm::Dvb::SatFrontend(pAdapter, 0);
-    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-    pAdapter->addFrontend(pFrontend);
+main(int argc, char** argv)
+{
+    Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
 
-//    pFrontend->listInitialTransponderData();
+    pDevice->addInitialTransponders(Omm::Dvb::Frontend::DVBT, "de-Baden-Wuerttemberg");
+    pDevice->addInitialTransponders(Omm::Dvb::Frontend::DVBS, "Astra-19.2E");
 
-    pFrontend->scan("dvb-t/de-Baden-Wuerttemberg");
-//    pFrontend->scan("dvb-s/Astra-19.2E");
-
-    Omm::Dvb::Device::instance()->writeXml(std::cout);
-
-//    std::ifstream xmlDevice("/home/jb/tmp/dvb.xml");
-//    Omm::Dvb::Device::instance()->readXml(xmlDevice);
+    pDevice->detectAdapters();
+    pDevice->scan();
+    pDevice->writeXml(std::cout);
 
     return 0;
 }

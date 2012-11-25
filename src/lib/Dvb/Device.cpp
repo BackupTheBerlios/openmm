@@ -28,6 +28,7 @@
 #include <sys/ioctl.h>
 
 #include <Poco/File.h>
+#include <Poco/Glob.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/NumberParser.h>
 #include <Poco/NumberFormatter.h>
@@ -85,6 +86,30 @@ Adapter::~Adapter()
 {
 //    delete _pFrontend;
 
+}
+
+
+void
+Adapter::detectFrontends()
+{
+    std::string frontendBasePath = _deviceName + "/frontend";
+    std::set<std::string> frontendFileNames;
+    Poco::Glob::glob(frontendBasePath + "?", frontendFileNames);
+    for (std::set<std::string>::iterator it = frontendFileNames.begin(); it != frontendFileNames.end(); ++it) {
+        try {
+            int frontendNum = Poco::NumberParser::parse(it->substr(frontendBasePath.length(), 1));
+            Frontend* pFrontend = Frontend::detectFrontend(this, frontendNum);
+            if (pFrontend) {
+                addFrontend(pFrontend);
+            }
+            else {
+                LOG(dvb, error, "failed to detect frontend " + frontendBasePath + Poco::NumberFormatter::format(frontendNum));
+            }
+        }
+        catch (Poco::Exception& e) {
+            LOG(dvb, error, "failed to retrieve frontend number: " + e.message());
+        }
+    }
 }
 
 
@@ -236,6 +261,33 @@ Device::serviceEnd()
 
 
 void
+Device::detectAdapters()
+{
+    std::string adapterBasePath = "/dev/dvb/adapter";
+    std::set<std::string> adapterFileNames;
+    Poco::Glob::glob(adapterBasePath + "?", adapterFileNames);
+    for (std::set<std::string>::iterator it = adapterFileNames.begin(); it != adapterFileNames.end(); ++it) {
+        try {
+            int adapterNum = Poco::NumberParser::parse(it->substr(adapterBasePath.length(), 1));
+            Adapter* pAdapter = new Adapter(adapterNum);
+            addAdapter(pAdapter);
+            pAdapter->detectFrontends();
+        }
+        catch (Poco::Exception& e) {
+            LOG(dvb, error, "failed to retrieve adapter number: " + e.message());
+        }
+    }
+}
+
+
+void
+Device::addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders)
+{
+    _initialTransponders[frontendType].insert(initialTransponders);
+}
+
+
+void
 Device::open()
 {
     LOG(dvb, debug, "device open ...");
@@ -258,12 +310,36 @@ Device::close()
 
 
 void
-Device::scan(const std::string& initialTransponderData)
+Device::scan()
 {
-    // TODO: allocate adapters and frontend according to device nodes in system
-    _adapters[0]->_frontends[0]->scan(initialTransponderData);
+    for (std::vector<Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
+        LOG(dvb, debug, "scan adapter " + (*ait)->_deviceName);
+        for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
+            LOG(dvb, debug, "scan frontend " + (*fit)->_deviceName + " of type: " + (*fit)->getType());
+            std::map<std::string, std::set<std::string> >::iterator tsit = _initialTransponders.find((*fit)->getType());
+            LOG(dvb, debug, "number of initial transponder lists: " + Poco::NumberFormatter::format(tsit->second.size()));
+            if (tsit != _initialTransponders.end()) {
+                for (std::set<std::string>::iterator tit = tsit->second.begin(); tit != tsit->second.end(); ++tit) {
+//                for (int t = 0; t < tsit->second.size(); ++t) {
+                    std::string initialTransponders = (*fit)->getType() + "/" + *tit;
+//                    std::string initialTransponders = (*fit)->getType() + "/" + tsit->second[t];
+                    LOG(dvb, debug, "scan initial transponders " + initialTransponders);
+                    (*fit)->scan(initialTransponders);
+                }
+            }
+        }
+    }
     initServiceMap();
 }
+
+
+//void
+//Device::scan(const std::string& initialTransponderData)
+//{
+//    // TODO: allocate adapters and frontend according to device nodes in system
+//    _adapters[0]->_frontends[0]->scan(initialTransponderData);
+//    initServiceMap();
+//}
 
 
 void

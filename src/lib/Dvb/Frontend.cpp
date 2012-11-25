@@ -105,10 +105,10 @@ SignalCheckThread::stop()
 
 
 const std::string Frontend::Unknown("unknown");
-const std::string Frontend::DVBS("DVB-S");
-const std::string Frontend::DVBT("DVB-T");
-const std::string Frontend::DVBC("DVB-C");
-const std::string Frontend::ATSC("ATSC");
+const std::string Frontend::DVBS("dvb-s");
+const std::string Frontend::DVBT("dvb-t");
+const std::string Frontend::DVBC("dvb-c");
+const std::string Frontend::ATSC("atsc");
 
 Frontend::Frontend(Adapter* pAdapter, int num) :
 _fileDescFrontend(-1),
@@ -129,6 +129,62 @@ Frontend::~Frontend()
     closeFrontend();
     delete _pDemux;
     delete _pDvr;
+}
+
+
+Frontend*
+Frontend::detectFrontend(Adapter* pAdapter, int num)
+{
+    std::string deviceName = pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(num);
+    LOG(dvb, information, "detect frontend " + deviceName + " ...");
+
+    LOG(dvb, debug, "opening frontend");
+    int fileDescFrontend;
+    if ((fileDescFrontend = open(deviceName.c_str(), O_RDONLY | O_NONBLOCK)) < 0) {
+        LOG(dvb, error, "opening frontend failed: " + std::string(strerror(errno)));
+        return 0;
+    }
+
+    struct dvb_frontend_info feInfo;
+    int result = ioctl(fileDescFrontend, FE_GET_INFO, &feInfo);
+
+    if (result < 0) {
+        LOG(dvb, error, "ioctl FE_GET_INFO failed");
+        if (close(fileDescFrontend)) {
+            LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
+        }
+        return 0;
+    }
+
+    Frontend* pFrontend = 0;
+    switch (feInfo.type) {
+        case FE_QPSK:
+            pFrontend = new SatFrontend(pAdapter, num);
+            break;
+        case FE_OFDM:
+            pFrontend = new TerrestrialFrontend(pAdapter, num);
+            break;
+        case FE_QAM:
+            pFrontend = new CableFrontend(pAdapter, num);
+            break;
+        case FE_ATSC:
+            pFrontend = new AtscFrontend(pAdapter, num);
+            break;
+    }
+    pFrontend->_name = std::string(feInfo.name);
+
+    LOG(dvb, debug, "closing frontend");
+    if (close(fileDescFrontend)) {
+        LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
+    }
+    if (pFrontend) {
+        LOG(dvb, information, "found frontend " + pFrontend->_name + " (" + pFrontend->_type + ")");
+    }
+    else {
+        LOG(dvb, error, "could not detect frontend " + deviceName);
+    }
+
+    return pFrontend;
 }
 
 
@@ -205,7 +261,7 @@ Frontend::scan(const std::string& initialTransponderData)
     // TODO: clear transponder lists
 
     getInitialTransponderData(initialTransponderData);
-    LOG(dvb, debug, "number of initial transponders: " + Poco::NumberFormatter::format(_initialTransponders.size()));
+    LOG(dvb, debug, "number of initial transponders in " + initialTransponderData + ": " + Poco::NumberFormatter::format(_initialTransponders.size()));
     openFrontend();
 //    std::vector<Transponder*>::iterator it = _initialTransponders.begin() + 2;
 //    SatTransponder* pT = new SatTransponder(this, 11856000, 1072);
@@ -685,6 +741,7 @@ const int SatFrontend::maxSatNum(4);
 SatFrontend::SatFrontend(Adapter* pAdapter, int num) :
 Frontend(pAdapter, num)
 {
+    _type = DVBS;
     // FIXME: when do we need to multiply freqs with 1000?
     _lnbs["UNIVERSAL"] = new Lnb("Europe | 10800 to 11800 MHz and 11600 to 12700 Mhz | Dual LO, loband 9750, hiband 10600 MHz",
                                     9750000, 10600000, 11700000);
