@@ -108,10 +108,10 @@ public:
     void readXml(std::istream& istream);
     void writeXml(std::ostream& ostream);
 
-    Transponder* getTransponder(const std::string& serviceName);
+    Transponder* getFirstTransponder(const std::string& serviceName);
     std::vector<Transponder*>& getTransponders(const std::string& serviceName);
 
-    std::istream* getStream(const std::string& serviceName);
+    std::istream* getStream(const std::string& serviceName, bool unscrambledOnly = true);
     void freeStream(std::istream* pIstream);
 
 private:

@@ -50,7 +50,7 @@ main(int argc, char** argv)
         Poco::Timestamp t;
         Poco::Timestamp::TimeDiff maxTime = 5000000;  // get max 5,000,000 microsec
 
-        Omm::Dvb::Transponder* pTransponder = pDevice->getTransponder(serviceName);
+        Omm::Dvb::Transponder* pTransponder = pDevice->getFirstTransponder(serviceName);
         if (pTransponder) {
             Omm::Dvb::Service* pService = pTransponder->getService(serviceName);
             if (pService && pService->getStatus() == Omm::Dvb::Service::StatusRunning && !pService->getScrambled()

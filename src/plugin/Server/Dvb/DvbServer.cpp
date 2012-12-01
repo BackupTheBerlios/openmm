@@ -86,11 +86,6 @@ DvbModel::getSystemUpdateId(bool checkMod)
 void
 DvbModel::scan()
 {
-//    _channels.scanChannels();
-//    for (Omm::Dvb::Channels::ChannelIterator it = _channels.beginChannel(); it != _channels.endChannel(); ++it) {
-//        addPath(it->first);
-//    }
-
     // TODO: do a frontend scan
 
     LOGNS(Omm::Dvb, dvb, debug, "dvb model scan ...");
@@ -130,7 +125,7 @@ DvbModel::scan()
 std::string
 DvbModel::getClass(const std::string& path)
 {
-    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getTransponder(path)->getService(path);
+    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getFirstTransponder(path)->getService(path);
     if (pService->isAudio()) {
         return Omm::Av::AvClass::className(Omm::Av::AvClass::ITEM, Omm::Av::AvClass::AUDIO_BROADCAST);
     }
@@ -174,7 +169,7 @@ DvbModel::freeStream(std::istream* pIstream)
 std::string
 DvbModel::getMime(const std::string& path)
 {
-    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getTransponder(path)->getService(path);
+    Omm::Dvb::Service* pService = Omm::Dvb::Device::instance()->getFirstTransponder(path)->getService(path);
     if (pService->isAudio()) {
         return Omm::Av::Mime::AUDIO_MPEG;
     }
