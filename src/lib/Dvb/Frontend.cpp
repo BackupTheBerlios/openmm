@@ -233,7 +233,7 @@ Frontend::openFrontend()
         LOG(dvb, error, "frontend device is not a DVB-S or DVB-T device, not yet supported");
         closeFrontend();
     }
-    else {
+    else if (_transponders.size()) {  // no transponders, no dvr needed
         _pDvr->openDvr();
     }
 }
@@ -244,7 +244,9 @@ Frontend::closeFrontend()
 {
     LOG(dvb, debug, "close frontend");
 
-    _pDvr->closeDvr();
+    if (_transponders.size()) {
+        _pDvr->closeDvr();
+    }
 
     dvb_frontend_event event;
     while (!ioctl(_fileDescFrontend, FE_GET_EVENT, &event)) {
@@ -258,14 +260,10 @@ Frontend::closeFrontend()
 void
 Frontend::scan(const std::string& initialTransponderData)
 {
-    // TODO: clear transponder lists
-
+    // TODO: clear transponder lists?
     getInitialTransponderData(initialTransponderData);
     LOG(dvb, debug, "number of initial transponders in " + initialTransponderData + ": " + Poco::NumberFormatter::format(_initialTransponders.size()));
     openFrontend();
-//    std::vector<Transponder*>::iterator it = _initialTransponders.begin() + 2;
-//    SatTransponder* pT = new SatTransponder(this, 11856000, 1072);
-//    pT->init(0, 27500000, "V");
     for (std::vector<Transponder*>::iterator it = _initialTransponders.begin(); it != _initialTransponders.end(); ++it) {
         LOG(dvb, trace, "initial transponder (freq: " + Poco::NumberFormatter::format((*it)->_frequency) + ", tsid: " + Poco::NumberFormatter::format((*it)->_transportStreamId) + ")");
         if (tune(*it)) {
