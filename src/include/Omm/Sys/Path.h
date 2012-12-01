@@ -17,21 +17,25 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#ifndef UtilImplLinux_INCLUDED
-#define UtilImplLinux_INCLUDED
+ ***************************************************************************/
+#ifndef Path_INCLUDED
+#define Path_INCLUDED
 
 #include <string>
-
-#include "Sys/Path.h"
 
 namespace Omm {
 namespace Sys {
 
-class SysImpl
+
+class SysPath
 {
 public:
-    static const std::string getPath(SysPath::Location loc);
+    enum Location {Home, Cache, Tmp};
+    /// Home: a place in the system, where the user can store his documents
+    /// Cache: a place in the system, where all users can store cached files, that can be restored automatically
+    /// Tmp: a place in the system, where all users can store temporary files
+
+    static const std::string getPath(Location loc);
 };
 
 }  // namespace Sys

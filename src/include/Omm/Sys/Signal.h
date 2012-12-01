@@ -18,91 +18,18 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef Sys_INCLUDED
-#define Sys_INCLUDED
+#ifndef Signal_INCLUDED
+#define Signal_INCLUDED
 
 #ifdef __LINUX__
 #include <signal.h>
 #endif
 
-#include <Poco/Logger.h>
-#include <Poco/NotificationCenter.h>
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
-#include <vector>
-#include <string>
 
 namespace Omm {
 namespace Sys {
-
-#ifndef NDEBUG
-class Log
-{
-public:
-    static Log* instance();
-
-    Poco::Logger& sys();
-
-private:
-    Log();
-
-    static Log*     _pInstance;
-    Poco::Logger*   _pSysLogger;
-};
-#endif // NDEBUG
-
-
-class SysPath
-{
-public:
-    enum Location {Home, Cache, Tmp};
-    /// Home: a place in the system, where the user can store his documents
-    /// Cache: a place in the system, where all users can store cached files, that can be restored automatically
-    /// Tmp: a place in the system, where all users can store temporary files
-
-    static const std::string getPath(Location loc);
-};
-
-
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
-{
-public:
-    enum VisualType {VTNone, VTX11, VTFB, VTQt, VTOSX, VTWin};
-
-#ifdef __LINUX__
-    typedef Poco::UInt32 WindowHandle;
-#elif __DARWIN__
-    typedef uint32_t WindowHandle;
-#elif __WINDOWS__
-    typedef void* WindowHandle;
-#endif
-
-    Visual();
-    virtual ~Visual() {}
-
-    virtual void show() {}
-    virtual void hide() {}
-
-    virtual void* getWindow() { return 0; }
-    virtual WindowHandle getWindowId() { return 0; }
-    virtual VisualType getType() { return VTNone; }
-    virtual void renderImage(const std::string& imageData) {}
-    virtual void blank() {}
-
-    int getWidth();
-    int getHeight();
-    bool getFullscreen();
-    void setWidth(int width);
-    void setHeight(int height);
-    void setFullscreen(bool fullscreen = true);
-
-private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
-};
 
 
 class SignalHandler

@@ -47,10 +47,10 @@
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/NotificationCenter.h>
 
-#include "UpnpTypes.h"
-#include "Net.h"
-#include "Sys.h"
+#include "Sys/Visual.h"
 #include "Log.h"
+#include "Net.h"
+#include "UpnpTypes.h"
 
 namespace Omm {
 

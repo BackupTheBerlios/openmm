@@ -17,22 +17,30 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
-#ifndef UtilImplLinux_INCLUDED
-#define UtilImplLinux_INCLUDED
+ ***************************************************************************/
+#ifndef SysLogger_INCLUDED
+#define SysLogger_INCLUDED
 
-#include <string>
-
-#include "Sys/Path.h"
+#include <Poco/Logger.h>
 
 namespace Omm {
 namespace Sys {
 
-class SysImpl
+#ifndef NDEBUG
+class Log
 {
 public:
-    static const std::string getPath(SysPath::Location loc);
+    static Log* instance();
+
+    Poco::Logger& sys();
+
+private:
+    Log();
+
+    static Log*     _pInstance;
+    Poco::Logger*   _pSysLogger;
 };
+#endif // NDEBUG
 
 }  // namespace Sys
 }  // namespace Omm

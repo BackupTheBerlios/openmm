@@ -21,8 +21,11 @@
 
 #include <Poco/NumberFormatter.h>
 
-#include "Sys.h"
 #include "Log.h"
+#include "Sys/SysLogger.h"
+#include "Sys/Path.h"
+#include "Sys/Signal.h"
+#include "Sys/Visual.h"
 
 #ifdef __LINUX__
 #include "Linux/SysImplLinux.h"

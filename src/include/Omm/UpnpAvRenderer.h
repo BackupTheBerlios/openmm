@@ -24,9 +24,9 @@
 
 #include <Poco/Timer.h>
 
+#include "Sys/Visual.h"
 #include "Upnp.h"
 #include "UpnpAvObject.h"
-#include "Sys.h"
 
 namespace Omm {
 namespace Av {

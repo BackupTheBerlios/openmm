@@ -21,7 +21,7 @@
 #ifndef X11Visual_INCLUDED
 #define X11Visual_INCLUDED
 
-#include <Omm/Sys.h>
+#include <Omm/Sys/Visual.h>
 
 class X11Visual : public Omm::Sys::Visual
 {

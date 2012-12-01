@@ -22,7 +22,7 @@
 #ifndef Application_INCLUDED
 #define Application_INCLUDED
 
-#include <Omm/Sys.h>
+#include <Omm/Sys/Signal.h>
 
 
 namespace Omm {

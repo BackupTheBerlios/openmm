@@ -26,8 +26,8 @@
 #include <Poco/Thread.h>
 #include <iostream>
 
+#include "Sys/Path.h"
 #include "Util.h"
-#include "Sys.h"
 
 namespace Omm {
 namespace Util {

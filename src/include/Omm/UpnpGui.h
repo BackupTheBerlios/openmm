@@ -35,6 +35,8 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 
+#include "Sys/Signal.h"
+
 #include "Upnp.h"
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvRenderer.h"
@@ -42,7 +44,6 @@
 #include "UpnpAvCtlObject2.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvServer.h"
-#include "Sys.h"
 
 #include "Gui/Application.h"
 #include "Gui/Tab.h"
