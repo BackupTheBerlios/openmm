@@ -108,13 +108,13 @@ public:
     void open();
     void close();
     void scan();
-//    void scan(const std::string& initialTransponderData);
     void readXml(std::istream& istream);
     void writeXml(std::ostream& ostream);
 
     void addAdapter(Adapter* pAdapter);
 
     Transponder* getTransponder(const std::string& serviceName);
+    std::vector<Transponder*>& getTransponders(const std::string& serviceName);
 
     std::istream* getStream(const std::string& serviceName);
     void freeStream(std::istream* pIstream);

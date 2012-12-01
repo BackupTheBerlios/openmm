@@ -140,20 +140,6 @@ Adapter::closeAdapter()
 }
 
 
-//Demux*
-//Adapter::getDemux()
-//{
-//    return _pDemux;
-//}
-//
-//
-//Dvr*
-//Adapter::getDvr()
-//{
-//    return _pDvr;
-//}
-
-
 void
 Adapter::readXml(Poco::XML::Node* pXmlAdapter)
 {
@@ -251,15 +237,6 @@ Device::serviceEnd()
 }
 
 
-//void
-//Device::init()
-//{
-//    Omm::Dvb::Adapter* pAdapter = new Omm::Dvb::Adapter(0);
-//    pAdapter->openAdapter();
-//    Omm::Dvb::Device::instance()->addAdapter(pAdapter);
-//}
-
-
 void
 Device::detectAdapters()
 {
@@ -331,15 +308,6 @@ Device::scan()
     }
     initServiceMap();
 }
-
-
-//void
-//Device::scan(const std::string& initialTransponderData)
-//{
-//    // TODO: allocate adapters and frontend according to device nodes in system
-//    _adapters[0]->_frontends[0]->scan(initialTransponderData);
-//    initServiceMap();
-//}
 
 
 void
@@ -437,25 +405,11 @@ Device::getTransponder(const std::string& serviceName)
 }
 
 
-    // FIXME: two subsequent getStream() without stopping the stream may lead to
-    //        a blocked dvr device: engine stops reading the previous stream
-    //        when receiving the new stream. This may overlap and the file
-    //        handle is still open. Even if the engine is stopped right before
-    //        playing a new stream, it could take a while until reading of stream
-    //        is stopped, too (stop() and play() are typically async calls into
-    //        the engine).
-    //        DvbModel needs a way to interrupt current stream and close file handles.
-    //        UPDATE: this only happens when renderer and dvb server run in the same process.
-    //        UPDATE: man(2) close:
-    //                It is probably unwise to close file descriptors while they may be in use by system calls in other threads  in  the
-    //                same  process.  Since a file descriptor may be reused, there are some obscure race conditions that may cause unin-
-    //                tended side effects.
-    //        UPDATE: Even if the http request is run in the same thread as the previous http request, dvr device cannot be
-    //                opened ("Device or resource busy").
-    //        UPDATE: when run in main thread (test/tunedvb), opening and closing dvr works
-    //        UPDATE: when not run in main thread and dvr device is kept open, streams sometimes seam to be corrupt, but are not!
-    //                this is a vlc problem: recording the muxed transport streams can be played with mplayer and ts analysis with
-    //                dvbsnoop shows correct transport stream container.
+std::vector<Transponder*>&
+Device::getTransponders(const std::string& serviceName)
+{
+    return _serviceMap.find(serviceName)->second;
+}
 
 
 std::istream*
@@ -463,13 +417,56 @@ Device::getStream(const std::string& serviceName)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
 
-    Transponder* pTransponder = getTransponder(serviceName);
-    Frontend* pFrontend = pTransponder->_pFrontend;
-    if (!pFrontend->isTuned(pTransponder)) {
-        bool tuneSuccess = pFrontend->tune(pTransponder);
-        if (!tuneSuccess) {
-            return 0;
+//    Transponder* pTransponder = getTransponder(serviceName);
+//    Frontend* pFrontend = pTransponder->_pFrontend;
+//    if (!pFrontend->isTuned(pTransponder)) {
+//        bool tuneSuccess = pFrontend->tune(pTransponder);
+//        if (!tuneSuccess) {
+//            return 0;
+//        }
+//    }
+
+    std::vector<Transponder*>& transponders = getTransponders(serviceName);
+    Transponder* pTransponder = 0;
+    Frontend* pFrontend = 0;
+    int t = 0;
+    LOG(dvb, debug, "number of available frontends: " + Poco::NumberFormatter::format(transponders.size()));
+    while (t < transponders.size()) {
+        LOG(dvb, debug, "try frontend " + Poco::NumberFormatter::format(t));
+        pTransponder = transponders[t];
+        pFrontend = pTransponder->_pFrontend;
+        if (!pFrontend->isTuned()) {
+            LOG(dvb, debug, "frontend not tuned, doing so");
+            if (!pFrontend->tune(pTransponder)) {
+                LOG(dvb, error, "failed to tune to transponder");
+                return 0;
+            }
+            else {
+                break;
+            }
         }
+        if (!pFrontend->isTunedTo(pTransponder)) {
+            if (t + 1 < transponders.size()) {
+                // there are more frontends available that can tune to a transponder with this service
+                LOG(dvb, debug, "available frontend already tuned to different transponder, try next frontend");
+            }
+            else {
+                // interrupt the services on current transponder and tune to newly requested one
+                LOG(dvb, debug, "no more frontends available, interrupt service and tune to different transponder");
+                if (!pFrontend->tune(pTransponder)) {
+                    LOG(dvb, error, "failed to tune to transponder");
+                    return 0;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        else {
+            LOG(dvb, debug, "frontend already tuned to requested transponder, skip tuning");
+            break;
+        }
+        t++;
     }
 
     Demux* pDemux = pFrontend->_pDemux;

@@ -388,7 +388,14 @@ Frontend::typeSupported()
 
 
 bool
-Frontend::isTuned(Transponder* pTransponder)
+Frontend::isTuned()
+{
+    return _pTunedTransponder != 0;
+}
+
+
+bool
+Frontend::isTunedTo(Transponder* pTransponder)
 {
     return _pTunedTransponder == pTransponder;
 }

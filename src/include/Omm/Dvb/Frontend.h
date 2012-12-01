@@ -66,7 +66,8 @@ public:
     const std::string getType();
     const std::string getName();
     bool typeSupported();
-    bool isTuned(Transponder* pTransponder);
+    bool isTuned();
+    bool isTunedTo(Transponder* pTransponder);
     virtual bool tune(Transponder* pTransponder) {}
     virtual Transponder* createTransponder(unsigned int freq, unsigned int tsid) {}
 
