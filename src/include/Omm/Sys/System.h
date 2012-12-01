@@ -17,53 +17,56 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
-***************************************************************************/
+ ***************************************************************************/
+#ifndef SysDevice_INCLUDED
+#define SysDevice_INCLUDED
 
-#include <shlobj.h>
-
-#include "Poco/Environment.h"
-#include "Poco/Path.h"
-
-#include "SysImplWindows.h"
+#include <string>
+#include <vector>
 
 namespace Omm {
 namespace Sys {
 
-
-const std::string Sys::System::DeviceTypeOther("");
-const std::string Sys::System::DeviceTypeDvb("dvb");
-const std::string Sys::System::DeviceTypeDisk("block");
+class SysImpl;
+class Device;
 
 
-const std::string
-SysImpl::getPath(SysPath::Location loc)
+class System
 {
-    TCHAR path[MAX_PATH];
-    switch (loc) {
-        case SysPath::Home:
-            if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) {
-                return std::string(path);
-            }
-            return "";
-        case SysPath::Cache:
-            if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, path))) {
-                return std::string(path);
-            }
-            return "";
-        case SysPath::Tmp:
-            return Poco::Path::temp();
-        default:
-            return "";
-    }
-}
+public:
+    // TODO: complete system device types
+    static const std::string DeviceTypeOther;
+    static const std::string DeviceTypeDvb;
+    static const std::string DeviceTypeDisk;
+
+    static System* instance();
+
+    void getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType);
+
+private:
+    System();
+
+    static System*     _pInstance;
+    SysImpl*           _pImpl;
+};
 
 
-void
-SysImpl::getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType)
+class Device
 {
-    // TODO: implement SysImpl::getDevicesForType() for Window
-}
+public:
+    Device(const std::string& id, const std::string& type = System::DeviceTypeOther, const std::string& node = "");
 
+    std::string getId();
+    std::string getType();
+    std::string getNode();
+
+private:
+    std::string     _id;
+    std::string     _type;
+    std::string     _node;
+};
 
 }  // namespace Sys
-} // namespace Omm
+}  // namespace Omm
+
+#endif

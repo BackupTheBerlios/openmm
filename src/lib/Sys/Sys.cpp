@@ -26,6 +26,7 @@
 #include "Sys/Path.h"
 #include "Sys/Signal.h"
 #include "Sys/Visual.h"
+#include "Sys/System.h"
 
 #ifdef __LINUX__
 #include "Linux/SysImplLinux.h"
@@ -159,6 +160,59 @@ SignalHandler::signalHandlerListener()
             break;
     }
 #endif
+}
+
+
+System* System::_pInstance = 0;
+
+System::System() :
+_pImpl(new SysImpl)
+{
+}
+
+
+System*
+System::instance()
+{
+    if (!_pInstance) {
+        _pInstance = new System;
+    }
+    return _pInstance;
+}
+
+
+void
+System::getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType)
+{
+    _pImpl->getDevicesForType(devices, deviceType);
+}
+
+
+Device::Device(const std::string& id, const std::string& type, const std::string& node) :
+_id(id),
+_node(node)
+{
+}
+
+
+std::string
+Device::getId()
+{
+    return _id;
+}
+
+
+std::string
+Device::getType()
+{
+    return _type;
+}
+
+
+std::string
+Device::getNode()
+{
+    return _node;
 }
 
 

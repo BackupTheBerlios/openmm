@@ -53,6 +53,7 @@
 #include <Poco/Thread.h>
 #include <map>
 
+#include "Sys/System.h"
 #include "Log.h"
 #include "DvbLogger.h"
 #include "Descriptor.h"
@@ -75,48 +76,18 @@ namespace Dvb {
 Adapter::Adapter(int num)
 {
     _deviceName = "/dev/dvb/adapter" + Poco::NumberFormatter::format(num);
-    _recPsi = true;
-
-//    _pFrontend = new Frontend(this, 0);
-
 }
 
 
 Adapter::~Adapter()
 {
-//    delete _pFrontend;
 
-}
-
-
-void
-Adapter::detectFrontends()
-{
-    std::string frontendBasePath = _deviceName + "/frontend";
-    std::set<std::string> frontendFileNames;
-    Poco::Glob::glob(frontendBasePath + "?", frontendFileNames);
-    for (std::set<std::string>::iterator it = frontendFileNames.begin(); it != frontendFileNames.end(); ++it) {
-        try {
-            int frontendNum = Poco::NumberParser::parse(it->substr(frontendBasePath.length(), 1));
-            Frontend* pFrontend = Frontend::detectFrontend(this, frontendNum);
-            if (pFrontend) {
-                addFrontend(pFrontend);
-            }
-            else {
-                LOG(dvb, error, "failed to detect frontend " + frontendBasePath + Poco::NumberFormatter::format(frontendNum));
-            }
-        }
-        catch (Poco::Exception& e) {
-            LOG(dvb, error, "failed to retrieve frontend number: " + e.message());
-        }
-    }
 }
 
 
 void
 Adapter::addFrontend(Frontend* pFrontend)
 {
-//    _pFrontend = pFrontend;
     _frontends.push_back(pFrontend);
 }
 
@@ -140,6 +111,20 @@ Adapter::closeAdapter()
 }
 
 
+std::string
+Adapter::getId()
+{
+    return _id;
+}
+
+
+void
+Adapter::setId(const std::string& id)
+{
+    _id = id;
+}
+
+
 void
 Adapter::readXml(Poco::XML::Node* pXmlAdapter)
 {
@@ -147,23 +132,23 @@ Adapter::readXml(Poco::XML::Node* pXmlAdapter)
 
     if (pXmlAdapter->hasChildNodes()) {
         Poco::XML::Node* pXmlFrontend = pXmlAdapter->firstChild();
-        std::string frontendType = static_cast<Poco::XML::Element*>(pXmlFrontend)->getAttribute("type");
         int numFrontend = 0;
         while (pXmlFrontend && pXmlFrontend->nodeName() == "frontend") {
-            Frontend* pFrontend;
-            if (frontendType == Frontend::DVBS) {
-                pFrontend = new SatFrontend(this, numFrontend);
+            std::string frontendType = static_cast<Poco::XML::Element*>(pXmlFrontend)->getAttribute("type");
+            std::string frontendName = static_cast<Poco::XML::Element*>(pXmlFrontend)->getAttribute("name");
+            if (numFrontend >= _frontends.size()) {
+                LOG(dvb, error, "too many frontends for adapter, rescan recommended");
+                break;
             }
-            else if (frontendType == Frontend::DVBT) {
-                pFrontend = new TerrestrialFrontend(this, numFrontend);
+            Frontend* pFrontend = _frontends[numFrontend];
+            if (frontendType != pFrontend->getType()) {
+                LOG(dvb, error, "frontend type mismatch, rescan recommended");
+                break;
             }
-            else if (frontendType == Frontend::DVBC) {
-                pFrontend = new CableFrontend(this, numFrontend);
+            if (frontendName != pFrontend->getName()) {
+                LOG(dvb, error, "frontend name mismatch, rescan recommended");
+                break;
             }
-            else if (frontendType == Frontend::ATSC) {
-                pFrontend = new AtscFrontend(this, numFrontend);
-            }
-            addFrontend(pFrontend);
             pFrontend->readXml(pXmlFrontend);
             pXmlFrontend = pXmlFrontend->nextSibling();
             numFrontend++;
@@ -185,10 +170,8 @@ Adapter::writeXml(Poco::XML::Element* pDvbDevice)
 
     Poco::XML::Document* pDoc = pDvbDevice->ownerDocument();
     Poco::XML::Element* pAdapter = pDoc->createElement("adapter");
+    pAdapter->setAttribute("id", _id);
     pDvbDevice->appendChild(pAdapter);
-//    if (_pFrontend) {
-//        _pFrontend->writeXml(pAdapter);
-//    }
     for (std::vector<Frontend*>::iterator it = _frontends.begin(); it != _frontends.end(); ++it) {
         (*it)->writeXml(pAdapter);
     }
@@ -207,8 +190,8 @@ Device::Device()
 
 Device::~Device()
 {
-    for(std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
-        delete *it;
+    for(std::map<std::string, Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        delete it->second;
     }
 }
 
@@ -238,26 +221,6 @@ Device::serviceEnd()
 
 
 void
-Device::detectAdapters()
-{
-    std::string adapterBasePath = "/dev/dvb/adapter";
-    std::set<std::string> adapterFileNames;
-    Poco::Glob::glob(adapterBasePath + "?", adapterFileNames);
-    for (std::set<std::string>::iterator it = adapterFileNames.begin(); it != adapterFileNames.end(); ++it) {
-        try {
-            int adapterNum = Poco::NumberParser::parse(it->substr(adapterBasePath.length(), 1));
-            Adapter* pAdapter = new Adapter(adapterNum);
-            addAdapter(pAdapter);
-            pAdapter->detectFrontends();
-        }
-        catch (Poco::Exception& e) {
-            LOG(dvb, error, "failed to retrieve adapter number: " + e.message());
-        }
-    }
-}
-
-
-void
 Device::addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders)
 {
     _initialTransponders[frontendType].insert(initialTransponders);
@@ -268,8 +231,8 @@ void
 Device::open()
 {
     LOG(dvb, debug, "device open ...");
-    for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
-        (*it)->openAdapter();
+    for (std::map<std::string, Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        it->second->openAdapter();
     }
     LOG(dvb, debug, "device open finished.");
 }
@@ -279,8 +242,8 @@ void
 Device::close()
 {
     LOG(dvb, debug, "device close ...");
-    for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
-        (*it)->closeAdapter();
+    for (std::map<std::string, Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+        it->second->closeAdapter();
     }
     LOG(dvb, debug, "device close finished.");
 }
@@ -289,23 +252,24 @@ Device::close()
 void
 Device::scan()
 {
-    for (std::vector<Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
-        LOG(dvb, debug, "scan adapter " + (*ait)->_deviceName);
-        for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
+    detectAdapters();
+
+    for (std::map<std::string, Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
+        LOG(dvb, debug, "scan adapter " + ait->second->_deviceName);
+        for (std::vector<Frontend*>::iterator fit = ait->second->_frontends.begin(); fit != ait->second->_frontends.end(); ++fit) {
             LOG(dvb, debug, "scan frontend " + (*fit)->_deviceName + " of type: " + (*fit)->getType());
             std::map<std::string, std::set<std::string> >::iterator tsit = _initialTransponders.find((*fit)->getType());
             LOG(dvb, debug, "number of initial transponder lists: " + Poco::NumberFormatter::format(tsit->second.size()));
             if (tsit != _initialTransponders.end()) {
                 for (std::set<std::string>::iterator tit = tsit->second.begin(); tit != tsit->second.end(); ++tit) {
-//                for (int t = 0; t < tsit->second.size(); ++t) {
                     std::string initialTransponders = (*fit)->getType() + "/" + *tit;
-//                    std::string initialTransponders = (*fit)->getType() + "/" + tsit->second[t];
                     LOG(dvb, debug, "scan initial transponders " + initialTransponders);
                     (*fit)->scan(initialTransponders);
                 }
             }
         }
     }
+
     initServiceMap();
 }
 
@@ -314,8 +278,6 @@ void
 Device::readXml(std::istream& istream)
 {
     LOG(dvb, debug, "read device ...");
-
-    clearAdapters();
 
     Poco::AutoPtr<Poco::XML::Document> pXmlDoc = new Poco::XML::Document;
     Poco::XML::InputSource xmlFile(istream);
@@ -340,14 +302,20 @@ Device::readXml(std::istream& istream)
         return;
     }
     if (pDvbDevice->hasChildNodes()) {
+
+        detectAdapters();
+
         Poco::XML::Node* pXmlAdapter = pDvbDevice->firstChild();
-        int numAdapter = 0;
         while (pXmlAdapter && pXmlAdapter->nodeName() == "adapter") {
-            Adapter* pAdapter = new Adapter(numAdapter);
-            addAdapter(pAdapter);
-            pAdapter->readXml(pXmlAdapter);
+            std::string adapterId = static_cast<Poco::XML::Element*>(pXmlAdapter)->getAttribute("id");
+            std::map<std::string, Adapter*>::iterator it = _adapters.find(adapterId);
+            if (it != _adapters.end()) {
+                it->second->readXml(pXmlAdapter);
+            }
+            else {
+                LOG(dvb, error, "could not find adapter with id: " + adapterId + " on system, skipping (rescan recommended)");
+            }
             pXmlAdapter = pXmlAdapter->nextSibling();
-            numAdapter++;
         }
     }
     else {
@@ -372,8 +340,8 @@ Device::writeXml(std::ostream& ostream)
     Poco::XML::Element* pDvbDevice = pXmlDoc->createElement("device");
     pXmlDoc->appendChild(pDvbDevice);
     try {
-        for (std::vector<Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
-            (*it)->writeXml(pDvbDevice);
+        for (std::map<std::string, Adapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+            it->second->writeXml(pDvbDevice);
         }
         writer.writeNode(ostream, pXmlDoc);
     }
@@ -381,13 +349,6 @@ Device::writeXml(std::ostream& ostream)
         LOG(dvb, error, "writing dvb description failed: " + e.displayText());
     }
     LOG(dvb, debug, "wrote device.");
-}
-
-
-void
-Device::addAdapter(Adapter* pAdapter)
-{
-    _adapters.push_back(pAdapter);
 }
 
 
@@ -416,15 +377,6 @@ std::istream*
 Device::getStream(const std::string& serviceName)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
-
-//    Transponder* pTransponder = getTransponder(serviceName);
-//    Frontend* pFrontend = pTransponder->_pFrontend;
-//    if (!pFrontend->isTuned(pTransponder)) {
-//        bool tuneSuccess = pFrontend->tune(pTransponder);
-//        if (!tuneSuccess) {
-//            return 0;
-//        }
-//    }
 
     std::vector<Transponder*>& transponders = getTransponders(serviceName);
     Transponder* pTransponder = 0;
@@ -511,13 +463,71 @@ Device::freeStream(std::istream* pIstream)
 
 
 void
+Device::detectAdapters()
+{
+    clearAdapters();
+
+    std::vector<Sys::Device*> dvbDevices;
+    Sys::System::instance()->getDevicesForType(dvbDevices, Sys::System::DeviceTypeDvb);
+
+    for (std::vector<Sys::Device*>::iterator it = dvbDevices.begin(); it != dvbDevices.end(); ++it) {
+        std::string adapterId = (*it)->getId().substr(0, (*it)->getId().length() - std::string(".frontendX").length());
+        LOG(dvb, debug, "found dvb device node " + (*it)->getNode() + " with id: " + adapterId);
+
+        std::string deviceNode = (*it)->getNode();
+        Poco::StringTokenizer deviceNodePath(deviceNode, "/");
+        if (deviceNodePath.count() < 2) {
+            LOG(dvb, error, "failed to detect dvb adapters, device path too short: " + deviceNode);
+            return;
+        }
+        try {
+            if (deviceNodePath[deviceNodePath.count() - 1].substr(0, std::string("frontend").length()) == "frontend") {
+                int adapterNum = Poco::NumberParser::parse(deviceNodePath[deviceNodePath.count() - 2].substr(std::string("adapter").length()));
+                int frontendNum = Poco::NumberParser::parse(deviceNodePath[deviceNodePath.count() - 1].substr(std::string("frontend").length()));
+                Adapter* pAdapter = addAdapter(adapterId, adapterNum);
+                Frontend* pFrontend = Frontend::detectFrontend(pAdapter, frontendNum);
+                if (pFrontend) {
+                    pAdapter->addFrontend(pFrontend);
+                }
+                else {
+                    LOG(dvb, error, "failed to detect frontend " + (*it)->getNode());
+                }
+            }
+        }
+        catch (Poco::Exception& e) {
+            LOG(dvb, error, "failed to detect dvb device numbers: " + e.message());
+        }
+    }
+}
+
+
+Adapter*
+Device::addAdapter(const std::string& id, int adapterNum)
+{
+    LOG(dvb, debug, "add adapter number " + Poco::NumberFormatter::format(adapterNum) + " with id: " + id);
+
+    Adapter* pAdapter;
+    std::map<std::string, Adapter*>::iterator it = _adapters.find(id);
+    if (it == _adapters.end()) {
+        pAdapter = new Adapter(adapterNum);
+        pAdapter->setId(id);
+        _adapters[id] = pAdapter;
+    }
+    else {
+        pAdapter = _adapters[id];
+    }
+    return pAdapter;
+}
+
+
+void
 Device::initServiceMap()
 {
     LOG(dvb, debug, "init service map ...");
     clearServiceMap();
 
-    for (std::vector<Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
-        for (std::vector<Frontend*>::iterator fit = (*ait)->_frontends.begin(); fit != (*ait)->_frontends.end(); ++fit) {
+    for (std::map<std::string, Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
+        for (std::vector<Frontend*>::iterator fit = ait->second->_frontends.begin(); fit != ait->second->_frontends.end(); ++fit) {
             for (std::vector<Transponder*>::iterator tit = (*fit)->_transponders.begin(); tit != (*fit)->_transponders.end(); ++tit) {
                 for (std::vector<Service*>::iterator sit = (*tit)->_services.begin(); sit != (*tit)->_services.end(); ++sit) {
                     _serviceMap[(*sit)->getName()].push_back(*tit);

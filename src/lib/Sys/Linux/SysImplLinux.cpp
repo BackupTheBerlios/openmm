@@ -21,10 +21,33 @@
 
 #include "Poco/Environment.h"
 
+#include "Log.h"
+#include "Sys/SysLogger.h"
 #include "SysImplLinux.h"
 
 namespace Omm {
 namespace Sys {
+
+
+const std::string Sys::System::DeviceTypeOther("");
+const std::string Sys::System::DeviceTypeDvb("dvb");
+const std::string Sys::System::DeviceTypeDisk("block");
+
+
+SysImpl::SysImpl()
+{
+    _pUdev = udev_new();
+    if (!_pUdev) {
+        LOG(sys, error, "initialization of udev failed");
+    }
+}
+
+
+SysImpl::~SysImpl()
+{
+    udev_unref(_pUdev);
+}
+
 
 const std::string
 SysImpl::getPath(SysPath::Location loc)
@@ -39,6 +62,31 @@ SysImpl::getPath(SysPath::Location loc)
         default:
             return "";
     }
+}
+
+
+void
+SysImpl::getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType)
+{
+    struct udev_enumerate* pUdevEnumerate = udev_enumerate_new(_pUdev);
+
+    udev_enumerate_add_match_subsystem(pUdevEnumerate, deviceType.c_str());
+	udev_enumerate_scan_devices(pUdevEnumerate);
+    struct udev_list_entry* deviceList;
+    deviceList = udev_enumerate_get_list_entry(pUdevEnumerate);
+
+    struct udev_list_entry* deviceIterator;
+    udev_list_entry_foreach(deviceIterator, deviceList) {
+        std::string deviceId(udev_list_entry_get_name(deviceIterator));
+		udev_device* device = udev_device_new_from_syspath(_pUdev, deviceId.c_str());
+        std::string deviceNode(udev_device_get_devnode(device));
+
+        devices.push_back(new Device(deviceId, deviceType, deviceNode));
+
+        udev_device_unref(device);
+    }
+
+    udev_enumerate_unref(pUdevEnumerate);
 }
 
 

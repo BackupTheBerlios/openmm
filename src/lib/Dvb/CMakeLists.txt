@@ -52,6 +52,7 @@ target_link_libraries(ommdvb
 ${POCO_FOUNDATION}
 ${POCO_XML}
 ${POCO_ZIP}
+${OMM_SYS}
 ${OMM_AVSTREAM}
 )
 

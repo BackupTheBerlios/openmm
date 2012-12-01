@@ -27,6 +27,11 @@ namespace Omm {
 namespace Sys {
 
 
+const std::string Sys::System::DeviceTypeOther("");
+const std::string Sys::System::DeviceTypeDvb("dvb");
+const std::string Sys::System::DeviceTypeDisk("block");
+
+
 const std::string
 SysImpl::getPath(SysPath::Location loc)
 {
@@ -42,6 +47,12 @@ SysImpl::getPath(SysPath::Location loc)
     }
 }
 
+
+void
+SysImpl::getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType)
+{
+    // TODO: implement SysImpl::getDevicesForType() for Darwin
+}
 
 }  // namespace Sys
 } // namespace Omm

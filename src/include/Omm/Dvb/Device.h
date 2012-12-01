@@ -19,8 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Device_INCLUDED
-#define Device_INCLUDED
+#ifndef DvbDevice_INCLUDED
+#define DvbDevice_INCLUDED
 
 #include <cstring>
 #include <string>
@@ -69,23 +69,21 @@ public:
     Adapter(int num);
     ~Adapter();
 
-    void detectFrontends();
     void addFrontend(Frontend* pFrontend);
     void openAdapter();
     void closeAdapter();
 
-    void getDeviceInfo();  // TODO: implement DvbAdapter::getDeviceInfo()
-//    Demux* getDemux();
-//    Dvr* getDvr();
+    std::string getId();
+    void setId(const std::string& id);
 
     void readXml(Poco::XML::Node* pXmlAdapter);
     void writeXml(Poco::XML::Element* pDvbDevice);
 
 private:
     int                         _num;
+    std::string                 _id;
     std::string                 _deviceName;
     std::vector<Frontend*>      _frontends;
-    bool                        _recPsi;
 };
 
 
@@ -95,7 +93,7 @@ class Device
     friend class SignalCheckThread;
 
 public:
-    typedef enum {ModeDvr, ModeMultiplex, ModeDvrMultiplex, ModeElementaryStreams} Mode;
+    typedef enum { ModeDvr, ModeMultiplex, ModeDvrMultiplex, ModeElementaryStreams } Mode;
 
     static Device* instance();
 
@@ -103,15 +101,12 @@ public:
     ServiceIterator serviceBegin();
     ServiceIterator serviceEnd();
 
-    void detectAdapters();
     void addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders);
     void open();
     void close();
     void scan();
     void readXml(std::istream& istream);
     void writeXml(std::ostream& ostream);
-
-    void addAdapter(Adapter* pAdapter);
 
     Transponder* getTransponder(const std::string& serviceName);
     std::vector<Transponder*>& getTransponders(const std::string& serviceName);
@@ -123,13 +118,15 @@ private:
     Device();
     ~Device();
 
+    void detectAdapters();
+    Adapter* addAdapter(const std::string& id, int adapterNum);
     void initServiceMap();
     void clearServiceMap();
     void clearAdapters();
 
     static Device*                                      _pInstance;
 
-    std::vector<Adapter*>                               _adapters;
+    std::map<std::string, Adapter*>                     _adapters;
     std::map<std::string, std::vector<Transponder*> >   _serviceMap;
     std::map<std::istream*, Service*>                   _streamMap;
     std::map<std::string, std::set<std::string> >       _initialTransponders;

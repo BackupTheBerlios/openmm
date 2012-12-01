@@ -21,9 +21,13 @@
 #ifndef UtilImplLinux_INCLUDED
 #define UtilImplLinux_INCLUDED
 
+#include <libudev.h>
+
 #include <string>
+#include <vector>
 
 #include "Sys/Path.h"
+#include "Sys/System.h"
 
 namespace Omm {
 namespace Sys {
@@ -31,7 +35,15 @@ namespace Sys {
 class SysImpl
 {
 public:
+    SysImpl();
+    ~SysImpl();
+
     static const std::string getPath(SysPath::Location loc);
+
+    void getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType);
+
+private:
+    struct udev*    _pUdev;
 };
 
 }  // namespace Sys

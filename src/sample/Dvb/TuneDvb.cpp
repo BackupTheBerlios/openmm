@@ -20,8 +20,6 @@
  ***************************************************************************/
 
 #include <iostream>
-#include <Poco/StreamCopier.h>
-#include <sstream>
 
 #include <Poco/Timestamp.h>
 
@@ -42,6 +40,7 @@ main(int argc, char** argv)
     Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
 
     std::ifstream dvbXml(Omm::Util::Home::instance()->getConfigDirPath("dvb.xml").c_str());
+
     pDevice->readXml(dvbXml);
     pDevice->open();
 
@@ -73,6 +72,7 @@ main(int argc, char** argv)
             }
         }
     }
+
     pDevice->close();
 
     return 0;

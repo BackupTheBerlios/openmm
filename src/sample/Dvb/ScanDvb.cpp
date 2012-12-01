@@ -45,7 +45,6 @@ main(int argc, char** argv)
         }
     }
 
-    pDevice->detectAdapters();
     pDevice->scan();
     pDevice->writeXml(std::cout);
 

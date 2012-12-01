@@ -22,8 +22,10 @@
 #define UtilImplDarwin_INCLUDED
 
 #include <string>
+#include <vector>
 
-#include "Sys.h"
+#include "Sys/Path.h"
+#include "Sys/System.h"
 
 namespace Omm {
 namespace Sys {
@@ -32,6 +34,8 @@ class SysImpl
 {
 public:
     static const std::string getPath(SysPath::Location loc);
+
+    void getDevicesForType(std::vector<Device*>& devices, const std::string& deviceType);
 };
 
 }  // namespace Sys

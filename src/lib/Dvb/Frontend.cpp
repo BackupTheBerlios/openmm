@@ -138,10 +138,10 @@ Frontend::detectFrontend(Adapter* pAdapter, int num)
     std::string deviceName = pAdapter->_deviceName + "/frontend" + Poco::NumberFormatter::format(num);
     LOG(dvb, information, "detect frontend " + deviceName + " ...");
 
-    LOG(dvb, debug, "opening frontend");
+    LOG(dvb, debug, "open frontend");
     int fileDescFrontend;
     if ((fileDescFrontend = open(deviceName.c_str(), O_RDONLY | O_NONBLOCK)) < 0) {
-        LOG(dvb, error, "opening frontend failed: " + std::string(strerror(errno)));
+        LOG(dvb, error, "open frontend failed: " + std::string(strerror(errno)));
         return 0;
     }
 
@@ -173,7 +173,7 @@ Frontend::detectFrontend(Adapter* pAdapter, int num)
     }
     pFrontend->_name = std::string(feInfo.name);
 
-    LOG(dvb, debug, "closing frontend");
+    LOG(dvb, debug, "close frontend");
     if (close(fileDescFrontend)) {
         LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
     }
@@ -199,10 +199,10 @@ Frontend::addTransponder(Transponder* pTransponder)
 void
 Frontend::openFrontend()
 {
-    LOG(dvb, debug, "opening frontend");
+    LOG(dvb, debug, "open frontend");
 
     if ((_fileDescFrontend = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
-        LOG(dvb, error, "opening frontend failed: " + std::string(strerror(errno)));
+        LOG(dvb, error, "open frontend failed: " + std::string(strerror(errno)));
     }
 
     int result = ioctl(_fileDescFrontend, FE_GET_INFO, &_feInfo);
@@ -242,7 +242,7 @@ Frontend::openFrontend()
 void
 Frontend::closeFrontend()
 {
-    LOG(dvb, debug, "closing frontend");
+    LOG(dvb, debug, "close frontend");
 
     _pDvr->closeDvr();
 
