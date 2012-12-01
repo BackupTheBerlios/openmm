@@ -111,7 +111,7 @@ public:
     Transponder* getFirstTransponder(const std::string& serviceName);
     std::vector<Transponder*>& getTransponders(const std::string& serviceName);
 
-    std::istream* getStream(const std::string& serviceName, bool unscrambledOnly = true);
+    std::istream* getStream(const std::string& serviceName);
     void freeStream(std::istream* pIstream);
 
 private:
@@ -123,6 +123,7 @@ private:
     void initServiceMap();
     void clearServiceMap();
     void clearAdapters();
+    Transponder* tuneToService(const std::string& serviceName, bool unscrambledOnly = true);
 
     static Device*                                      _pInstance;
 

@@ -374,79 +374,17 @@ Device::getTransponders(const std::string& serviceName)
 
 
 std::istream*
-Device::getStream(const std::string& serviceName, bool unscrambledOnly)
+Device::getStream(const std::string& serviceName)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
 
-    std::vector<Transponder*>& transponders = getTransponders(serviceName);
-    Service* pService = 0;
-    Frontend* pFrontend = 0;
-
-    bool tuneSuccess = false;
-    LOG(dvb, debug, "number of available frontends: " + Poco::NumberFormatter::format(transponders.size()));
-    for (int t = 0; t < transponders.size(); t++) {
-        LOG(dvb, debug, "try frontend " + Poco::NumberFormatter::format(t));
-        Transponder* pTransponder = transponders[t];
-        pService = pTransponder->getService(serviceName);
-        if (unscrambledOnly && pService->getScrambled()) {
-            LOG(dvb, debug, "service is scrambled on this transponder, skipping");
-            continue;
-        }
-
-        pFrontend = pTransponder->_pFrontend;
-        if (!pFrontend->isTuned()) {
-            LOG(dvb, debug, "frontend not tuned, doing so");
-            if (!pFrontend->tune(pTransponder)) {
-                if (transponders.size() > t + 1) {
-                    LOG(dvb, debug, "failed to tune to transponder, trying next one");
-                    continue;
-                }
-                else {
-                    tuneSuccess = false;
-                    break;
-                }
-            }
-            else {
-                tuneSuccess = true;
-                break;
-            }
-        }
-        if (!pFrontend->isTunedTo(pTransponder)) {
-            if (transponders.size() > t + 1) {
-                // there are more frontends available that can tune to a transponder with this service
-                LOG(dvb, debug, "available frontend already tuned to different transponder, try next frontend");
-                continue;
-            }
-            else {
-                // interrupt the services on current transponder and tune to newly requested one
-                LOG(dvb, debug, "no more frontends available, interrupt service and tune to different transponder");
-                if (!pFrontend->tune(pTransponder)) {
-                    if (transponders.size() > t + 1) {
-                        LOG(dvb, debug, "failed to tune to transponder, trying next one");
-                        continue;
-                    }
-                    else {
-                        tuneSuccess = false;
-                        break;
-                    }
-                }
-                else {
-                    tuneSuccess = true;
-                    break;
-                }
-            }
-        }
-        else {
-            LOG(dvb, debug, "frontend already tuned to requested transponder, skip tuning");
-            tuneSuccess = true;
-            break;
-        }
-    }
-    if (!tuneSuccess) {
-        LOG(dvb, error, "failed to tune to transponder");
+    // scrambled services are not supported, yet
+    Transponder* pTransponder = tuneToService(serviceName, true);
+    if (!pTransponder) {
         return 0;
     }
-
+    Frontend* pFrontend = pTransponder->_pFrontend;
+    Service* pService = pTransponder->getService(serviceName);
     Demux* pDemux = pFrontend->_pDemux;
     Dvr* pDvr = pFrontend->_pDvr;
 
@@ -578,6 +516,82 @@ Device::clearAdapters()
 {
     // TODO: delete whole adapter tree
     _adapters.clear();
+}
+
+
+Transponder*
+Device::tuneToService(const std::string& serviceName, bool unscrambledOnly)
+{
+    std::vector<Transponder*>& transponders = getTransponders(serviceName);
+
+    Transponder* pTransponder = 0;
+    bool tuneSuccess = false;
+    LOG(dvb, debug, "number of available frontends: " + Poco::NumberFormatter::format(transponders.size()));
+    for (int t = 0; t < transponders.size(); t++) {
+        LOG(dvb, debug, "try frontend " + Poco::NumberFormatter::format(t));
+        pTransponder = transponders[t];
+        Service* pService = pTransponder->getService(serviceName);
+        if (unscrambledOnly && pService->getScrambled()) {
+            LOG(dvb, debug, "service is scrambled on this transponder, skipping");
+            continue;
+        }
+
+        Frontend* pFrontend = pTransponder->_pFrontend;
+        if (!pFrontend->isTuned()) {
+            LOG(dvb, debug, "frontend not tuned, doing so");
+            if (!pFrontend->tune(pTransponder)) {
+                if (transponders.size() > t + 1) {
+                    LOG(dvb, debug, "failed to tune to transponder, trying next one");
+                    continue;
+                }
+                else {
+                    tuneSuccess = false;
+                    break;
+                }
+            }
+            else {
+                tuneSuccess = true;
+                break;
+            }
+        }
+        if (!pFrontend->isTunedTo(pTransponder)) {
+            if (transponders.size() > t + 1) {
+                // there are more frontends available that can tune to a transponder with this service
+                LOG(dvb, debug, "available frontend already tuned to different transponder, try next frontend");
+                continue;
+            }
+            else {
+                // interrupt the services on current transponder and tune to newly requested one
+                LOG(dvb, debug, "no more frontends available, interrupt service and tune to different transponder");
+                if (!pFrontend->tune(pTransponder)) {
+                    if (transponders.size() > t + 1) {
+                        LOG(dvb, debug, "failed to tune to transponder, trying next one");
+                        continue;
+                    }
+                    else {
+                        tuneSuccess = false;
+                        break;
+                    }
+                }
+                else {
+                    tuneSuccess = true;
+                    break;
+                }
+            }
+        }
+        else {
+            LOG(dvb, debug, "frontend already tuned to requested transponder, skip tuning");
+            tuneSuccess = true;
+            break;
+        }
+    }
+    if (!tuneSuccess) {
+        LOG(dvb, error, "failed to tune to transponder");
+        return 0;
+    }
+    else {
+        return pTransponder;
+    }
 }
 
 
