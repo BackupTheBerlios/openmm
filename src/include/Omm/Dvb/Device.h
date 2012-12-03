@@ -124,6 +124,8 @@ private:
     void clearServiceMap();
     void clearAdapters();
     Transponder* tuneToService(const std::string& serviceName, bool unscrambledOnly = true);
+    std::istream* getStreamForService(Service* pService);
+    void eraseStream(std::istream* pStream);
 
     static Device*                                      _pInstance;
 

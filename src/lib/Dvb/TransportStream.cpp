@@ -31,25 +31,66 @@ namespace Omm {
 namespace Dvb {
 
 
+const int TransportStreamPacketBlock::SizeInPackets = 1;
+const int TransportStreamPacketBlock::Size = SizeInPackets * TransportStreamPacket::Size;
+
+TransportStreamPacketBlock::TransportStreamPacketBlock() :
+_packetIndex(0),
+_refCounter(1)
+{
+    _pPacketData = new Poco::UInt8[TransportStreamPacketBlock::Size];
+    for (int i = 0; i < SizeInPackets; ++i) {
+        TransportStreamPacket* pPacket = new TransportStreamPacket(false);
+        pPacket->_pPacketBlock = this;
+        pPacket->setData(_pPacketData + i * TransportStreamPacket::Size);
+        _packetBlock.push_back(pPacket);
+    }
+}
+
+
+TransportStreamPacketBlock::~TransportStreamPacketBlock()
+{
+    delete _pPacketData;
+}
+
+
+TransportStreamPacket*
+TransportStreamPacketBlock::getPacket()
+{
+    if (_packetIndex < SizeInPackets) {
+//        LOG(dvb, debug, "get packet number: " + Poco::NumberFormatter::format(_packetIndex));
+        return _packetBlock[_packetIndex++];
+    }
+    else {
+        return 0;
+    }
+}
+
+
 const Poco::UInt8 TransportStreamPacket::SyncByte = 0x47;
 const int TransportStreamPacket::Size = 188;
 const int TransportStreamPacket::HeaderSize = 4;
 const int TransportStreamPacket::PayloadSize = 188 - 4;
 
-TransportStreamPacket::TransportStreamPacket() :
+TransportStreamPacket::TransportStreamPacket(bool allocateData) :
 _adaptionFieldSize(0),
 _adaptionFieldPcrSet(false),
 _adaptionFieldSplicingPointSet(false),
-_refCounter(1)
+_refCounter(1),
+_pPacketBlock(0)
 {
-    _data = new Poco::UInt8[Size];
-    setBytes<Poco::UInt8>(0, SyncByte);
+    if (allocateData) {
+        _data = new Poco::UInt8[Size];
+        setBytes<Poco::UInt8>(0, SyncByte);
+    }
 }
 
 
 TransportStreamPacket::~TransportStreamPacket()
 {
-    delete (Poco::UInt8*)_data;
+    if (_data) {
+        delete (Poco::UInt8*)_data;
+    }
 }
 
 

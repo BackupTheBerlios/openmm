@@ -178,7 +178,7 @@ Demux::unselectStream(Stream* pStream)
 //        delete pStream->_pStream;
 //        pStream->_pStream = 0;
         pStream->_fileDesc = -1;
-        LOG(dvb, debug, "demuxer unselected stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
+        LOG(dvb, debug, "demuxer unselect stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
         return true;
     }
     else {
@@ -302,12 +302,12 @@ Demux::incPidRefCount(Poco::UInt16 pid)
     std::map<Poco::UInt16, int>::const_iterator it = _pidRefCount.find(pid);
     if (it == _pidRefCount.end()) {
         _pidRefCount[pid] = 1;
-        LOG(dvb, debug, "demux inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+        LOG(dvb, debug, "demuxer inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
         return true;
     }
     else {
         _pidRefCount[pid]++;
-        LOG(dvb, debug, "demux inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+        LOG(dvb, debug, "demuxer inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
         return false;
     }
 }
@@ -324,12 +324,12 @@ Demux::decPidRefCount(Poco::UInt16 pid)
     else {
         if (_pidRefCount[pid] == 1) {
             _pidRefCount.erase(it);
-            LOG(dvb, debug, "demux dec erase pid " + Poco::NumberFormatter::format(pid));
+            LOG(dvb, debug, "demuxer erase pid " + Poco::NumberFormatter::format(pid));
             return true;
         }
         else {
             _pidRefCount[pid]--;
-            LOG(dvb, debug, "demux dec pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
+            LOG(dvb, debug, "demuxer dec pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
             return false;
         }
     }

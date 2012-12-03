@@ -34,10 +34,53 @@ namespace Omm {
 namespace Dvb {
 
 class Stream;
+class Remux;
+class TransportStreamPacket;
+
+
+class TransportStreamPacketBlock
+{
+public:
+    static const int SizeInPackets;
+    static const int Size;
+
+    TransportStreamPacketBlock();
+    ~TransportStreamPacketBlock();
+
+    Poco::UInt8* getPacketData() { return _pPacketData; }
+    TransportStreamPacket* getPacket();
+
+    virtual void free() {}
+
+    void incRefCounter()
+    {
+//        LOG(dvb, debug, "packet block inc ref counter: " + Poco::NumberFormatter::format(_refCounter));
+        ++_refCounter;
+    }
+
+    void decRefCounter()
+    {
+//        LOG(dvb, debug, "packet block dec ref counter: " + Poco::NumberFormatter::format(_refCounter));
+        if (!(--_refCounter)) {
+//            LOG(dvb, debug, "packet block free");
+            _packetIndex = 0;
+            _refCounter = 1;
+            free();
+        }
+    }
+
+private:
+    std::vector<TransportStreamPacket*>     _packetBlock;
+    Poco::UInt8*                            _pPacketData;
+    int                                     _packetIndex;
+    Poco::AtomicCounter                     _refCounter;
+};
 
 
 class TransportStreamPacket : public BitField
 {
+    friend class TransportStreamPacketBlock;
+
 public:
     enum { ScrambledNone = 0x00, ScrambledReserved = 0x01, ScrambledEvenKey = 0x10, ScrambledOddKey = 0x11 };
     enum { AdaptionFieldPayloadOnly = 0x01, AdaptionFieldOnly = 0x10, AdaptionFieldAndPayload = 0x11 };
@@ -47,7 +90,7 @@ public:
     static const int           HeaderSize;
     static const int           PayloadSize;
 
-    TransportStreamPacket();
+    TransportStreamPacket(bool allocateData = true);
     ~TransportStreamPacket();
 
     void writePayloadFromStream(Stream* pStream, int timeout);
@@ -82,12 +125,20 @@ public:
 
     void incRefCounter() const
     {
-        ++_refCounter;
+        if (_pPacketBlock) {
+            _pPacketBlock->incRefCounter();
+        }
+        else {
+            ++_refCounter;
+        }
     }
 
     void decRefCounter() const
     {
-        if (!(--_refCounter)) {
+        if (_pPacketBlock) {
+            _pPacketBlock->decRefCounter();
+        }
+        else if (!(--_refCounter)) {
             delete this;
         }
     }
@@ -97,6 +148,7 @@ private:
     bool                            _adaptionFieldPcrSet;
     bool                            _adaptionFieldSplicingPointSet;
     mutable Poco::AtomicCounter     _refCounter;
+    TransportStreamPacketBlock*     _pPacketBlock;
 };
 
 

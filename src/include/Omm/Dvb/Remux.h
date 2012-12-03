@@ -27,6 +27,7 @@
 #include <Poco/Thread.h>
 #include <Poco/Mutex.h>
 
+#include "TransportStream.h"
 #include "Service.h"
 //#include "Stream.h"
 //#include "../AvStream.h"
@@ -35,11 +36,25 @@
 namespace Omm {
 namespace Dvb {
 
-//class ElementaryTransportStream;
+
+class Remux;
+
+class TsPacketBlock : public TransportStreamPacketBlock
+{
+public:
+    TsPacketBlock(Remux* pRemux) : _pRemux(pRemux) {}
+
+private:
+    virtual void free();
+
+    Remux*  _pRemux;
+};
 
 
 class Remux
 {
+    friend class TsPacketBlock;
+
 public:
     Remux(int multiplex);
     ~Remux();
@@ -54,19 +69,33 @@ public:
 
 private:
     TransportStreamPacket* getTransportStreamPacket();
+    TsPacketBlock* getFreePacketBlock();
+    void putFreePacketBlock(TsPacketBlock* pPacketBlock);
+    void queuePacketBlock(TsPacketBlock* pPacketBlock);
+    TsPacketBlock* readPacketBlock();
     void readThread();
     bool readThreadRunning();
+    void queueThread();
+    bool queueThreadRunning();
 
     int                                                 _multiplex;
     std::vector<Service*>                               _services;
 //    std::map<Poco::UInt16, ElementaryTransportStream*>  _pStreams;
 
     Poco::FastMutex                                     _remuxLock;
+    struct pollfd                                       _fileDescPoll[1];
+    const int                                           _readTimeout;
     Poco::Thread*                                       _pReadThread;
     Poco::RunnableAdapter<Remux>                        _readThreadRunnable;
     bool                                                _readThreadRunning;
-    struct pollfd                                       _fileDescPoll[1];
-    const int                                           _readTimeout;
+    Poco::Thread*                                       _pQueueThread;
+    Poco::RunnableAdapter<Remux>                        _queueThreadRunnable;
+    bool                                                _queueThreadRunning;
+
+    const int                                           _packetBlockQueueSize;
+    Poco::Condition                                     _packetBlockQueueReadCondition;
+    std::queue<TsPacketBlock*>                          _packetBlockQueue;
+    std::stack<TsPacketBlock*>                          _packetPool;
 };
 
 

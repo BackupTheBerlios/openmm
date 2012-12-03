@@ -28,22 +28,34 @@
 #include "Remux.h"
 #include "Device.h"
 #include "TransportStream.h"
-#include "Dvb/TransportStream.h"
 
 
 namespace Omm {
 namespace Dvb {
 
 
+void
+TsPacketBlock::free()
+{
+    _pRemux->putFreePacketBlock(this);
+}
+
+
 Remux::Remux(int multiplex) :
 _multiplex(multiplex),
+_readTimeout(1000),
 _pReadThread(0),
 _readThreadRunnable(*this, &Remux::readThread),
 _readThreadRunning(false),
-_readTimeout(1000)
+_pQueueThread(0),
+_queueThreadRunnable(*this, &Remux::queueThread),
+_queueThreadRunning(false),
+_packetBlockQueueSize(100)
 {
     _fileDescPoll[0].fd = multiplex;
     _fileDescPoll[0].events = POLLIN;
+
+//    _packetPool.push(new TsPacketBlock(this));
 }
 
 
@@ -88,37 +100,56 @@ Remux::delService(Service* pService)
 void
 Remux::startRemux()
 {
-    LOG(dvb, debug, "start TS remux thread ...");
+    LOG(dvb, debug, "TS remux thread start ...");
 
     if (!_pReadThread) {
         _readThreadRunning = true;
         _pReadThread = new Poco::Thread;
         _pReadThread->start(_readThreadRunnable);
     }
+//    if (!_pQueueThread) {
+//        _queueThreadRunning = true;
+//        _pQueueThread = new Poco::Thread;
+//        _pQueueThread->start(_queueThreadRunnable);
+//    }
 }
 
 
 void
 Remux::stopRemux()
 {
-    LOG(dvb, debug, "stop TS remux thread ...");
+    LOG(dvb, debug, "remux thread stop ...");
 
+//    if (_pQueueThread) {
+//        _remuxLock.lock();
+//        _queueThreadRunning = false;
+//        _packetBlockQueue.push(0);
+//        _packetBlockQueueReadCondition.broadcast();
+//        _remuxLock.unlock();
+//    }
     if (_pReadThread) {
         _remuxLock.lock();
         _readThreadRunning = false;
         _remuxLock.unlock();
     }
 
-    LOG(dvb, debug, "TS remux thread stopped.");
+    LOG(dvb, debug, "remux thread stopped.");
 }
 
 
 void
 Remux::waitForStopRemux()
 {
+//    if (_pQueueThread) {
+//        if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(_readTimeout)) {
+//            LOG(dvb, error, "failed to join TS remux queue thread");
+//        }
+//        delete _pQueueThread;
+//        _pQueueThread = 0;
+//    }
     if (_pReadThread) {
         if (_pReadThread->isRunning() && !_pReadThread->tryJoin(_readTimeout)) {
-            LOG(dvb, error, "failed to join TS remux thread");
+            LOG(dvb, error, "failed to join TS remux read thread");
         }
         delete _pReadThread;
         _pReadThread = 0;
@@ -141,6 +172,12 @@ Remux::flush()
             LOG(dvb, warning, "flush remux input stream: " + std::string(strerror(errno)));
         }
     } while (bytes > 0);
+
+//    LOG(dvb, debug, "flush remux packet block queue: " + Poco::NumberFormatter::format(_packetBlockQueue.size()) + " packet blocks");
+//    while (_packetBlockQueue.size()) {
+//        putFreePacketBlock(_packetBlockQueue.front());
+//        _packetBlockQueue.pop();
+//    }
 }
 
 
@@ -152,12 +189,21 @@ Remux::readThreadRunning()
 }
 
 
+bool
+Remux::queueThreadRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
+    return _queueThreadRunning;
+}
+
+
 TransportStreamPacket*
 Remux::getTransportStreamPacket()
 {
     TransportStreamPacket* pPacket = new TransportStreamPacket;
-    int bytesRead = 0;
     int bytesToRead = TransportStreamPacket::Size;
+    int bytesRead = 0;
+
     while (bytesToRead > 0) {
         int pollRes = poll(_fileDescPoll, 1, _readTimeout);
         if (pollRes > 0) {
@@ -193,6 +239,152 @@ Remux::getTransportStreamPacket()
         }
     }
     return pPacket;
+}
+
+
+TsPacketBlock*
+Remux::getFreePacketBlock()
+{
+//    LOG(dvb, debug, "remux get free packet block, pool size: " + Poco::NumberFormatter::format(_packetPool.size()));
+
+    Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
+
+    if (_packetPool.size()) {
+        TsPacketBlock* pRes = _packetPool.top();
+        _packetPool.pop();
+        return pRes;
+    }
+    else {
+//        LOG(dvb, debug, "remux new packet block");
+        return new TsPacketBlock(this);
+    }
+}
+
+
+void
+Remux::putFreePacketBlock(TsPacketBlock* pPacketBlock)
+{
+//    LOG(dvb, debug, "remux put free packet block, pool size: " + Poco::NumberFormatter::format(_packetPool.size()));
+
+    Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
+
+    _packetPool.push(pPacketBlock);
+}
+
+
+void
+Remux::queuePacketBlock(TsPacketBlock* pPacketBlock)
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_remuxLock);
+
+    if (_packetBlockQueue.size() < _packetBlockQueueSize) {
+        _packetBlockQueue.push(pPacketBlock);
+        _packetBlockQueueReadCondition.broadcast();
+    }
+    else {
+        LOG(dvb, error, "packet block queue full, discard packet block.");
+        putFreePacketBlock(pPacketBlock);
+    }
+}
+
+
+TsPacketBlock*
+Remux::readPacketBlock()
+{
+    TsPacketBlock* pPacketBlock = getFreePacketBlock();
+    Poco::UInt8* pPacketBlockData = pPacketBlock->getPacketData();
+
+    int bytesToRead = TsPacketBlock::Size;
+    int bytesRead = 0;
+
+    while (bytesToRead > 0) {
+        int pollRes = poll(_fileDescPoll, 1, _readTimeout);
+        if (pollRes > 0) {
+            if (_fileDescPoll[0].revents & POLLIN){
+                bytesRead += ::read(_multiplex, pPacketBlockData + bytesRead, bytesToRead);
+                if (bytesRead > 0) {
+                    bytesToRead -= bytesRead;
+                    if (*pPacketBlockData != TransportStreamPacket::SyncByte) {
+                        LOG(dvb, error, "TS packet wrong sync byte: " + Poco::NumberFormatter::formatHex(*pPacketBlockData));
+                        putFreePacketBlock(pPacketBlock);
+                        return 0;
+                    }
+                }
+                else if (bytesRead == -1) {
+                    LOG(dvb, error, "remux read thread failed to read from device: " + std::string(strerror(errno)));
+                    putFreePacketBlock(pPacketBlock);
+                    return 0;
+                }
+            }
+            else {
+                LOG(dvb, warning, "remux read thread uncatched poll event");
+            }
+        }
+        else if (pollRes == 0) {
+            LOG(dvb, trace, "remux read thread timeout");
+            putFreePacketBlock(pPacketBlock);
+            return 0;
+        }
+        else if (pollRes == -1) {
+            LOG(dvb, error, "remux read thread failed to read TS packet block: " + std::string(strerror(errno)));
+            putFreePacketBlock(pPacketBlock);
+            return 0;
+        }
+    }
+    return pPacketBlock;
+}
+
+
+//void
+//Remux::readThread()
+//{
+//    // NOTE: the remuxer loop is very performance critical
+//    LOG(dvb, debug, "remux read thread started.");
+//
+//    while (readThreadRunning()) {
+//        TsPacketBlock* pPacketBlock = readPacketBlock();
+//        if (!pPacketBlock) {
+////            LOG(dvb, warning, "remux thread could not read packet.");
+//            continue;
+//        }
+//        queuePacketBlock(pPacketBlock);
+//    }
+//
+//    LOG(dvb, debug, "remux read thread finished.");
+//}
+
+
+void
+Remux::queueThread()
+{
+    LOG(dvb, debug, "remux queue thread started.");
+
+    while (queueThreadRunning()) {
+        _remuxLock.lock();
+        if (_packetBlockQueue.size() == 0) {
+//            LOG(dvb, trace, "service queue thread wait for packet");
+            _packetBlockQueueReadCondition.wait<Poco::FastMutex>(_remuxLock);
+        }
+//        LOG(dvb, debug, "remux queue thread get packet block, queue size: " + Poco::NumberFormatter::format(_packetBlockQueue.size()));
+        TsPacketBlock* pPacketBlock = _packetBlockQueue.front();
+        _packetBlockQueue.pop();
+        _remuxLock.unlock();
+        if (!pPacketBlock) {
+            continue;
+        }
+
+        while (TransportStreamPacket* pTsPacket = pPacketBlock->getPacket()) {
+            Poco::UInt16 pid = pTsPacket->getPacketIdentifier();
+            for (std::vector<Service*>::const_iterator it = _services.begin(); it != _services.end(); ++it) {
+                if ((*it)->hasPacketIdentifier(pid)) {
+                    (*it)->queueTsPacket(pTsPacket);
+                }
+            }
+        }
+        pPacketBlock->decRefCounter();
+    }
+
+    LOG(dvb, debug, "remux queue thread finished.");
 }
 
 

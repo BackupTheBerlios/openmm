@@ -563,6 +563,10 @@ Device::tuneToService(const std::string& serviceName, bool unscrambledOnly)
             else {
                 // interrupt the services on current transponder and tune to newly requested one
                 LOG(dvb, debug, "no more frontends available, interrupt service and tune to different transponder");
+//                std::istream* pStream = getStreamForService(pService);
+//                if (pStream) {
+//                    eraseStream(pStream);
+//                }
                 if (!pFrontend->tune(pTransponder)) {
                     if (transponders.size() > t + 1) {
                         LOG(dvb, debug, "failed to tune to transponder, trying next one");
@@ -592,6 +596,26 @@ Device::tuneToService(const std::string& serviceName, bool unscrambledOnly)
     else {
         return pTransponder;
     }
+}
+
+
+std::istream*
+Device::getStreamForService(Service* pService)
+{
+    for (std::map<std::istream*, Service*>::iterator it = _streamMap.begin(); it != _streamMap.end(); ++it) {
+        if (it->second == pService) {
+            return it->first;
+        }
+    }
+    return 0;
+}
+
+
+void
+Device::eraseStream(std::istream* pStream)
+{
+    delete pStream;
+    _streamMap.erase(pStream);
 }
 
 

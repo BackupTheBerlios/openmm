@@ -514,7 +514,7 @@ Service::queueTsPacket(TransportStreamPacket* pPacket)
     }
     else {
         LOG(dvb, error, "service queue full, discard packet.");
-        delete pPacket;
+        pPacket->decRefCounter();
     }
 }
 
