@@ -224,12 +224,12 @@ void
 Engine::endOfStream(Poco::Timer& timer)
 {
     if (_playlist.size() && _trackNumberInPlaylist < _playlist.size()) {
-//    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
-        LOG(upnpav, debug, "engine skips to next track in playlist");
-        _trackNumberInPlaylist++;
-        stop();
-        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
-        play();
+////    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+//        LOG(upnpav, debug, "engine skips to next track in playlist");
+//        _trackNumberInPlaylist++;
+//        stop();
+//        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+//        play();
     }
 
 //    // position state vars are not evented via LastChange state var (and not evented at all).
