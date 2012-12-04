@@ -383,16 +383,8 @@ Device::getStream(const std::string& serviceName)
     if (!pTransponder) {
         return 0;
     }
-    Frontend* pFrontend = pTransponder->_pFrontend;
     Service* pService = pTransponder->getService(serviceName);
-    Demux* pDemux = pFrontend->_pDemux;
-    Dvr* pDvr = pFrontend->_pDvr;
-
-    LOG(dvb, debug, "reading service stream " + serviceName + " ...");
-    pService = pDvr->addService(pService);
-    pDemux->selectService(pService, Demux::TargetDvr, false);
-    pDemux->runService(pService, true);
-
+    pService = startService(pService);
     std::istream* pStream = pService->getStream();
     _streamMap[pStream] = pService;
     return pStream;
@@ -408,17 +400,7 @@ Device::freeStream(std::istream* pIstream)
     if (!pService) {
         return;
     }
-
-    Transponder* pTransponder = pService->getTransponder();
-    Demux* pDemux = pTransponder->_pFrontend->_pDemux;
-
-    LOG(dvb, debug, "stop reading service stream " + pService->getName() + ".");
-    Dvr* pDvr = pService->getTransponder()->_pFrontend->_pDvr;
-
-    pDemux->runService(pService, false);
-    pDemux->unselectService(pService);
-    pDvr->delService(pService);
-
+    stopService(pService);
     _streamMap.erase(pIstream);
     delete pIstream;
 }
@@ -562,11 +544,8 @@ Device::tuneToService(const std::string& serviceName, bool unscrambledOnly)
             }
             else {
                 // interrupt the services on current transponder and tune to newly requested one
-                LOG(dvb, debug, "no more frontends available, interrupt service and tune to different transponder");
-//                std::istream* pStream = getStreamForService(pService);
-//                if (pStream) {
-//                    eraseStream(pStream);
-//                }
+                LOG(dvb, debug, "no more frontends available, interrupt services and tune to different transponder");
+                stopServiceStreamsOnTransponder(pFrontend->_pTunedTransponder);
                 if (!pFrontend->tune(pTransponder)) {
                     if (transponders.size() > t + 1) {
                         LOG(dvb, debug, "failed to tune to transponder, trying next one");
@@ -599,23 +578,52 @@ Device::tuneToService(const std::string& serviceName, bool unscrambledOnly)
 }
 
 
-std::istream*
-Device::getStreamForService(Service* pService)
+Service*
+Device::startService(Service* pService)
 {
-    for (std::map<std::istream*, Service*>::iterator it = _streamMap.begin(); it != _streamMap.end(); ++it) {
-        if (it->second == pService) {
-            return it->first;
-        }
-    }
-    return 0;
+    LOG(dvb, debug, "reading service stream " + pService->getName() + " ...");
+
+    Transponder* pTransponder = pService->getTransponder();
+    Frontend* pFrontend = pTransponder->_pFrontend;
+    Demux* pDemux = pFrontend->_pDemux;
+    Dvr* pDvr = pFrontend->_pDvr;
+
+    pService = pDvr->addService(pService);
+    pDemux->selectService(pService, Demux::TargetDvr, false);
+    pDemux->runService(pService, true);
+    pTransponder->markServiceStarted(pService);
+
+    return pService;
 }
 
 
 void
-Device::eraseStream(std::istream* pStream)
+Device::stopService(Service* pService)
 {
-    delete pStream;
-    _streamMap.erase(pStream);
+    LOG(dvb, debug, "stop reading service stream " + pService->getName() + ".");
+
+    Transponder* pTransponder = pService->getTransponder();
+    Demux* pDemux = pTransponder->_pFrontend->_pDemux;
+    Dvr* pDvr = pTransponder->_pFrontend->_pDvr;
+
+    pDemux->runService(pService, false);
+    pDemux->unselectService(pService);
+    pDvr->delService(pService);
+    pTransponder->markServiceStopped(pService);
+}
+
+
+void
+Device::stopServiceStreamsOnTransponder(Transponder* pTransponder)
+{
+    Demux* pDemux = pTransponder->_pFrontend->_pDemux;
+    Dvr* pDvr = pTransponder->_pFrontend->_pDvr;
+    std::set<Dvb::Service*>& services = pTransponder->runningServices();
+    for (std::set<Dvb::Service*>::iterator it = services.begin(); it != services.end(); ++it) {
+        LOG(dvb, debug, "stop reading service stream " + (*it)->getName() + ".");
+        (*it)->stopStream();
+    }
+    services.clear();
 }
 
 

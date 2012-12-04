@@ -98,6 +98,7 @@ _pcrPid(InvalidPcrPid),
 _status(StatusUndefined),
 _scrambled(false),
 _byteQueue(2 * 1024),
+_pIStream(0),
 _packetQueueTimeout(100),
 _packetQueueSize(10000),
 _pQueueThread(0),
@@ -134,6 +135,7 @@ _scrambled(service._scrambled),
 _streams(service._streams),
 _pids(service._pids),
 _byteQueue(2 * 1024),
+_pIStream(0),
 //_pPat(new PatSection(*service._pPat)),
 //_pPatTsPacket(new TransportStreamPacket(*service._pPatTsPacket)),
 _packetQueueTimeout(100),
@@ -471,14 +473,17 @@ Service::hasPacketIdentifier(Poco::UInt16 pid)
 std::istream*
 Service::getStream()
 {
-    return new ByteQueueIStream(_byteQueue);
+    _pIStream = new ByteQueueIStream(_byteQueue);
+    return _pIStream;
 }
 
 
-int
-Service::countStreams()
+void
+Service::stopStream()
 {
-    return _outStreams.size();
+    if (_pIStream) {
+        _pIStream->stop();
+    }
 }
 
 

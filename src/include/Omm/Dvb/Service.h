@@ -52,6 +52,7 @@ class Transponder;
 class Stream;
 class PatSection;
 class TransportStreamPacket;
+class ByteQueueIStream;
 
 class Service
 {
@@ -119,7 +120,7 @@ public:
     bool hasPacketIdentifier(Poco::UInt16 pid);
 
     std::istream* getStream();
-    int countStreams();
+    void stopStream();
     void flush();
     void queueTsPacket(TransportStreamPacket* pPacket);
     void startQueueThread();
@@ -145,8 +146,8 @@ private:
     // set of service pids makes calls to hastPacketIdentifier() more efficient
     std::set<Poco::UInt16>              _pids;
 
-    std::stack<std::istream*>           _outStreams;
     AvStream::ByteQueue                 _byteQueue;
+    ByteQueueIStream*                   _pIStream;
     PatSection*                         _pPat;
     TransportStreamPacket*              _pPatTsPacket;
     std::queue<TransportStreamPacket*>  _packetQueue;

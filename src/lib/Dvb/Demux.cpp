@@ -148,7 +148,6 @@ Demux::selectStream(Stream* pStream, Target target, bool blocking)
         success = false;
     }
     if (success) {
-//        pStream->_pStream = new UnixFileIStream(pStream->_fileDesc);
         pStream->_fileDescPoll[0].fd = pStream->_fileDesc;
         pStream->_fileDescPoll[0].events = POLLIN;
         LOG(dvb, debug, "demuxer selected stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
@@ -175,8 +174,6 @@ Demux::unselectStream(Stream* pStream)
         success = false;
     }
     if (success) {
-//        delete pStream->_pStream;
-//        pStream->_pStream = 0;
         pStream->_fileDesc = -1;
         LOG(dvb, debug, "demuxer unselect stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
         return true;

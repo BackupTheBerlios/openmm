@@ -157,6 +157,27 @@ Transponder::equal(Transponder* pOtherTransponder)
 }
 
 
+void
+Transponder::markServiceStarted(Service* pService)
+{
+    _runningServices.insert(pService);
+}
+
+
+void
+Transponder::markServiceStopped(Service* pService)
+{
+    _runningServices.erase(pService);
+}
+
+
+std::set<Dvb::Service*>&
+Transponder::runningServices()
+{
+    return _runningServices;
+}
+
+
 const std::string SatTransponder::POL_HORIZ("H");
 const std::string SatTransponder::POL_VERT("V");
 const std::string SatTransponder::POL_CIRC_LEFT("CL");

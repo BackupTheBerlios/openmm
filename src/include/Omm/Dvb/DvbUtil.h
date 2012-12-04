@@ -27,6 +27,7 @@
 #include <Poco/BufferedStreamBuf.h>
 //#include <Poco/UnbufferedStreamBuf.h>
 #include <Poco/ByteOrder.h>
+#include <Poco/AtomicCounter.h>
 #include <Poco/String.h>
 
 #include "../AvStream.h"
@@ -270,17 +271,28 @@ class ByteQueueStreamBuf : public Poco::BufferedStreamBuf
 //class ByteQueueStreamBuf : public Poco::UnbufferedStreamBuf
 {
 public:
-    ByteQueueStreamBuf(AvStream::ByteQueue& byteQueue) : BasicBufferedStreamBuf(byteQueue.size(), std::ios_base::in), _byteQueue(byteQueue) {}
+    ByteQueueStreamBuf(AvStream::ByteQueue& byteQueue) : BasicBufferedStreamBuf(byteQueue.size(), std::ios_base::in), _byteQueue(byteQueue), _stop(0) {}
 //    ByteQueueStreamBuf(int fileDesc) : BasicUnbufferedStreamBuf(), _fileDesc(fileDesc) {}
 
     virtual int readFromDevice(char_type* buffer, std::streamsize length)
     {
-        _byteQueue.read(buffer, length);
-        return length;
+        if (!_stop) {
+            _byteQueue.read(buffer, length);
+            return length;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    void stop()
+    {
+        _stop = 1;
     }
 
 private:
     AvStream::ByteQueue&         _byteQueue;
+    Poco::AtomicCounter          _stop;
 };
 
 
@@ -288,6 +300,11 @@ class ByteQueueIStream : public std::basic_istream<char, std::char_traits<char> 
 {
 public:
     ByteQueueIStream(AvStream::ByteQueue& byteQueue) : _streamBuf(byteQueue), std::basic_istream<char, std::char_traits<char> >(&_streamBuf) { clear(); }
+
+    void stop()
+    {
+        _streamBuf.stop();
+    }
 
 private:
     ByteQueueStreamBuf   _streamBuf;

@@ -73,11 +73,16 @@ public:
 
     bool equal(Transponder* pOtherTransponder);
 
+    void markServiceStarted(Service* pService);
+    void markServiceStopped(Service* pService);
+    std::set<Dvb::Service*>& runningServices();
+
 protected:
     virtual bool initTransponder(Poco::StringTokenizer& params) {}
 
     Frontend*                           _pFrontend;
     std::vector<Dvb::Service*>          _services;
+    std::set<Dvb::Service*>             _runningServices;
     Poco::AutoPtr<Poco::XML::Element>   _pXmlTransponder;
 
 private:
