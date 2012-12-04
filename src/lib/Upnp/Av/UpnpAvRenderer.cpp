@@ -225,6 +225,11 @@ Engine::endOfStream(Poco::Timer& timer)
 {
     if (_playlist.size() && _trackNumberInPlaylist < _playlist.size()) {
 ////    if (_playlist.size() && _trackNumberInPlaylist < _playlist.size() && (getTransportState() == Stopped)) {
+
+        // TODO: disabled renderer playing next playlist item when current finishes, because
+        //    stopping DVB services on a transponder leads to tuning to next service
+        //    in playlist (when started from a playlist), which in turn may stop
+        //    another service ... initiating a fast tuning sequence.
 //        LOG(upnpav, debug, "engine skips to next track in playlist");
 //        _trackNumberInPlaylist++;
 //        stop();

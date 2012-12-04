@@ -56,9 +56,11 @@ public:
 
 signals:
     void popSignal();
+    void popToRootSignal();
 
 private slots:
-    void pop();
+    void popSlot();
+    void popToRootSlot();
     void buttonPushed();
     void textEdited(const QString& text);
     long unsigned int buttonCount();

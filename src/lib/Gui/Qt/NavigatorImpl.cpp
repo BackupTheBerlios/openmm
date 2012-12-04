@@ -77,6 +77,8 @@ _pNavigatorView(pNavigatorView)
 
     _pIconProvider = new QFileIconProvider;
 
+    connect(this, SIGNAL(popSignal()), this, SLOT(popSlot()));
+    connect(this, SIGNAL(popToRootSignal()), this, SLOT(popToRootSlot()));
     connect(_pSearchWidget, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
 }
 
@@ -111,7 +113,7 @@ QtNavigatorPanel::pop(View* pView)
 
 
 void
-QtNavigatorPanel::pop()
+QtNavigatorPanel::popSlot()
 {
     if (_buttonStack.empty()) {
         return;
@@ -124,6 +126,15 @@ QtNavigatorPanel::pop()
     _buttonStack.pop();
     if (!_buttonStack.empty()) {
         _pNavigatorView->exposeView(_buttonStack.top()->_pView);
+    }
+}
+
+
+void
+QtNavigatorPanel::popToRootSlot()
+{
+    while (_buttonStack.size() > 1) {
+        popSlot();
     }
 }
 
@@ -202,16 +213,14 @@ NavigatorViewImpl::popView(bool keepRootView)
     if (keepRootView && _pNavigatorPanel->buttonCount() == 1) {
         return;
     }
-    emit _pNavigatorPanel->pop();
+    emit _pNavigatorPanel->popSignal();
 }
 
 
 void
 NavigatorViewImpl::popToRootView()
 {
-    while (_pNavigatorPanel->buttonCount() > 1) {
-        emit _pNavigatorPanel->pop();
-    }
+    emit _pNavigatorPanel->popToRootSignal();
 }
 
 

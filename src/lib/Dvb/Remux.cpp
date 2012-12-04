@@ -381,6 +381,10 @@ Remux::queueThread()
                 }
             }
         }
+        // NOTE: enabling queue thread reduces cpu load but introduces interrupts in stream
+        // no interrupts when:
+        // 1. TransportStreamPacketBlock::SizeInPackets = 1 (but then no cpu load decrease, either)
+        // 2. next line is commented. Then packet blocks are not reused, but newly allocated
         pPacketBlock->decRefCounter();
     }
 

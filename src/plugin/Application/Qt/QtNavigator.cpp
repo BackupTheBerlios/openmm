@@ -47,7 +47,7 @@ QtNavigatorPanel::QtNavigatorPanel(QWidget* pParent) :
 QWidget(pParent)
 {
     _pButtonLayout = new QHBoxLayout(this);
-    _pSignalMapper = new QSignalMapper(this);
+//    _pSignalMapper = new QSignalMapper(this);
     connect(this, SIGNAL(popSignal()), this, SLOT(pop()));
 //    connect(_pSignalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonPushed()));
 }
@@ -70,7 +70,8 @@ QtNavigatorPanel::pop(QtNavigable* pNavigable)
 {
     while(!_buttonStack.empty() && _buttonStack.top()->getNavigable() != pNavigable) {
         QtNavigatorPanelButton* pButton = _buttonStack.top();
-        disconnect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
+//        disconnect(pButton, SIGNAL(pressed()), _pSignalMapper, SLOT (map()));
+        disconnect(pButton, SIGNAL(pressed()), this, SLOT (buttonPushed()));
         _pButtonLayout->removeWidget(pButton);
         delete pButton;
         _buttonStack.pop();
