@@ -230,11 +230,11 @@ Engine::endOfStream(Poco::Timer& timer)
         //    stopping DVB services on a transponder leads to tuning to next service
         //    in playlist (when started from a playlist), which in turn may stop
         //    another service ... initiating a fast tuning sequence.
-//        LOG(upnpav, debug, "engine skips to next track in playlist");
-//        _trackNumberInPlaylist++;
-//        stop();
-//        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
-//        play();
+        LOG(upnpav, debug, "engine skips to next track in playlist");
+        _trackNumberInPlaylist++;
+        stop();
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+        play();
     }
 
 //    // position state vars are not evented via LastChange state var (and not evented at all).

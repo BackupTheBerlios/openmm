@@ -90,7 +90,9 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
     getConnectionManager()->addConnection(pConnection, "");
     ui4 AvTransportId = pConnection->getAvTransportId();
 
-    if (_usePlaylistResource && pContainerRes) {
+    if (_usePlaylistResource && pContainerRes
+            && !AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::AUDIO_BROADCAST)
+            && !AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::VIDEO_BROADCAST)) {
         LOG(upnpav, debug, "selected object is child of a container with playlist resource");
         std::string metaData;
         MediaObjectWriter2 writer;
