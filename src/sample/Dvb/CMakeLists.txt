@@ -15,3 +15,8 @@ target_link_libraries(tunedvb
 ${OMM_UTIL}
 ${OMM_DVB}
 )
+
+install(TARGETS scandvb tunedvb
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+)

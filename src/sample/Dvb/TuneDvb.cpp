@@ -39,7 +39,11 @@ main(int argc, char** argv)
 
     Omm::Dvb::Device* pDevice = Omm::Dvb::Device::instance();
 
-    std::ifstream dvbXml(Omm::Util::Home::instance()->getConfigDirPath("dvb.xml").c_str());
+    if (argc != 2) {
+        std::cerr << "usage: tunedvb <dvb config file> " << std::endl;
+        return 1;
+    }
+    std::ifstream dvbXml(argv[1]);
 
     pDevice->readXml(dvbXml);
     pDevice->open();
