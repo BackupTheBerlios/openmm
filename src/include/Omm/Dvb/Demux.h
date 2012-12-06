@@ -23,6 +23,7 @@
 #define Demux_INCLUDED
 
 #include <map>
+#include <sys/poll.h>
 
 
 namespace Omm {
@@ -32,6 +33,8 @@ class Adapter;
 class TransportStreamPacket;
 class Multiplex;
 class Remux;
+class PidSelector;
+
 
 class Demux
 {
@@ -43,7 +46,6 @@ public:
 
     Demux(Adapter* pAdapter, int num);
     ~Demux();
-
 
     bool selectService(Service* pService, Target target, bool blocking = true);
     bool unselectService(Service* pService);
@@ -58,18 +60,10 @@ public:
     bool readTable(Table* pTable);
 
 private:
-    int pidRefCount(Poco::UInt16 pid);
-    bool incPidRefCount(Poco::UInt16 pid);
-    bool decPidRefCount(Poco::UInt16 pid);
-
-    Adapter*                            _pAdapter;
-    std::string                         _deviceName;
-    int                                 _num;
-    std::map<Poco::UInt16, int>         _pidRefCount;
-
-    // currently not used:
-//    Multiplex*                          _pMultiplex;
-//    Remux*                              _pRemux;
+    Adapter*                                _pAdapter;
+    std::string                             _deviceName;
+    int                                     _num;
+    std::map<Poco::UInt16, PidSelector*>    _pidSelectors;
 };
 
 }  // namespace Omm

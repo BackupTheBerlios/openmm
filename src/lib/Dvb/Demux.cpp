@@ -55,11 +55,33 @@
 namespace Omm {
 namespace Dvb {
 
+
+class PidSelector
+{
+    friend class Demux;
+
+private:
+    PidSelector() : _refCount(1), _fileDesc(-1) {}
+    void setFileDesc(int fileDesc);
+
+    int                 _refCount;
+    int                 _fileDesc;
+    struct pollfd       _fileDescPoll[1];
+};
+
+
+void
+PidSelector::setFileDesc(int fileDesc)
+{
+    _fileDesc = fileDesc;
+    _fileDescPoll[0].fd = fileDesc;
+    _fileDescPoll[0].events = POLLIN;
+}
+
+
 Demux::Demux(Adapter* pAdapter, int num) :
 _pAdapter(pAdapter),
 _num(num)
-//_pMultiplex(0),
-//_pRemux(0)
 {
     _deviceName = _pAdapter->_deviceName + "/demux" + Poco::NumberFormatter::format(_num);
 }
@@ -74,7 +96,6 @@ Demux::~Demux()
 bool
 Demux::selectService(Service* pService, Target target, bool blocking)
 {
-    // FIXME: only select stream, if service doesn't have it already
     for (std::vector<Stream*>::iterator it = pService->_streams.begin(); it != pService->_streams.end(); ++it) {
         if (!selectStream(*it, target, blocking)) {
             LOG(dvb, error, "demuxer failed to select service: " + pService->_name);
@@ -104,7 +125,7 @@ Demux::runService(Service* pService, bool run)
     LOG(dvb, debug, "demuxer " + std::string(run ? "start" : "stop") + " service: " + pService->getName());
     for (std::vector<Stream*>::iterator it = pService->_streams.begin(); it != pService->_streams.end(); ++it) {
         if (!runStream(*it, run)) {
-            LOG(dvb, error, "demuxer failed to run service: " + pService->_name);
+            LOG(dvb, error, "demuxer failed to start/stop service: " + pService->_name);
             return false;
         }
     }
@@ -115,18 +136,22 @@ Demux::runService(Service* pService, bool run)
 bool
 Demux::selectStream(Stream* pStream, Target target, bool blocking)
 {
-    if (!incPidRefCount(pStream->_pid)) {
+    Poco::UInt16 pid = pStream->_pid;
+
+    std::map<Poco::UInt16, PidSelector*>::const_iterator it = _pidSelectors.find(pid);
+    if (it != _pidSelectors.end()) {
         // pid already selected by another service
+        it->second->_refCount++;
+        LOG(dvb, debug, "demuxer pid " + Poco::NumberFormatter::format(pid)  + " inc ref counter: " + Poco::NumberFormatter::format(it->second->_refCount));
         return true;
     }
 
     dmx_pes_type_t pesType;
-    // other PES types (audio, video) are only relevant for full featured cards,
-    // when feeding elementary streams into decoder
+    // other PES types (audio, video) are only relevant for full featured cards, when feeding elementary streams into decoder
     pesType = DMX_PES_OTHER;
 
     struct dmx_pes_filter_params pesfilter;
-    pesfilter.pid = pStream->_pid;
+    pesfilter.pid = pid;
     pesfilter.input = DMX_IN_FRONTEND;
     if (target == TargetDvr) {
         pesfilter.output = DMX_OUT_TS_TAP; // send output to dvr device
@@ -137,97 +162,85 @@ Demux::selectStream(Stream* pStream, Target target, bool blocking)
     pesfilter.pes_type = pesType;
     pesfilter.flags = 0;
 
-    bool success = true;
     int flag = blocking ? O_RDWR : O_RDWR | O_NONBLOCK;
-    if ((pStream->_fileDesc = open(_deviceName.c_str(), flag)) < 0) {
-        LOG(dvb, error, "opening elementary stream: " + std::string(strerror(errno)));
-        success = false;
-    }
-    if (success && ioctl(pStream->_fileDesc, DMX_SET_PES_FILTER, &pesfilter) == -1) {
-        LOG(dvb, error, "DMX_SET_PES_FILTER failed: " + std::string(strerror(errno)));
-        success = false;
-    }
-    if (success) {
-        pStream->_fileDescPoll[0].fd = pStream->_fileDesc;
-        pStream->_fileDescPoll[0].events = POLLIN;
-        LOG(dvb, debug, "demuxer selected stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
-        return true;
-    }
-    else {
-        LOG(dvb, error, "demuxer failed to select stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
+    int fileDesc;
+    if ((fileDesc = open(_deviceName.c_str(), flag)) < 0) {
+        LOG(dvb, error, "demuxer failed to open stream: " + std::string(strerror(errno)));
         return false;
     }
+    if (ioctl(fileDesc, DMX_SET_PES_FILTER, &pesfilter) == -1) {
+        LOG(dvb, error, "DMX_SET_PES_FILTER failed: " + std::string(strerror(errno)));
+        return false;
+    }
+    _pidSelectors[pid] = new PidSelector;
+    _pidSelectors[pid]->setFileDesc(fileDesc);
+    LOG(dvb, debug, "demuxer selected stream with pid: " + Poco::NumberFormatter::format(pid));
+    return true;
 }
 
 
 bool
 Demux::unselectStream(Stream* pStream)
 {
-    if (!decPidRefCount(pStream->_pid)) {
-        // pid still selected by another service
-        return true;
-    }
+    Poco::UInt16 pid = pStream->_pid;
 
-    bool success = true;
-    if (close(pStream->_fileDesc)) {
-        LOG(dvb, error, "closing elementary stream: " + std::string(strerror(errno)));
-        success = false;
-    }
-    if (success) {
-        pStream->_fileDesc = -1;
-        LOG(dvb, debug, "demuxer unselect stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
-        return true;
-    }
-    else {
-        LOG(dvb, error, "demuxer failed to unselect stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
+    std::map<Poco::UInt16, PidSelector*>::iterator it = _pidSelectors.find(pid);
+    if (it == _pidSelectors.end()) {
+        LOG(dvb, debug, "demuxer already unselected stream with pid: " + Poco::NumberFormatter::format(pid));
         return false;
     }
+    if (it->second->_refCount == 1) {
+        if (close(_pidSelectors[pid]->_fileDesc)) {
+            LOG(dvb, error, "demuxer closing stream: " + std::string(strerror(errno)));
+            return false;
+        }
+        delete _pidSelectors[pid];
+        _pidSelectors.erase(pid);
+        LOG(dvb, debug, "demuxer unselected stream with pid: " + Poco::NumberFormatter::format(pid));
+    }
+    else {
+        it->second->_refCount--;
+        LOG(dvb, debug, "demuxer pid " + Poco::NumberFormatter::format(pid)  + " dec ref counter: " + Poco::NumberFormatter::format(it->second->_refCount));
+    }
+    return true;
 }
 
 
 bool
 Demux::runStream(Stream* pStream, bool run)
 {
-    if (pidRefCount(pStream->_pid) > 1) {
+    Poco::UInt16 pid = pStream->_pid;
+
+    if (_pidSelectors.find(pid) == _pidSelectors.end()) {
+        return false;
+    }
+    if (_pidSelectors[pid]->_refCount > 1) {
         return true;
     }
 
-    bool success = true;
-    if (run) {
-        if (ioctl(pStream->_fileDesc, DMX_START) == -1) {
-            LOG(dvb, error, "starting stream: " + std::string(strerror(errno)));
-            success = false;
-        }
-    }
-    else {
-        if (ioctl(pStream->_fileDesc, DMX_STOP) == -1) {
-            LOG(dvb, error, "stopping stream: " + std::string(strerror(errno)));
-            success = false;
-        }
-    }
-    if (success) {
-        LOG(dvb, debug, "demuxer " + std::string(run ? "start" : "stop") + " stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
-        return true;
-    }
-    else {
-        LOG(dvb, error, "demuxer failed to set run state of stream with pid: " + Poco::NumberFormatter::format(pStream->_pid));
+    if (ioctl(_pidSelectors[pid]->_fileDesc, run ? DMX_START : DMX_STOP) == -1) {
+        LOG(dvb, error, "demuxer failed to " + std::string(run ? "start" : "stop") + " stream with pid: " + Poco::NumberFormatter::format(pid));
         return false;
     }
+    LOG(dvb, debug, "demuxer " + std::string(run ? "start" : "stop") + " stream with pid: " + Poco::NumberFormatter::format(pid));
+    return true;
 }
 
 
 bool
 Demux::setSectionFilter(Stream* pStream, Poco::UInt8 tableId)
 {
+    Poco::UInt16 pid = pStream->_pid;
+
     struct dmx_sct_filter_params sectionFilter;
 
     memset(&sectionFilter, 0, sizeof(sectionFilter));
-    sectionFilter.pid = pStream->_pid;
+    sectionFilter.pid = pid;
     sectionFilter.filter.filter[0] = tableId;
     sectionFilter.filter.mask[0] = 0xff;
     sectionFilter.flags |= DMX_CHECK_CRC;
 
-    if (ioctl(pStream->_fileDesc, DMX_SET_FILTER, &sectionFilter) == -1) {
+    if (ioctl(_pidSelectors[pid]->_fileDesc, DMX_SET_FILTER, &sectionFilter) == -1) {
         LOG(dvb, error, "DMX_SET_PES_FILTER failed: " + std::string(strerror(errno)));
         return false;
     }
@@ -278,58 +291,6 @@ Demux::readTable(Table* pTable)
     runStream(&stream, false);
     unselectStream(&stream);
     return success;
-}
-
-
-int
-Demux::pidRefCount(Poco::UInt16 pid)
-{
-    if (_pidRefCount.find(pid) == _pidRefCount.end()) {
-        return 0;
-    }
-    else {
-        return _pidRefCount[pid];
-    }
-}
-
-
-bool
-Demux::incPidRefCount(Poco::UInt16 pid)
-{
-    std::map<Poco::UInt16, int>::const_iterator it = _pidRefCount.find(pid);
-    if (it == _pidRefCount.end()) {
-        _pidRefCount[pid] = 1;
-        LOG(dvb, debug, "demuxer inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
-        return true;
-    }
-    else {
-        _pidRefCount[pid]++;
-        LOG(dvb, debug, "demuxer inc pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
-        return false;
-    }
-}
-
-
-bool
-Demux::decPidRefCount(Poco::UInt16 pid)
-{
-    std::map<Poco::UInt16, int>::iterator it = _pidRefCount.find(pid);
-    if (it == _pidRefCount.end()) {
-        LOG(dvb, debug, "cannot decrease demux pid refcount");
-        return false;
-    }
-    else {
-        if (_pidRefCount[pid] == 1) {
-            _pidRefCount.erase(it);
-            LOG(dvb, debug, "demuxer erase pid " + Poco::NumberFormatter::format(pid));
-            return true;
-        }
-        else {
-            _pidRefCount[pid]--;
-            LOG(dvb, debug, "demuxer dec pid " + Poco::NumberFormatter::format(pid)  + " ref counter: " + Poco::NumberFormatter::format(_pidRefCount[pid]));
-            return false;
-        }
-    }
 }
 
 
