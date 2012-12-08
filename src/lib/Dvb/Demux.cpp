@@ -254,9 +254,6 @@ void
 Demux::readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout)
 {
     Poco::UInt16 pid = pStream->_pid;
-
-    LOG(dvb, debug, "demux read stream with pid: " + Poco::NumberFormatter::format(pid));
-
     int bytesToRead = size;
     int bytesRead = 0;
 
@@ -286,7 +283,6 @@ Demux::readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout)
             return;
         }
     }
-    LOG(dvb, debug, "demux read stream with pid: " + Poco::NumberFormatter::format(pid) + " finished.");
 }
 
 

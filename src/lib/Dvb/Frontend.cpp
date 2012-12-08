@@ -571,37 +571,45 @@ Frontend::scanPatPmt(Transponder* pTransponder)
 {
     LOG(dvb, trace, "--------------     PAT     --------------");
     PatSection pat;
-    if (_pDemux->readSection(&pat)) {
-        LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(pat.transportStreamId()));
-        if (pTransponder->_transportStreamId == Transponder::InvalidTransportStreamId) {
-            pTransponder->_transportStreamId = pat.transportStreamId();
-        }
-        else if (pTransponder->_transportStreamId != pat.transportStreamId()) {
-            LOG(dvb, error, "transport stream id mismatch: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + " != " + Poco::NumberFormatter::format(pat.transportStreamId()));
-            return false;
-        }
-        LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pat.serviceCount()));
-        for (int serviceIndex = 0; serviceIndex < pat.serviceCount(); serviceIndex++) {
-            LOG(dvb, trace, "--------------     PMT     --------------");
-            LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pat.serviceId(serviceIndex)) +
-                          ", pmt pid: " + Poco::NumberFormatter::format(pat.pmtPid(serviceIndex)));
-            if (pat.serviceId(serviceIndex)) { // no NIT service
-                Service* pService = new Dvb::Service(pTransponder, "", pat.serviceId(serviceIndex), pat.pmtPid(serviceIndex));
-                pTransponder->addService(pService);
-                PmtSection pmt(pat.pmtPid(serviceIndex));
-                if (pat.serviceId(serviceIndex) && _pDemux->readSection(&pmt)) {
-                    for (int streamIndex = 0; streamIndex < pmt.streamCount(); streamIndex++) {
-                        LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(pmt.streamPid(streamIndex)) +
-                                    ", type: " + Stream::streamTypeToString(pmt.streamType(streamIndex)));
-                        pService->addStream(new Stream(Stream::streamTypeToString(pmt.streamType(streamIndex)), pmt.streamPid(streamIndex)));
+    Table patTab(pat);
+    if (_pDemux->readTable(&patTab)) {
+        for (int sPat = 0; sPat < patTab.sectionCount(); sPat++) {
+            PatSection* pPat = static_cast<PatSection*>(patTab.getSection(sPat));
+            LOG(dvb, trace, "transport stream id: " + Poco::NumberFormatter::format(pPat->transportStreamId()));
+            if (pTransponder->_transportStreamId == Transponder::InvalidTransportStreamId) {
+                pTransponder->_transportStreamId = pPat->transportStreamId();
+            }
+            else if (pTransponder->_transportStreamId != pPat->transportStreamId()) {
+                LOG(dvb, error, "transport stream id mismatch: " + Poco::NumberFormatter::format(pTransponder->_transportStreamId) + " != " + Poco::NumberFormatter::format(pPat->transportStreamId()));
+                return false;
+            }
+            LOG(dvb, trace, "service count: " + Poco::NumberFormatter::format(pPat->serviceCount()));
+            for (int serviceIndex = 0; serviceIndex < pPat->serviceCount(); serviceIndex++) {
+                LOG(dvb, trace, "--------------     PMT     --------------");
+                LOG(dvb, trace, "service id: " + Poco::NumberFormatter::format(pPat->serviceId(serviceIndex)) +
+                              ", pmt pid: " + Poco::NumberFormatter::format(pPat->pmtPid(serviceIndex)));
+                if (pPat->serviceId(serviceIndex)) { // no NIT service
+                    Service* pService = new Dvb::Service(pTransponder, "", pPat->serviceId(serviceIndex), pPat->pmtPid(serviceIndex));
+                    pTransponder->addService(pService);
+                    PmtSection pmt(pPat->pmtPid(serviceIndex));
+                    Table pmtTab(pmt);
+                    for (int sPmt = 0; sPmt < pmtTab.sectionCount(); sPmt++) {
+                        PmtSection* pPmt = static_cast<PmtSection*>(pmtTab.getSection(sPmt));
+                        if (pPat->serviceId(serviceIndex) && _pDemux->readSection(pPmt)) {
+                            for (int streamIndex = 0; streamIndex < pPmt->streamCount(); streamIndex++) {
+                                LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(pPmt->streamPid(streamIndex)) +
+                                            ", type: " + Stream::streamTypeToString(pPmt->streamType(streamIndex)));
+                                pService->addStream(new Stream(Stream::streamTypeToString(pPmt->streamType(streamIndex)), pPmt->streamPid(streamIndex)));
+                            }
+                            pService->addStream(new Stream(Stream::ProgramMapTable, pPmt->packetId()));
+                            pService->_pcrPid = pPmt->pcrPid();
+        //                    pService->addStream(new Stream(Stream::ProgramClock, pPmt->pcrPid()));
+                        }
                     }
-                    pService->addStream(new Stream(Stream::ProgramMapTable, pmt.packetId()));
-                    pService->_pcrPid = pmt.pcrPid();
-//                    pService->addStream(new Stream(Stream::ProgramClock, pmt.pcrPid()));
                 }
             }
+            return true;
         }
-        return true;
     }
     else {
         return false;
