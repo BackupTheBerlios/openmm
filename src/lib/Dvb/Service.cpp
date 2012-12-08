@@ -502,6 +502,7 @@ Service::flush()
     _serviceLock.unlock();
     LOG(dvb, debug, "flush count bytes from service byte queue: " + Poco::NumberFormatter::format(_byteQueue.size()));
     _byteQueue.clear();
+    LOG(dvb, debug, "service stream flushed");
 }
 
 

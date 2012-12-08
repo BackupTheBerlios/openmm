@@ -376,6 +376,8 @@ Device::getTransponders(const std::string& serviceName)
 std::istream*
 Device::getStream(const std::string& serviceName)
 {
+    LOG(dvb, debug, "get stream: " + serviceName);
+
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
 
     // scrambled services are not supported, yet
@@ -394,6 +396,8 @@ Device::getStream(const std::string& serviceName)
 void
 Device::freeStream(std::istream* pIstream)
 {
+    LOG(dvb, debug, "free stream ...");
+
     Poco::ScopedLock<Poco::FastMutex> lock(_deviceLock);
 
     Service* pService = _streamMap[pIstream];
@@ -403,6 +407,8 @@ Device::freeStream(std::istream* pIstream)
     stopService(pService);
     _streamMap.erase(pIstream);
     delete pIstream;
+
+    LOG(dvb, debug, "free stream finished.");
 }
 
 

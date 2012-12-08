@@ -593,9 +593,9 @@ Frontend::scanPatPmt(Transponder* pTransponder)
                     pTransponder->addService(pService);
                     PmtSection pmt(pPat->pmtPid(serviceIndex));
                     Table pmtTab(pmt);
-                    for (int sPmt = 0; sPmt < pmtTab.sectionCount(); sPmt++) {
-                        PmtSection* pPmt = static_cast<PmtSection*>(pmtTab.getSection(sPmt));
-                        if (pPat->serviceId(serviceIndex) && _pDemux->readSection(pPmt)) {
+                    if (pPat->serviceId(serviceIndex) && _pDemux->readTable(&pmtTab)) {
+                        for (int sPmt = 0; sPmt < pmtTab.sectionCount(); sPmt++) {
+                            PmtSection* pPmt = static_cast<PmtSection*>(pmtTab.getSection(sPmt));
                             for (int streamIndex = 0; streamIndex < pPmt->streamCount(); streamIndex++) {
                                 LOG(dvb, trace, "stream pid: " + Poco::NumberFormatter::format(pPmt->streamPid(streamIndex)) +
                                             ", type: " + Stream::streamTypeToString(pPmt->streamType(streamIndex)));

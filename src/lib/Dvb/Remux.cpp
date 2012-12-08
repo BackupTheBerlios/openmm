@@ -128,14 +128,9 @@ Remux::stopRemux()
 //        _remuxLock.unlock();
 //    }
     if (_pReadThread) {
-        LOG(dvb, debug, "remux set read thread running to false ...");
         _remuxLock.lock();
         _readThreadRunning = false;
         _remuxLock.unlock();
-        LOG(dvb, debug, "remux set read thread running to false finished.");
-    }
-    else {
-        LOG(dvb, debug, "remux thread not running.");
     }
 }
 
