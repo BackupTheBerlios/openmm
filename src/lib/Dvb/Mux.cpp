@@ -35,7 +35,9 @@
 namespace Omm {
 namespace Dvb {
 
+// Mux is currently not needed (was attempt to mux elementary streams coming from demuxer)
 
+   
 Mux::Mux() :
 _byteQueue(100*1024)
 {

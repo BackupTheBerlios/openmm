@@ -23,6 +23,7 @@
 
 #include "Descriptor.h"
 #include "Section.h"
+#include "Demux.h"
 #include "Stream.h"
 #include "Dvb/Section.h"
 #include "DvbLogger.h"
@@ -49,11 +50,11 @@ Table::~Table()
 
 
 void
-Table::read(Stream* pStream)
+Table::read(Demux* pDemux, Stream* pStream)
 {
     int attempt = 1;
     LOG(dvb, trace, "table section read attempt: " + Poco::NumberFormatter::format(attempt));
-    _pFirstSection->read(pStream);
+    _pFirstSection->read(pDemux, pStream);
     attempt++;
     int sectionCount = _pFirstSection->lastSectionNumber() + 1;
     int maxAttempts = sectionCount + 3;
@@ -68,7 +69,7 @@ Table::read(Stream* pStream)
     while (sectionsRead < sectionCount && attempt < maxAttempts) {
         LOG(dvb, trace, "table section read attempt: " + Poco::NumberFormatter::format(attempt));
         Section* pS = _pFirstSection->clone();
-        pS->read(pStream);
+        pS->read(pDemux, pStream);
         int sNumber = pS->sectionNumber();
         LOG(dvb, trace, "table section number of next section: " + Poco::NumberFormatter::format(sNumber));
         if (!_sections[sNumber]) {
@@ -144,14 +145,12 @@ Section::~Section()
 
 
 void
-Section::read(Stream* pStream)
+Section::read(Demux* pDemux, Stream* pStream)
 {
-    pStream->read((Poco::UInt8*)_data, 3, _timeout);
-
+    pDemux->readStream(pStream, (Poco::UInt8*)_data, 3, _timeout);
     Poco::UInt16 sectionLength = getValue<Poco::UInt16>(12, 12);
-
 //    LOG(dvb, debug, "section length: " + Poco::NumberFormatter::format(sectionLength));
-    pStream->read((Poco::UInt8*)(_data) + 3, sectionLength, _timeout);
+    pDemux->readStream(pStream, (Poco::UInt8*)(_data) + 3, sectionLength, _timeout);
     _size = sectionLength + 3;
 }
 
@@ -393,7 +392,7 @@ const unsigned int Section::crc32Table[] =
 
 
 PatSection::PatSection() :
-Section("PAT", 0x00, 0x00, 5),
+Section("PAT", 0x00, 0x00, 5000),
 _serviceCount(0)
 {
 }
@@ -474,7 +473,7 @@ PatSection::addService(Poco::UInt16 serviceId, Poco::UInt16 pmtPid, unsigned int
 
 
 PmtSection::PmtSection(Poco::UInt16 pid) :
-Section("PMT", pid, 0x02, 5)
+Section("PMT", pid, 0x02, 5000)
 {
 }
 
@@ -550,7 +549,7 @@ PmtSection::esInfoDescriptor(unsigned int streamIndex)
 
 
 SdtSection::SdtSection() :
-Section("SDT", 0x11, 0x42, 5)
+Section("SDT", 0x11, 0x42, 5000)
 {
 }
 
@@ -652,7 +651,7 @@ SdtSection::serviceDescriptor(unsigned int serviceIndex, int serviceDescriptorIn
 
 
 NitSection::NitSection(Poco::UInt8 tableId) :
-Section("NIT", 0x10, tableId, 15)
+Section("NIT", 0x10, tableId, 15000)
 {
 }
 

@@ -128,18 +128,23 @@ Remux::stopRemux()
 //        _remuxLock.unlock();
 //    }
     if (_pReadThread) {
+        LOG(dvb, debug, "remux set read thread running to false ...");
         _remuxLock.lock();
         _readThreadRunning = false;
         _remuxLock.unlock();
+        LOG(dvb, debug, "remux set read thread running to false finished.");
     }
-
-    LOG(dvb, debug, "remux thread stopped.");
+    else {
+        LOG(dvb, debug, "remux thread not running.");
+    }
 }
 
 
 void
 Remux::waitForStopRemux()
 {
+    LOG(dvb, debug, "remux wait for stop ...");
+
 //    if (_pQueueThread) {
 //        if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(_readTimeout)) {
 //            LOG(dvb, error, "failed to join TS remux queue thread");
@@ -160,6 +165,8 @@ Remux::waitForStopRemux()
 void
 Remux::flush()
 {
+    LOG(dvb, debug, "remux flush ...");
+
     const int bufsize = 1000 * TransportStreamPacket::Size;
     char buf[bufsize];
     int bytes = 0;

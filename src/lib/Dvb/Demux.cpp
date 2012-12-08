@@ -250,16 +250,56 @@ Demux::setSectionFilter(Stream* pStream, Poco::UInt8 tableId)
 }
 
 
+void
+Demux::readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout)
+{
+    Poco::UInt16 pid = pStream->_pid;
+
+    LOG(dvb, debug, "demux read stream with pid: " + Poco::NumberFormatter::format(pid));
+
+    int bytesToRead = size;
+    int bytesRead = 0;
+
+    while (bytesToRead > 0) {
+        int pollRes = poll(_pidSelectors[pid]->_fileDescPoll, 1, timeout);
+        if (pollRes > 0) {
+            if (_pidSelectors[pid]->_fileDescPoll[0].revents & POLLIN){
+                bytesRead += ::read(_pidSelectors[pid]->_fileDesc, buf + bytesRead, bytesToRead);
+                if (bytesRead > 0) {
+                    bytesToRead -= bytesRead;
+                }
+                else if (bytesRead == -1) {
+                    LOG(dvb, error, "demux read failed to read from device: " + std::string(strerror(errno)));
+                    return;
+                }
+            }
+            else {
+                LOG(dvb, warning, "demux read uncatched poll event");
+            }
+        }
+        else if (pollRes == 0) {
+            LOG(dvb, trace, "demux read timeout");
+            return;
+        }
+        else if (pollRes == -1) {
+            LOG(dvb, error, "demux read failure: " + std::string(strerror(errno)));
+            return;
+        }
+    }
+    LOG(dvb, debug, "demux read stream with pid: " + Poco::NumberFormatter::format(pid) + " finished.");
+}
+
+
 bool
 Demux::readSection(Section* pSection)
 {
     bool success = true;
     Stream stream(Stream::Other, pSection->packetId());
-    selectStream(&stream, Demux::TargetDemux, true);
+    selectStream(&stream, Demux::TargetDemux, false);
     setSectionFilter(&stream, pSection->tableId());
     runStream(&stream, true);
     try {
-        pSection->read(&stream);
+        pSection->read(this, &stream);
         pSection->parse();
     }
     catch (Poco::TimeoutException& e) {
@@ -277,11 +317,11 @@ Demux::readTable(Table* pTable)
 {
     bool success = true;
     Stream stream(Stream::Other, pTable->getFirstSection()->packetId());
-    selectStream(&stream, Demux::TargetDemux, true);
+    selectStream(&stream, Demux::TargetDemux, false);
     setSectionFilter(&stream, pTable->getFirstSection()->tableId());
     runStream(&stream, true);
     try {
-        pTable->read(&stream);
+        pTable->read(this, &stream);
         pTable->parse();
     }
     catch (Poco::TimeoutException& e) {

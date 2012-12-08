@@ -60,13 +60,16 @@ Dvr::openDvr()
 void
 Dvr::closeDvr()
 {
-    _pRemux->stopRemux();
-    _pRemux->flush();
-    delete _pRemux;
-    if (close(_fileDescDvr)) {
-        LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+    if (_pRemux) {
+        _pRemux->stopRemux();
+        _pRemux->waitForStopRemux();
+        _pRemux->flush();
+        delete _pRemux;
+        if (close(_fileDescDvr)) {
+            LOG(dvb, error, "failed to close dvb rec device \"" + _deviceName + "\": " + strerror(errno));
+        }
+        _fileDescDvr = -1;
     }
-    _fileDescDvr = -1;
 }
 
 

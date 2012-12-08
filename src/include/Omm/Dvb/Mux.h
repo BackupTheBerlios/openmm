@@ -31,6 +31,7 @@
 namespace Omm {
 namespace Dvb {
 
+// Mux is currently not needed (was attempt to mux elementary streams coming from demuxer)
 
 class InStream;
 

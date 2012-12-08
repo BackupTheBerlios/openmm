@@ -30,6 +30,7 @@ namespace Dvb {
 
 class Descriptor;
 class Stream;
+class Demux;
 class Section;
 
 
@@ -39,7 +40,7 @@ public:
     Table(Section& firstSection);
     ~Table();
 
-    void read(Stream* pStream);
+    void read(Demux* pDemux, Stream* pStream);
     void parse();
     int sectionCount();
     Section* getFirstSection();
@@ -59,7 +60,7 @@ public:
     Section(const std::string& name, Poco::UInt16 pid, Poco::UInt8 tableId, unsigned int timeout);
     ~Section();
 
-    void read(Stream* pStream);
+    void read(Demux* pDemux, Stream* pStream);
     void stuff();
     virtual Section* clone();
     virtual void parse() {}
@@ -87,7 +88,7 @@ public:
 
 private:
     static const unsigned int crc32Table[];
-    
+
     std::string         _name;
     Poco::UInt16        _pid;
     Poco::UInt8         _tableId;

@@ -93,7 +93,7 @@ public:
     TransportStreamPacket(bool allocateData = true);
     ~TransportStreamPacket();
 
-    void writePayloadFromStream(Stream* pStream, int timeout);
+//    void writePayloadFromStream(Stream* pStream, int timeout);
     void clearPayload();
     void stuffPayload(int actualPayloadSize);
 

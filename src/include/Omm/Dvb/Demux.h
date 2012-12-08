@@ -56,6 +56,7 @@ public:
     bool runStream(Stream* pStream, bool run = true);
     bool setSectionFilter(Stream* pStream, Poco::UInt8 tableId);
 
+    void readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout);
     bool readSection(Section* pSection);
     bool readTable(Table* pTable);
 

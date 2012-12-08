@@ -248,9 +248,9 @@ Frontend::closeFrontend()
         _pDvr->closeDvr();
     }
 
-    dvb_frontend_event event;
-    while (!ioctl(_fileDescFrontend, FE_GET_EVENT, &event)) {
-    }
+//    dvb_frontend_event event;
+//    while (!ioctl(_fileDescFrontend, FE_GET_EVENT, &event)) {
+//    }
     if (close(_fileDescFrontend)) {
         LOG(dvb, error, "failed to close frontend: " + std::string(strerror(errno)));
     }

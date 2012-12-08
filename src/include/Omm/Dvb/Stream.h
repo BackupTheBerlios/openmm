@@ -95,13 +95,9 @@ public:
     bool isAudio();
     bool isVideo();
     Poco::UInt16 getPid();
-    int getFileDesc();
-    void read(Poco::UInt8* buf, int size, int timeout = 0);
-    /// timeout in secs, timeout = 0 means unlimited
-//    std::istream* getStream();
 
-    void skipToElementaryStreamPacketHeader(Poco::UInt8* skippedBytes, int timeout = 0);
-    ElementaryStreamPacket* getElementaryStreamPacket(int timeout = 0);
+//    void skipToElementaryStreamPacketHeader(Poco::UInt8* skippedBytes, int timeout = 0);
+//    ElementaryStreamPacket* getElementaryStreamPacket(int timeout = 0);
 
     static Poco::UInt8 streamTypeFromString(const std::string& val);
     static std::string streamTypeToString(Poco::UInt8 val);
@@ -109,12 +105,6 @@ public:
 private:
     std::string         _type;
     Poco::UInt16        _pid;
-
-    int                 _fileDesc;
-    struct pollfd       _fileDescPoll[1];
-//    UnixFileIStream*    _pStream;
-
-    int                 _logSequence;
 };
 
 

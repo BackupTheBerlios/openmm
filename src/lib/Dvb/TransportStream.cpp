@@ -94,11 +94,11 @@ TransportStreamPacket::~TransportStreamPacket()
 }
 
 
-void
-TransportStreamPacket::writePayloadFromStream(Stream* pStream, int timeout)
-{
-    pStream->read((Poco::UInt8*)_data + HeaderSize, PayloadSize, timeout);
-}
+//void
+//TransportStreamPacket::writePayloadFromStream(Stream* pStream, int timeout)
+//{
+//    pStream->read((Poco::UInt8*)_data + HeaderSize, PayloadSize, timeout);
+//}
 
 
 void

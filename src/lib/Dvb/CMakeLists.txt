@@ -30,7 +30,7 @@ Service.cpp
 Transponder.cpp
 Frontend.cpp
 Demux.cpp
-Mux.cpp
+#Mux.cpp
 Remux.cpp
 Dvr.cpp
 TransportStream.cpp
