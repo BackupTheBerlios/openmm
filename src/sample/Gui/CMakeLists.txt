@@ -177,3 +177,11 @@ target_link_libraries(web
 ${OMM_GUI}
 )
 
+
+add_executable(platter
+Platter.cpp
+)
+
+target_link_libraries(platter
+${OMM_GUI}
+)

@@ -47,6 +47,7 @@
 
 #include "Gui/Application.h"
 #include "Gui/Tab.h"
+#include "Gui/Platter.h"
 #include "Gui/Navigator.h"
 #include "Gui/ListModel.h"
 #include "Gui/List.h"
@@ -218,7 +219,11 @@ public:
 };
 
 
+#ifdef __IPHONE__
 class ControllerWidget : public Controller, public Gui::Tab
+#else
+class ControllerWidget : public Controller, public Gui::Platter
+#endif
 {
 friend class PlaylistEditor;
 
@@ -254,7 +259,6 @@ private:
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;
-    bool                        _fullscreen;
     UpnpApplication*            _pApplication;
 };
 

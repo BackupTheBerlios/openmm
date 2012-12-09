@@ -905,6 +905,7 @@ _pApplication(pApplication)
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
+    setCurrentView(_pMediaServerGroupWidget);
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));

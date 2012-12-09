@@ -77,8 +77,8 @@ protected:
     void showItemsAt(int rowOffset, int itemOffset, int countItems);
     void scrollOneRow(int direction);
     virtual void scrollToRowOffset(int rowOffset);
-    virtual void resize(int width, int height);
     virtual void scale(float factor);
+    void onResize(int width, int height);
 
     // item view management
     void extendViewPool();

@@ -142,7 +142,7 @@ void
 ListScrollAreaController::resized(int width, int height)
 {
     LOG(gui, debug, "list scroll area resized width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
-    _pListView->resize(width, height);
+    _pListView->onResize(width, height);
 }
 
 
@@ -412,7 +412,7 @@ ListView::scrollToRowOffset(int rowOffset)
 
 
 void
-ListView::resize(int width, int height)
+ListView::onResize(int width, int height)
 {
     setItemViewWidth(width);
     updateScrollWidgetSize(totalItemCount());

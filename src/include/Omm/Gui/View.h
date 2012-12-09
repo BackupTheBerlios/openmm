@@ -107,8 +107,8 @@ public:
     void setName(const std::string& name);
 
     typedef std::vector<View*>::iterator SubviewIterator;
-    SubviewIterator beginSubview();
-    SubviewIterator endSubview();
+    virtual SubviewIterator beginSubview();
+    virtual SubviewIterator endSubview();
     int subviewCount();
 
     typedef std::vector<Controller*>::iterator ControllerIterator;
