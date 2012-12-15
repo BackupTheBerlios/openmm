@@ -81,6 +81,7 @@ public:
 
     void mousePressEvent(QMouseEvent* pMouseEvent)
     {
+//        LOG(gui, debug, "mouse press event");
         if (pMouseEvent->button() == Qt::LeftButton) {
             _dragStartPosition = pMouseEvent->pos();
         }
@@ -90,6 +91,7 @@ public:
 
     void mouseMoveEvent(QMouseEvent* pMouseEvent)
     {
+//        LOG(gui, debug, "mouse move event");
         if (!(pMouseEvent->buttons() & Qt::LeftButton)) {
             return;
         }
@@ -106,7 +108,7 @@ public:
         // if dragging started not in an omm application, mime data is not of type QtMimeData and pDrag is set to 0.
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dragEntered(pMime->_pDragImpl->getDrag());
+            _pViewImpl->dragEntered(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag());
             pDragEvent->acceptProposedAction();
         }
     }
@@ -116,12 +118,12 @@ public:
         LOG(gui, debug, "DRAG MOVE EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dragMoved(pMime->_pDragImpl->getDrag());
+            _pViewImpl->dragMoved(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag());
             pDragEvent->acceptProposedAction();
         }
     }
 
-    void dragLeaveEvent(QDragLeaveEvent* pDragEvent)
+    void dragLeaveEvent()
     {
         LOG(gui, debug, "DRAG LEAVE EVENT");
         _pViewImpl->dragLeft();
@@ -132,7 +134,7 @@ public:
         LOG(gui, debug, "DROP EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDropEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dropped(pMime->_pDragImpl->getDrag());
+            _pViewImpl->dropped(Position(pDropEvent->pos().x(), pDropEvent->pos().y()), pMime->_pDragImpl->getDrag());
             pDropEvent->acceptProposedAction();
         }
     }

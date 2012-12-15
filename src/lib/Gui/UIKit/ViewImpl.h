@@ -24,6 +24,7 @@
 
 #include "Gui/View.h"
 #include "Gui/Model.h"
+#include "Gui/Geometry.h"
 
 namespace Omm {
 namespace Gui {
@@ -43,6 +44,7 @@ public:
     void setNativeView(void* pView);
     void raise();
     virtual void addSubview(View* pView);
+    virtual void removeFromSuperview();
     virtual void showView(bool async);
     virtual void hideView(bool async);
     virtual int posXView();
@@ -61,10 +63,10 @@ public:
     void resized(int width, int height);
     void selected();
     void dragStarted();
-    void dragEntered(Drag* pDrag);
-    void dragMoved(Drag* pDrag);
+    void dragEntered(const Position& pos, Drag* pDrag);
+    void dragMoved(const Position& pos, Drag* pDrag);
     void dragLeft();
-    void dropped(Drag* pDrag);
+    void dropped(const Position& pos, Drag* pDrag);
 
     View*                       _pView;
 protected:

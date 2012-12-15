@@ -55,6 +55,7 @@ public:
     void setNativeView(QWidget* pView);
     void raise();
     virtual void addSubview(View* pView);
+    virtual void removeFromSuperview();
     virtual void showView(bool async);
     virtual void hideView(bool async);
     virtual int posXView();
@@ -83,10 +84,10 @@ private:
     void selected();
     void keyPressed(int key);
     void dragStarted();
-    void dragEntered(Drag* pDrag);
-    void dragMoved(Drag* pDrag);
+    void dragEntered(const Position& pos, Drag* pDrag);
+    void dragMoved(const Position& pos, Drag* pDrag);
     void dragLeft();
-    void dropped(Drag* pDrag);
+    void dropped(const Position& pos, Drag* pDrag);
 
     QtEventFilter*              _pEventFilter;
     QWidget*                    _pHighlightWidget;

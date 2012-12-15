@@ -896,10 +896,11 @@ _pApplication(pApplication)
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
     _pPlaylistEditor = new PlaylistEditor(this);
-    addView(_pPlaylistEditor, "Playlist Editor");
+    addView(_pPlaylistEditor, "List");
     _pVisual = new GuiVisual;
     addView(_pVisual, "Video");
     _pConfigBrowser = new Gui::WebBrowser;
+    _pConfigBrowser->setName("Setup");
     addView(_pConfigBrowser, "Setup");
     _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
     _pControlPanel = new MediaRendererView;
@@ -1047,7 +1048,7 @@ void
 ControllerWidget::showOnlyBasicDeviceGroups(bool show)
 {
     addView(_pMediaRendererGroupWidget, "Player", !show);
-    addView(_pPlaylistEditor, "Playlist Editor", !show);
+    addView(_pPlaylistEditor, "List", !show);
     addView(_pConfigBrowser, "Setup", !show);
 }
 
@@ -1057,7 +1058,7 @@ ControllerWidget::showOnlyRendererVisual(bool show)
 {
     addView(_pMediaServerGroupWidget, "Media", !show);
     addView(_pMediaRendererGroupWidget, "Player", !show);
-    addView(_pPlaylistEditor, "Playlist Editor", !show);
+    addView(_pPlaylistEditor, "List", !show);
     addView(_pConfigBrowser, "Setup", !show);
 }
 
@@ -1225,8 +1226,8 @@ DeviceGroupWidget(new Av::MediaRendererGroupDelegate),
 _pControllerWidget(pControllerWidget)
 {
 //    LOGNS(Gui, gui, debug, "media renderer group widget ctor");
-    View::setName("media renderer group view");
-    _deviceGroupListView.setName("media renderer group view");
+    View::setName("Player");
+    _deviceGroupListView.setName("Player");
     push(&_deviceGroupListView, "Player");
 
 #ifdef __IPHONE__
@@ -1640,8 +1641,8 @@ MediaServerGroupWidget::MediaServerGroupWidget() :
 DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 {
 //    LOGNS(Gui, gui, debug, "media server group widget ctor");
-    View::setName("media server group view");
-    _deviceGroupListView.setName("media server group view");
+    View::setName("Media");
+    _deviceGroupListView.setName("Media");
     if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         _deviceGroupListView.setItemViewHeight(80);
     }
@@ -2112,6 +2113,7 @@ _pPlaylistContainer(0)
 {
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
             PlaylistNotification>(*this, &PlaylistEditor::playlistNotification));
+    View::setName("List");
     setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
     setModel(this);
     attachController(this);
@@ -2270,6 +2272,7 @@ _pPlaylistEditor(pPlaylistEditor)
 
 GuiVisual::GuiVisual(Gui::View* pParent)
 {
+    setName("Video");
     setBackgroundColor(Gui::Color("black"));
 }
 

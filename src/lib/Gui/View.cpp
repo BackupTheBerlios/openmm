@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <Poco/NumberFormatter.h>
+#include <vector>
 
 #include "Gui/View.h"
 #include "Gui/GuiLogger.h"
@@ -128,6 +129,17 @@ View::addSubview(View* pView)
     pView->_pParent = this;
     _subviews.push_back(pView);
     pView->_scaleFactor = _scaleFactor;
+}
+
+
+void
+View::removeFromSuperview()
+{
+    _pImpl->removeFromSuperview();
+    if (_pParent) {
+        _pParent->removeSubview(this);
+        _pParent = 0;
+    }
 }
 
 
@@ -284,7 +296,7 @@ View::scale(float factor)
 void
 View::move(int x, int y)
 {
-//    LOG(gui, debug, "view move: " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+    LOG(gui, debug, "view move " + _name + ": " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
     _pImpl->moveView(x, y);
 }
 
@@ -388,6 +400,15 @@ View::endSubview()
 }
 
 
+void
+View::removeSubview(View* pView)
+{
+    SubviewIterator it = std::find(beginSubview(), endSubview(), pView);
+    if (it != endSubview()) {
+        _subviews.erase(it);
+    }
+}
+
 int
 View::subviewCount()
 {
@@ -443,6 +464,7 @@ View::updateLayout()
     if (_pLayout) {
         LOG(gui, debug, "view \"" + getName() + "\" update layout");
         _pLayout->layoutView();
+//        _pLayout->layoutViewEquiDistant();
     }
 }
 

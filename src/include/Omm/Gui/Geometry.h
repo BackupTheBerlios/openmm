@@ -19,60 +19,31 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Controller_INCLUDED
-#define Controller_INCLUDED
-
-#include <vector>
-#include "Geometry.h"
+#ifndef Geometry_INCLUDED
+#define Geometry_INCLUDED
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class Model;
-class Drag;
 
-#define UPDATE_MODEL(CLASS, METHOD, ...) for (ModelIterator it = beginModel(); it != endModel(); ++it) \
-{ CLASS* pCLASS = dynamic_cast<CLASS*>(*it); if (pCLASS) { pCLASS->METHOD(__VA_ARGS__); } }
-
-
-class Controller
+class Position
 {
-    friend class View;
-    friend class Model;
-    friend class ViewImpl;
-    friend class ButtonViewImpl;
-
 public:
-    typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
-            KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
-            KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
-            KeyPlayPause, KeyMute, KeyRecord,
-            KeyPowerOff, KeyWakeUp, KeyEject, KeyLast,
-            KeyX
-    } KeyCode;
+    Position(int x, int y) : _x(x), _y(y) {}
 
-    void attachModel(Model* pModel);
-    void detachModel(Model* pModel);
+    const int x() const
+    {
+        return _x;
+    }
 
-    void syncModelViews();
+    const int y() const
+    {
+        return _y;
+    }
 
-//protected:
-    virtual void presented() {}
-    virtual void resized(int width, int height) {}
-    virtual void selected() {}
-    virtual void keyPressed(KeyCode key) {}
-    virtual void dragStarted() {}
-    virtual void dragEntered(const Position& pos, Drag* pDrag) {}
-    virtual void dragMoved(const Position& pos, Drag* pDrag) {}
-    virtual void dragLeft() {}
-    virtual void dropped(const Position& pos, Drag* pDrag) {}
-
-    typedef std::vector<Model*>::iterator ModelIterator;
-    ModelIterator beginModel();
-    ModelIterator endModel();
-
-    std::vector<Model*>     _models;
+private:
+    int     _x;
+    int     _y;
 };
 
 
@@ -80,3 +51,4 @@ public:
 }  // namespace Gui
 
 #endif
+

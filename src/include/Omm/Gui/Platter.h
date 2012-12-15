@@ -23,6 +23,7 @@
 #define Platter_INCLUDED
 
 #include <map>
+#include <vector>
 
 #include "View.h"
 
@@ -30,34 +31,34 @@ namespace Omm {
 namespace Gui {
 
 
+class Label;
 class Button;
+class ListItemView;
+class ClusterView;
+
 
 class PlatterView : public View
 {
     friend class PlatterViewImpl;
     friend class PlatterStackedLayout;
+    friend class ClusterView;
 
 public:
     PlatterView(View* pParent = 0);
     virtual ~PlatterView();
 
     void addView(View* pView, const std::string& name = "", bool show = true);
+    void removeView(View* pView);
     int getTabCount();
     int getCurrentTab();
     void setTabBarHidden(bool hidden = true);
     void setCurrentView(View* pView);
     void setCurrentTab(int index);
 
-    virtual SubviewIterator beginSubview();
-    virtual SubviewIterator endSubview();
-
 private:
-    int                         _barHeight;
-    int                         _handleWidth;
-    std::map<View*, Button*>    _handles;
-    std::vector<View*>          _views;
-    int                         _currentView;
-    bool                        _tabBarHidden;
+    ClusterView* addCluster();
+
+    std::vector<ClusterView*>               _clusters;
 };
 
 

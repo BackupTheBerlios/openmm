@@ -71,6 +71,7 @@ public:
 #endif
     View* getParent();
     void addSubview(View* pView);
+    void removeFromSuperview();
 
     virtual void raise();
     virtual void show(bool async = true);
@@ -107,8 +108,8 @@ public:
     void setName(const std::string& name);
 
     typedef std::vector<View*>::iterator SubviewIterator;
-    virtual SubviewIterator beginSubview();
-    virtual SubviewIterator endSubview();
+    SubviewIterator beginSubview();
+    SubviewIterator endSubview();
     int subviewCount();
 
     typedef std::vector<Controller*>::iterator ControllerIterator;
@@ -132,6 +133,7 @@ protected:
     View(View* pParent, bool createPlainView);
 
     void initView(View* pParent);
+    void removeSubview(View* pView);
 
     View*                       _pParent;
     std::vector<View*>          _subviews;

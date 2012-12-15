@@ -85,6 +85,7 @@
 - (void)handleDragGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
 //    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture");
+    CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         Omm::Gui::UIDrag::instance()->getPointerView()->show();
         _pViewImpl->dragStarted();
@@ -93,16 +94,16 @@
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
         if (pDropView != Omm::Gui::UIDrag::instance()->getDropView()) {
             Omm::Gui::UIDrag::instance()->setDropView(pDropView);
-            pDropView->getViewImpl()->dragEntered(Omm::Gui::UIDrag::instance()->getDrag());
+            pDropView->getViewImpl()->dragEntered(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
         }
         else {
-            pDropView->getViewImpl()->dragMoved(Omm::Gui::UIDrag::instance()->getDrag());
+            pDropView->getViewImpl()->dragMoved(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
         }
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
         Omm::Gui::UIDrag::instance()->getPointerView()->hide();
-        pDropView->getViewImpl()->dropped(Omm::Gui::UIDrag::instance()->getDrag());
+        pDropView->getViewImpl()->dropped(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
         Omm::Gui::UIDrag::instance()->setDrag(0);
     }
 }
@@ -312,6 +313,13 @@ ViewImpl::addSubview(View* pView)
 
 
 void
+ViewImpl::removeFromSuperview()
+{
+    [static_cast<UIView*>(getNativeView()) removeFromSuperview];
+}
+
+
+void
 ViewImpl::showView(bool async)
 {
 //    LOG(gui, debug, "view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
@@ -468,18 +476,18 @@ ViewImpl::dragStarted()
 
 
 void
-ViewImpl::dragEntered(Drag* pDrag)
+ViewImpl::dragEntered(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drag entered in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag);
 }
 
 
 void
-ViewImpl::dragMoved(Drag* pDrag)
+ViewImpl::dragMoved(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drag moved in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag);
 }
 
 
@@ -492,10 +500,10 @@ ViewImpl::dragLeft()
 
 
 void
-ViewImpl::dropped(Drag* pDrag)
+ViewImpl::dropped(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drop in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag);
 }
 
 

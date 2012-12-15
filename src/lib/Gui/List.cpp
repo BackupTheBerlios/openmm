@@ -89,12 +89,12 @@ public:
         pDrag->start();
     }
 
-    virtual void dragEntered(Drag* pDrag)
+    virtual void dragEntered(const Position& pos, Drag* pDrag)
     {
         _pListView->shiftViews(_pItemView);
     }
 
-    virtual void dragMoved(Drag* pDrag)
+    virtual void dragMoved(const Position& pos, Drag* pDrag)
     {
     }
 
@@ -102,7 +102,7 @@ public:
     {
     }
 
-    virtual void dropped(Drag* pDrag)
+    virtual void dropped(const Position& pos, Drag* pDrag)
     {
         _pListView->dropView(pDrag->getModel(), _pItemView);
         _pListView->syncViewImpl();

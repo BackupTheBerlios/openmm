@@ -130,6 +130,13 @@ ViewImpl::addSubview(View* pView)
 
 
 void
+ViewImpl::removeFromSuperview()
+{
+    static_cast<QWidget*>(getNativeView())->setParent(0);
+}
+
+
+void
 ViewImpl::showView(bool async)
 {
 //    LOG(gui, debug, "view impl show _pNativeView: " + Poco::NumberFormatter::format(_pNativeView) + " ...");
@@ -373,18 +380,18 @@ ViewImpl::dragStarted()
 
 
 void
-ViewImpl::dragEntered(Drag* pDrag)
+ViewImpl::dragEntered(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drag entered in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag);
 }
 
 
 void
-ViewImpl::dragMoved(Drag* pDrag)
+ViewImpl::dragMoved(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drag moved in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag);
 }
 
 
@@ -397,10 +404,10 @@ ViewImpl::dragLeft()
 
 
 void
-ViewImpl::dropped(Drag* pDrag)
+ViewImpl::dropped(const Position& pos, Drag* pDrag)
 {
     LOG(gui, debug, "view impl drop in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag);
 }
 
 

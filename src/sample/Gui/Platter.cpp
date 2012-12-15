@@ -33,18 +33,16 @@ class Application : public Omm::Gui::Application
     {
         Omm::Gui::Platter* pPlatter = new Omm::Gui::Platter;
 
-        Omm::Gui::Label* pLabel1 = new Omm::Gui::Label;
-        pLabel1->setName("label 1");
-        pLabel1->setLabel("label 1");
-        pLabel1->setAlignment(Omm::Gui::View::AlignCenter);
+        const int subviewCount = 5;
+        for (int i = 0; i < subviewCount; i++) {
+            Omm::Gui::Label* pLabel = new Omm::Gui::Label;
+            std::string label = "V" + Poco::NumberFormatter::format(i);
+            pLabel->setName(label);
+            pLabel->setLabel(label);
+            pLabel->setAlignment(Omm::Gui::View::AlignCenter);
+            pPlatter->addView(pLabel, pLabel->getLabel());
+        }
 
-        Omm::Gui::Label* pLabel2 = new Omm::Gui::Label;
-        pLabel2->setName("label 2");
-        pLabel2->setLabel("label 2");
-        pLabel2->setAlignment(Omm::Gui::View::AlignCenter);
-
-        pPlatter->addView(pLabel1, pLabel1->getLabel());
-        pPlatter->addView(pLabel2, pLabel2->getLabel());
         return pPlatter;
     }
 };
