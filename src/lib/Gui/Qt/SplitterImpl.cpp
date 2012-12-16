@@ -19,66 +19,55 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Platter_INCLUDED
-#define Platter_INCLUDED
+#include <QtGui>
+#include <Poco/NumberFormatter.h>
+#include <qt4/QtGui/qsplitter.h>
 
-#include <map>
-#include <vector>
-
-#include "View.h"
-#include "Splitter.h"
+#include "SplitterImpl.h"
+#include "Gui/Splitter.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
 
-class Label;
-class Button;
-class ListItemView;
-class ClusterView;
-
-
-class PlatterView : public SplitterView
+SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
 {
-    friend class PlatterViewImpl;
-    friend class PlatterStackedLayout;
-    friend class ClusterView;
+//    LOG(gui, debug, "splitter view impl ctor");
+    QSplitter* pNativeView = new QSplitter;
 
-public:
-    PlatterView(View* pParent = 0, bool createCluster = true);
-    virtual ~PlatterView();
-
-    void addView(View* pView, const std::string& name = "", bool show = true);
-    void removeView(View* pView);
-    int getTabCount();
-    int getCurrentTab();
-    void setTabBarHidden(bool hidden = true);
-    void setCurrentView(View* pView);
-    void setCurrentTab(int index);
-
-    ClusterView* getCluster();
-    PlatterView* getFirstPlatter();
-    PlatterView* getSecondPlatter();
-
-private:
-//    ClusterView* addCluster();
-    ClusterView* addCluster(bool horizontalLayout);
-
-    ClusterView*                            _pCluster;
-    PlatterView*                            _pFirstPlatter;
-    PlatterView*                            _pSecondPlatter;
-//    std::vector<ClusterView*>               _clusters;
-};
+    initViewImpl(pView, pNativeView);
+    
+    if (orientation == View::Vertical) {
+        pNativeView->setOrientation(Qt::Vertical);
+    }
+}
 
 
-class Platter : public Widget<PlatterView, Controller, Model>
+SplitterViewImpl::~SplitterViewImpl()
 {
-public:
-    Platter(View* pParent = 0) : Widget<PlatterView, Controller, Model>(pParent) {}
-};
+}
 
+
+void
+SplitterViewImpl::addSubview(View* pView)
+{
+    static_cast<QSplitter*>(_pNativeView)->addWidget(static_cast<QWidget*>(pView->getNativeView()));
+}
+
+
+void
+SplitterViewImpl::setOrientation(View::Orientation orientation)
+{
+    switch(orientation) {
+        case View::Horizontal:
+            static_cast<QSplitter*>(_pNativeView)->setOrientation(Qt::Horizontal);
+            break;
+        case View::Vertical:
+            static_cast<QSplitter*>(_pNativeView)->setOrientation(Qt::Vertical);
+            break;
+    }
+}
 
 }  // namespace Omm
 }  // namespace Gui
-
-#endif

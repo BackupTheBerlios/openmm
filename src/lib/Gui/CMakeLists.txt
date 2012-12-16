@@ -34,6 +34,7 @@ TextLine.cpp
 Drag.cpp
 SelectionView.cpp
 Platter.cpp
+Splitter.cpp
 )
 
 target_link_libraries(ommgui

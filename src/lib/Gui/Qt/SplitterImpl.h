@@ -19,62 +19,27 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Platter_INCLUDED
-#define Platter_INCLUDED
+#ifndef SplitterImpl_INCLUDED
+#define SplitterImpl_INCLUDED
 
-#include <map>
-#include <vector>
-
-#include "View.h"
-#include "Splitter.h"
+#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
+class View;
 
-class Label;
-class Button;
-class ListItemView;
-class ClusterView;
-
-
-class PlatterView : public SplitterView
+class SplitterViewImpl : public ViewImpl
 {
-    friend class PlatterViewImpl;
-    friend class PlatterStackedLayout;
-    friend class ClusterView;
-
-public:
-    PlatterView(View* pParent = 0, bool createCluster = true);
-    virtual ~PlatterView();
-
-    void addView(View* pView, const std::string& name = "", bool show = true);
-    void removeView(View* pView);
-    int getTabCount();
-    int getCurrentTab();
-    void setTabBarHidden(bool hidden = true);
-    void setCurrentView(View* pView);
-    void setCurrentTab(int index);
-
-    ClusterView* getCluster();
-    PlatterView* getFirstPlatter();
-    PlatterView* getSecondPlatter();
+    friend class SplitterView;
 
 private:
-//    ClusterView* addCluster();
-    ClusterView* addCluster(bool horizontalLayout);
+    SplitterViewImpl(View* pView, View::Orientation orientation);
+    ~SplitterViewImpl();
 
-    ClusterView*                            _pCluster;
-    PlatterView*                            _pFirstPlatter;
-    PlatterView*                            _pSecondPlatter;
-//    std::vector<ClusterView*>               _clusters;
-};
+    virtual void addSubview(View* pView);
 
-
-class Platter : public Widget<PlatterView, Controller, Model>
-{
-public:
-    Platter(View* pParent = 0) : Widget<PlatterView, Controller, Model>(pParent) {}
+    void setOrientation(View::Orientation orientation);
 };
 
 
@@ -82,3 +47,4 @@ public:
 }  // namespace Gui
 
 #endif
+

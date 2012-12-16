@@ -189,7 +189,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-//    LOG(gui, debug, "view impl height.");
+    LOG(gui, debug, "view impl height.");
     return _pNativeView->height();
 }
 

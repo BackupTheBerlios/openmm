@@ -32,6 +32,7 @@ WebBrowserImpl.cpp
 TextLineImpl.cpp
 DragImpl.cpp
 SelectionViewImpl.cpp
+SplitterImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

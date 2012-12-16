@@ -19,66 +19,38 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Platter_INCLUDED
-#define Platter_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <map>
-#include <vector>
+#include "Gui/Splitter.h"
+#include "Gui/GuiLogger.h"
+#include "SplitterImpl.h"
+#include "Log.h"
 
-#include "View.h"
-#include "Splitter.h"
 
 namespace Omm {
 namespace Gui {
 
 
-class Label;
-class Button;
-class ListItemView;
-class ClusterView;
-
-
-class PlatterView : public SplitterView
+SplitterView::SplitterView(View* pParent, Orientation orientation) :
+View(pParent, false)
 {
-    friend class PlatterViewImpl;
-    friend class PlatterStackedLayout;
-    friend class ClusterView;
+//    LOG(gui, debug, "Splitter view ctor.");
+    setName("splitter view");
 
-public:
-    PlatterView(View* pParent = 0, bool createCluster = true);
-    virtual ~PlatterView();
-
-    void addView(View* pView, const std::string& name = "", bool show = true);
-    void removeView(View* pView);
-    int getTabCount();
-    int getCurrentTab();
-    void setTabBarHidden(bool hidden = true);
-    void setCurrentView(View* pView);
-    void setCurrentTab(int index);
-
-    ClusterView* getCluster();
-    PlatterView* getFirstPlatter();
-    PlatterView* getSecondPlatter();
-
-private:
-//    ClusterView* addCluster();
-    ClusterView* addCluster(bool horizontalLayout);
-
-    ClusterView*                            _pCluster;
-    PlatterView*                            _pFirstPlatter;
-    PlatterView*                            _pSecondPlatter;
-//    std::vector<ClusterView*>               _clusters;
-};
+    _minWidth = 50;
+    _minHeight = 10;
+    _prefWidth = 150;
+    _prefHeight = 20;
+    _pImpl = new SplitterViewImpl(this, orientation);
+}
 
 
-class Platter : public Widget<PlatterView, Controller, Model>
+void
+SplitterView::setOrientation(Orientation orientation)
 {
-public:
-    Platter(View* pParent = 0) : Widget<PlatterView, Controller, Model>(pParent) {}
-};
+    static_cast<SplitterViewImpl*>(_pImpl)->setOrientation(orientation);
+}
 
 
-}  // namespace Omm
-}  // namespace Gui
-
-#endif
+} // namespace Gui
+} // namespace Omm

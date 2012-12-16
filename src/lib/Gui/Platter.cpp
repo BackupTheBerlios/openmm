@@ -105,7 +105,9 @@ public:
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
 //        _pClusterView->removeView(pDrag->getSource());
         if (_pView == _pClusterView) {
-            bool horizontal = pos.y() < _pPlatterView->height() / 2;
+//            bool horizontal = pos.y() < _pPlatterView->height() / 2;
+            bool horizontal = pos.y() < _pClusterView->height() / 2;
+//            bool horizontal = false;
             ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
         }
         else {
@@ -304,19 +306,22 @@ ClusterView::setCurrentTab(int index)
 ClusterView*
 ClusterView::createClusterWithView(View* pView, bool horizontalLayout)
 {
+    LOG(gui, debug, "create cluster with view: " + pView->getName());
+
     PlatterView* pPlatterView = static_cast<PlatterView*>(getParent());
 
     ClusterView* pClusterView = pPlatterView->addCluster(horizontalLayout);
     pClusterView->addView(pView, pView->getName());
     pClusterView->show();
     pView->show();
-    pPlatterView->updateLayout();
+//    pPlatterView->updateLayout();
     return pClusterView;
 }
 
 
 PlatterView::PlatterView(View* pParent, bool createCluster) :
-View(pParent, true),
+//View(pParent, true),
+SplitterView(pParent),
 _pCluster(0),
 _pFirstPlatter(0),
 _pSecondPlatter(0)
@@ -443,39 +448,49 @@ PlatterView::addCluster(bool horizontalLayout)
 
     ClusterView* pRes = _pCluster;
     if (!_pCluster) {
-        _pCluster = new ClusterView(this);
+//        _pCluster = new ClusterView(this);
+        _pCluster = new ClusterView;
         _pCluster->setName("first cluster");
+        addSubview(_pCluster);
     }
     else if (!_pFirstPlatter) {
 //        _pFirstPlatter = new PlatterView(this, false);
-        _pFirstPlatter = new PlatterView(this);
+//        _pFirstPlatter = new PlatterView(this);
+        _pFirstPlatter = new PlatterView;
+        addSubview(_pFirstPlatter);
         _pFirstPlatter->removeSubview(_pFirstPlatter->_pCluster);
+        _pFirstPlatter->_pCluster->hide();
         _pFirstPlatter->setName("first platter");
         _pFirstPlatter->addSubview(_pCluster);
         _pFirstPlatter->_pCluster = _pCluster;
         removeSubview(_pCluster);
+//        _pCluster->hide();
         _pCluster = 0;
-        _pSecondPlatter = new PlatterView(this);
+//        _pSecondPlatter = new PlatterView(this);
+        _pSecondPlatter = new PlatterView;
+        addSubview(_pSecondPlatter);
         _pSecondPlatter->setName("second platter");
         _pSecondPlatter->_pCluster->setName("second cluster");
         pRes = _pSecondPlatter->_pCluster;
         pRes->show();
         _pFirstPlatter->show();
-        _pFirstPlatter->updateLayout();
+//        _pFirstPlatter->updateLayout();
         _pSecondPlatter->show();
-        _pSecondPlatter->updateLayout();
+//        _pSecondPlatter->updateLayout();
     }
     else {
         return 0;
     }
-    if (getLayout()) {
-
-    }
+//    if (getLayout()) {
+//
+//    }
     if (horizontalLayout) {
-        setLayout(new HorizontalLayout);
+        setOrientation(Horizontal);
+//        setLayout(new HorizontalLayout);
     }
     else {
-        setLayout(new VerticalLayout);
+        setOrientation(Vertical);
+//        setLayout(new VerticalLayout);
     }
     return pRes;
 }
