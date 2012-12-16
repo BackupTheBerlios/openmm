@@ -48,7 +48,7 @@ public:
     ClusterView(PlatterView* pParent = 0);
     virtual ~ClusterView();
 
-    ClusterView* createClusterWithView(View* pView);
+    ClusterView* createClusterWithView(View* pView, bool horizontalLayout);
     void addView(View* pView, const std::string& name = "", bool show = true);
     void removeView(View* pView);
     int getTabCount();
@@ -105,7 +105,8 @@ public:
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
 //        _pClusterView->removeView(pDrag->getSource());
         if (_pView == _pClusterView) {
-            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource());
+            bool horizontal = pos.y() < _pPlatterView->height() / 2;
+            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
         }
         else {
             _pClusterView->addView(pDrag->getSource(), pDrag->getSource()->getName());
@@ -301,11 +302,11 @@ ClusterView::setCurrentTab(int index)
 
 
 ClusterView*
-ClusterView::createClusterWithView(View* pView)
+ClusterView::createClusterWithView(View* pView, bool horizontalLayout)
 {
     PlatterView* pPlatterView = static_cast<PlatterView*>(getParent());
 
-    ClusterView* pClusterView = pPlatterView->addCluster();
+    ClusterView* pClusterView = pPlatterView->addCluster(horizontalLayout);
     pClusterView->addView(pView, pView->getName());
     pClusterView->show();
     pView->show();
@@ -314,80 +315,180 @@ ClusterView::createClusterWithView(View* pView)
 }
 
 
-PlatterView::PlatterView(View* pParent) :
-View(pParent, true)
+PlatterView::PlatterView(View* pParent, bool createCluster) :
+View(pParent, true),
+_pCluster(0),
+_pFirstPlatter(0),
+_pSecondPlatter(0)
 {
     setName("platter view");
-    addCluster();
-    setLayout(new HorizontalLayout);
-//    setLayout(new VerticalLayout);
-//    setBackgroundColor(Color("blue"));
+    if (createCluster) {
+        addCluster(true);
+    }
 }
 
 
 PlatterView::~PlatterView()
 {
-    delete _clusters[0];
+//    delete _clusters[0];
+    if (!_pCluster) {
+        return;
+    }
+    delete _pCluster;
 }
 
 
 void
 PlatterView::addView(View* pView, const std::string& name, bool show)
 {
-    _clusters[0]->addView(pView, name, show);
+//    _clusters[0]->addView(pView, name, show);
+    if (!_pCluster) {
+        return;
+    }
+    _pCluster->addView(pView, name, show);
 }
 
 
 void
 PlatterView::removeView(View* pView)
 {
-    _clusters[0]->removeView(pView);
+//    _clusters[0]->removeView(pView);
+    if (!_pCluster) {
+        return;
+    }
+    _pCluster->removeView(pView);
 }
 
 
 int
 PlatterView::getTabCount()
 {
-    return _clusters[0]->getTabCount();
+//    return _clusters[0]->getTabCount();
+    if (!_pCluster) {
+        return 0;
+    }
+    return _pCluster->getTabCount();
 }
 
 
 int
 PlatterView::getCurrentTab()
 {
-    return _clusters[0]->getCurrentTab();
+//    return _clusters[0]->getCurrentTab();
+    if (!_pCluster) {
+        return -1;
+    }
+    return _pCluster->getCurrentTab();
 }
 
 
 void
 PlatterView::setTabBarHidden(bool hidden)
 {
-    return _clusters[0]->setTabBarHidden(hidden);
+//    return _clusters[0]->setTabBarHidden(hidden);
+    if (!_pCluster) {
+        return;
+    }
+    return _pCluster->setTabBarHidden(hidden);
 }
 
 
 void
 PlatterView::setCurrentView(View* pView)
 {
-    _clusters[0]->setCurrentView(pView);
+//    _clusters[0]->setCurrentView(pView);
+    if (!_pCluster) {
+        return;
+    }
+    _pCluster->setCurrentView(pView);
 }
 
 
 void
 PlatterView::setCurrentTab(int index)
 {
-    _clusters[0]->setCurrentTab(index);
+//    _clusters[0]->setCurrentTab(index);
+    if (!_pCluster) {
+        return;
+    }
+    _pCluster->setCurrentTab(index);
 }
 
 
 ClusterView*
-PlatterView::addCluster()
+PlatterView::getCluster()
 {
-    ClusterView* pClusterView = new ClusterView(this);
-    _clusters.push_back(pClusterView);
-    pClusterView->setName("cluster view " + Poco::NumberFormatter::format(_clusters.size() - 1));
-    return pClusterView;
+    return _pCluster;
 }
+
+
+PlatterView*
+PlatterView::getFirstPlatter()
+{
+    return _pFirstPlatter;
+}
+
+
+PlatterView*
+PlatterView::getSecondPlatter()
+{
+    return _pSecondPlatter;
+}
+
+
+ClusterView*
+PlatterView::addCluster(bool horizontalLayout)
+{
+    LOG(gui, debug, getName() + " add cluster");
+
+    ClusterView* pRes = _pCluster;
+    if (!_pCluster) {
+        _pCluster = new ClusterView(this);
+        _pCluster->setName("first cluster");
+    }
+    else if (!_pFirstPlatter) {
+//        _pFirstPlatter = new PlatterView(this, false);
+        _pFirstPlatter = new PlatterView(this);
+        _pFirstPlatter->removeSubview(_pFirstPlatter->_pCluster);
+        _pFirstPlatter->setName("first platter");
+        _pFirstPlatter->addSubview(_pCluster);
+        _pFirstPlatter->_pCluster = _pCluster;
+        removeSubview(_pCluster);
+        _pCluster = 0;
+        _pSecondPlatter = new PlatterView(this);
+        _pSecondPlatter->setName("second platter");
+        _pSecondPlatter->_pCluster->setName("second cluster");
+        pRes = _pSecondPlatter->_pCluster;
+        pRes->show();
+        _pFirstPlatter->show();
+        _pFirstPlatter->updateLayout();
+        _pSecondPlatter->show();
+        _pSecondPlatter->updateLayout();
+    }
+    else {
+        return 0;
+    }
+    if (getLayout()) {
+
+    }
+    if (horizontalLayout) {
+        setLayout(new HorizontalLayout);
+    }
+    else {
+        setLayout(new VerticalLayout);
+    }
+    return pRes;
+}
+
+
+//ClusterView*
+//PlatterView::addCluster()
+//{
+//    ClusterView* pClusterView = new ClusterView(this);
+//    _clusters.push_back(pClusterView);
+//    pClusterView->setName("cluster view " + Poco::NumberFormatter::format(_clusters.size() - 1));
+//    return pClusterView;
+//}
 
 
 } // namespace Gui

@@ -34,67 +34,39 @@ namespace Gui {
 void
 VerticalLayout::layoutView()
 {
-    LOG(gui, debug, "vertical layout, lay out view ...");
-
-    int minSubviewWidth = 0;
-    int minSubviewHeight = 0;
-    int prefSubviewWidth = 0;
-    int prefSubviewHeight = 0;
-    int maxSubviewWidth = 0;
-    int maxSubviewHeight = 0;
-
-    // assign subviews to rows
-    int currentCol = 0;
-    std::vector<int> subviewCol;
-
-    for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it) {
-        minSubviewWidth += (*it)->width(View::Min);
-        minSubviewHeight = std::max((*it)->height(View::Min), minSubviewHeight);
-        prefSubviewWidth += (*it)->width(View::Pref);
-        prefSubviewHeight = std::max((*it)->height(View::Pref), prefSubviewHeight);
-        maxSubviewWidth += (*it)->width(View::Max);
-        maxSubviewHeight = std::max((*it)->height(View::Max), maxSubviewHeight);
-
-        if (prefSubviewHeight > _pView->height()) {
-            currentCol++;
-            prefSubviewHeight = (*it)->height(View::Pref);
-        }
-        subviewCol.push_back(currentCol);
-    }
-
-    // stretch subviews, so that they fit exactly into each col
-    float subviewHeightSum = 0.0;
-    std::vector<float> stretchFactor;
+    // stretch subviews, so that they fit exactly into each row
+    int flexHeightSum = 0.0;
+    int fixedHeightSum = 0.0;
     int i = 0;
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
-        if (i > 0 && (subviewCol[i] != subviewCol[i-1])) {
-            stretchFactor.push_back(_pView->height() / subviewHeightSum);
-            // "newline"
-            subviewHeightSum = 0.0;
+        if ((*it)->stretchFactor() == -1.0) {
+            fixedHeightSum += (*it)->height(View::Pref);
         }
-        subviewHeightSum += (*it)->height(View::Pref) * (1 + (*it)->stretchFactor());
+        else {
+            flexHeightSum += (*it)->height(View::Pref);
+        }
     }
-    stretchFactor.push_back(_pView->height() / subviewHeightSum);
+    float subviewStretchFactor = 1.0;
+    if (_pView->height() >= fixedHeightSum) {
+        subviewStretchFactor = (float)(_pView->height() - fixedHeightSum) / flexHeightSum;
+    }
+    else {
+        subviewStretchFactor = 0.0;
+    }
 
-    int subviewWidth = prefSubviewWidth;
     int subviewHeight = 0;
-
-    // resize super view
-    _pView->resizeNoLayout((currentCol + 1) * subviewWidth, _pView->height());
 
     // layout the subviews by moving and resizing them
     i = 0;
     for (View::SubviewIterator it = _pView->beginSubview(); it != _pView->endSubview(); ++it, ++i) {
-        int height = (*it)->height(View::Pref) * (1 + (*it)->stretchFactor()) * stretchFactor[subviewCol[i]];
+//        int width = (*it)->width(View::Pref) * subviewStretchFactor * (1 + (*it)->stretchFactor());
+        int height = (*it)->height(View::Pref) * subviewStretchFactor * (*it)->stretchFactor();
         if ((*it)->stretchFactor() == -1.0) {
+//            width = (*it)->width(View::Pref) * subviewStretchFactor;
             height = (*it)->height(View::Pref);
         }
-        if (i > 0 && (subviewCol[i] != subviewCol[i-1])) {
-            // "newline"
-            subviewHeight = 0;
-        }
-        (*it)->move(subviewCol[i] * subviewWidth, subviewHeight);
-        (*it)->resize(subviewWidth, height);
+        (*it)->move(0, subviewHeight);
+        (*it)->resize(_pView->width(), height);
         subviewHeight += height;
     }
 //    LOG(gui, debug, "vertical layout, lay out view finished.");

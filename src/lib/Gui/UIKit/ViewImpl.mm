@@ -312,11 +312,11 @@ ViewImpl::addSubview(View* pView)
 }
 
 
-void
-ViewImpl::removeFromSuperview()
-{
-    [static_cast<UIView*>(getNativeView()) removeFromSuperview];
-}
+//void
+//ViewImpl::removeFromSuperview()
+//{
+//    [static_cast<UIView*>(getNativeView()) removeFromSuperview];
+//}
 
 
 void

@@ -71,7 +71,7 @@ public:
 #endif
     View* getParent();
     void addSubview(View* pView);
-    void removeFromSuperview();
+//    void removeFromSuperview();
 
     virtual void raise();
     virtual void show(bool async = true);

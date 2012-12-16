@@ -132,15 +132,15 @@ View::addSubview(View* pView)
 }
 
 
-void
-View::removeFromSuperview()
-{
-    _pImpl->removeFromSuperview();
-    if (_pParent) {
-        _pParent->removeSubview(this);
-        _pParent = 0;
-    }
-}
+//void
+//View::removeFromSuperview()
+//{
+//    _pImpl->removeFromSuperview();
+//    if (_pParent) {
+//        _pParent->removeSubview(this);
+//        _pParent = 0;
+//    }
+//}
 
 
 void

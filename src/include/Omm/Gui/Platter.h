@@ -44,7 +44,7 @@ class PlatterView : public View
     friend class ClusterView;
 
 public:
-    PlatterView(View* pParent = 0);
+    PlatterView(View* pParent = 0, bool createCluster = true);
     virtual ~PlatterView();
 
     void addView(View* pView, const std::string& name = "", bool show = true);
@@ -55,10 +55,18 @@ public:
     void setCurrentView(View* pView);
     void setCurrentTab(int index);
 
-private:
-    ClusterView* addCluster();
+    ClusterView* getCluster();
+    PlatterView* getFirstPlatter();
+    PlatterView* getSecondPlatter();
 
-    std::vector<ClusterView*>               _clusters;
+private:
+//    ClusterView* addCluster();
+    ClusterView* addCluster(bool horizontalLayout);
+
+    ClusterView*                            _pCluster;
+    PlatterView*                            _pFirstPlatter;
+    PlatterView*                            _pSecondPlatter;
+//    std::vector<ClusterView*>               _clusters;
 };
 
 
