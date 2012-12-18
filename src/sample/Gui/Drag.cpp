@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include <Poco/NumberFormatter.h>
+
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/Label.h>
 #include <Omm/Gui/Button.h>
@@ -32,16 +34,32 @@ class Application : public Omm::Gui::Application
 {
     class DragController : public Omm::Gui::Controller
     {
-        virtual void dragStarted()
-        {
-            LOGNS(Omm::Gui, gui, debug, "drag event");
-        }
+    public:
+        DragController(Omm::Gui::View* pSourceView) : _pSourceView(pSourceView) {}
 
         virtual void selected()
         {
             LOGNS(Omm::Gui, gui, debug, "select event");
         }
 
+        virtual void dragStarted()
+        {
+            LOGNS(Omm::Gui, gui, debug, "drag event");
+            Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pSourceView, _pSourceView->getModel());
+            pDrag->start();
+        }
+
+        virtual void dragMoved(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag)
+        {
+            LOGNS(Omm::Gui, gui, debug, "drag move event [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+        }
+
+        virtual void dropped(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag)
+        {
+            LOGNS(Omm::Gui, gui, debug, "drop event");
+        }
+
+        Omm::Gui::View* _pSourceView;
     };
 
 
@@ -52,21 +70,23 @@ class Application : public Omm::Gui::Application
         pSource->setLabel("Source");
         pSource->setBackgroundColor(Omm::Gui::Color("blue"));
         pSource->setAlignment(Omm::Gui::View::AlignCenter);
-        pSource->attachController(new DragController);
+        pSource->attachController(new DragController(pSource));
+        pSource->setAcceptDrops(true);
 
         Omm::Gui::Label* pTarget = new Omm::Gui::Label;
         pTarget->setName("target view");
         pTarget->setLabel("Target");
         pTarget->setBackgroundColor(Omm::Gui::Color("white"));
         pTarget->setAlignment(Omm::Gui::View::AlignCenter);
-        pTarget->attachController(new DragController);
+        pTarget->attachController(new DragController(pTarget));
+        pTarget->setAcceptDrops(true);
 
         Omm::Gui::View* pView = new Omm::Gui::View;
         pView->setName("main view");
-        pView->addSubview(pSource);
-        pView->addSubview(pTarget);
+        pSource->setParent(pView);
+        pTarget->setParent(pView);
         pView->setLayout(new Omm::Gui::VerticalLayout);
-        pView->attachController(new DragController);
+        pView->attachController(new DragController(pView));
 
         return pView;
     }

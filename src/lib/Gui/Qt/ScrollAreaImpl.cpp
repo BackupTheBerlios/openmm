@@ -33,22 +33,14 @@ namespace Omm {
 namespace Gui {
 
 
-//class QtScrollArea : public QScrollArea
-//{
-//public:
-//    virtual void scrollContentsBy(int dx, int dy)
-//    {
-//        QScrollArea::sc
-//    }
-//};
-
-
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 {
     QScrollArea* pNativeView = new QtViewImpl<QScrollArea>(this);
     ScrollAreaSignalProxy* pSignalProxy = new ScrollAreaSignalProxy(this);
 
-    _pScrollWidget = new QWidget;
+    _pAreaView = new View;
+    _pScrollWidget = static_cast<QWidget*>(_pAreaView->getNativeView());
+
     _pScrollWidget->resize(pNativeView->viewport()->size());
 //    _pScrollWidget->setPalette(QPalette(QColor(255, 255, 255)));
     pNativeView->setWidget(_pScrollWidget);
@@ -63,6 +55,13 @@ ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 
 ScrollAreaViewImpl::~ScrollAreaViewImpl()
 {
+}
+
+
+View*
+ScrollAreaViewImpl::getAreaView()
+{
+    return _pAreaView;
 }
 
 
@@ -91,27 +90,6 @@ int
 ScrollAreaViewImpl::getYOffset()
 {
     return - _pScrollWidget->geometry().y();
-}
-
-
-int
-ScrollAreaViewImpl::getScrollAreaWidth()
-{
-    return _pScrollWidget->geometry().width();
-}
-
-
-int
-ScrollAreaViewImpl::getScrollAreaHeight()
-{
-    return _pScrollWidget->geometry().height();
-}
-
-
-void
-ScrollAreaViewImpl::resizeScrollArea(int width, int height)
-{
-    _pScrollWidget->resize(width, height);
 }
 
 
@@ -148,7 +126,7 @@ ScrollAreaViewImpl::setBackgroundColor(const Color& color)
 
 
 void
-ScrollAreaViewImpl::addSubview(View* pView)
+ScrollAreaViewImpl::addView(View* pView)
 {
     static_cast<QWidget*>(pView->getNativeView())->setParent(_pScrollWidget);
 }
@@ -157,7 +135,7 @@ ScrollAreaViewImpl::addSubview(View* pView)
 void
 ScrollAreaSignalProxy::init()
 {
-    LOG(gui, debug, "button view impl, init signal proxy");
+    LOG(gui, debug, "scroll area view impl, init signal proxy");
     SignalProxy::init();
     QScrollArea* pNativeView = static_cast<QScrollArea*>(_pViewImpl->getNativeView());
     connect(pNativeView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewScrolledXSlot(int)));

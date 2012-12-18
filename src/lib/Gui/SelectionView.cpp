@@ -76,14 +76,14 @@ View(0, false)
 
 
 void
-SelectionView::setChildView(View* pParent)
+SelectionView::setParentView(View* pParent)
 {
     if (pParent) {
-        pParent->addSubview(this);
+        setParent(pParent);
 #ifdef DoNotUseSelectionViewImpl
-        pParent->addSubview(_pBottom);
-        pParent->addSubview(_pLeft);
-        pParent->addSubview(_pRight);
+        _pBottom->setParent(pParent);
+        _pLeft->setParent(pParent);
+        _pRight->setParent(pParent);
 #endif
     }
 }

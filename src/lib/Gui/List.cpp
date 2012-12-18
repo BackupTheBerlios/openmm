@@ -507,7 +507,7 @@ ListView::extendViewPool()
     }
     if (!_pSelectionView) {
         _pSelectionView = new SelectionView;
-        _pSelectionView->setChildView(this);
+        _pSelectionView->setParentView(getAreaView());
         _pSelectionView->hide(true);
     }
     else {
@@ -557,7 +557,7 @@ ListView::addItemView(View* pView)
 
     pView->resize(getViewportWidth(), getItemViewHeight());
     pView->setSizeConstraint(getViewportWidth(), getItemViewHeight(), View::Pref);
-    addSubview(pView);
+    pView->setParent(getAreaView());
 }
 
 
@@ -579,7 +579,7 @@ ListView::getOffset()
 void
 ListView::updateScrollWidgetSize(int rows)
 {
-    resizeScrollArea(getViewportWidth(), rows * getItemViewHeight());
+    getAreaView()->resize(getViewportWidth(), rows * getItemViewHeight());
     extendViewPool();
 }
 

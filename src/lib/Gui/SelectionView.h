@@ -35,7 +35,7 @@ class SelectionView : public View
 public:
     SelectionView();
 
-    void setChildView(View* pParent);
+    void setParentView(View* pParent);
 
     virtual void raise();
     virtual void show(bool async = true);

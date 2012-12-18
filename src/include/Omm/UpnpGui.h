@@ -47,7 +47,8 @@
 
 #include "Gui/Application.h"
 #include "Gui/Tab.h"
-#include "Gui/Platter.h"
+//#include "Gui/Platter.h"
+#include "Gui/Cluster.h"
 #include "Gui/Navigator.h"
 #include "Gui/ListModel.h"
 #include "Gui/List.h"
@@ -219,11 +220,12 @@ public:
 };
 
 
-#ifdef __IPHONE__
+//#ifdef __IPHONE__
 class ControllerWidget : public Controller, public Gui::Tab
-#else
-class ControllerWidget : public Controller, public Gui::Platter
-#endif
+//#else
+//class ControllerWidget : public Controller, public Gui::Platter
+//class ControllerWidget : public Controller, public Gui::Cluster
+//#endif
 {
 friend class PlaylistEditor;
 

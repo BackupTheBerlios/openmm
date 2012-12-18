@@ -31,10 +31,10 @@ class ScrollArea : public Omm::Gui::ScrollArea
 public:
     ScrollArea()
     {
-        resizeScrollArea(10000, 10000);
+        getAreaView()->resize(10000, 10000);
         label.setLabel("offset x: 0, y: 0");
         label.resize(200, 40);
-        addSubview(&label);
+        label.setParent(getAreaView());
     }
 
 

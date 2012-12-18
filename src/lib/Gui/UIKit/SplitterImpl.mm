@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2012                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,96 +19,36 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "Gui/GuiLogger.h"
-#include "Gui/Color.h"
-#include "UIDrag.h"
+#include <Poco/NumberFormatter.h>
 
+#include "SplitterImpl.h"
+#include "Gui/Splitter.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-UIDrag* UIDrag::_pInstance = 0;
 
-UIDrag*
-UIDrag::instance()
+SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
 {
-    if (!_pInstance) {
-        _pInstance = new UIDrag;
-    }
-    return _pInstance;
 }
 
 
-Drag*
-UIDrag::getDrag()
+SplitterViewImpl::~SplitterViewImpl()
 {
-    return _pDrag;
 }
 
 
 void
-UIDrag::setDrag(Drag* pDrag)
+SplitterViewImpl::addSubview(View* pView)
 {
-    _pDrag = pDrag;
-}
-
-
-View*
-UIDrag::getMainView()
-{
-    return _pMainView;
 }
 
 
 void
-UIDrag::setMainView(View* pView)
-{
-    _pMainView = pView;
-    _pPointerView = new View(_pMainView);
-    _pPointerView->hide();
-    _pPointerView->resize(20, 20);
-    _pPointerView->setBackgroundColor(Color("blue"));
-}
-
-
-View*
-UIDrag::getDropView()
-{
-    return _pDropView;
-}
-
-
-void
-UIDrag::setDropView(View* pView)
-{
-    _pDropView = pView;
-}
-
-
-View*
-UIDrag::getPointerView()
-{
-    return _pPointerView;
-}
-
-
-void
-UIDrag::setPointerView(View* pView)
-{
-    [static_cast<UIView*>(_pPointerView->getNativeView()) removeFromSuperview];
-    _pPointerView = pView;
-    _pPointerView->setParent(_pMainView);
-    _pPointerView->hide();
-}
-
-
-UIDrag::UIDrag() :
-_pDrag(0),
-_pDropView(0),
-_pPointerView(0)
+SplitterViewImpl::setOrientation(View::Orientation orientation)
 {
 }
-
 
 }  // namespace Omm
 }  // namespace Gui

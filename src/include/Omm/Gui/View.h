@@ -71,8 +71,7 @@ public:
     uint32_t getNativeWindowId();
 #endif
     View* getParent();
-    void addSubview(View* pView);
-//    void removeFromSuperview();
+    void setParent(View* pView);
 
     virtual void raise();
     virtual void show(bool async = true);
@@ -134,7 +133,7 @@ protected:
     View(View* pParent, bool createPlainView);
 
     void initView(View* pParent);
-    void removeSubview(View* pView);
+    virtual void removeSubview(View* pView);
 
     View*                       _pParent;
     std::vector<View*>          _subviews;

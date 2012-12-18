@@ -61,7 +61,8 @@ _prefHeight(70),
 _maxWidth(200),
 _maxHeight(140),
 _stretchFactor(1.0),
-_scaleFactor(1.0)
+_scaleFactor(1.0),
+_pImpl(0)
 {
 //    LOG(gui, debug, "view ctor (parent, createPlainView).");
 
@@ -123,24 +124,16 @@ View::getParent()
 
 
 void
-View::addSubview(View* pView)
+View::setParent(View* pView)
 {
-    _pImpl->addSubview(pView);
-    pView->_pParent = this;
-    _subviews.push_back(pView);
-    pView->_scaleFactor = _scaleFactor;
+    _pImpl->setParent(pView);
+    if (_pParent) {
+        _pParent->removeSubview(this);
+    }
+    _pParent = pView;
+    _pParent->_subviews.push_back(this);
+    _scaleFactor = _pParent->_scaleFactor;
 }
-
-
-//void
-//View::removeFromSuperview()
-//{
-//    _pImpl->removeFromSuperview();
-//    if (_pParent) {
-//        _pParent->removeSubview(this);
-//        _pParent = 0;
-//    }
-//}
 
 
 void

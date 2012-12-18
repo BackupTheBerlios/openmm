@@ -18,6 +18,7 @@ WebBrowserImpl.mm
 TextLineImpl.mm
 DragImpl.mm
 UIDrag.mm
+SplitterImpl.mm
 )
 
 

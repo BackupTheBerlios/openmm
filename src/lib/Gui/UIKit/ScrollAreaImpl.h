@@ -38,16 +38,17 @@ public:
     ScrollAreaViewImpl(View* pView);
     virtual ~ScrollAreaViewImpl();
 
+    View* getAreaView();
     int getViewportWidth();
     int getViewportHeight();
     int getXOffset();
     int getYOffset();
-    int getScrollAreaWidth();
-    int getScrollAreaHeight();
-    void resizeScrollArea(int width, int height);
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show);
     void viewScrolled();
+
+private:
+    View*                   _pAreaView;
 };
 
 

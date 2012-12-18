@@ -43,8 +43,7 @@ public:
     void* getNativeViewController();
     void setNativeView(void* pView);
     void raise();
-    virtual void addSubview(View* pView);
-//    virtual void removeFromSuperview();
+    void setParent(View* pView);
     virtual void showView(bool async);
     virtual void hideView(bool async);
     virtual int posXView();

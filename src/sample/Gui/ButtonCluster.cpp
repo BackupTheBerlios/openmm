@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2012                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,98 +17,39 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#include "Gui/GuiLogger.h"
-#include "Gui/Color.h"
-#include "UIDrag.h"
+#include <Poco/NumberFormatter.h>
+
+#include <Omm/Gui/Application.h>
+#include <Omm/Gui/Button.h>
+#include <Omm/Gui/Cluster.h>
 
 
-namespace Omm {
-namespace Gui {
 
-UIDrag* UIDrag::_pInstance = 0;
-
-UIDrag*
-UIDrag::instance()
+class Application : public Omm::Gui::Application
 {
-    if (!_pInstance) {
-        _pInstance = new UIDrag;
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::Cluster* pCluster = new Omm::Gui::Cluster;
+
+        const int subviewCount = 5;
+        for (int i = 0; i < subviewCount; i++) {
+            Omm::Gui::Button* pButton = new Omm::Gui::Button;
+            std::string label = "B" + Poco::NumberFormatter::format(i);
+            pButton->setName(label);
+            pButton->setLabel(label);
+            pCluster->addView(pButton, pButton->getLabel());
+        }
+
+        return pCluster;
     }
-    return _pInstance;
-}
+};
 
 
-Drag*
-UIDrag::getDrag()
+int main(int argc, char** argv)
 {
-    return _pDrag;
+    Application app;
+    return app.runEventLoop(argc, argv);
 }
 
-
-void
-UIDrag::setDrag(Drag* pDrag)
-{
-    _pDrag = pDrag;
-}
-
-
-View*
-UIDrag::getMainView()
-{
-    return _pMainView;
-}
-
-
-void
-UIDrag::setMainView(View* pView)
-{
-    _pMainView = pView;
-    _pPointerView = new View(_pMainView);
-    _pPointerView->hide();
-    _pPointerView->resize(20, 20);
-    _pPointerView->setBackgroundColor(Color("blue"));
-}
-
-
-View*
-UIDrag::getDropView()
-{
-    return _pDropView;
-}
-
-
-void
-UIDrag::setDropView(View* pView)
-{
-    _pDropView = pView;
-}
-
-
-View*
-UIDrag::getPointerView()
-{
-    return _pPointerView;
-}
-
-
-void
-UIDrag::setPointerView(View* pView)
-{
-    [static_cast<UIView*>(_pPointerView->getNativeView()) removeFromSuperview];
-    _pPointerView = pView;
-    _pPointerView->setParent(_pMainView);
-    _pPointerView->hide();
-}
-
-
-UIDrag::UIDrag() :
-_pDrag(0),
-_pDropView(0),
-_pPointerView(0)
-{
-}
-
-
-}  // namespace Omm
-}  // namespace Gui

@@ -67,15 +67,76 @@ namespace Omm {
 namespace Gui {
 
 
+class AreaViewImpl : public ViewImpl
+{
+public:
+    AreaViewImpl(View* pView, UIScrollView* pNativeView);
+
+    virtual int widthView();
+    virtual int heightView();
+    virtual void resizeView(int width, int height);
+};
+
+
+AreaViewImpl::AreaViewImpl(View* pView, UIScrollView* pNativeView)
+{
+    initViewImpl(pView, pNativeView);
+}
+
+
+int
+AreaViewImpl::widthView()
+{
+    return static_cast<UIScrollView*>(getNativeView()).contentSize.width;
+}
+
+
+int
+AreaViewImpl::heightView()
+{
+    return static_cast<UIScrollView*>(getNativeView()).contentSize.height;
+}
+
+
+void
+AreaViewImpl::resizeView(int width, int height)
+{
+    static_cast<UIScrollView*>(getNativeView()).contentSize = CGSizeMake(width, height);
+}
+
+
+class AreaView : public View
+{
+public:
+    AreaView(View* pParent, UIScrollView* pNativeView);
+};
+
+
+AreaView::AreaView(View* pParent, UIScrollView* pNativeView) :
+View(pParent, false)
+{
+    _pImpl = new AreaViewImpl(this, pNativeView);
+}
+
+
 ScrollAreaViewImpl::ScrollAreaViewImpl(View* pView)
 {
     OmmGuiScrollView* pNativeView = [[OmmGuiScrollView alloc] initWithImpl:this];
     initViewImpl(pView, pNativeView);
+//    _pAreaView = new AreaView(pView->getParent(), pNativeView);
+    _pAreaView = new AreaView(0, pNativeView);
 }
 
 
 ScrollAreaViewImpl::~ScrollAreaViewImpl()
 {
+}
+
+
+View*
+ScrollAreaViewImpl::getAreaView()
+{
+    return _pAreaView;
 }
 
 
@@ -104,27 +165,6 @@ int
 ScrollAreaViewImpl::getYOffset()
 {
     return static_cast<UIScrollView*>(getNativeView()).contentOffset.y;
-}
-
-
-int
-ScrollAreaViewImpl::getScrollAreaWidth()
-{
-    return static_cast<UIScrollView*>(getNativeView()).contentSize.width;
-}
-
-
-int
-ScrollAreaViewImpl::getScrollAreaHeight()
-{
-    return static_cast<UIScrollView*>(getNativeView()).contentSize.height;
-}
-
-
-void
-ScrollAreaViewImpl::resizeScrollArea(int width, int height)
-{
-    static_cast<UIScrollView*>(getNativeView()).contentSize = CGSizeMake(width, height);
 }
 
 

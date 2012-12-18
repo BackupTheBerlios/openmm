@@ -25,7 +25,7 @@
 
 #include "Log.h"
 #include "Gui/GuiLogger.h"
-#include "Gui/Platter.h"
+#include "Gui/Cluster.h"
 #include "Gui/Layout.h"
 #include "Gui/HorizontalLayout.h"
 #include "Gui/VerticalLayout.h"
@@ -39,40 +39,40 @@ namespace Omm {
 namespace Gui {
 
 
-class ClusterView : public View
-{
-    friend class ClusterViewImpl;
-    friend class ClusterStackedLayout;
-
-public:
-    ClusterView(PlatterView* pParent = 0);
-    virtual ~ClusterView();
-
-    ClusterView* createClusterWithView(View* pView, bool horizontalLayout);
-    void addView(View* pView, const std::string& name = "", bool show = true);
-    void removeView(View* pView);
-    int getTabCount();
-    int getCurrentTab();
-    const int getHandleHeight() const;
-    void setTabBarHidden(bool hidden = true);
-    void setCurrentView(View* pView);
-    void setCurrentTab(int index);
-
-private:
-    PlatterView*                        _pPlatterView;
-    int                                 _handleHeight;
-    int                                 _handleWidth;
-    bool                                _handleBarHidden;
-    std::map<View*, ListItemView*>      _handles;
-    std::vector<View*>                  _views;
-    int                                 _currentView;
-};
+//class ClusterView : public View
+//{
+//    friend class ClusterViewImpl;
+//    friend class ClusterStackedLayout;
+//
+//public:
+//    ClusterView(ClusterView* pParent = 0);
+//    virtual ~ClusterView();
+//
+//    ClusterView* createClusterWithView(View* pView, bool horizontalLayout);
+//    void addView(View* pView, const std::string& name = "", bool show = true);
+//    void removeView(View* pView);
+//    int getTabCount();
+//    int getCurrentTab();
+//    const int getHandleHeight() const;
+//    void setTabBarHidden(bool hidden = true);
+//    void setCurrentView(View* pView);
+//    void setCurrentTab(int index);
+//
+//private:
+//    ClusterView*                        _pClusterView;
+//    int                                 _handleHeight;
+//    int                                 _handleWidth;
+//    bool                                _handleBarHidden;
+//    std::map<View*, ListItemView*>      _handles;
+//    std::vector<View*>                  _views;
+//    int                                 _currentView;
+//};
 
 
 class ClusterController : public Controller
 {
 public:
-    ClusterController(PlatterView* pPlatterView, ClusterView* pClusterView, View* pView) : _pPlatterView(pPlatterView), _pClusterView(pClusterView), _pView(pView) {}
+    ClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
 
     virtual void dragStarted()
     {
@@ -108,8 +108,8 @@ public:
         if (_pView == _pClusterView) {
             // dropped onto a cluster view
             bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
-            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
-            pClusterView->updateLayout();
+//            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
+//            pClusterView->updateLayout();
         }
         else {
             // dropped onto a handle
@@ -121,7 +121,7 @@ public:
     }
 
 private:
-    PlatterView*    _pPlatterView;
+//    ClusterView*    _pClusterView;
     ClusterView*    _pClusterView;
     View*           _pView;
 };
@@ -182,16 +182,16 @@ private:
 };
 
 
-ClusterView::ClusterView(PlatterView* pParent) :
+ClusterView::ClusterView(View* pParent) :
 View(pParent, true),
-_pPlatterView(pParent),
+//_pClusterView(pParent),
 _handleHeight(25),
 _handleWidth(150),
 _handleBarHidden(false),
 _currentView(-1)
 {
     setAcceptDrops(true);
-    attachController(new ClusterController(pParent, this, this));
+    attachController(new ClusterController(this, this));
     setLayout(new ClusterStackedLayout);
 }
 
@@ -206,7 +206,7 @@ ClusterView::addView(View* pView, const std::string& name, bool show)
 {
     if (show) {
         LOG(gui, debug, "cluster add view: " + name);
-        addSubview(pView);
+        pView->setParent(this);
         pView->resize(width(), height() - _handleHeight);
         pView->move(0, _handleHeight);
 
@@ -221,7 +221,7 @@ ClusterView::addView(View* pView, const std::string& name, bool show)
         HandleController* pHandleController = new HandleController(this, pView);
         pHandle->attachController(pHandleController);
         pHandle->setAcceptDrops(true);
-        pHandle->attachController(new ClusterController(_pPlatterView, this, pView));
+        pHandle->attachController(new ClusterController(this, pView));
         pHandle->show();
 
         _handles[pView] = pHandle;
@@ -312,190 +312,185 @@ ClusterView::setCurrentTab(int index)
 }
 
 
-ClusterView*
-ClusterView::createClusterWithView(View* pView, bool horizontalLayout)
-{
-    LOG(gui, debug, "create cluster with view: " + pView->getName());
-
-    PlatterView* pPlatterView = static_cast<PlatterView*>(getParent());
-
-    ClusterView* pClusterView = pPlatterView->addCluster(horizontalLayout);
-    pClusterView->addView(pView, pView->getName());
-    pClusterView->show();
-    pView->show();
-//    pPlatterView->updateLayout();
-    return pClusterView;
-}
-
-
-PlatterView::PlatterView(View* pParent, bool createCluster) :
-//View(pParent, true),
-SplitterView(pParent),
-_pCluster(0),
-_pFirstPlatter(0),
-_pSecondPlatter(0)
-{
-    setName("platter view");
-    if (createCluster) {
-        addCluster(true);
-    }
-}
-
-
-PlatterView::~PlatterView()
-{
-    if (!_pCluster) {
-        return;
-    }
-    delete _pCluster;
-}
-
-
 void
-PlatterView::addView(View* pView, const std::string& name, bool show)
+ClusterView::syncViewImpl()
 {
-    if (!_pCluster) {
-        return;
-    }
-    _pCluster->addView(pView, name, show);
+    LOG(gui, debug, "cluster sync view impl");
+
+    ClusterModel* pModel = static_cast<ClusterModel*>(_pModel);
 }
 
 
-void
-PlatterView::removeView(View* pView)
-{
-    if (!_pCluster) {
-        return;
-    }
-    _pCluster->removeView(pView);
-}
 
 
-int
-PlatterView::getTabCount()
-{
-    if (!_pCluster) {
-        return 0;
-    }
-    return _pCluster->getTabCount();
-}
 
 
-int
-PlatterView::getCurrentTab()
-{
-    if (!_pCluster) {
-        return -1;
-    }
-    return _pCluster->getCurrentTab();
-}
 
 
-void
-PlatterView::setTabBarHidden(bool hidden)
-{
-    if (!_pCluster) {
-        return;
-    }
-    return _pCluster->setTabBarHidden(hidden);
-}
-
-
-void
-PlatterView::setCurrentView(View* pView)
-{
-    if (!_pCluster) {
-        return;
-    }
-    _pCluster->setCurrentView(pView);
-}
-
-
-void
-PlatterView::setCurrentTab(int index)
-{
-    if (!_pCluster) {
-        return;
-    }
-    _pCluster->setCurrentTab(index);
-}
-
-
-ClusterView*
-PlatterView::getCluster()
-{
-    return _pCluster;
-}
-
-
-PlatterView*
-PlatterView::getFirstPlatter()
-{
-    return _pFirstPlatter;
-}
-
-
-PlatterView*
-PlatterView::getSecondPlatter()
-{
-    return _pSecondPlatter;
-}
-
-
-ClusterView*
-PlatterView::addCluster(bool horizontalLayout)
-{
-    LOG(gui, debug, getName() + " add cluster");
-
-    ClusterView* pRes = _pCluster;
-    if (!_pCluster) {
-//        _pCluster = new ClusterView(this);
-        _pCluster = new ClusterView;
-        _pCluster->setName("first cluster");
-        addSubview(_pCluster);
-    }
-    else if (!_pFirstPlatter) {
-//        _pFirstPlatter = new PlatterView(this, false);
-//        _pFirstPlatter = new PlatterView(this);
-        _pFirstPlatter = new PlatterView;
-        addSubview(_pFirstPlatter);
-        _pFirstPlatter->removeSubview(_pFirstPlatter->_pCluster);
-        _pFirstPlatter->_pCluster->hide();
-        _pFirstPlatter->setName("first platter");
-        _pFirstPlatter->addSubview(_pCluster);
-        _pFirstPlatter->_pCluster = _pCluster;
-        removeSubview(_pCluster);
-//        _pCluster->hide();
-        _pCluster = 0;
-//        _pSecondPlatter = new PlatterView(this);
-        _pSecondPlatter = new PlatterView;
-        addSubview(_pSecondPlatter);
-        _pSecondPlatter->setName("second platter");
-        _pSecondPlatter->_pCluster->setName("second cluster");
-        pRes = _pSecondPlatter->_pCluster;
-        pRes->show();
-        _pFirstPlatter->show();
-        _pFirstPlatter->_pCluster->updateLayout();
-        _pSecondPlatter->show();
-        _pSecondPlatter->_pCluster->show();
-        _pSecondPlatter->_pCluster->updateLayout();
-    }
-    else {
-        return 0;
-    }
-//    if (getLayout()) {
+//ClusterView*
+//ClusterView::createClusterWithView(View* pView, bool horizontalLayout)
+//{
+//    LOG(gui, debug, "create cluster with view: " + pView->getName());
 //
+//    ClusterView* pClusterView = static_cast<ClusterView*>(getParent());
+//
+//    ClusterView* pClusterView = pClusterView->addCluster(horizontalLayout);
+//    pClusterView->addView(pView, pView->getName());
+//    pClusterView->show();
+//    pView->show();
+////    pClusterView->updateLayout();
+//    return pClusterView;
+//}
+
+
+//const std::string ClusterView::Flat("FlatClusterView");
+//const std::string ClusterView::Tree("TreeClusterView");
+
+//ClusterView::ClusterView(View* pParent) :
+////View(pParent, true),
+//SplitterView(pParent),
+//_pCluster(0),
+//_pFirstCluster(0),
+//_pSecondCluster(0)
+//{
+//    setName("platter view");
+//    addCluster(true);
+//}
+//
+//
+//ClusterView::~ClusterView()
+//{
+//    if (!_pCluster) {
+//        return;
 //    }
-    if (horizontalLayout) {
-        setOrientation(Horizontal);
-//        setLayout(new HorizontalLayout);
-    }
-    else {
-        setOrientation(Vertical);
-//        setLayout(new VerticalLayout);
-    }
-    return pRes;
-}
+//    delete _pCluster;
+//}
+//
+//
+//void
+//ClusterView::addView(View* pView, const std::string& name, bool show)
+//{
+//    if (!_pCluster) {
+//        return;
+//    }
+//    _pCluster->addView(pView, name, show);
+//}
+//
+//
+//void
+//ClusterView::removeView(View* pView)
+//{
+//    if (!_pCluster) {
+//        return;
+//    }
+//    _pCluster->removeView(pView);
+//}
+//
+//
+//int
+//ClusterView::getTabCount()
+//{
+//    if (!_pCluster) {
+//        return 0;
+//    }
+//    return _pCluster->getTabCount();
+//}
+//
+//
+//int
+//ClusterView::getCurrentTab()
+//{
+//    if (!_pCluster) {
+//        return -1;
+//    }
+//    return _pCluster->getCurrentTab();
+//}
+//
+//
+//void
+//ClusterView::setTabBarHidden(bool hidden)
+//{
+//    if (!_pCluster) {
+//        return;
+//    }
+//    return _pCluster->setTabBarHidden(hidden);
+//}
+//
+//
+//void
+//ClusterView::setCurrentView(View* pView)
+//{
+//    if (!_pCluster) {
+//        return;
+//    }
+//    _pCluster->setCurrentView(pView);
+//}
+//
+//
+//void
+//ClusterView::setCurrentTab(int index)
+//{
+//    if (!_pCluster) {
+//        return;
+//    }
+//    _pCluster->setCurrentTab(index);
+//}
+//
+//
+//ClusterView*
+//ClusterView::addCluster(bool horizontalLayout)
+//{
+//    LOG(gui, debug, getName() + " add cluster");
+//
+//    ClusterView* pRes = _pCluster;
+//    if (!_pCluster) {
+////        _pCluster = new ClusterView(this);
+//        _pCluster = new ClusterView;
+//        _pCluster->setName("first cluster");
+//        addSubview(_pCluster);
+//    }
+//    else if (!_pFirstCluster) {
+////        _pFirstCluster = new ClusterView(this, false);
+////        _pFirstCluster = new ClusterView(this);
+//        _pFirstCluster = new ClusterView;
+//        addSubview(_pFirstCluster);
+//        _pFirstCluster->removeSubview(_pFirstCluster->_pCluster);
+//        _pFirstCluster->_pCluster->hide();
+//        _pFirstCluster->setName("first platter");
+//        _pFirstCluster->addSubview(_pCluster);
+//        _pFirstCluster->_pCluster = _pCluster;
+//        removeSubview(_pCluster);
+////        _pCluster->hide();
+//        _pCluster = 0;
+////        _pSecondCluster = new ClusterView(this);
+//        _pSecondCluster = new ClusterView;
+//        addSubview(_pSecondCluster);
+//        _pSecondCluster->setName("second platter");
+//        _pSecondCluster->_pCluster->setName("second cluster");
+//        pRes = _pSecondCluster->_pCluster;
+//        pRes->show();
+//        _pFirstCluster->show();
+//        _pFirstCluster->_pCluster->updateLayout();
+//        _pSecondCluster->show();
+//        _pSecondCluster->_pCluster->show();
+//        _pSecondCluster->_pCluster->updateLayout();
+//    }
+//    else {
+//        return 0;
+//    }
+////    if (getLayout()) {
+////
+////    }
+//    if (horizontalLayout) {
+//        setOrientation(Horizontal);
+////        setLayout(new HorizontalLayout);
+//    }
+//    else {
+//        setOrientation(Vertical);
+////        setLayout(new VerticalLayout);
+//    }
+//    return pRes;
+//}
 
 
 } // namespace Gui

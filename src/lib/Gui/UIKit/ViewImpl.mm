@@ -306,17 +306,11 @@ ViewImpl::raise()
 
 
 void
-ViewImpl::addSubview(View* pView)
+ViewImpl::setParent(View* pView)
 {
-    [static_cast<UIView*>(getNativeView()) addSubview:static_cast<UIView*>(pView->getNativeView())];
+    [static_cast<UIView*>(_pNativeView) removeFromSuperview];
+    [static_cast<UIView*>(pView->getNativeView()) addSubview:static_cast<UIView*>(_pNativeView)];
 }
-
-
-//void
-//ViewImpl::removeFromSuperview()
-//{
-//    [static_cast<UIView*>(getNativeView()) removeFromSuperview];
-//}
 
 
 void

@@ -39,6 +39,13 @@ View(pParent, false)
 }
 
 
+View*
+ScrollAreaView::getAreaView()
+{
+    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getAreaView();
+}
+
+
 int
 ScrollAreaView::getViewportWidth()
 {
@@ -67,27 +74,6 @@ ScrollAreaView::getYOffset()
 }
 
 
-int
-ScrollAreaView::getScrollAreaWidth()
-{
-    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getScrollAreaWidth();
-}
-
-
-int
-ScrollAreaView::getScrollAreaHeight()
-{
-    return static_cast<ScrollAreaViewImpl*>(_pImpl)->getScrollAreaHeight();
-}
-
-
-void
-ScrollAreaView::resizeScrollArea(int width, int height)
-{
-    static_cast<ScrollAreaViewImpl*>(_pImpl)->resizeScrollArea(width, height);
-}
-
-
 void
 ScrollAreaView::scrollContentsTo(int x, int y)
 {
@@ -102,13 +88,6 @@ ScrollAreaView::showScrollBars(bool show)
 {
     static_cast<ScrollAreaViewImpl*>(_pImpl)->showScrollBars(show);
 }
-
-
-//void
-//ScrollAreaView::setBackgroundColor(const Color& color)
-//{
-//    static_cast<ScrollAreaViewImpl*>(_pImpl)->setBackgroundColor(color);
-//}
 
 
 } // namespace Gui

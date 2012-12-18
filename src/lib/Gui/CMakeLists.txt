@@ -33,8 +33,9 @@ WebBrowser.cpp
 TextLine.cpp
 Drag.cpp
 SelectionView.cpp
-Platter.cpp
+#Platter.cpp
 Splitter.cpp
+Cluster.cpp
 )
 
 target_link_libraries(ommgui

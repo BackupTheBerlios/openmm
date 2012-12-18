@@ -178,10 +178,19 @@ ${OMM_GUI}
 )
 
 
-add_executable(platter
-Platter.cpp
+#add_executable(platter
+#Platter.cpp
+#)
+#
+#target_link_libraries(platter
+#${OMM_GUI}
+#)
+
+
+add_executable(buttoncluster
+ButtonCluster.cpp
 )
 
-target_link_libraries(platter
+target_link_libraries(buttoncluster
 ${OMM_GUI}
 )

@@ -123,17 +123,10 @@ ViewImpl::raise()
 
 
 void
-ViewImpl::addSubview(View* pView)
+ViewImpl::setParent(View* pView)
 {
-    static_cast<QWidget*>(pView->getNativeView())->setParent(_pNativeView);
+    _pNativeView->setParent(static_cast<QWidget*>(pView->getNativeView()));
 }
-
-
-//void
-//ViewImpl::removeFromSuperview()
-//{
-//    static_cast<QWidget*>(getNativeView())->setParent(0);
-//}
 
 
 void

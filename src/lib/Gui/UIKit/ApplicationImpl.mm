@@ -54,7 +54,7 @@
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
     Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
     if (Omm::Gui::ApplicationImpl::_pToolBar) {
-        _pMainView->addSubview(Omm::Gui::ApplicationImpl::_pToolBar);
+        Omm::Gui::ApplicationImpl::_pToolBar->setParent(_pMainView);
         int toolBarHeight = _pMainView->height() / 4;
         Omm::Gui::ApplicationImpl::_pToolBar->resize(_pMainView->width(), toolBarHeight);
         Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height());

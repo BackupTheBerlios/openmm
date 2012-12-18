@@ -43,16 +43,13 @@ class ScrollAreaView : public View
 public:
     ScrollAreaView(View* pParent = 0);
 
+    View* getAreaView();
     int getViewportWidth();
     int getViewportHeight();
     int getXOffset();
     int getYOffset();
-    int getScrollAreaWidth();
-    int getScrollAreaHeight();
-    void resizeScrollArea(int width, int height);
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show = true);
-//    void setBackgroundColor(const Color& color);
 };
 
 

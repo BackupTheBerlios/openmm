@@ -41,21 +41,20 @@ public:
     virtual ~ScrollAreaViewImpl();
 
 protected:
+    View* getAreaView();
     int getViewportWidth();
     int getViewportHeight();
     int getXOffset();
     int getYOffset();
-    int getScrollAreaWidth();
-    int getScrollAreaHeight();
-    void resizeScrollArea(int width, int height);
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show);
     virtual void setBackgroundColor(const Color& color);
     // need to override addSubview to operate on widget inside QScrollArea
-    virtual void addSubview(View* pView);
+    void addView(View* pView);
 
 private:
-    QWidget*                 _pScrollWidget;
+    View*                   _pAreaView;
+    QWidget*                _pScrollWidget;
 };
 
 
