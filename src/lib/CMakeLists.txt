@@ -230,13 +230,25 @@ Upnp/UpnpGui.cpp
 ${OMM_RESOURCES}
 )
 
+#if(IPHONE)
+#target_link_libraries(ommupnpgui
+#ommsys
+#ommutil
+#ommupnp
+#ommupnpav
+#ommgui
+#)
+#elseif(IPHONE)
 target_link_libraries(ommupnpgui
 ommsys
 ommutil
 ommupnp
 ommupnpav
 ommgui
+ommx-engine-vlc
 )
+#endif(IPHONE)
+
 
 set(OMM_UPNPGUI
 ommupnpgui

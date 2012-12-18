@@ -200,8 +200,6 @@ View::width(SizeConstraint size)
 int
 View::height(SizeConstraint size)
 {
-    LOG(gui, debug, "view height()");
-//    LOG(gui, debug, "view height(), _pImpl: " + Poco::NumberFormatter::format(_pImpl));
     switch(size) {
         case Current:
             return _pImpl->heightView();

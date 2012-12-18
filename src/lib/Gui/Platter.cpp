@@ -53,6 +53,7 @@ public:
     void removeView(View* pView);
     int getTabCount();
     int getCurrentTab();
+    const int getHandleHeight() const;
     void setTabBarHidden(bool hidden = true);
     void setCurrentView(View* pView);
     void setCurrentTab(int index);
@@ -105,10 +106,9 @@ public:
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
 //        _pClusterView->removeView(pDrag->getSource());
         if (_pView == _pClusterView) {
-//            bool horizontal = pos.y() < _pPlatterView->height() / 2;
-            bool horizontal = pos.y() < _pClusterView->height() / 2;
-//            bool horizontal = false;
+            bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
             ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
+            pClusterView->updateLayout();
         }
         else {
             _pClusterView->addView(pDrag->getSource(), pDrag->getSource()->getName());
@@ -267,6 +267,13 @@ ClusterView::getCurrentTab()
 }
 
 
+const int
+ClusterView::getHandleHeight() const
+{
+    return _handleHeight;
+}
+
+
 void
 ClusterView::setTabBarHidden(bool hidden)
 {
@@ -335,7 +342,6 @@ _pSecondPlatter(0)
 
 PlatterView::~PlatterView()
 {
-//    delete _clusters[0];
     if (!_pCluster) {
         return;
     }
@@ -346,7 +352,6 @@ PlatterView::~PlatterView()
 void
 PlatterView::addView(View* pView, const std::string& name, bool show)
 {
-//    _clusters[0]->addView(pView, name, show);
     if (!_pCluster) {
         return;
     }
@@ -357,7 +362,6 @@ PlatterView::addView(View* pView, const std::string& name, bool show)
 void
 PlatterView::removeView(View* pView)
 {
-//    _clusters[0]->removeView(pView);
     if (!_pCluster) {
         return;
     }
@@ -368,7 +372,6 @@ PlatterView::removeView(View* pView)
 int
 PlatterView::getTabCount()
 {
-//    return _clusters[0]->getTabCount();
     if (!_pCluster) {
         return 0;
     }
@@ -379,7 +382,6 @@ PlatterView::getTabCount()
 int
 PlatterView::getCurrentTab()
 {
-//    return _clusters[0]->getCurrentTab();
     if (!_pCluster) {
         return -1;
     }
@@ -390,7 +392,6 @@ PlatterView::getCurrentTab()
 void
 PlatterView::setTabBarHidden(bool hidden)
 {
-//    return _clusters[0]->setTabBarHidden(hidden);
     if (!_pCluster) {
         return;
     }
@@ -401,7 +402,6 @@ PlatterView::setTabBarHidden(bool hidden)
 void
 PlatterView::setCurrentView(View* pView)
 {
-//    _clusters[0]->setCurrentView(pView);
     if (!_pCluster) {
         return;
     }
@@ -412,7 +412,6 @@ PlatterView::setCurrentView(View* pView)
 void
 PlatterView::setCurrentTab(int index)
 {
-//    _clusters[0]->setCurrentTab(index);
     if (!_pCluster) {
         return;
     }
@@ -474,9 +473,10 @@ PlatterView::addCluster(bool horizontalLayout)
         pRes = _pSecondPlatter->_pCluster;
         pRes->show();
         _pFirstPlatter->show();
-//        _pFirstPlatter->updateLayout();
+        _pFirstPlatter->_pCluster->updateLayout();
         _pSecondPlatter->show();
-//        _pSecondPlatter->updateLayout();
+        _pSecondPlatter->_pCluster->show();
+        _pSecondPlatter->_pCluster->updateLayout();
     }
     else {
         return 0;
@@ -494,16 +494,6 @@ PlatterView::addCluster(bool horizontalLayout)
     }
     return pRes;
 }
-
-
-//ClusterView*
-//PlatterView::addCluster()
-//{
-//    ClusterView* pClusterView = new ClusterView(this);
-//    _clusters.push_back(pClusterView);
-//    pClusterView->setName("cluster view " + Poco::NumberFormatter::format(_clusters.size() - 1));
-//    return pClusterView;
-//}
 
 
 } // namespace Gui

@@ -189,7 +189,7 @@ ViewImpl::widthView()
 int
 ViewImpl::heightView()
 {
-    LOG(gui, debug, "view impl height.");
+//    LOG(gui, debug, "view impl height.");
     return _pNativeView->height();
 }
 
@@ -347,7 +347,7 @@ ViewImpl::keyPressed(int key)
         case Qt::Key_X:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyX);
             break;
-#if (QT_VERSION & 0xFFFFFFFF) > 0x040500
+#if (QT_VERSION & 0xFFFFFFFF) >= 0x040700
         case Qt::Key_MediaPause:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPause);
             break;

@@ -21,6 +21,38 @@ include(InstallRequiredSystemLibraries)
 set(CPACK_GENERATOR
 "TGZ;NSIS"
 )
+elseif(MACOSX)
+set(CPACK_GENERATOR
+"TGZ"
+#"Bundle"
+)
+set(CPACK_PACKAGE_FILE_NAME # provides the name of the final compressed disk image (the name of the file that is distributed).
+"Omm"
+)
+set(CPACK_PACKAGE_ICON # provides the icon for the mounted disk image (appears after the user mounts the disk image).
+${CMAKE_CURRENT_SOURCE_DIR}/src/lib/img/omm.png
+)
+set(CPACK_BUNDLE_NAME # provides the bundle name (displayed in the finder underneath the bundle icon).
+"Omm"
+)
+set(CPACK_BUNDLE_ICON # provides the bundle icon (displayed in the /Applications folder, on the dock, etc).
+${CMAKE_CURRENT_SOURCE_DIR}/src/lib/img/omm.png
+)
+set(CPACK_BUNDLE_PLIST # path to a file that will become the bundle plist.
+"${CMAKE_CURRENT_BINARY_DIR}/src/app/omm/info.plist"
+)
+set(CPACK_BUNDLE_STARTUP_COMMAND # path to a file that will be executed when the user opens the bundle. Could be a shell-script or a binary.
+"${CMAKE_CURRENT_BINARY_DIR}/src/app/omm/omm"
+)
+file(GLOB MACOSX_DYLIBS ${STAGING_DIR}/lib/*.dylib)
+message(STATUS "packing macosx dylibs: ${MACOSX_DYLIBS}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+${MACOSX_DYLIBS}
+)
+set(CPACK_INSTALLED_DIRECTORIES
+"${STAGING_DIR}/bin/plugins;bin/plugins"
+)
+include(InstallRequiredSystemLibraries)
 endif(LINUX)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS

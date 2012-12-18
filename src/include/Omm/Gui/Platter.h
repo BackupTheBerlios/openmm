@@ -61,13 +61,11 @@ public:
     PlatterView* getSecondPlatter();
 
 private:
-//    ClusterView* addCluster();
     ClusterView* addCluster(bool horizontalLayout);
 
     ClusterView*                            _pCluster;
     PlatterView*                            _pFirstPlatter;
     PlatterView*                            _pSecondPlatter;
-//    std::vector<ClusterView*>               _clusters;
 };
 
 
