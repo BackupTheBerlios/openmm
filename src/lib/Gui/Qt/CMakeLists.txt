@@ -25,6 +25,7 @@ LabelImpl.cpp
 ButtonImpl.cpp
 ScrollAreaImpl.cpp
 TabImpl.cpp
+ClusterImpl.cpp
 NavigatorImpl.cpp
 SliderImpl.cpp
 ImageImpl.cpp

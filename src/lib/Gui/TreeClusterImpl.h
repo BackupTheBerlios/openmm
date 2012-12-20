@@ -19,28 +19,56 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef SplitterImpl_INCLUDED
-#define SplitterImpl_INCLUDED
+#ifndef TreeClusterImpl_INCLUDED
+#define TreeClusterImpl_INCLUDED
 
+#include <map>
+#include <vector>
+
+#include "Gui/View.h"
 #include "ViewImpl.h"
+#include "SplitterImpl.h"
+#include "AbstractClusterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
 
-class SplitterViewImpl : public ViewImpl
+class SplitterView;
+
+
+//class TreeClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
+class TreeClusterViewImpl : public AbstractClusterViewImpl, public SplitterViewImpl
 {
-    friend class SplitterView;
-    friend class TreeClusterViewImpl;
+    friend class TreeClusterController;
+
+public:
+    TreeClusterViewImpl(View* pView, bool createInitialCluster = true);
+
+    virtual void init();
+    virtual void insertView(View* pView, const std::string& name = "", int index = 0);
+    virtual void removeView(View* pView);
+    virtual int getViewCount();
+    virtual int getCurrentViewIndex(); /// current view has focus
+    virtual void setCurrentViewIndex(int index);
+    virtual int getIndexFromView(View* pView);
+
+    virtual void setHandlesHidden(bool hidden = true);
+    virtual const int getHandleHeight();
 
 private:
-    SplitterViewImpl(View* pView, View::Orientation orientation);
-    ~SplitterViewImpl();
+    void split(bool horizontal);
+    void moveFirstCluster();
+    void updateClusterController();
+    void updateLayout();
 
-//    virtual void addSubview(View* pView);
+    bool                                _createInitialCluster;
+    ClusterView*                        _pCluster;
+    ClusterView*                        _pFirstCluster;
+    ClusterView*                        _pSecondCluster;
 
-    void setOrientation(View::Orientation orientation);
+    static int                          _genericClusterNumber;
+    static int                          _treeClusterNumber;
 };
 
 
@@ -48,4 +76,3 @@ private:
 }  // namespace Gui
 
 #endif
-

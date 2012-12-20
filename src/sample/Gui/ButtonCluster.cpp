@@ -31,7 +31,9 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        Omm::Gui::Cluster* pCluster = new Omm::Gui::Cluster;
+//        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView;
+//        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Generic);
+        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Tree);
 
         const int subviewCount = 5;
         for (int i = 0; i < subviewCount; i++) {
@@ -39,7 +41,7 @@ class Application : public Omm::Gui::Application
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
-            pCluster->addView(pButton, pButton->getLabel());
+            pCluster->insertView(pButton, pButton->getLabel());
         }
 
         return pCluster;

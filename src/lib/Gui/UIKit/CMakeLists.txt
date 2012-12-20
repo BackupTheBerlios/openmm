@@ -11,6 +11,7 @@ LabelImpl.mm
 ButtonImpl.mm
 ScrollAreaImpl.mm
 TabImpl.mm
+ClusterImpl.mm
 NavigatorImpl.mm
 SliderImpl.mm
 ImageImpl.mm

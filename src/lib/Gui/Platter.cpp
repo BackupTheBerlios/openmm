@@ -169,15 +169,15 @@ ClusterStackedLayout::layoutViewEquiDistant()
 class HandleController : public Controller
 {
 public:
-    HandleController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
+    HandleController(ClusterView* pClusterView, View* pView) : _pClusterViewImpl(pClusterView), _pView(pView) {}
 
     virtual void selected()
     {
-        _pClusterView->setCurrentView(_pView);
+        _pClusterViewImpl->setCurrentView(_pView);
     }
 
 private:
-    ClusterView*    _pClusterView;
+    ClusterView*    _pClusterViewImpl;
     View*           _pView;
 };
 

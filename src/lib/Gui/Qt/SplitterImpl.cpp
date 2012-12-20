@@ -37,7 +37,7 @@ SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
     QSplitter* pNativeView = new QSplitter;
 
     initViewImpl(pView, pNativeView);
-    
+
     if (orientation == View::Vertical) {
         pNativeView->setOrientation(Qt::Vertical);
     }
@@ -49,11 +49,11 @@ SplitterViewImpl::~SplitterViewImpl()
 }
 
 
-void
-SplitterViewImpl::addSubview(View* pView)
-{
-    static_cast<QSplitter*>(_pNativeView)->addWidget(static_cast<QWidget*>(pView->getNativeView()));
-}
+//void
+//SplitterViewImpl::addSubview(View* pView)
+//{
+//    static_cast<QSplitter*>(_pNativeView)->addWidget(static_cast<QWidget*>(pView->getNativeView()));
+//}
 
 
 void

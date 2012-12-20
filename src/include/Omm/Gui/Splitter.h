@@ -37,6 +37,9 @@ public:
     SplitterView(View* pParent = 0, Orientation orientation = Horizontal);
 
     void setOrientation(Orientation orientation);
+
+private:
+
 };
 
 

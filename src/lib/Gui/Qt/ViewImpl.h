@@ -45,6 +45,7 @@ class ViewImpl
 public:
     virtual ~ViewImpl();
 
+    virtual void init() {}
     View* getView();
     QWidget* getNativeView();
 #ifdef __WINDOWS__

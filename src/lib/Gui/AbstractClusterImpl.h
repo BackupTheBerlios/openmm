@@ -19,28 +19,27 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef SplitterImpl_INCLUDED
-#define SplitterImpl_INCLUDED
+#ifndef AbstractClusterImpl_INCLUDED
+#define AbstractClusterImpl_INCLUDED
 
-#include "ViewImpl.h"
+//#include "ViewImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
 
-class SplitterViewImpl : public ViewImpl
+class AbstractClusterViewImpl
 {
-    friend class SplitterView;
-    friend class TreeClusterViewImpl;
+public:
+    virtual void insertView(View* pView, const std::string& name = "", int index = 0) = 0;
+    virtual void removeView(View* pView) = 0;
+    virtual int getViewCount() = 0;
+    virtual int getCurrentViewIndex() = 0; /// current view has focus
+    virtual void setCurrentViewIndex(int index) = 0;
+    virtual int getIndexFromView(View* pView) = 0;
 
-private:
-    SplitterViewImpl(View* pView, View::Orientation orientation);
-    ~SplitterViewImpl();
-
-//    virtual void addSubview(View* pView);
-
-    void setOrientation(View::Orientation orientation);
+    virtual void setHandlesHidden(bool hidden = true) = 0;
+    virtual const int getHandleHeight() = 0;
 };
 
 

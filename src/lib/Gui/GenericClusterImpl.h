@@ -19,28 +19,45 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef SplitterImpl_INCLUDED
-#define SplitterImpl_INCLUDED
+#ifndef GenericClusterImpl_INCLUDED
+#define GenericClusterImpl_INCLUDED
 
+#include <map>
+#include <vector>
+
+#include "Gui/View.h"
 #include "ViewImpl.h"
+#include "AbstractClusterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
-class View;
 
-class SplitterViewImpl : public ViewImpl
+class GenericClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
 {
-    friend class SplitterView;
-    friend class TreeClusterViewImpl;
+    friend class GenericClusterStackedLayout;
+
+public:
+    GenericClusterViewImpl(View* pView);
+
+    virtual void init();
+    virtual void insertView(View* pView, const std::string& name = "", int index = 0);
+    virtual void removeView(View* pView);
+    virtual int getViewCount();
+    virtual int getCurrentViewIndex(); /// current view has focus
+    virtual void setCurrentViewIndex(int index);
+    virtual int getIndexFromView(View* pView);
+
+    virtual void setHandlesHidden(bool hidden = true);
+    virtual const int getHandleHeight();
 
 private:
-    SplitterViewImpl(View* pView, View::Orientation orientation);
-    ~SplitterViewImpl();
-
-//    virtual void addSubview(View* pView);
-
-    void setOrientation(View::Orientation orientation);
+    int                                 _handleHeight;
+    int                                 _handleWidth;
+    bool                                _handleBarHidden;
+    std::map<View*, ListItemView*>      _handles;
+    std::vector<View*>                  _views;
+    int                                 _currentView;
 };
 
 
@@ -48,4 +65,3 @@ private:
 }  // namespace Gui
 
 #endif
-

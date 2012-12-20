@@ -33,6 +33,9 @@
 #include "Gui/Button.h"
 #include "Gui/ListItem.h"
 #include "Gui/Drag.h"
+#include "ClusterImpl.h"
+#include "GenericClusterImpl.h"
+#include "TreeClusterImpl.h"
 
 
 namespace Omm {
@@ -69,130 +72,134 @@ namespace Gui {
 //};
 
 
-class ClusterController : public Controller
-{
-public:
-    ClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
-
-    virtual void dragStarted()
-    {
-        LOG(gui, debug, "platter drag controller drag started in view: " + _pView->getName());
-        _pClusterView->removeView(_pView);
-        _pClusterView->updateLayout();
-        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pView, _pView->getModel());
-        pDrag->start();
-    }
-
-    virtual void dragEntered(const Position& pos, Drag* pDrag)
-    {
-        LOG(gui, debug, "platter drag controller drag entered in view: " + _pView->getName()
-                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-    }
-
-    virtual void dragMoved(const Position& pos, Drag* pDrag)
-    {
-        LOG(gui, debug, "platter drag controller drag moved in view: " + _pView->getName()
-                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-    }
-
-    virtual void dragLeft()
-    {
-        LOG(gui, debug, "platter drag controller drag left in view: " + _pView->getName());
-    }
-
-    virtual void dropped(const Position& pos, Drag* pDrag)
-    {
-        LOG(gui, debug, "platter drag controller dropped in view: " + _pView->getName() + ", source view: " + pDrag->getSource()->getName()
-                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-//        _pClusterView->removeView(pDrag->getSource());
-        if (_pView == _pClusterView) {
-            // dropped onto a cluster view
-            bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
-//            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
-//            pClusterView->updateLayout();
-        }
-        else {
-            // dropped onto a handle
-            _pClusterView->addView(pDrag->getSource(), pDrag->getSource()->getName());
-            _pClusterView->updateLayout();
-            _pClusterView->show();
-            pDrag->getSource()->show();
-        }
-    }
-
-private:
+//class ClusterController : public Controller
+//{
+//public:
+//    ClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
+//
+//    virtual void dragStarted()
+//    {
+//        LOG(gui, debug, "platter drag controller drag started in view: " + _pView->getName());
+////        _pClusterView->removeView(_pView);
+////        _pClusterView->updateLayout();
+//        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pView, _pView->getModel());
+//        pDrag->start();
+//    }
+//
+//    virtual void dragEntered(const Position& pos, Drag* pDrag)
+//    {
+//        LOG(gui, debug, "platter drag controller drag entered in view: " + _pView->getName()
+//                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+//    }
+//
+//    virtual void dragMoved(const Position& pos, Drag* pDrag)
+//    {
+//        LOG(gui, debug, "platter drag controller drag moved in view: " + _pView->getName()
+//                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+//    }
+//
+//    virtual void dragLeft()
+//    {
+//        LOG(gui, debug, "platter drag controller drag left in view: " + _pView->getName());
+//    }
+//
+//    virtual void dropped(const Position& pos, Drag* pDrag)
+//    {
+//        LOG(gui, debug, "platter drag controller dropped in view: " + _pView->getName() + ", source view: " + pDrag->getSource()->getName()
+//                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+////        _pClusterView->removeView(pDrag->getSource());
+//        if (_pView == _pClusterView) {
+//            // dropped onto a cluster view
+//            bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
+////            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
+////            pClusterView->updateLayout();
+//        }
+//        else {
+//            // dropped onto a handle
+//            _pClusterView->insertView(pDrag->getSource(), pDrag->getSource()->getName());
+//            _pClusterView->updateLayout();
+//            _pClusterView->show();
+//            pDrag->getSource()->show();
+//        }
+//    }
+//
+//private:
+////    ClusterView*    _pClusterView;
 //    ClusterView*    _pClusterView;
-    ClusterView*    _pClusterView;
-    View*           _pView;
-};
+//    View*           _pView;
+//};
 
 
-class ClusterStackedLayout : public Layout
+//class ClusterStackedLayout : public Layout
+//{
+//public:
+//    virtual void layoutView();
+//    virtual void layoutViewEquiDistant();
+//};
+//
+//
+//void
+//ClusterStackedLayout::layoutView()
+//{
+//    ClusterView* pView = static_cast<ClusterView*>(_pView);
+//    if (!pView->_views.size()) {
+//        return;
+//    }
+//
+//    int handleHeight = (pView->_handleBarHidden ? 0 : pView->_handleHeight);
+//    int handleWidth = pView->width() / pView->_handles.size();
+//
+//    int handleIndex = 0;
+//    for (ClusterView::SubviewIterator itv = pView->_views.begin(); itv != pView->_views.end(); ++handleIndex, ++itv) {
+//        ListItemView* pHandle = pView->_handles[*itv];
+//        pHandle->resize(handleWidth, handleHeight);
+//        pHandle->move(handleIndex * handleWidth, 0);
+//        (*itv)->resize(pView->width(), pView->height() - handleHeight);
+//        (*itv)->move(0, handleHeight);
+//    }
+//}
+//
+//
+//void
+//ClusterStackedLayout::layoutViewEquiDistant()
+//{
+//    layoutView();
+//}
+
+
+//class HandleController : public Controller
+//{
+//public:
+//    HandleController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
+//
+//    virtual void selected()
+//    {
+//        _pClusterView->setCurrentViewIndex(_pClusterView->getIndexFromView(_pView));
+//    }
+//
+//private:
+//    ClusterView*    _pClusterView;
+//    View*           _pView;
+//};
+
+
+const std::string ClusterView::Native("NativeClusterView");
+const std::string ClusterView::Generic("GenericClusterView");
+const std::string ClusterView::Tree("TreeClusterView");
+
+ClusterView::ClusterView(View* pParent, const std::string& type, bool createInitialCluster) :
+View(pParent, false)
 {
-public:
-    virtual void layoutView();
-    virtual void layoutViewEquiDistant();
-};
-
-
-void
-ClusterStackedLayout::layoutView()
-{
-    ClusterView* pView = static_cast<ClusterView*>(_pView);
-    if (!pView->_views.size()) {
-        return;
+    if (type == Native) {
+        _pImpl = new ClusterViewImpl(this);
     }
-
-    int handleHeight = (pView->_handleBarHidden ? 0 : pView->_handleHeight);
-    int handleWidth = pView->width() / pView->_handles.size();
-
-    int handleIndex = 0;
-    for (std::map<View*, ListItemView*>::iterator ith = pView->_handles.begin(); ith != pView->_handles.end(); ++handleIndex, ++ith) {
-        ith->second->resize(handleWidth, handleHeight);
-        ith->second->move(handleIndex * handleWidth, 0);
+    else if (type == Generic) {
+        _pImpl = new GenericClusterViewImpl(this);
     }
-
-    for (ClusterView::SubviewIterator itv = pView->_views.begin(); itv != pView->_views.end(); ++itv) {
-        (*itv)->resize(pView->width(), pView->height() - handleHeight);
-        (*itv)->move(0, handleHeight);
+    else if (type == Tree) {
+        _pImpl = new TreeClusterViewImpl(this, createInitialCluster);
     }
-}
-
-
-void
-ClusterStackedLayout::layoutViewEquiDistant()
-{
-    layoutView();
-}
-
-
-class HandleController : public Controller
-{
-public:
-    HandleController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
-
-    virtual void selected()
-    {
-        _pClusterView->setCurrentView(_pView);
-    }
-
-private:
-    ClusterView*    _pClusterView;
-    View*           _pView;
-};
-
-
-ClusterView::ClusterView(View* pParent) :
-View(pParent, true),
-//_pClusterView(pParent),
-_handleHeight(25),
-_handleWidth(150),
-_handleBarHidden(false),
-_currentView(-1)
-{
-    setAcceptDrops(true);
-    attachController(new ClusterController(this, this));
-    setLayout(new ClusterStackedLayout);
+    _pImpl->init();
 }
 
 
@@ -202,123 +209,76 @@ ClusterView::~ClusterView()
 
 
 void
-ClusterView::addView(View* pView, const std::string& name, bool show)
+ClusterView::insertView(View* pView, const std::string& name, int index)
 {
-    if (show) {
-        LOG(gui, debug, "cluster add view: " + name);
-        pView->setParent(this);
-        pView->resize(width(), height() - _handleHeight);
-        pView->move(0, _handleHeight);
+    // NOTE: this is somewhat crude, a dynamic_cast wouldn't work with GenericClusterViewImpl
+    // or TreeClusterViewImpl: there's no direct inheritance, but the same interface.
+    static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, name, index);
+}
 
-        std::string handleName = "handle " + Poco::NumberFormatter::format(_views.size());
-        LabelModel* pHandleLabelModel = new LabelModel;
-        pHandleLabelModel->setLabel(name);
-        ListItemModel* pHandleModel = new ListItemModel;
-        pHandleModel->setLabelModel(pHandleLabelModel);
-        ListItemView* pHandle = new ListItemView(this);
-        pHandle->setModel(pHandleModel);
-        pHandle->setName(handleName);
-        HandleController* pHandleController = new HandleController(this, pView);
-        pHandle->attachController(pHandleController);
-        pHandle->setAcceptDrops(true);
-        pHandle->attachController(new ClusterController(this, pView));
-        pHandle->show();
 
-        _handles[pView] = pHandle;
-        _views.push_back(pView);
-        _currentView = _views.size() - 1;
-    }
-    else {
-        SubviewIterator it = std::find(_views.begin(), _views.end(), pView);
-        if (it != _views.end()) {
-            _views.erase(it);
-            _currentView = 0;
-        }
-    }
+int
+ClusterView::getViewCount()
+{
+    return static_cast<ClusterViewImpl*>(_pImpl)->getViewCount();
+}
+
+
+int
+ClusterView::getCurrentViewIndex()
+{
+    return static_cast<ClusterViewImpl*>(_pImpl)->getCurrentViewIndex();
 }
 
 
 void
-ClusterView::removeView(View* pView)
+ClusterView::setCurrentViewIndex(int index)
 {
-    std::map<View*, ListItemView*>::iterator ith = _handles.find(pView);
-    std::vector<View*>::iterator itv = std::find(_views.begin(), _views.end(), pView);
-    if (ith != _handles.end()) {
-        // TODO: maintain a pool of handles and reuse them
-        _handles[pView]->hide();
-        _handles.erase(ith);
-        _currentView = 0;
-        _views.erase(itv);
-    }
+    static_cast<ClusterViewImpl*>(_pImpl)->setCurrentViewIndex(index);
 }
 
 
 int
-ClusterView::getTabCount()
+ClusterView::getIndexFromView(View* pView)
 {
-    return _views.size();
+    return static_cast<ClusterViewImpl*>(_pImpl)->getIndexFromView(pView);
 }
 
 
-int
-ClusterView::getCurrentTab()
+void
+ClusterView::setHandlesHidden(bool hidden)
 {
-    LOG(gui, debug, "cluster get current tab: " + Poco::NumberFormatter::format(_currentView));
-
-    return _currentView;
+    static_cast<ClusterViewImpl*>(_pImpl)->setHandlesHidden(hidden);
 }
 
 
 const int
-ClusterView::getHandleHeight() const
+ClusterView::getHandleHeight()
 {
-    return _handleHeight;
+    return static_cast<ClusterViewImpl*>(_pImpl)->getHandleHeight();
 }
 
 
 void
-ClusterView::setTabBarHidden(bool hidden)
+ClusterView::removedSubview(View* pView)
 {
-    _handleBarHidden = hidden;
-    for (SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
-        (*it)->resize(width(), height() - (hidden ? 0 : _handleHeight));
-        (*it)->move(0, (hidden ? 0 : _handleHeight));
-    }
+    static_cast<ClusterViewImpl*>(_pImpl)->removeView(pView);
 }
 
 
-void
-ClusterView::setCurrentView(View* pView)
-{
-    SubviewIterator it = std::find(_views.begin(), _views.end(), pView);
-    if (it != _views.end()) {
-        _handles[_views[_currentView]]->setBackgroundColor(Color("white"));
-        _currentView = it - _views.begin();
-        pView->raise();
-        _handles[pView]->setBackgroundColor(Color(200, 200, 200, 255));
-    }
-}
 
 
-void
-ClusterView::setCurrentTab(int index)
-{
-    LOG(gui, debug, "cluster set current tab: " + Poco::NumberFormatter::format(index));
-
-    _handles[_views[_currentView]]->setBackgroundColor(Color("white"));
-    _currentView = index;
-    _views[_currentView]->raise();
-    _handles[_views[_currentView]]->setBackgroundColor(Color(200, 200, 200, 255));
-}
 
 
-void
-ClusterView::syncViewImpl()
-{
-    LOG(gui, debug, "cluster sync view impl");
 
-    ClusterModel* pModel = static_cast<ClusterModel*>(_pModel);
-}
+
+//void
+//ClusterView::syncViewImpl()
+//{
+//    LOG(gui, debug, "cluster sync view impl");
+//
+//    ClusterModel* pModel = static_cast<ClusterModel*>(_pModel);
+//}
 
 
 

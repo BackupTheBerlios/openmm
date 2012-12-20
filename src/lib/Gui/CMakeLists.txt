@@ -36,6 +36,8 @@ SelectionView.cpp
 #Platter.cpp
 Splitter.cpp
 Cluster.cpp
+GenericClusterImpl.cpp
+TreeClusterImpl.cpp
 )
 
 target_link_libraries(ommgui

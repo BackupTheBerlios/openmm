@@ -38,14 +38,14 @@ class Button;
 class ListItemView;
 class SubClusterView;
 
-class ClusterModel : public Model
-{
-public:
-    virtual int getViewCount() { return 0; }
-    virtual View* getView(int index) { return 0; }
-    virtual std::string getName(int index) { return ""; }
-    virtual ImageModel* getImageModel(int index) { return 0; }
-};
+//class ClusterModel : public Model
+//{
+//public:
+//    virtual int getViewCount() { return 0; }
+//    virtual View* getView(int index) { return 0; }
+//    virtual std::string getName(int index) { return ""; }
+//    virtual ImageModel* getImageModel(int index) { return 0; }
+//};
 
 
 class ClusterView : public View
@@ -55,42 +55,24 @@ class ClusterView : public View
     friend class SubClusterView;
 
 public:
-//    static const std::string Flat;
-//    static const std::string Tree;
+    static const std::string Native;
+    static const std::string Generic;
+    static const std::string Tree;
 
-    ClusterView(View* pParent = 0);
+    ClusterView(View* pParent = 0, const std::string& type = Native, bool createInitialCluster = true);
     virtual ~ClusterView();
 
-    void addView(View* pView, const std::string& name = "", bool show = true);
-//    void insertView(View* pView, const std::string& name = "", int index);
-    void removeView(View* pView);
+    void insertView(View* pView, const std::string& name = "", int index = 0);
+    int getViewCount();
+    int getCurrentViewIndex(); /// current view has focus
+    void setCurrentViewIndex(int index);
+    int getIndexFromView(View* pView);
 
-    int getTabCount();
-//    getViewCount();
-    int getCurrentTab();
-//    getCurrentViewIndex(); /// current view has the focus
-    void setCurrentTab(int index);
-//    setCurrentViewIndex(int index);
-    void setCurrentView(View* pView);
-//    getIndexFromView(View* pView);
-
-    void setTabBarHidden(bool hidden = true);
-//    setHandlesHidden(bool hidden = true);
-    const int getHandleHeight() const;
-
-protected:
-//    void insertHandle(int index, const std::string& name = "");
-//    void removeHandle(int index);
-    virtual void syncViewImpl();
+    void setHandlesHidden(bool hidden = true);
+    const int getHandleHeight();
 
 private:
-    int                                 _handleHeight;
-    int                                 _handleWidth;
-    bool                                _handleBarHidden;
-    std::map<View*, ListItemView*>      _handles;
-    std::vector<View*>                  _views;
-    int                                 _currentView;
-
+    virtual void removedSubview(View* pView);
 
 //    SubClusterView* addSubCluster(bool horizontalLayout);
 //
@@ -100,10 +82,10 @@ private:
 };
 
 
-class Cluster : public Widget<ClusterView, Controller, ClusterModel>
+class Cluster : public Widget<ClusterView, Controller, Model>
 {
 public:
-    Cluster(View* pParent = 0) : Widget<ClusterView, Controller, ClusterModel>(pParent) {}
+    Cluster(View* pParent = 0) : Widget<ClusterView, Controller, Model>(pParent) {}
 };
 
 

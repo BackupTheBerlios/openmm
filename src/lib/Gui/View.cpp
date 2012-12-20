@@ -46,7 +46,7 @@ _maxHeight(140),
 _stretchFactor(1.0),
 _scaleFactor(1.0)
 {
-//    LOG(gui, debug, "view ctor (parent).");
+    LOG(gui, debug, "view ctor (parent).");
 
     initView(pParent);
     _pImpl = new PlainViewImpl(this);
@@ -64,7 +64,7 @@ _stretchFactor(1.0),
 _scaleFactor(1.0),
 _pImpl(0)
 {
-//    LOG(gui, debug, "view ctor (parent, createPlainView).");
+    LOG(gui, debug, "view ctor (parent, createPlainView).");
 
     initView(pParent);
     if (createPlainView) {
@@ -128,11 +128,10 @@ View::setParent(View* pView)
 {
     _pImpl->setParent(pView);
     if (_pParent) {
-        _pParent->removeSubview(this);
+        _pParent->removedSubview(this);
     }
     _pParent = pView;
-    _pParent->_subviews.push_back(this);
-    _scaleFactor = _pParent->_scaleFactor;
+    _pParent->addedSubview(this);
 }
 
 
@@ -394,13 +393,24 @@ View::endSubview()
 
 
 void
-View::removeSubview(View* pView)
+View::removedSubview(View* pView)
 {
     SubviewIterator it = std::find(beginSubview(), endSubview(), pView);
     if (it != endSubview()) {
         _subviews.erase(it);
     }
+    updateLayout();
 }
+
+
+void
+View::addedSubview(View* pView)
+{
+    _subviews.push_back(pView);
+    pView->_scaleFactor = _scaleFactor;
+    updateLayout();
+}
+
 
 int
 View::subviewCount()

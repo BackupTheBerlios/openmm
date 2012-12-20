@@ -37,6 +37,7 @@ class ViewImpl
 public:
     virtual ~ViewImpl();
 
+    virtual void init() {}
     View* getView();
     void* getNativeView();
     uint32_t getNativeWindowId();
