@@ -99,6 +99,8 @@ const std::string UpnpApplication::PLAYLIST_URI = "/Playlist";
 const std::string UpnpApplication::CONFIG_URI = "/Config";
 const std::string UpnpApplication::CONFIG_APP_QUERY = "saveForm=app";
 const std::string UpnpApplication::CONFIG_DEV_QUERY = "saveForm=dev";
+const std::string UpnpApplication::ModeFull = "ModeFull";
+const std::string UpnpApplication::ModeRendererOnly = "ModeRendererOnly";
 
 UpnpApplication::UpnpApplication(int argc, char** argv) :
 //Poco::Util::Application(argc, argv),
@@ -121,6 +123,7 @@ _pLocalDeviceServer(new DeviceServer),
 _pLocalDeviceContainer(new DeviceContainer),
 _pLocalMediaRenderer(0),
 _pConf(0),
+_mode(ModeFull),
 _instanceMutexName("OmmApplicationMutex"),
 _appStandardPort(4009)
 {
@@ -261,12 +264,12 @@ void
 UpnpApplication::presentedMainView()
 {
     if (config().getBool("application.fullscreen", false)) {
-        _pControllerWidget->setTabBarHidden(true);
-        _pControllerWidget->showOnlyBasicDeviceGroups(true);
+        _pControllerWidget->setHandlesHidden(true);
+//        _pControllerWidget->showOnlyBasicDeviceGroups(true);
     }
     else if (_showRendererVisualOnly) {
         _pControllerWidget->showOnlyRendererVisual(true);
-        _pControllerWidget->setTabBarHidden(true);
+        _pControllerWidget->setHandlesHidden(true);
     }
     _pControllerWidget->init();
 }
@@ -644,6 +647,7 @@ UpnpApplication::showRendererVisualOnly(bool show)
 //    _pControllerWidget->setTabBarHidden(!show);
 //    _pControllerWidget->showOnlyRendererVisual(show);
     _showRendererVisualOnly = show;
+    _mode = ModeRendererOnly;
     showToolBar(false);
     showStatusBar(false);
 }
@@ -887,26 +891,53 @@ UpnpApplication::getConfigHttpUri()
 }
 
 
+std::string
+UpnpApplication::getMode()
+{
+    return _mode;
+}
+
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
+#ifdef __IPHONE__
+ClusterView(0, Gui::ClusterView::Native),
+#else
+ClusterView(0, Gui::ClusterView::Native),
+//ClusterView(0, Gui::ClusterView::Generic),
+//ClusterView(0, Gui::ClusterView::Tree),
+#endif
 _pApplication(pApplication)
 {
     LOGNS(Gui, gui, debug, "controller widget register device groups ...");
-    _pMediaServerGroupWidget = new MediaServerGroupWidget;
-    registerDeviceGroup(_pMediaServerGroupWidget);
+
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        _pConfigBrowser = new Gui::WebBrowser;
+        _pConfigBrowser->setName("Setup");
+        insertView(_pConfigBrowser, "Setup");
+        _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
+    }
+
+    _pVisual = new GuiVisual;
+    insertView(_pVisual, "Video");
+
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        _pPlaylistEditor = new PlaylistEditor(this);
+        insertView(_pPlaylistEditor, "List");
+    }
+
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
-    _pPlaylistEditor = new PlaylistEditor(this);
-    addView(_pPlaylistEditor, "List");
-    _pVisual = new GuiVisual;
-    addView(_pVisual, "Video");
-    _pConfigBrowser = new Gui::WebBrowser;
-    _pConfigBrowser->setName("Setup");
-    addView(_pConfigBrowser, "Setup");
-    _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        insertView(_pMediaRendererGroupWidget, "Player");
+    }
+
+    _pMediaServerGroupWidget = new MediaServerGroupWidget;
+    registerDeviceGroup(_pMediaServerGroupWidget);
+    insertView(_pMediaServerGroupWidget, "Media");
+
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
-    setCurrentView(_pMediaServerGroupWidget);
+    setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
@@ -991,7 +1022,7 @@ ControllerWidget::newStreamType(Av::StreamTypeNotification* pNotification)
     LOGNS(Gui, gui, debug, "controller widget stream type notification, instance id: "
         + Poco::NumberFormatter::format(pNotification->_instanceId) + ", transport state: " + pNotification->_transportState + ", stream type: " + pNotification->_streamType);
     if (pNotification->_streamType == Av::Engine::StreamTypeVideo && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING) {
-        setCurrentView(_pVisual);
+        setCurrentViewIndex(getIndexFromView(_pVisual));
     }
     else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
         showMainMenu();
@@ -1040,26 +1071,26 @@ ControllerWidget::newStreamType(Av::StreamTypeNotification* pNotification)
 void
 ControllerWidget::showMainMenu()
 {
-    setCurrentView(_pMediaServerGroupWidget);
+    setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 }
 
 
-void
-ControllerWidget::showOnlyBasicDeviceGroups(bool show)
-{
-    addView(_pMediaRendererGroupWidget, "Player", !show);
-    addView(_pPlaylistEditor, "List", !show);
-    addView(_pConfigBrowser, "Setup", !show);
-}
+//void
+//ControllerWidget::showOnlyBasicDeviceGroups(bool show)
+//{
+//    insertView(_pMediaRendererGroupWidget, "Player");
+//    insertView(_pPlaylistEditor, "List");
+//    insertView(_pConfigBrowser, "Setup");
+//}
 
 
 void
 ControllerWidget::showOnlyRendererVisual(bool show)
 {
-    addView(_pMediaServerGroupWidget, "Media", !show);
-    addView(_pMediaRendererGroupWidget, "Player", !show);
-    addView(_pPlaylistEditor, "List", !show);
-    addView(_pConfigBrowser, "Setup", !show);
+    insertView(_pMediaServerGroupWidget, "Media");
+    insertView(_pMediaRendererGroupWidget, "Player");
+    insertView(_pPlaylistEditor, "List");
+    insertView(_pConfigBrowser, "Setup");
 }
 
 
@@ -1109,13 +1140,13 @@ KeyController::keyPressed(KeyCode key)
             _pControllerWidget->showMainMenu();
             break;
         case Gui::Controller::KeyLeft:
-            if (_pControllerWidget->getCurrentTab()) {
-                _pControllerWidget->setCurrentTab(_pControllerWidget->getCurrentTab() - 1);
+            if (_pControllerWidget->getCurrentViewIndex()) {
+                _pControllerWidget->setCurrentViewIndex(_pControllerWidget->getCurrentViewIndex() - 1);
             }
             break;
         case Gui::Controller::KeyRight:
-            if (_pControllerWidget->getCurrentTab() < _pControllerWidget->getTabCount() - 1) {
-                _pControllerWidget->setCurrentTab(_pControllerWidget->getCurrentTab() + 1);
+            if (_pControllerWidget->getCurrentViewIndex() < _pControllerWidget->getViewCount() - 1) {
+                _pControllerWidget->setCurrentViewIndex(_pControllerWidget->getCurrentViewIndex() + 1);
             }
             break;
         case Gui::Controller::KeyUp:
@@ -1168,13 +1199,13 @@ DeviceGroupWidget::removeDevice(Device* pDevice, int index, bool begin)
 }
 
 
-void
-DeviceGroupWidget::showDeviceGroup()
-{
-    LOGNS(Gui, gui, debug, "device group widget show device group");
-    ControllerWidget* pController = static_cast<ControllerWidget*>(getController());
-    pController->addView(this, shortName());
-}
+//void
+//DeviceGroupWidget::showDeviceGroup()
+//{
+//    LOGNS(Gui, gui, debug, "device group widget show device group");
+//    ControllerWidget* pController = static_cast<ControllerWidget*>(getController());
+//    pController->insertView(this, shortName());
+//}
 
 
 int

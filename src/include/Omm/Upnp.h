@@ -431,7 +431,7 @@ public:
 
     void setState(State newState);
 
-    void registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show = true);
+    void registerDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
 //    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
@@ -679,8 +679,6 @@ public:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
-    void setVisible(bool visible = true);
-
 protected:
     virtual void init() {}
 
@@ -689,7 +687,6 @@ protected:
 
 private:
     void initDelegate();
-    bool getVisible();
 
     DeviceGroupDelegate*            _pDeviceGroupDelegate;
     Controller*                     _pController;
@@ -699,7 +696,6 @@ private:
     std::string                     _preferredDeviceUuid;
     std::string                     _deviceType;
     std::string                     _shortName;
-    bool                            _visible;
 };
 
 

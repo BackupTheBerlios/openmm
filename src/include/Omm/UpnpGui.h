@@ -113,6 +113,9 @@ public:
     static const std::string CONFIG_APP_QUERY;
     static const std::string CONFIG_DEV_QUERY;
 
+    static const std::string ModeFull;
+    static const std::string ModeRendererOnly;
+
     UpnpApplication(int argc, char** argv);
     ~UpnpApplication();
 
@@ -122,6 +125,7 @@ public:
     void showRendererVisualOnly(bool show = true);
     std::string getAppHttpUri();
     std::string getConfigHttpUri();
+    std::string getMode();
 
 private:
     // Poco::Util::Application interface
@@ -164,6 +168,7 @@ private:
     bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;
+    std::string                                 _mode;
 
     ControllerWidget*                           _pControllerWidget;
     bool                                        _enableController;
@@ -220,12 +225,7 @@ public:
 };
 
 
-//#ifdef __IPHONE__
-class ControllerWidget : public Controller, public Gui::Tab
-//#else
-//class ControllerWidget : public Controller, public Gui::Platter
-//class ControllerWidget : public Controller, public Gui::Cluster
-//#endif
+class ControllerWidget : public Controller, public Gui::ClusterView
 {
 friend class PlaylistEditor;
 
@@ -243,7 +243,7 @@ public:
 //    void newTrack(TrackNotification* pNotification);
 //    void newPlaylist(PlaylistNotification* pNotification);
     void showMainMenu();
-    void showOnlyBasicDeviceGroups(bool show = false);
+//    void showOnlyBasicDeviceGroups(bool show = false);
     void showOnlyRendererVisual(bool show = false);
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
@@ -290,7 +290,7 @@ public:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer, int index, bool begin) {}
 
-    virtual void showDeviceGroup();
+//    virtual void showDeviceGroup();
 
     // ListModel interface
     virtual int totalItemCount();

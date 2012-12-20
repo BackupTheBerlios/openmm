@@ -3975,17 +3975,12 @@ Controller::setState(State newState)
 
 
 void
-Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup, bool show)
+Controller::registerDeviceGroup(DeviceGroup* pDeviceGroup)
 {
     pDeviceGroup->_pController = this;
     _deviceGroups[pDeviceGroup->getDeviceType()] = pDeviceGroup;
     pDeviceGroup->init();
     pDeviceGroup->initDelegate();
-    pDeviceGroup->setVisible(show);
-    if (show) {
-//        showDeviceGroup(pDeviceGroup);
-        pDeviceGroup->showDeviceGroup();
-    }
 }
 
 
@@ -4122,10 +4117,6 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
                 pTypedDevice->initController();
 
                 pDeviceGroup->addDevice(pTypedDevice);
-                if (!pDeviceGroup->getVisible()) {
-//                    showDeviceGroup(pDeviceGroup);
-                    pDeviceGroup->showDeviceGroup();
-                }
                 LOG(upnp, debug, "controller add device finished, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
             }
         }
@@ -4875,13 +4866,6 @@ DeviceGroup::createDevice()
 
 
 void
-DeviceGroup::setVisible(bool visible)
-{
-    _visible = visible;
-}
-
-
-void
 DeviceGroup::addDevice(Device* pDevice)
 {
     addDevice(pDevice, _devices.size(), true);
@@ -4906,13 +4890,6 @@ DeviceGroup::initDelegate()
     if (_pDeviceGroupDelegate) {
         _pDeviceGroupDelegate->init();
     }
-}
-
-
-bool
-DeviceGroup::getVisible()
-{
-    return _visible;
 }
 
 
