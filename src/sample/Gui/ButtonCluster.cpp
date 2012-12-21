@@ -33,7 +33,8 @@ class Application : public Omm::Gui::Application
     {
 //        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView;
 //        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Generic);
-        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Tree);
+//        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Tree);
+        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Column);
 
         const int subviewCount = 5;
         for (int i = 0; i < subviewCount; i++) {

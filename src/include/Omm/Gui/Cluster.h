@@ -57,6 +57,7 @@ class ClusterView : public View
 public:
     static const std::string Native;
     static const std::string Generic;
+    static const std::string Column;
     static const std::string Tree;
 
     ClusterView(View* pParent = 0, const std::string& type = Native, bool createInitialCluster = true);

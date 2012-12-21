@@ -35,6 +35,7 @@
 #include "Gui/Drag.h"
 #include "ClusterImpl.h"
 #include "GenericClusterImpl.h"
+#include "ColumnClusterImpl.h"
 #include "TreeClusterImpl.h"
 
 
@@ -185,6 +186,7 @@ namespace Gui {
 
 const std::string ClusterView::Native("NativeClusterView");
 const std::string ClusterView::Generic("GenericClusterView");
+const std::string ClusterView::Column("ColumnClusterView");
 const std::string ClusterView::Tree("TreeClusterView");
 
 ClusterView::ClusterView(View* pParent, const std::string& type, bool createInitialCluster) :
@@ -195,6 +197,9 @@ View(pParent, false)
     }
     else if (type == Generic) {
         _pImpl = new GenericClusterViewImpl(this);
+    }
+    else if (type == Column) {
+        _pImpl = new ColumnClusterViewImpl(this);
     }
     else if (type == Tree) {
         _pImpl = new TreeClusterViewImpl(this, createInitialCluster);

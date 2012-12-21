@@ -37,6 +37,7 @@ public:
     SplitterView(View* pParent = 0, Orientation orientation = Horizontal);
 
     void setOrientation(Orientation orientation);
+    void insertView(View* pView, int index = 0);
 
 private:
 

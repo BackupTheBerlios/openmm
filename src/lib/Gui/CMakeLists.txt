@@ -38,6 +38,7 @@ Splitter.cpp
 Cluster.cpp
 GenericClusterImpl.cpp
 TreeClusterImpl.cpp
+ColumnClusterImpl.cpp
 )
 
 target_link_libraries(ommgui

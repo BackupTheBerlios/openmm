@@ -52,5 +52,12 @@ SplitterView::setOrientation(Orientation orientation)
 }
 
 
+void
+SplitterView::insertView(View* pView, int index)
+{
+    static_cast<SplitterViewImpl*>(_pImpl)->insertView(pView, index);
+}
+
+
 } // namespace Gui
 } // namespace Omm

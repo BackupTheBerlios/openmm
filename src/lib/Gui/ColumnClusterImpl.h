@@ -19,63 +19,57 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <QtGui>
-#include <Poco/NumberFormatter.h>
-#include <qt4/QtGui/qsplitter.h>
+#ifndef ColumnClusterImpl_INCLUDED
+#define ColumnClusterImpl_INCLUDED
 
+#include <map>
+#include <vector>
+
+#include "Gui/View.h"
+#include "ViewImpl.h"
 #include "SplitterImpl.h"
-#include "Gui/Splitter.h"
-#include "Gui/GuiLogger.h"
+#include "AbstractClusterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
 
-SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
+class SplitterView;
+class ColumnView;
+
+//class ColumnClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
+class ColumnClusterViewImpl : public AbstractClusterViewImpl, public SplitterViewImpl
 {
-//    LOG(gui, debug, "splitter view impl ctor");
-    QSplitter* pNativeView = new QSplitter;
+    friend class ColumnClusterController;
+    friend class ColumnView;
 
-    initViewImpl(pView, pNativeView);
+public:
+    ColumnClusterViewImpl(View* pView, bool createInitialCluster = true);
 
-    if (orientation == View::Vertical) {
-        pNativeView->setOrientation(Qt::Vertical);
-    }
-}
+    virtual void init();
+    virtual void insertView(View* pView, const std::string& name = "", int index = 0);
+    virtual void removeView(View* pView);
+    virtual int getViewCount();
+    virtual int getCurrentViewIndex(); /// current view has focus
+    virtual void setCurrentViewIndex(int index);
+    virtual int getIndexFromView(View* pView);
 
+    virtual void setHandlesHidden(bool hidden = true);
+    virtual const int getHandleHeight();
 
-SplitterViewImpl::~SplitterViewImpl()
-{
-}
+private:
+    typedef std::vector<ColumnView*>::iterator GridIterator;
 
+    int getColumn(ColumnView* pColumn);
+    ClusterView* getFirstCluster();
+    ClusterView* createClusterInNewColumn(int column);
+    ClusterView* createClusterInRow(int column, int row);
 
-//void
-//SplitterViewImpl::addSubview(View* pView)
-//{
-//    static_cast<QSplitter*>(_pNativeView)->addWidget(static_cast<QWidget*>(pView->getNativeView()));
-//}
-
-
-void
-SplitterViewImpl::setOrientation(View::Orientation orientation)
-{
-    switch(orientation) {
-        case View::Horizontal:
-            static_cast<QSplitter*>(_pNativeView)->setOrientation(Qt::Horizontal);
-            break;
-        case View::Vertical:
-            static_cast<QSplitter*>(_pNativeView)->setOrientation(Qt::Vertical);
-            break;
-    }
-}
-
-
-void
-SplitterViewImpl::insertView(View* pView, int index)
-{
-    static_cast<QSplitter*>(_pNativeView)->insertWidget(index, static_cast<QWidget*>(pView->getNativeView()));
-}
+    std::vector<ColumnView*>                        _grid;
+};
 
 
 }  // namespace Omm
 }  // namespace Gui
+
+#endif
