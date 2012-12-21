@@ -41,6 +41,7 @@
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvCtlServer.h"
+
 #include "UpnpAvCtlObject2.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvServer.h"
@@ -251,6 +252,7 @@ public:
 
     virtual std::stringstream* getPlaylistResource();
     MediaServerDevice* getServer(const std::string& uuid);
+    Av::CtlMediaRenderer* getSelectedRenderer();
 
 private:
     MediaServerGroupWidget*     _pMediaServerGroupWidget;

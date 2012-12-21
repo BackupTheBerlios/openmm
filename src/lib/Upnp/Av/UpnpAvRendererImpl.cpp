@@ -734,18 +734,18 @@ DevRenderingControlRendererImpl::SetVerticalKeystone(const ui4& InstanceID, cons
 void
 DevRenderingControlRendererImpl::GetMute(const ui4& InstanceID, const std::string& Channel, bool& CurrentMute)
 {
-// begin of your own code
+    LOG(upnpav, debug, "get mute of engine instance: " + Poco::NumberFormatter::format(InstanceID));
 
-// end of your own code
+    CurrentMute = _engines[InstanceID]->getMute(Channel);
 }
 
 
 void
 DevRenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::string& Channel, const bool& DesiredMute)
 {
-// begin of your own code
+    LOG(upnpav, debug, "set mute of engine instance: " + Poco::NumberFormatter::format(InstanceID));
 
-// end of your own code
+    _engines[InstanceID]->setMute(Channel, DesiredMute);
 }
 
 

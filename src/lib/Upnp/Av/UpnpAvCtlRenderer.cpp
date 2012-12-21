@@ -237,6 +237,32 @@ CtlMediaRenderer::getVolume()
 }
 
 
+void
+CtlMediaRenderer::setMute(bool mute)
+{
+    try {
+        _pCtlMediaRendererCode->RenderingControl()->SetMute(0, "Master", mute);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+}
+
+
+bool
+CtlMediaRenderer::getMute()
+{
+    bool value;
+    try {
+        _pCtlMediaRendererCode->RenderingControl()->GetMute(0, "Master", value);
+    }
+    catch (Poco::Exception e){
+//        error(e.message());
+    }
+    return value;
+}
+
+
 ConnectionManager*
 CtlMediaRenderer::getConnectionManager()
 {

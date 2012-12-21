@@ -62,6 +62,8 @@ public:
     void positionMoved(int position);
     void volumeChanged(int value);
     ui2 getVolume();
+    void setMute(bool mute);
+    bool getMute();
 
     void startPositionTimer(bool start = true);
     ConnectionManager* getConnectionManager();

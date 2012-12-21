@@ -444,6 +444,38 @@ VlcEngine::getVolume(const std::string& channel)
 
 
 void
+VlcEngine::setMute(const std::string& channel, bool mute)
+{
+#if LIBVLC_VERSION_INT < 0x110
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        libvlc_audio_set_mute(_pVlcInstance, mute, _pException);
+    }
+#else
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        libvlc_audio_set_mute(_pVlcPlayer, mute);
+    }
+#endif
+    handleException();
+}
+
+
+bool
+VlcEngine::getMute(const std::string& channel)
+{
+#if LIBVLC_VERSION_INT < 0x110
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        return libvlc_audio_get_mute(_pVlcInstance, _pException);
+    }
+#else
+    if (channel == Omm::Av::AvChannel::MASTER) {
+        return libvlc_audio_get_mute(_pVlcPlayer);
+    }
+#endif
+    handleException();
+}
+
+
+void
 VlcEngine::handleException()
 {
     // TODO: really handle exception (vlc may crash, if exception is ignored).

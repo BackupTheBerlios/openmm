@@ -97,6 +97,9 @@ public:
     virtual void setVolume(const std::string& channel, float vol) = 0;
     virtual float getVolume(const std::string& channel) = 0;
 
+    virtual void setMute(const std::string& channel, bool mute) = 0;
+    virtual bool getMute(const std::string& channel) = 0;
+
 protected:
     virtual TransportState getTransportState() = 0;
 

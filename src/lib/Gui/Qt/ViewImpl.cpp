@@ -276,7 +276,6 @@ ViewImpl::keyPressed(int key)
 {
     LOG(gui, debug, "view impl key pressed: " + Poco::NumberFormatter::format(key));
     switch (key) {
-        case Qt::Key_M:
         case Qt::Key_Menu:
         case Qt::Key_HomePage:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyMenu);
@@ -337,8 +336,83 @@ ViewImpl::keyPressed(int key)
         case Qt::Key_MediaRecord:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRecord);
             break;
+        case Qt::Key_A:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyA);
+            break;
+        case Qt::Key_B:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyB);
+            break;
+        case Qt::Key_C:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyC);
+            break;
+        case Qt::Key_D:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyD);
+            break;
+        case Qt::Key_E:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyE);
+            break;
+        case Qt::Key_F:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyF);
+            break;
+        case Qt::Key_G:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyG);
+            break;
+        case Qt::Key_H:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyH);
+            break;
+        case Qt::Key_I:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyI);
+            break;
+        case Qt::Key_J:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyJ);
+            break;
+        case Qt::Key_K:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyK);
+            break;
+        case Qt::Key_L:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyL);
+            break;
+        case Qt::Key_M:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyM);
+            break;
+        case Qt::Key_N:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyN);
+            break;
+        case Qt::Key_O:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyO);
+            break;
+        case Qt::Key_P:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyP);
+            break;
+        case Qt::Key_Q:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyQ);
+            break;
+        case Qt::Key_R:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyR);
+            break;
+        case Qt::Key_S:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyS);
+            break;
+        case Qt::Key_T:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyT);
+            break;
+        case Qt::Key_U:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyU);
+            break;
+        case Qt::Key_V:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyV);
+            break;
+        case Qt::Key_W:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyW);
+            break;
         case Qt::Key_X:
             IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyX);
+            break;
+        case Qt::Key_Y:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyY);
+            break;
+        case Qt::Key_Z:
+            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyZ);
             break;
 #if (QT_VERSION & 0xFFFFFFFF) >= 0x040700
         case Qt::Key_MediaPause:

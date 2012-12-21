@@ -70,6 +70,10 @@ public:
     virtual void setVolume(const std::string& channel, float vol);
     virtual float getVolume(const std::string& channel);
 
+    // TODO: implement setMute() and getMute()
+    virtual void setMute(const std::string& channel, bool mute) {}
+    virtual bool getMute(const std::string& channel) {}
+
 private:
     std::string             _uri;
     Omm::Av::Mime           _mime;

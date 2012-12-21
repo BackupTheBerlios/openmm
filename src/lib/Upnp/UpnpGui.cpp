@@ -1131,11 +1131,21 @@ ControllerWidget::getServer(const std::string& uuid)
 }
 
 
+Av::CtlMediaRenderer*
+ControllerWidget::getSelectedRenderer()
+{
+    return static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getSelectedDevice());
+}
+
+
 void
 KeyController::keyPressed(KeyCode key)
 {
     LOGNS(Gui, gui, debug, "key controller, key pressed: " + Poco::NumberFormatter::format(key));
+    Av::CtlMediaRenderer* pRenderer = _pControllerWidget->getSelectedRenderer();
+
     switch (key) {
+        case Gui::Controller::KeyM:
         case Gui::Controller::KeyMenu:
             _pControllerWidget->showMainMenu();
             break;
@@ -1156,6 +1166,36 @@ KeyController::keyPressed(KeyCode key)
             break;
         case Gui::Controller::KeyBack:
             _pControllerWidget->back();
+            break;
+        case Gui::Controller::KeyP:
+        case Gui::Controller::KeyPlay:
+            if (pRenderer) {
+                pRenderer->playPressed();
+            }
+            break;
+        case Gui::Controller::KeyS:
+        case Gui::Controller::KeyStop:
+            if (pRenderer) {
+                pRenderer->stopPressed();
+            }
+            break;
+        case Gui::Controller::KeyH:
+        case Gui::Controller::KeyMute:
+            if (pRenderer) {
+                pRenderer->setMute(!pRenderer->getMute());
+            }
+            break;
+        case Gui::Controller::KeyU:
+        case Gui::Controller::KeyVolUp:
+            if (pRenderer) {
+                pRenderer->volumeChanged(pRenderer->getVolume() + 10);
+            }
+            break;
+        case Gui::Controller::KeyD:
+        case Gui::Controller::KeyVolDown:
+            if (pRenderer) {
+                pRenderer->volumeChanged(pRenderer->getVolume() - 10);
+            }
             break;
     }
 }
@@ -1379,6 +1419,8 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     // TODO: deactivated position timer for now, should fix it.
 //    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
+    // FIXME: from "new transport state STOPPED" to UPNP.CONTROL action response sent (StopResponse) it takes nearly one
+    // second, sometimes.
 }
 
 

@@ -79,6 +79,9 @@ public:
     virtual void setVolume(const std::string& channel, float vol);
     virtual float getVolume(const std::string& channel);
 
+    virtual void setMute(const std::string& channel, bool mute);
+    virtual bool getMute(const std::string& channel);
+
 private:
     void handleException();
 
