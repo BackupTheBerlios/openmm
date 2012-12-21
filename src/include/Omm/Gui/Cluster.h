@@ -38,15 +38,6 @@ class Button;
 class ListItemView;
 class SubClusterView;
 
-//class ClusterModel : public Model
-//{
-//public:
-//    virtual int getViewCount() { return 0; }
-//    virtual View* getView(int index) { return 0; }
-//    virtual std::string getName(int index) { return ""; }
-//    virtual ImageModel* getImageModel(int index) { return 0; }
-//};
-
 
 class ClusterView : public View
 {
@@ -74,12 +65,6 @@ public:
 
 private:
     virtual void removedSubview(View* pView);
-
-//    SubClusterView* addSubCluster(bool horizontalLayout);
-//
-//    SubClusterView*                         _pSubCluster;
-//    ClusterView*                            _pFirstCluster;
-//    ClusterView*                            _pSecondCluster;
 };
 
 

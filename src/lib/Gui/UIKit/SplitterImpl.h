@@ -32,14 +32,15 @@ class View;
 class SplitterViewImpl : public ViewImpl
 {
     friend class SplitterView;
+    friend class TreeClusterViewImpl;
+    friend class ColumnClusterViewImpl;
 
 private:
     SplitterViewImpl(View* pView, View::Orientation orientation);
     ~SplitterViewImpl();
 
-    virtual void addSubview(View* pView);
-
     void setOrientation(View::Orientation orientation);
+    void insertView(View* pView, int index);
 };
 
 

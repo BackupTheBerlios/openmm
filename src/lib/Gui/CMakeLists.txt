@@ -25,7 +25,6 @@ List.cpp
 #ListModel.cpp
 ListItem.cpp
 LazyList.cpp
-Tab.cpp
 Navigator.cpp
 Slider.cpp
 Image.cpp
@@ -33,7 +32,6 @@ WebBrowser.cpp
 TextLine.cpp
 Drag.cpp
 SelectionView.cpp
-#Platter.cpp
 Splitter.cpp
 Cluster.cpp
 GenericClusterImpl.cpp

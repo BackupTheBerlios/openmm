@@ -47,8 +47,6 @@
 #include "UpnpAvServer.h"
 
 #include "Gui/Application.h"
-#include "Gui/Tab.h"
-//#include "Gui/Platter.h"
 #include "Gui/Cluster.h"
 #include "Gui/Navigator.h"
 #include "Gui/ListModel.h"

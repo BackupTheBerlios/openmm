@@ -31,6 +31,7 @@ namespace Gui {
 
 SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
 {
+    // TODO: implement UIKit SplitterViewImpl::SplitterViewImpl()
 }
 
 
@@ -40,15 +41,18 @@ SplitterViewImpl::~SplitterViewImpl()
 
 
 void
-SplitterViewImpl::addSubview(View* pView)
+SplitterViewImpl::setOrientation(View::Orientation orientation)
 {
+    // TODO: implement UIKit SplitterViewImpl::insertView()
 }
 
 
 void
-SplitterViewImpl::setOrientation(View::Orientation orientation)
+SplitterViewImpl::insertView(View* pView, int index)
 {
+    // TODO: implement UIKit SplitterViewImpl::insertView()
 }
+
 
 }  // namespace Omm
 }  // namespace Gui

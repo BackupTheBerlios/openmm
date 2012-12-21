@@ -124,15 +124,6 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttontab
-ButtonTab.cpp
-)
-
-target_link_libraries(buttontab
-${OMM_GUI}
-)
-
-
 add_executable(buttonnavigator
 ButtonNavigator.cpp
 )
@@ -176,15 +167,6 @@ Web.cpp
 target_link_libraries(web
 ${OMM_GUI}
 )
-
-
-#add_executable(platter
-#Platter.cpp
-#)
-#
-#target_link_libraries(platter
-#${OMM_GUI}
-#)
 
 
 add_executable(buttoncluster
