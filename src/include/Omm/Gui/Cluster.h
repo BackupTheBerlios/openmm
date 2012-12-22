@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "View.h"
+#include "Controller.h"
 #include "Model.h"
 #include "Image.h"
 
@@ -37,6 +38,17 @@ class Label;
 class Button;
 class ListItemView;
 class SubClusterView;
+
+
+class ClusterController : public Controller
+{
+    friend class ClusterView;
+    friend class ColumnClusterViewImpl;
+
+protected:
+    virtual void insertedView(View* pView) {}
+    virtual void movedView(View* pView) {}
+};
 
 
 class ClusterView : public View
@@ -51,7 +63,7 @@ public:
     static const std::string Column;
     static const std::string Tree;
 
-    ClusterView(View* pParent = 0, const std::string& type = Native, bool createInitialCluster = true);
+    ClusterView(View* pParent = 0, const std::string& type = Native);
     virtual ~ClusterView();
 
     void insertView(View* pView, const std::string& name = "", int index = 0);
@@ -68,10 +80,10 @@ private:
 };
 
 
-class Cluster : public Widget<ClusterView, Controller, Model>
+class Cluster : public Widget<ClusterView, ClusterController, Model>
 {
 public:
-    Cluster(View* pParent = 0) : Widget<ClusterView, Controller, Model>(pParent) {}
+    Cluster(View* pParent = 0) : Widget<ClusterView, ClusterController, Model>(pParent) {}
 };
 
 

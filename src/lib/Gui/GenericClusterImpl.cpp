@@ -40,10 +40,10 @@ namespace Omm {
 namespace Gui {
 
 
-class ClusterController : public Controller
+class GenericClusterController : public Controller
 {
 public:
-    ClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
+    GenericClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
 
     virtual void dragStarted()
     {
@@ -52,21 +52,10 @@ public:
         pDrag->start();
     }
 
-    virtual void dragEntered(const Position& pos, Drag* pDrag)
-    {
-        LOG(gui, debug, "generic cluster drag controller drag entered in target view: " + _pView->getName()
-                + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-    }
-
     virtual void dragMoved(const Position& pos, Drag* pDrag)
     {
         LOG(gui, debug, "generic cluster drag controller drag moved in target view: " + _pView->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-    }
-
-    virtual void dragLeft()
-    {
-        LOG(gui, debug, "generic cluster drag controller drag left in target view: " + _pView->getName());
     }
 
     virtual void dropped(const Position& pos, Drag* pDrag)
@@ -152,7 +141,7 @@ GenericClusterViewImpl::init()
 void
 GenericClusterViewImpl::insertView(View* pView, const std::string& name, int index)
 {
-    LOG(gui, debug, "generic cluster insert view: " + name);
+    LOG(gui, debug, "generic cluster insert view: " + pView->getName());
     pView->setParent(_pView);
     pView->resize(_pView->width(), _pView->height() - _handleHeight);
     pView->move(0, _handleHeight);
@@ -169,7 +158,7 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
     HandleController* pHandleController = new HandleController(this, pView);
     pHandle->attachController(pHandleController);
     pHandle->setAcceptDrops(true);
-    pHandle->attachController(new ClusterController(static_cast<ClusterView*>(_pView), pView));
+    pHandle->attachController(new GenericClusterController(static_cast<ClusterView*>(_pView), pView));
     pHandle->show();
 
     _handles[pView] = pHandle;

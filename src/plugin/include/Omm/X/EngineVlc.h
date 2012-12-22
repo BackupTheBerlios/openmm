@@ -23,6 +23,7 @@
 #define EngineVlc_INCLUDED
 
 #include <Omm/UpnpAvRenderer.h>
+#include <Omm/Sys/Visual.h>
 
 
 #if LIBVLC_VERSION_INT < 0x110
@@ -41,6 +42,7 @@ public:
     VlcEngine();
     ~VlcEngine();
 
+    virtual void setVisual(Omm::Sys::Visual* pVisual);
     virtual void createPlayer();
 
     /*

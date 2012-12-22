@@ -125,6 +125,7 @@ public:
     std::string getAppHttpUri();
     std::string getConfigHttpUri();
     std::string getMode();
+    Av::MediaRenderer* getLocalRenderer();
 
 private:
     // Poco::Util::Application interface
@@ -233,6 +234,7 @@ public:
 
     void setState(State newState);
 
+    Av::MediaRenderer* getLocalRenderer();
     GuiVisual* getLocalRendererVisual();
     Gui::View* getControlPanel();
     Gui::View* getStatusBar();

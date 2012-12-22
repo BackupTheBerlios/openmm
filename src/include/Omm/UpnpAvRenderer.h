@@ -54,7 +54,7 @@ public:
 
     std::string getEngineId();
     void setInstancedId(Omm::ui4 instanceId);
-    void setVisual(Sys::Visual* pVisual);
+    virtual void setVisual(Sys::Visual* pVisual);
 
 //    virtual void setOption(const std::string& key, const std::string& value);
     virtual void createPlayer()  = 0;
@@ -142,6 +142,7 @@ public:
     ~MediaRenderer();
 
     void addEngine(Engine* pEngine);
+    Engine* getEngine(Omm::ui4 instanceId = 0);
 
 private:
     // these pointers to service implementations are only temporarily needed when setting them in the engine.

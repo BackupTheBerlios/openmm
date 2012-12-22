@@ -283,5 +283,13 @@ MediaRenderer::addEngine(Engine* pEngine)
     LOG(upnpav, information, "add renderer engine: " + pEngine->getEngineId());
 }
 
+
+Engine*
+MediaRenderer::getEngine(Omm::ui4 instanceId)
+{
+    return _pAVTransportImpl->_engines[instanceId];
+}
+
+
 } // namespace Av
 } // namespace Omm

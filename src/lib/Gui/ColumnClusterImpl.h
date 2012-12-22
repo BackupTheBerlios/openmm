@@ -65,6 +65,8 @@ private:
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
 
+    void movedView(View* pView);
+
     std::vector<ColumnView*>                        _grid;
 };
 

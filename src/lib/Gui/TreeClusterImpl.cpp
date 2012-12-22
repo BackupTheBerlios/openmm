@@ -195,8 +195,8 @@ TreeClusterViewImpl::split(bool horizontal)
         setOrientation(View::Vertical);
     }
 
-    _pFirstCluster = new ClusterView(0, ClusterView::Tree, false);
-//    _pFirstCluster = new ClusterView(0, ClusterView::Tree);
+//    _pFirstCluster = new ClusterView(0, ClusterView::Tree, false);
+    _pFirstCluster = new ClusterView(0, ClusterView::Tree);
     _pFirstCluster->setParent(_pView);
     _pFirstCluster->show();
 

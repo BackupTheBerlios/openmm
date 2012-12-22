@@ -737,8 +737,8 @@ UpnpApplication::setLocalRenderer()
     LOGNS(Av, upnpav, information, "engine plugin: " + _rendererPlugin + " loaded successfully");
 #endif
 
-    pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
     pEngine->createPlayer();
+    pEngine->setVisual(_pControllerWidget->getLocalRendererVisual());
 
     Av::MediaRenderer* pMediaRenderer = new Av::MediaRenderer;
     _pLocalMediaRenderer = pMediaRenderer;
@@ -757,6 +757,13 @@ UpnpApplication::setLocalRenderer()
         }
     }
     LOGNS(Av, upnpav, debug, "omm application set local renderer finished.");
+}
+
+
+Av::MediaRenderer*
+UpnpApplication::getLocalRenderer()
+{
+    return _pLocalMediaRenderer;
 }
 
 
@@ -897,13 +904,35 @@ UpnpApplication::getMode()
     return _mode;
 }
 
+
+class ControllerWidgetClusterController : public Omm::Gui::ClusterController
+{
+    friend class ControllerWidget;
+
+    ControllerWidgetClusterController(ControllerWidget* pControllerWidget) : _pControllerWidget(pControllerWidget) {}
+
+    virtual void movedView(Omm::Gui::View* pView)
+    {
+        LOGNS(Gui, gui, debug, "controller widget moved view: " + pView->getName());
+
+        GuiVisual* pVisual = dynamic_cast<GuiVisual*>(pView);
+        if (pVisual) {
+            _pControllerWidget->getLocalRenderer()->getEngine()->setVisual(pVisual);
+        }
+    }
+
+    ControllerWidget* _pControllerWidget;
+};
+
+
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
 #ifdef __IPHONE__
 ClusterView(0, Gui::ClusterView::Native),
 #else
-ClusterView(0, Gui::ClusterView::Native),
+//ClusterView(0, Gui::ClusterView::Native),
 //ClusterView(0, Gui::ClusterView::Generic),
 //ClusterView(0, Gui::ClusterView::Tree),
+ClusterView(0, Gui::ClusterView::Column),
 #endif
 _pApplication(pApplication)
 {
@@ -944,6 +973,7 @@ _pApplication(pApplication)
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TrackNotification>(*this, &ControllerWidget::newTrack));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
+    attachController(new ControllerWidgetClusterController(this));
 }
 
 
@@ -979,6 +1009,13 @@ ControllerWidget::setState(State newState)
         _pMediaRendererGroupWidget->getDeviceGroupView().syncView();
     }
     LOG(upnp, debug, "controller widget state change finished");
+}
+
+
+Av::MediaRenderer*
+ControllerWidget::getLocalRenderer()
+{
+    return _pApplication->getLocalRenderer();
 }
 
 

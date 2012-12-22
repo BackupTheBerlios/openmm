@@ -19,12 +19,26 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
 
+#include <iostream>
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Gui/Application.h>
 #include <Omm/Gui/Button.h>
 #include <Omm/Gui/Cluster.h>
 
+
+class ButtonClusterController : public Omm::Gui::ClusterController
+{
+    virtual void insertedView(Omm::Gui::View* pView)
+    {
+        std::cout << "button cluster inserted view: " + pView->getName() << std::endl;
+    }
+
+    virtual void movedView(Omm::Gui::View* pView)
+    {
+        std::cout << "button cluster moved view: " + pView->getName() << std::endl;
+    }
+};
 
 
 class Application : public Omm::Gui::Application
@@ -35,8 +49,9 @@ class Application : public Omm::Gui::Application
 //        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Generic);
 //        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Tree);
         Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Column);
+        pCluster->attachController(new ButtonClusterController);
 
-        const int subviewCount = 5;
+        const int subviewCount = 8;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
             std::string label = "B" + Poco::NumberFormatter::format(i);

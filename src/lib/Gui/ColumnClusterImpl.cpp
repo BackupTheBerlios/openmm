@@ -36,6 +36,7 @@
 #include "Gui/Splitter.h"
 #include "ColumnClusterImpl.h"
 #include "Qt/SplitterImpl.h"
+#include "UIKit/ViewImpl.h"
 
 
 namespace Omm {
@@ -60,7 +61,7 @@ private:
 };
 
 
-class ColumnClusterController : public Controller
+class ColumnClusterController : public ClusterController
 {
 public:
     ColumnClusterController(ClusterView* pClusterView, ColumnView* pColumnView, ColumnClusterViewImpl* pColumnClusterViewImpl) : _pClusterView(pClusterView), _pColumnView(pColumnView), _pColumnClusterViewImpl(pColumnClusterViewImpl) {}
@@ -95,6 +96,13 @@ public:
             pNewCluster->insertView(pDrag->getSource(), pDrag->getSource()->getName(), 0);
         }
     }
+
+    virtual void insertedView(View* pView)
+    {
+        LOG(gui, debug, "column cluster inserted view: " + pView->getName());
+        _pColumnClusterViewImpl->movedView(pView);
+    }
+
 
     ClusterView*            _pClusterView;
     ColumnView*             _pColumnView;
@@ -274,6 +282,13 @@ ColumnClusterViewImpl::createClusterInRow(int column, int row)
         return 0;
     }
     return _grid[column]->createCluster(row);
+}
+
+
+void
+ColumnClusterViewImpl::movedView(View* pView)
+{
+    IMPL_NOTIFY_CONTROLLER(ClusterController, movedView, pView);
 }
 
 
