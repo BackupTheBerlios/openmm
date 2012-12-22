@@ -73,17 +73,8 @@ public:
     {
         LOG(gui, debug, "generic cluster drag controller dropped in target view: " + _pView->getName() + ", source view: " + pDrag->getSource()->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
-//        if (_pView == _pClusterView) {
-//            // dropped onto a subview
-//            bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
-////            ClusterView* pClusterView = _pClusterView->createClusterWithView(pDrag->getSource(), horizontal);
-////            pClusterView->updateLayout();
-//        }
-//        else {
-            // dropped onto a handle
-            int index = _pClusterView->getIndexFromView(_pView);
-            _pClusterView->insertView(pDrag->getSource(), pDrag->getSource()->getName(), index);
-//        }
+        int index = _pClusterView->getIndexFromView(_pView);
+        _pClusterView->insertView(pDrag->getSource(), pDrag->getSource()->getName(), index);
     }
 
 private:
@@ -145,7 +136,7 @@ PlainViewImpl(pView),
 _handleHeight(25),
 _handleWidth(150),
 _handleBarHidden(false),
-_currentView(-1)
+_currentViewIndex(-1)
 {
 }
 
@@ -153,12 +144,7 @@ _currentView(-1)
 void
 GenericClusterViewImpl::init()
 {
-    // NOTE: setAcceptDrops() calls a method of _pImpl, which in turn must be readily constructed
-    // and thus cannot be called within GenericClusterViewImpl(). Therefore we got ViewImpl::init().
-
     ClusterView* pView = static_cast<ClusterView*>(_pView);
-//    pView->setAcceptDrops(true);
-//    pView->attachController(new ClusterController(pView, pView));
     pView->setLayout(new GenericClusterStackedLayout(this));
 }
 
@@ -188,8 +174,7 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
 
     _handles[pView] = pHandle;
     _views.insert(_views.begin() + index, pView);
-    _currentView = index;
-
+    _currentViewIndex = index;
     _pView->updateLayout();
 }
 
@@ -204,6 +189,7 @@ GenericClusterViewImpl::removeView(View* pView)
         _handles.erase(pView);
         _views.erase(it);
     }
+    _pView->updateLayout();
 }
 
 
@@ -217,24 +203,37 @@ GenericClusterViewImpl::getViewCount()
 int
 GenericClusterViewImpl::getCurrentViewIndex()
 {
-    LOG(gui, debug, "cluster get current tab: " + Poco::NumberFormatter::format(_currentView));
+    LOG(gui, debug, "cluster get current view index: " + Poco::NumberFormatter::format(_currentViewIndex));
 
-    return _currentView;
+    return _currentViewIndex;
 }
 
 
 void
 GenericClusterViewImpl::setCurrentViewIndex(int index)
 {
-    LOG(gui, debug, "cluster set current tab: " + Poco::NumberFormatter::format(index));
+    LOG(gui, debug, "cluster set current view index: " + Poco::NumberFormatter::format(index));
 
     if (index == -1) {
         return;
     }
-    _handles[_views[_currentView]]->setBackgroundColor(Color("white"));
-    _currentView = index;
-    _views[_currentView]->raise();
-    _handles[_views[_currentView]]->setBackgroundColor(Color(200, 200, 200, 255));
+
+    View* pCurrentView = _views[_currentViewIndex];
+    if (pCurrentView) {
+        View* pHandle = _handles[pCurrentView];
+        if (pHandle) {
+            pHandle->setBackgroundColor(Color("white"));
+        }
+    }
+    _currentViewIndex = index;
+    pCurrentView = _views[_currentViewIndex];
+    if (pCurrentView) {
+        _views[_currentViewIndex]->raise();
+        View* pHandle = _handles[pCurrentView];
+        if (pHandle) {
+            pHandle->setBackgroundColor(Color(200, 200, 200, 255));
+        }
+    }
 }
 
 

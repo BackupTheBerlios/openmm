@@ -57,7 +57,7 @@ private:
     bool                                _handleBarHidden;
     std::map<View*, ListItemView*>      _handles;
     std::vector<View*>                  _views;
-    int                                 _currentView;
+    int                                 _currentViewIndex;
 };
 
 
