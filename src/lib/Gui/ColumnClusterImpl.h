@@ -64,6 +64,7 @@ private:
     ClusterView* getFirstCluster();
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
+    ClusterView* getCluster(View* pView);
 
     void movedView(View* pView);
 

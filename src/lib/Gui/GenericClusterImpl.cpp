@@ -179,6 +179,9 @@ GenericClusterViewImpl::removeView(View* pView)
         _views.erase(it);
     }
     _pView->updateLayout();
+    if (!_views.size()) {
+        _pView->hide();
+    }
 }
 
 

@@ -79,9 +79,15 @@ public:
 
     virtual void dropped(const Position& pos, Drag* pDrag)
     {
-        LOG(gui, debug, "column cluster drag controller dropped in target view: " + _pClusterView->getName() + ", source view: " + pDrag->getSource()->getName()
+        LOG(gui, debug, "column cluster drag controller dropped in target view: " + _pClusterView->getName()
+                + ", source view: " + pDrag->getSource()->getName() + ", source cluster: " + pDrag->getSource()->getParent()->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
         bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
+
+//        ClusterView* pSourceCluster = dynamic_cast<ClusterView*>(pDrag->getSource()->getParent());
+//        if (pSourceCluster && pSourceCluster->getViewCount() == 1) {
+//            pSourceCluster->hide();
+//        }
 
         ClusterView* pNewCluster = 0;
         int row = _pColumnView->getRow(_pClusterView);
@@ -189,7 +195,7 @@ ColumnClusterViewImpl::init()
 void
 ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int index)
 {
-    LOG(gui, debug, "column cluster insert view: " + name);
+    LOG(gui, debug, "column cluster insert view: " + pView->getName());
 
     getFirstCluster()->insertView(pView, name, index);
 }
@@ -198,6 +204,7 @@ ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int inde
 void
 ColumnClusterViewImpl::removeView(View* pView)
 {
+    LOG(gui, debug, "column cluster remove view: " + pView->getName());
 
 }
 
@@ -282,6 +289,13 @@ ColumnClusterViewImpl::createClusterInRow(int column, int row)
         return 0;
     }
     return _grid[column]->createCluster(row);
+}
+
+
+ClusterView*
+ColumnClusterViewImpl::getCluster(View* pView)
+{
+    return dynamic_cast<ClusterView*>(pView->getParent());
 }
 
 
