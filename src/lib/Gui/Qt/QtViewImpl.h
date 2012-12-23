@@ -44,11 +44,13 @@ public:
 
     void showView();
     void hideView();
+    void raiseView();
     void syncView();
 
 signals:
     void showViewSignal();
     void hideViewSignal();
+    void raiseViewSignal();
     void syncViewSignal();
 
 private slots:

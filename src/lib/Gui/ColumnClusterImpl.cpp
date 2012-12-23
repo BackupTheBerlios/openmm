@@ -35,8 +35,6 @@
 #include "Gui/Drag.h"
 #include "Gui/Splitter.h"
 #include "ColumnClusterImpl.h"
-#include "Qt/SplitterImpl.h"
-#include "UIKit/ViewImpl.h"
 
 
 namespace Omm {
@@ -46,7 +44,12 @@ namespace Gui {
 class ColumnView : public SplitterView
 {
 public:
+    typedef std::vector<ClusterView*>::iterator ClusterIterator;
+
     ColumnView(ColumnClusterViewImpl* pColumnClusterViewImpl);
+
+    ClusterIterator beginCluster();
+    ClusterIterator endCluster();
 
     int getSize();
     int getRow(ClusterView* pCluster);
@@ -128,6 +131,20 @@ _pColumnClusterViewImpl(pColumnClusterViewImpl)
 }
 
 
+ColumnView::ClusterIterator
+ColumnView::beginCluster()
+{
+    return _col.begin();
+}
+
+
+ColumnView::ClusterIterator
+ColumnView::endCluster()
+{
+    return _col.end();
+}
+
+
 int
 ColumnView::getSize()
 {
@@ -195,7 +212,7 @@ ColumnClusterViewImpl::init()
 void
 ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int index)
 {
-    LOG(gui, debug, "column cluster insert view: " + pView->getName());
+    LOG(gui, debug, "column cluster view impl insert view: " + pView->getName());
 
     getFirstCluster()->insertView(pView, name, index);
 }
@@ -204,7 +221,7 @@ ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int inde
 void
 ColumnClusterViewImpl::removeView(View* pView)
 {
-    LOG(gui, debug, "column cluster remove view: " + pView->getName());
+    LOG(gui, debug, "column cluster view impl remove view: " + pView->getName());
 
 }
 
@@ -212,24 +229,45 @@ ColumnClusterViewImpl::removeView(View* pView)
 int
 ColumnClusterViewImpl::getViewCount()
 {
+    int viewCount = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            viewCount += (*it)->getViewCount();
+        }
+    }
+    return viewCount;
 }
 
 
 int
 ColumnClusterViewImpl::getCurrentViewIndex()
 {
-//    LOG(gui, debug, "cluster get current tab: " + Poco::NumberFormatter::format(_currentView));
-
+    // FIXME: this is not the view with focus, just the visible view of the first cluster
+    return getFirstCluster()->getCurrentViewIndex();
 }
 
 
 void
 ColumnClusterViewImpl::setCurrentViewIndex(int index)
 {
-    LOG(gui, debug, "cluster set current handle: " + Poco::NumberFormatter::format(index));
+    LOG(gui, debug, "column cluster view impl set current view index: " + Poco::NumberFormatter::format(index));
 
     if (index == -1) {
         return;
+    }
+    int topColClusterIndex = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        int rowClusterIndex = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            if (topColClusterIndex + rowClusterIndex + (*it)->getViewCount() > index) {
+                (*it)->setCurrentViewIndex(index - rowClusterIndex - topColClusterIndex);
+                return;
+            }
+            else {
+                rowClusterIndex += (*it)->getViewCount();
+            }
+        }
+        topColClusterIndex += rowClusterIndex;
     }
 }
 
@@ -237,6 +275,20 @@ ColumnClusterViewImpl::setCurrentViewIndex(int index)
 int
 ColumnClusterViewImpl::getIndexFromView(View* pView)
 {
+    int topColClusterIndex = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        int rowClusterIndex = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            int index = (*it)->getIndexFromView(pView);
+            if (index != -1) {
+                return topColClusterIndex + rowClusterIndex + index;
+            }
+            else {
+                rowClusterIndex += (*it)->getViewCount();
+            }
+        }
+        topColClusterIndex += rowClusterIndex;
+    }
 }
 
 

@@ -74,9 +74,9 @@ public:
     View* getParent();
     void setParent(View* pView);
 
-    virtual void raise();
     virtual void show(bool async = true);
     virtual void hide(bool async = true);
+    virtual void raise(bool async = true);
 
     int posX();
     int posY();

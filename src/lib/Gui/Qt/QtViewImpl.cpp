@@ -27,7 +27,7 @@ namespace Omm {
 namespace Gui {
 
 
-    
+
 SignalProxy::SignalProxy(ViewImpl* pViewImpl):
  _pViewImpl(pViewImpl)
 {
@@ -39,7 +39,8 @@ SignalProxy::init()
 {
     connect(this, SIGNAL(showViewSignal()), _pViewImpl->_pNativeView, SLOT(show()));
     connect(this, SIGNAL(hideViewSignal()), _pViewImpl->_pNativeView, SLOT(hide()));
-    connect(this, SIGNAL(syncViewSignal()), this, SLOT(syncViewSlot()));    
+    connect(this, SIGNAL(raiseViewSignal()), _pViewImpl->_pNativeView, SLOT(raise()));
+    connect(this, SIGNAL(syncViewSignal()), this, SLOT(syncViewSlot()));
 }
 
 
@@ -58,6 +59,13 @@ SignalProxy::hideView()
 
 
 void
+SignalProxy::raiseView()
+{
+    emit raiseViewSignal();
+}
+
+
+void
 SignalProxy::syncView()
 {
     emit syncViewSignal();
@@ -69,7 +77,7 @@ SignalProxy::syncViewSlot()
 {
     _pViewImpl->_pView->syncViewImpl();
 }
-        
-        
+
+
 }  // namespace Omm
 }  // namespace Gui

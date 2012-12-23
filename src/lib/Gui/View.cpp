@@ -136,13 +136,6 @@ View::setParent(View* pView)
 
 
 void
-View::raise()
-{
-    _pImpl->raise();
-}
-
-
-void
 View::show(bool async)
 {
     LOG(gui, debug, "view show \"" + getName() + "\" ...");
@@ -156,6 +149,13 @@ View::hide(bool async)
 {
 //    LOG(gui, debug, "view hide.");
     _pImpl->hideView(async);
+}
+
+
+void
+View::raise(bool async)
+{
+    _pImpl->raise(async);
 }
 
 
