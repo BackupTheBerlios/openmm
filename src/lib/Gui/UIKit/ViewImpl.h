@@ -43,10 +43,10 @@ public:
     uint32_t getNativeWindowId();
     void* getNativeViewController();
     void setNativeView(void* pView);
-    void raise();
     void setParent(View* pView);
     virtual void showView(bool async);
     virtual void hideView(bool async);
+    void raise(bool async);
     virtual int posXView();
     virtual int posYView();
     virtual int widthView();

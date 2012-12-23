@@ -183,6 +183,11 @@
     static_cast<UIView*>(_pViewImpl->getNativeView()).hidden = YES;
 }
 
+- (void)raiseView
+{
+    [static_cast<UIView*>(_pViewImpl->getView()->getParent()->getNativeView()) bringSubviewToFront:static_cast<UIView*>(_pViewImpl->getNativeView())];
+}
+
 - (void)syncView
 {
     _pViewImpl->getView()->syncViewImpl();
@@ -299,13 +304,6 @@ ViewImpl::setNativeView(void* pView)
 
 
 void
-ViewImpl::raise()
-{
-    [static_cast<UIView*>(getView()->getParent()->getNativeView()) bringSubviewToFront:static_cast<UIView*>(getNativeView())];
-}
-
-
-void
 ViewImpl::setParent(View* pView)
 {
     [static_cast<UIView*>(_pNativeView) removeFromSuperview];
@@ -338,6 +336,18 @@ ViewImpl::hideView(bool async)
         static_cast<UIView*>(getNativeView()).hidden = YES;
     }
 //    LOG(gui, debug, "view impl hide finished.");
+}
+
+
+void
+ViewImpl::raise(bool async)
+{
+    if (async) {
+        [static_cast<OmmGuiViewSelectorDispatcher*>(_pNativeViewSelectorDispatcher) performSelectorOnMainThread:@selector(raiseView) withObject:nil waitUntilDone:YES];
+    }
+    else {
+        [static_cast<UIView*>(getView()->getParent()->getNativeView()) bringSubviewToFront:static_cast<UIView*>(getNativeView())];
+    }
 }
 
 
