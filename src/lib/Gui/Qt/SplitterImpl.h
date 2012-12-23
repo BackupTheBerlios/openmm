@@ -32,7 +32,6 @@ class View;
 class SplitterViewImpl : public ViewImpl
 {
     friend class SplitterView;
-    friend class TreeClusterViewImpl;
     friend class ColumnClusterViewImpl;
 
 private:

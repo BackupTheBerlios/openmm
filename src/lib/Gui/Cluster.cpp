@@ -36,7 +36,6 @@
 #include "ClusterImpl.h"
 #include "GenericClusterImpl.h"
 #include "ColumnClusterImpl.h"
-#include "TreeClusterImpl.h"
 
 
 namespace Omm {
@@ -46,7 +45,6 @@ namespace Gui {
 const std::string ClusterView::Native("NativeClusterView");
 const std::string ClusterView::Generic("GenericClusterView");
 const std::string ClusterView::Column("ColumnClusterView");
-const std::string ClusterView::Tree("TreeClusterView");
 
 ClusterView::ClusterView(View* pParent, const std::string& type) :
 View(pParent, false)
@@ -59,9 +57,6 @@ View(pParent, false)
     }
     else if (type == Column) {
         _pImpl = new ColumnClusterViewImpl(this);
-    }
-    else if (type == Tree) {
-        _pImpl = new TreeClusterViewImpl(this, true);
     }
     _pImpl->init();
 }
@@ -76,7 +71,7 @@ void
 ClusterView::insertView(View* pView, const std::string& name, int index)
 {
     // NOTE: this is somewhat crude, a dynamic_cast wouldn't work with GenericClusterViewImpl
-    // or TreeClusterViewImpl: there's no direct inheritance, but the same interface.
+    // or ColumnClusterViewImpl: there's no direct inheritance, but the same interface.
     LOG(gui, debug, "cluster view insert view: " + pView->getName());
     static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, name, index);
     NOTIFY_CONTROLLER(ClusterController, insertedView, pView);

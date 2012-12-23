@@ -931,7 +931,6 @@ ClusterView(0, Gui::ClusterView::Native),
 #else
 //ClusterView(0, Gui::ClusterView::Native),
 //ClusterView(0, Gui::ClusterView::Generic),
-//ClusterView(0, Gui::ClusterView::Tree),
 ClusterView(0, Gui::ClusterView::Column),
 #endif
 _pApplication(pApplication)

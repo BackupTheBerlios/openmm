@@ -35,7 +35,6 @@ SelectionView.cpp
 Splitter.cpp
 Cluster.cpp
 GenericClusterImpl.cpp
-TreeClusterImpl.cpp
 ColumnClusterImpl.cpp
 )
 
