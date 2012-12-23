@@ -295,6 +295,11 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
 void
 ColumnClusterViewImpl::setHandlesHidden(bool hidden)
 {
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            (*it)->setHandlesHidden(hidden);
+        }
+    }
 }
 
 
