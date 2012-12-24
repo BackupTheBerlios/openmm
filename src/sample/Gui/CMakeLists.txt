@@ -169,6 +169,15 @@ ${OMM_GUI}
 )
 
 
+add_executable(splitter
+Splitter.cpp
+)
+
+target_link_libraries(splitter
+${OMM_GUI}
+)
+
+
 add_executable(buttoncluster
 ButtonCluster.cpp
 )

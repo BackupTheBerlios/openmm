@@ -65,9 +65,9 @@ ViewImpl::initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy)
         _pNativeView->resize(pParentWidget->size());
         _pNativeView->setParent(pParentWidget);
     }
-    else {
-        _pNativeView->resize(250, 400);
-    }
+//    else {
+//        _pNativeView->resize(250, 400);
+//    }
 }
 
 

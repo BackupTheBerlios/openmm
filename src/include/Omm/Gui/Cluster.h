@@ -43,11 +43,13 @@ class SubClusterView;
 class ClusterController : public Controller
 {
     friend class ClusterView;
+    friend class GenericClusterViewImpl;
     friend class ColumnClusterViewImpl;
 
 protected:
     virtual void insertedView(View* pView) {}
     virtual void movedView(View* pView) {}
+    virtual void sizeConstraintReached(View* pView) {}
 };
 
 
@@ -70,9 +72,13 @@ public:
     int getCurrentViewIndex(); /// current view has focus
     void setCurrentViewIndex(int index);
     int getIndexFromView(View* pView);
+    View* getViewFromIndex(int index);
 
     void setHandlesHidden(bool hidden = true);
     const int getHandleHeight();
+
+    void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
+    std::string writeLayout();
 
 private:
     virtual void removedSubview(View* pView);

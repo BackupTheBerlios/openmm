@@ -37,10 +37,10 @@ namespace Gui {
 class SplitterView;
 class ColumnView;
 
-//class ColumnClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
 class ColumnClusterViewImpl : public AbstractClusterViewImpl, public SplitterViewImpl
 {
     friend class ColumnClusterController;
+    friend class ColumnClusterLayout;
     friend class ColumnView;
 
 public:
@@ -53,20 +53,27 @@ public:
     virtual int getCurrentViewIndex(); /// current view has focus
     virtual void setCurrentViewIndex(int index);
     virtual int getIndexFromView(View* pView);
+    virtual View* getViewFromIndex(int index);
 
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
 
+    virtual std::string writeLayout();
+
 private:
     typedef std::vector<ColumnView*>::iterator GridIterator;
 
-    int getColumn(ColumnView* pColumn);
-    ClusterView* getFirstCluster();
+    int getColumnCount();
+    int getColumnIndex(ColumnView* pColumn);
+    ClusterView* getOriginCluster();
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
     ClusterView* getCluster(View* pView);
+    void mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster);
+    void removeCluster(ClusterView* pCluster);
 
     void movedView(View* pView);
+    void onResize(int width, int height);
 
     std::vector<ColumnView*>                        _grid;
 };

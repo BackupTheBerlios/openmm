@@ -37,9 +37,13 @@ public:
     virtual int getCurrentViewIndex() = 0; /// current view has focus
     virtual void setCurrentViewIndex(int index) = 0;
     virtual int getIndexFromView(View* pView) = 0;
+    virtual View* getViewFromIndex(int index) = 0;
 
     virtual void setHandlesHidden(bool hidden = true) = 0;
     virtual const int getHandleHeight() = 0;
+
+    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height) { }
+    virtual std::string writeLayout() { return ""; }
 };
 
 

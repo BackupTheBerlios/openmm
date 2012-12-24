@@ -288,7 +288,7 @@ View::scale(float factor)
 void
 View::move(int x, int y)
 {
-    LOG(gui, debug, "view move " + _name + ": " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
+//    LOG(gui, debug, "view move " + _name + ": " + Poco::NumberFormatter::format(x) + ", " + Poco::NumberFormatter::format(y));
     _pImpl->moveView(x, y);
 }
 

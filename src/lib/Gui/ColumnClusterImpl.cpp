@@ -22,6 +22,7 @@
 #include <Poco/NumberFormatter.h>
 #include <map>
 #include <vector>
+#include <stack>
 
 #include "Log.h"
 #include "Gui/Cluster.h"
@@ -56,6 +57,7 @@ public:
     ClusterView* getTopCluster();
     ClusterView* createCluster();
     ClusterView* createCluster(int row);
+    void removeCluster(ClusterView* pCluster);
 
 private:
     static int                  _clusterNumber;
@@ -71,18 +73,18 @@ public:
 
     virtual void dragStarted()
     {
-        LOG(gui, debug, "column cluster drag controller drag started in source view: " + _pClusterView->getName());
+        LOG(gui, debug, "column cluster controller drag started in source view: " + _pClusterView->getName());
     }
 
     virtual void dragMoved(const Position& pos, Drag* pDrag)
     {
-        LOG(gui, debug, "column cluster drag controller drag moved in target view: " + _pClusterView->getName()
+        LOG(gui, debug, "column cluster controller drag moved in target view: " + _pClusterView->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
     }
 
     virtual void dropped(const Position& pos, Drag* pDrag)
     {
-        LOG(gui, debug, "column cluster drag controller dropped in target view: " + _pClusterView->getName()
+        LOG(gui, debug, "column cluster controller dropped in target view: " + _pClusterView->getName()
                 + ", source view: " + pDrag->getSource()->getName() + ", source cluster: " + pDrag->getSource()->getParent()->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
         bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
@@ -94,7 +96,7 @@ public:
 
         ClusterView* pNewCluster = 0;
         int row = _pColumnView->getRow(_pClusterView);
-        int col = _pColumnClusterViewImpl->getColumn(_pColumnView);
+        int col = _pColumnClusterViewImpl->getColumnIndex(_pColumnView);
         if (horizontal) {
             pNewCluster = _pColumnClusterViewImpl->createClusterInNewColumn(col + 1);
         }
@@ -117,6 +119,25 @@ public:
     ColumnView*             _pColumnView;
     ColumnClusterViewImpl*  _pColumnClusterViewImpl;
 };
+
+
+class ColumnClusterLayout : public Layout
+{
+public:
+    ColumnClusterLayout(ColumnClusterViewImpl* pViewImpl) : _pViewImpl(pViewImpl) {}
+
+    virtual void layoutView();
+
+    ColumnClusterViewImpl*     _pViewImpl;
+};
+
+
+void
+ColumnClusterLayout::layoutView()
+{
+    LOG(gui, debug, "column cluster view resized [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
+    static_cast<ColumnClusterViewImpl*>(_pView->getViewImpl())->onResize(_pView->width(), _pView->height());
+}
 
 
 int ColumnView::_clusterNumber = 0;
@@ -163,7 +184,7 @@ ColumnView::getRow(ClusterView* pCluster)
 ClusterView*
 ColumnView::getTopCluster()
 {
-    return *_col.begin();
+    return _col[0];
 }
 
 
@@ -192,8 +213,17 @@ ColumnView::createCluster(int row)
 }
 
 
+void
+ColumnView::removeCluster(ClusterView* pCluster)
+{
+    std::vector<ClusterView*>::iterator it = std::find(_col.begin(), _col.end(), pCluster);
+    if (it != _col.end()) {
+        _col.erase(it);
+    }
+}
+
+
 ColumnClusterViewImpl::ColumnClusterViewImpl(View* pView, bool createInitialCluster) :
-//PlainViewImpl(pView),
 SplitterViewImpl(pView, View::Horizontal)
 {
 }
@@ -203,6 +233,7 @@ void
 ColumnClusterViewImpl::init()
 {
     _pView->setName("column cluster");
+    _pView->setLayout(new ColumnClusterLayout(this));
     ColumnView* pCol = new ColumnView(this);
     SplitterViewImpl::insertView(pCol, 0);
     _grid.push_back(pCol);
@@ -214,7 +245,7 @@ ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int inde
 {
     LOG(gui, debug, "column cluster view impl insert view: " + pView->getName());
 
-    getFirstCluster()->insertView(pView, name, index);
+    getOriginCluster()->insertView(pView, name, index);
 }
 
 
@@ -243,7 +274,7 @@ int
 ColumnClusterViewImpl::getCurrentViewIndex()
 {
     // FIXME: this is not the view with focus, just the visible view of the first cluster
-    return getFirstCluster()->getCurrentViewIndex();
+    return getOriginCluster()->getCurrentViewIndex();
 }
 
 
@@ -292,6 +323,14 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
 }
 
 
+View*
+ColumnClusterViewImpl::getViewFromIndex(int index)
+{
+    // TODO: implement view from index
+    return 0;
+}
+
+
 void
 ColumnClusterViewImpl::setHandlesHidden(bool hidden)
 {
@@ -306,12 +345,36 @@ ColumnClusterViewImpl::setHandlesHidden(bool hidden)
 const int
 ColumnClusterViewImpl::getHandleHeight()
 {
-    return getFirstCluster()->getHandleHeight();
+    return getOriginCluster()->getHandleHeight();
+}
+
+
+std::string
+ColumnClusterViewImpl::writeLayout()
+{
+    std::string res;
+    int column = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+        int cluster = 0;
+        res += "[" + Poco::NumberFormatter::format(column);
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
+            res += "(" + Poco::NumberFormatter::format(cluster) + ":\"" + (*it)->getName() + "\"" + (*it)->writeLayout() + ")";
+        }
+        res += "]";
+    }
+    return res;
 }
 
 
 int
-ColumnClusterViewImpl::getColumn(ColumnView* pColumn)
+ColumnClusterViewImpl::getColumnCount()
+{
+    return _grid.size();
+}
+
+
+int
+ColumnClusterViewImpl::getColumnIndex(ColumnView* pColumn)
 {
     std::vector<ColumnView*>::iterator it = std::find(_grid.begin(), _grid.end(), pColumn);
     return it - _grid.begin();
@@ -319,9 +382,9 @@ ColumnClusterViewImpl::getColumn(ColumnView* pColumn)
 
 
 ClusterView*
-ColumnClusterViewImpl::getFirstCluster()
+ColumnClusterViewImpl::getOriginCluster()
 {
-    return (*_grid.begin())->getTopCluster();
+    return _grid[0]->getTopCluster();
 }
 
 
@@ -331,6 +394,7 @@ ColumnClusterViewImpl::createClusterInNewColumn(int column)
     if (column < 0 || column > _grid.size()) {
         return 0;
     }
+    LOG(gui, debug, "column cluster create column: " + Poco::NumberFormatter::format(column));
 
     ColumnView* pCol = new ColumnView(this);
     SplitterViewImpl::insertView(pCol, column);
@@ -357,9 +421,111 @@ ColumnClusterViewImpl::getCluster(View* pView)
 
 
 void
+ColumnClusterViewImpl::mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster)
+{
+    if (pCluster == pTargetCluster) {
+        return;
+    }
+    for (int viewIndex = 0; viewIndex < pCluster->getViewCount(); ++viewIndex) {
+        View* pView = pCluster->getViewFromIndex(viewIndex);
+        pTargetCluster->insertView(pView, pView->getName());
+    }
+    removeCluster(pCluster);
+}
+
+
+void
+ColumnClusterViewImpl::removeCluster(ClusterView* pCluster)
+{
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        (*colIt)->removeCluster(pCluster);
+    }
+}
+
+
+void
 ColumnClusterViewImpl::movedView(View* pView)
 {
     IMPL_NOTIFY_CONTROLLER(ClusterController, movedView, pView);
+}
+
+
+void
+ColumnClusterViewImpl::onResize(int width, int height)
+{
+    View::SizeConstraint widthConstrained;
+    View::SizeConstraint heightConstrained;
+    View* pViewToMove = 0;
+    std::stack<ClusterView*> clustersToMove;
+    int column = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+        int cluster = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
+            View::SizeConstraint wC;
+            View::SizeConstraint hC;
+            (*it)->sizeConstraintReached(wC, hC);
+            if (wC != View::None) {
+                widthConstrained = wC;
+            }
+            if (hC != View::None) {
+                heightConstrained = hC;
+            }
+            if (wC != View::None || hC != View::None) {
+                LOG(gui, debug, "column cluster size constraint reached in cluster [" + Poco::NumberFormatter::format(column) + ", " + Poco::NumberFormatter::format(cluster) + "]");
+                clustersToMove.push(*it);
+            }
+            if ((*it)->getViewCount() > 1) {
+                pViewToMove = (*it)->getViewFromIndex(0);
+                LOG(gui, debug, "column cluster view move candidate in column " + Poco::NumberFormatter::format(column) + ", cluster " + Poco::NumberFormatter::format(cluster) + ": " + pViewToMove->getName());
+            }
+        }
+    }
+
+    if (pViewToMove) {
+        LOG(gui, debug, "column cluster view to move: " + pViewToMove->getName());
+    }
+    ClusterView* pNewCluster = 0;
+    if (widthConstrained == View::Min) {
+        LOG(gui, debug, "column cluster MIN WIDTH CONSTRAINT reached");
+//        for (ColumnView::ClusterIterator it = _grid.back()->beginCluster(); it != _grid.back()->endCluster(); ++it) {
+//            mergeClusterWithCluster(*it, getOriginCluster());
+//        }
+        while (clustersToMove.size()) {
+            mergeClusterWithCluster(clustersToMove.top(), getOriginCluster());
+            clustersToMove.pop();
+        }
+    }
+    else if (widthConstrained == View::Max) {
+        LOG(gui, debug, "column cluster MAX WIDTH CONSTRAINT reached");
+        if (pViewToMove) {
+            pNewCluster = createClusterInNewColumn(getColumnCount());
+            pNewCluster->insertView(pViewToMove, pViewToMove->getName());
+            pViewToMove = 0;
+        }
+    }
+    else if (heightConstrained == View::Min) {
+//    if (heightConstrained == View::Min) {
+        LOG(gui, debug, "column cluster MIN HEIGHT CONSTRAINT reached");
+        while (clustersToMove.size()) {
+            mergeClusterWithCluster(clustersToMove.top(), getOriginCluster());
+            clustersToMove.pop();
+        }
+    }
+    else if (heightConstrained == View::Max) {
+        LOG(gui, debug, "column cluster MAX HEIGHT CONSTRAINT reached");
+        if (pViewToMove) {
+            pNewCluster = createClusterInRow(0, _grid[0]->getSize());
+            pNewCluster->insertView(pViewToMove, pViewToMove->getName());
+        }
+    }
+
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+        if (!(*colIt)->getSize()) {
+            (*colIt)->hide();
+        }
+    }
+
+    LOG(gui, debug, "column cluster layout: " + writeLayout());
 }
 
 

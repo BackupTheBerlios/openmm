@@ -44,6 +44,13 @@ private:
 };
 
 
+class Splitter : public Widget<SplitterView, Controller, Model>
+{
+public:
+    Splitter(View* pParent = 0) : Widget<SplitterView, Controller, Model>(pParent) {}
+};
+
+
 
 }  // namespace Omm
 }  // namespace Gui

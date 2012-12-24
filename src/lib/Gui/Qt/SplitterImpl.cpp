@@ -24,6 +24,7 @@
 #include <qt4/QtGui/qsplitter.h>
 
 #include "SplitterImpl.h"
+#include "QtViewImpl.h"
 #include "Gui/Splitter.h"
 #include "Gui/GuiLogger.h"
 
@@ -34,7 +35,8 @@ namespace Gui {
 SplitterViewImpl::SplitterViewImpl(View* pView, View::Orientation orientation)
 {
 //    LOG(gui, debug, "splitter view impl ctor");
-    QSplitter* pNativeView = new QSplitter;
+//    QSplitter* pNativeView = new QSplitter;
+    QSplitter* pNativeView = new QtViewImpl<QSplitter>(this);
 
     initViewImpl(pView, pNativeView);
 

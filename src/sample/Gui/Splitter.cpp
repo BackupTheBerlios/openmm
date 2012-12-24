@@ -22,28 +22,26 @@
 #include <Poco/NumberFormatter.h>
 
 #include <Omm/Gui/Application.h>
-#include <Omm/Gui/Label.h>
-#include <Omm/Gui/Platter.h>
-
+#include <Omm/Gui/Button.h>
+#include <Omm/Gui/Splitter.h>
 
 
 class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
-        Omm::Gui::Platter* pPlatter = new Omm::Gui::Platter;
+        Omm::Gui::Splitter* pSplitter = new Omm::Gui::Splitter;
 
-        const int subviewCount = 5;
+        const int subviewCount = 2;
         for (int i = 0; i < subviewCount; i++) {
-            Omm::Gui::Label* pLabel = new Omm::Gui::Label;
-            std::string label = "V" + Poco::NumberFormatter::format(i);
-            pLabel->setName(label);
-            pLabel->setLabel(label);
-            pLabel->setAlignment(Omm::Gui::View::AlignCenter);
-            pPlatter->addView(pLabel, pLabel->getLabel());
+            Omm::Gui::Button* pButton = new Omm::Gui::Button;
+            std::string label = "B" + Poco::NumberFormatter::format(i);
+            pButton->setName(label);
+            pButton->setLabel(label);
+            pSplitter->insertView(pButton);
         }
 
-        return pPlatter;
+        return pSplitter;
     }
 };
 

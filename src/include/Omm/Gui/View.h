@@ -57,7 +57,7 @@ class View
 //    friend class HorizontalLayout;
 
 public:
-    typedef enum {Current, Min, Pref, Max} SizeConstraint;
+    typedef enum {None, Current, Min, Pref, Max} SizeConstraint;
     typedef enum {AlignLeft, AlignCenter, AlignRight} Alignment;
     typedef enum {Horizontal, Vertical} Orientation;
 

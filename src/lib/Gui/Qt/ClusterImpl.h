@@ -44,9 +44,12 @@ private:
     virtual int getCurrentViewIndex();
     virtual void setCurrentViewIndex(int index);
     virtual int getIndexFromView(View* pView);
+    virtual View* getViewFromIndex(int index);
 
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
+
+    std::vector<View*>  _views;
 };
 
 

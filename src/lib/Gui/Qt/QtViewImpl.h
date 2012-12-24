@@ -79,6 +79,7 @@ public:
         if (pEvent->oldSize().height() > 0) {
             _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
         }
+        W::resizeEvent(pEvent);
     }
 
     void mousePressEvent(QMouseEvent* pMouseEvent)

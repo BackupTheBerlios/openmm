@@ -106,6 +106,13 @@ ClusterView::getIndexFromView(View* pView)
 }
 
 
+View*
+ClusterView::getViewFromIndex(int index)
+{
+    return static_cast<ClusterViewImpl*>(_pImpl)->getViewFromIndex(index);
+}
+
+
 void
 ClusterView::setHandlesHidden(bool hidden)
 {
@@ -117,6 +124,20 @@ const int
 ClusterView::getHandleHeight()
 {
     return static_cast<ClusterViewImpl*>(_pImpl)->getHandleHeight();
+}
+
+
+void
+ClusterView::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
+{
+    static_cast<ClusterViewImpl*>(_pImpl)->sizeConstraintReached(width, height);
+}
+
+
+std::string
+ClusterView::writeLayout()
+{
+    return static_cast<ClusterViewImpl*>(_pImpl)->writeLayout();
 }
 
 
