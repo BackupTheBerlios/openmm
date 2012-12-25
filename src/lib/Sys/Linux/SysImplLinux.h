@@ -18,16 +18,16 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
 ***************************************************************************/
-#ifndef UtilImplLinux_INCLUDED
-#define UtilImplLinux_INCLUDED
-
-#include <libudev.h>
+#ifndef SysImplLinux_INCLUDED
+#define SysImplLinux_INCLUDED
 
 #include <string>
 #include <vector>
 
 #include "Sys/Path.h"
 #include "Sys/System.h"
+
+struct udev;
 
 namespace Omm {
 namespace Sys {

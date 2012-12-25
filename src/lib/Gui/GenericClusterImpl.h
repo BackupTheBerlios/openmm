@@ -56,6 +56,8 @@ public:
     virtual std::string writeLayout();
 
 private:
+    void updateSizeConstraints();
+
     int                                 _handleHeight;
     int                                 _handleWidth;
     bool                                _handleBarHidden;

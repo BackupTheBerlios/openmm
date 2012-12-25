@@ -326,7 +326,17 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
 View*
 ColumnClusterViewImpl::getViewFromIndex(int index)
 {
-    // TODO: implement view from index
+    int topColClusterIndex = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        int rowClusterIndex = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            if (index < topColClusterIndex + rowClusterIndex + (*it)->getViewCount()) {
+                return (*it)->getViewFromIndex(index - topColClusterIndex - rowClusterIndex);
+            }
+            rowClusterIndex += (*it)->getViewCount();
+        }
+        topColClusterIndex += rowClusterIndex;
+    }
     return 0;
 }
 
@@ -495,8 +505,10 @@ ColumnClusterViewImpl::onResize(int width, int height)
             clustersToMove.pop();
         }
     }
-    else if (widthConstrained == View::Max) {
-        LOG(gui, debug, "column cluster MAX WIDTH CONSTRAINT reached");
+//    else if (widthConstrained == View::Max) {
+//        LOG(gui, debug, "column cluster MAX WIDTH CONSTRAINT reached");
+    else if (widthConstrained == View::Pref) {
+        LOG(gui, debug, "column cluster PREF WIDTH CONSTRAINT reached");
         if (pViewToMove) {
             pNewCluster = createClusterInNewColumn(getColumnCount());
             pNewCluster->insertView(pViewToMove, pViewToMove->getName());
@@ -511,18 +523,26 @@ ColumnClusterViewImpl::onResize(int width, int height)
             clustersToMove.pop();
         }
     }
-    else if (heightConstrained == View::Max) {
-        LOG(gui, debug, "column cluster MAX HEIGHT CONSTRAINT reached");
+//    else if (heightConstrained == View::Max) {
+//        LOG(gui, debug, "column cluster MAX HEIGHT CONSTRAINT reached");
+    else if (heightConstrained == View::Pref) {
+        LOG(gui, debug, "column cluster PREF HEIGHT CONSTRAINT reached");
         if (pViewToMove) {
             pNewCluster = createClusterInRow(0, _grid[0]->getSize());
             pNewCluster->insertView(pViewToMove, pViewToMove->getName());
         }
     }
 
+    std::stack<std::vector<ColumnView*>::iterator> emptyCols;
     for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
         if (!(*colIt)->getSize()) {
-            (*colIt)->hide();
+            emptyCols.push(colIt);
         }
+    }
+    while (emptyCols.size()) {
+        (*emptyCols.top())->hide();
+        _grid.erase(emptyCols.top());
+        emptyCols.pop();
     }
 
     LOG(gui, debug, "column cluster layout: " + writeLayout());

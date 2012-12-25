@@ -208,16 +208,20 @@ View::height(SizeConstraint size)
 void
 View::setSizeConstraint(int width, int height, SizeConstraint size)
 {
+    _pImpl->setSizeConstraint(width, height, size);
     switch(size) {
         case Min:
             _minWidth = width;
             _minHeight = height;
+            break;
         case Pref:
             _prefWidth = width;
             _prefHeight = height;
+            break;
         case Max:
             _maxWidth = width;
             _maxHeight = height;
+            break;
     }
 }
 

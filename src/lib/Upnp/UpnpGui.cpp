@@ -941,6 +941,7 @@ _pApplication(pApplication)
         _pConfigBrowser = new Gui::WebBrowser;
         _pConfigBrowser->setName("Setup");
         _pConfigBrowser->setSizeConstraint(200, 120, Omm::Gui::View::Min);
+        _pConfigBrowser->setSizeConstraint(800, 600, Omm::Gui::View::Pref);
         _pConfigBrowser->setSizeConstraint(800, 800, Omm::Gui::View::Max);
         insertView(_pConfigBrowser, "Setup");
         _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
@@ -948,12 +949,14 @@ _pApplication(pApplication)
 
     _pVisual = new GuiVisual;
     _pVisual->setSizeConstraint(200, 120, Omm::Gui::View::Min);
+    _pVisual->setSizeConstraint(800, 600, Omm::Gui::View::Pref);
     _pVisual->setSizeConstraint(1900, 1080, Omm::Gui::View::Max);
     insertView(_pVisual, "Video");
 
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         _pPlaylistEditor = new PlaylistEditor(this);
         _pPlaylistEditor->setSizeConstraint(200, 120, Omm::Gui::View::Min);
+        _pPlaylistEditor->setSizeConstraint(800, 600, Omm::Gui::View::Pref);
         _pPlaylistEditor->setSizeConstraint(800, 800, Omm::Gui::View::Max);
         insertView(_pPlaylistEditor, "List");
     }
@@ -962,6 +965,7 @@ _pApplication(pApplication)
     registerDeviceGroup(_pMediaRendererGroupWidget);
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         _pMediaRendererGroupWidget->setSizeConstraint(200, 120, Omm::Gui::View::Min);
+        _pMediaRendererGroupWidget->setSizeConstraint(800, 600, Omm::Gui::View::Pref);
         _pMediaRendererGroupWidget->setSizeConstraint(800, 800, Omm::Gui::View::Max);
         insertView(_pMediaRendererGroupWidget, "Player");
     }
@@ -969,6 +973,7 @@ _pApplication(pApplication)
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
     registerDeviceGroup(_pMediaServerGroupWidget);
     _pMediaServerGroupWidget->setSizeConstraint(200, 120, Omm::Gui::View::Min);
+    _pMediaServerGroupWidget->setSizeConstraint(800, 600, Omm::Gui::View::Pref);
     _pMediaServerGroupWidget->setSizeConstraint(800, 1080, Omm::Gui::View::Max);
     insertView(_pMediaServerGroupWidget, "Media");
 

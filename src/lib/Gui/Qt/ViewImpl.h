@@ -63,6 +63,7 @@ public:
     virtual int widthView();
     virtual int heightView();
     virtual void resizeView(int width, int height);
+    virtual void setSizeConstraint(int width, int height, View::SizeConstraint size);
     virtual float getFontSize();
     virtual void setFontSize(float fontSize);
     virtual void moveView(int x, int y);

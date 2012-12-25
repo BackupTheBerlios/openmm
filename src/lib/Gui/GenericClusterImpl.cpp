@@ -171,6 +171,7 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
     _handles[pView] = pHandle;
     _views.insert(_views.begin() + index, pView);
     _currentViewIndex = index;
+    updateSizeConstraints();
     _pView->updateLayout();
 }
 
@@ -185,9 +186,12 @@ GenericClusterViewImpl::removeView(View* pView)
         _handles.erase(pView);
         _views.erase(it);
     }
-    _pView->updateLayout();
     if (!_views.size()) {
         _pView->hide();
+    }
+    else {
+        updateSizeConstraints();
+        _pView->updateLayout();
     }
 }
 
@@ -290,17 +294,21 @@ GenericClusterViewImpl::sizeConstraintReached(View::SizeConstraint& width, View:
             + Poco::NumberFormatter::format(pView->width(View::Max)) + ", "
             + Poco::NumberFormatter::format(pView->height(View::Max)) + "]");
 
-        if ((*it)->width(View::Current) < (*it)->width(View::Min)) {
+        if ((*it)->width(View::Current) <= (*it)->width(View::Min)) {
             width = View::Min;
         }
-        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
-            width = View::Max;
+//        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
+//            width = View::Max;
+        else if ((*it)->width(View::Current) > (*it)->width(View::Pref)) {
+            width = View::Pref;
         }
-        if ((*it)->height(View::Current) < (*it)->height(View::Min)) {
+        if ((*it)->height(View::Current) <= (*it)->height(View::Min)) {
             height = View::Min;
         }
-        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
-            height = View::Max;
+//        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
+//            height = View::Max;
+        else if ((*it)->height(View::Current) > (*it)->height(View::Pref)) {
+            height = View::Pref;
         }
     }
 }
@@ -315,6 +323,24 @@ GenericClusterViewImpl::writeLayout()
         res += "{" + Poco::NumberFormatter::format(index) + ":\"" + (*it)->getName() + "\"}";
     }
     return res;
+}
+
+
+void
+GenericClusterViewImpl::updateSizeConstraints()
+{
+    int minWidth = 0;
+    int maxWidth = (*_views.begin())->width(View::Max);
+    int minHeight = 0;
+    int maxHeight = (*_views.begin())->height(View::Max);
+    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
+        minWidth = minWidth > (*it)->width(View::Min) ? minWidth : (*it)->width(View::Min);
+        maxWidth = maxWidth < (*it)->width(View::Max) ? maxWidth : (*it)->width(View::Max);
+        minHeight = minHeight > (*it)->height(View::Min) ? minHeight : (*it)->height(View::Min);
+        maxHeight = maxHeight < (*it)->height(View::Max) ? maxHeight : (*it)->height(View::Max);
+    }
+    _pView->setSizeConstraint(minWidth, minHeight + _handleHeight, View::Min);
+    _pView->setSizeConstraint(maxWidth, maxHeight + _handleHeight, View::Max);
 }
 
 
