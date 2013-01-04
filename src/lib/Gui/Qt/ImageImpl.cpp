@@ -54,7 +54,9 @@ ImageViewImpl::setData(const std::string& data)
 //    static_cast<QLabel*>(_pNativeView)->setPixmap(*pImage);
 //    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaledToWidth(_pView->width()));
 //    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(_pView->width(View::Pref), _pView->height(View::Pref), Qt::KeepAspectRatio));
-    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(_pView->width(), _pView->height(), Qt::KeepAspectRatio));
+    if (!pImage->isNull()) {
+        static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(_pView->width(), _pView->height(), Qt::KeepAspectRatio));
+    }
 }
 
 

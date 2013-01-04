@@ -51,7 +51,7 @@ class Application : public Omm::Gui::Application
         Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Column);
         pCluster->attachController(new ButtonClusterController);
 
-        const int subviewCount = 4;
+        const int subviewCount = 8;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
             std::string label = "B" + Poco::NumberFormatter::format(i);

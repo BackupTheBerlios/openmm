@@ -72,7 +72,7 @@ ClusterView::insertView(View* pView, const std::string& name, int index)
 {
     // NOTE: this is somewhat crude, a dynamic_cast wouldn't work with GenericClusterViewImpl
     // or ColumnClusterViewImpl: there's no direct inheritance, but the same interface.
-    LOG(gui, debug, "cluster view insert view: " + pView->getName());
+//    LOG(gui, debug, "cluster view insert view: " + pView->getName());
     static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, name, index);
     NOTIFY_CONTROLLER(ClusterController, insertedView, pView);
 }

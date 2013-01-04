@@ -88,7 +88,7 @@ View(pParent)
 void
 ListItemView::setModel(Model* pModel)
 {
-    LOG(gui, debug, "list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+//    LOG(gui, debug, "list item view set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     if (!pModel) {
         LOG(gui, error, "list item view set model failed, model is null");
         return;
@@ -97,7 +97,7 @@ ListItemView::setModel(Model* pModel)
     _pImageView->setModel(pListItemModel->_pImageModel);
     _pLabelView->setModel(pListItemModel->_pLabelModel);
     View::setModel(pModel);
-    LOG(gui, debug, "list item view set model finished.");
+//    LOG(gui, debug, "list item view set model finished.");
 }
 
 
@@ -111,7 +111,7 @@ ListItemView::setSpacing(int hSpace)
 void
 ListItemView::syncViewImpl()
 {
-    LOG(gui, debug, "list item view sync view impl: " + getName() + " ...");
+//    LOG(gui, debug, "list item view sync view impl: " + getName() + " ...");
     ListItemModel* pItemModel = static_cast<ListItemModel*>(_pModel);
     if (pItemModel->_pLabelModel) {
         _pLabelView->syncViewImpl();
@@ -119,7 +119,7 @@ ListItemView::syncViewImpl()
     if (pItemModel->_pImageModel) {
         _pImageView->syncViewImpl();
     }
-    LOG(gui, debug, "list item view sync view impl: " + getName() + " finished.");
+//    LOG(gui, debug, "list item view sync view impl: " + getName() + " finished.");
 }
 
 

@@ -74,12 +74,14 @@ private:
     ClusterView* getCluster(View* pView);
     void mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster);
     void removeCluster(ClusterView* pCluster);
+    void removeEmptyCols();
 
     void movedView(View* pView);
     void onResize(int width, int height);
 
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;
+    std::vector<View*>                              _views;
 };
 
 

@@ -86,7 +86,7 @@ public:
 void
 GenericClusterStackedLayout::layoutView()
 {
-    LOG(gui, debug, "generic cluster view resized [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
+    LOG(gui, debug, "generic cluster view " + _pView->getName() + " resized [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
 
     if (!_pViewImpl->_views.size()) {
         return;

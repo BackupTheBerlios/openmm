@@ -77,8 +77,8 @@ LabelView::setAlignment(Alignment alignment)
 void
 LabelView::syncViewImpl()
 {
-    LOG(gui, debug, "Label view sync view: " + getName());
-    LOG(gui, debug, "Label view sync view with model: " + Poco::NumberFormatter::format(_pModel));
+//    LOG(gui, debug, "Label view sync view: " + getName());
+//    LOG(gui, debug, "Label view sync view with model: " + Poco::NumberFormatter::format(_pModel));
     LabelModel* pLabelModel = static_cast<LabelModel*>(_pModel);
     LabelViewImpl* pImpl = static_cast<LabelViewImpl*>(_pImpl);
     if (pLabelModel) {

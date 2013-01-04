@@ -916,7 +916,7 @@ class ControllerWidgetClusterController : public Omm::Gui::ClusterController
         LOGNS(Gui, gui, debug, "controller widget moved view: " + pView->getName());
 
         GuiVisual* pVisual = dynamic_cast<GuiVisual*>(pView);
-        if (pVisual) {
+        if (pVisual && _pControllerWidget->getLocalRenderer() && _pControllerWidget->getLocalRenderer()->getEngine()) {
             _pControllerWidget->getLocalRenderer()->getEngine()->setVisual(pVisual);
         }
     }
