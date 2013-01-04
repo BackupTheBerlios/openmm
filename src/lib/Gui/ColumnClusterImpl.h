@@ -24,6 +24,7 @@
 
 #include <map>
 #include <vector>
+#include <stack>
 
 #include "Gui/View.h"
 #include "ViewImpl.h"
@@ -65,6 +66,8 @@ private:
 
     int getColumnCount();
     int getColumnIndex(ColumnView* pColumn);
+    ColumnView* getColumn();
+    void putColumn(ColumnView* pColumn);
     ClusterView* getOriginCluster();
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
@@ -76,6 +79,7 @@ private:
     void onResize(int width, int height);
 
     std::vector<ColumnView*>                        _grid;
+    std::stack<ColumnView*>                         _columnPool;
 };
 
 

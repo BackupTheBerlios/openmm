@@ -46,7 +46,7 @@ _maxHeight(140),
 _stretchFactor(1.0),
 _scaleFactor(1.0)
 {
-    LOG(gui, debug, "view ctor (parent).");
+//    LOG(gui, debug, "view ctor (parent).");
 
     initView(pParent);
     _pImpl = new PlainViewImpl(this);
@@ -64,7 +64,7 @@ _stretchFactor(1.0),
 _scaleFactor(1.0),
 _pImpl(0)
 {
-    LOG(gui, debug, "view ctor (parent, createPlainView).");
+//    LOG(gui, debug, "view ctor (parent, createPlainView).");
 
     initView(pParent);
     if (createPlainView) {
@@ -138,7 +138,7 @@ View::setParent(View* pView)
 void
 View::show(bool async)
 {
-    LOG(gui, debug, "view show \"" + getName() + "\" ...");
+//    LOG(gui, debug, "view show \"" + getName() + "\" ...");
     _pImpl->showView(async);
 //    LOG(gui, debug, "view show finished.");
 }
@@ -268,7 +268,7 @@ View::resize(SizeConstraint size)
 void
 View::resize(int width, int height)
 {
-    LOG(gui, debug, "view resize \"" + getName() + "\" width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
+//    LOG(gui, debug, "view resize \"" + getName() + "\" width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pImpl->resizeView(width, height);
     updateLayout();
 }
@@ -307,7 +307,7 @@ View::getModel() const
 void
 View::setModel(Model* pModel)
 {
-    LOG(gui, debug, "view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
+//    LOG(gui, debug, "view \"" + getName() + "\" set model: " + Poco::NumberFormatter::format(pModel) + " ...");
     if (_pModel) {
         // if there was a model attached previously, detach controllers (and this view) from it
         for(ControllerIterator it = beginController(); it != endController(); ++it) {
@@ -323,9 +323,9 @@ View::setModel(Model* pModel)
         }
     }
     _pModel = pModel;
-    LOG(gui, debug, "view \"" + getName() + "\" sync view ...");
+//    LOG(gui, debug, "view \"" + getName() + "\" sync view ...");
     syncView();
-    LOG(gui, debug, "view \"" + getName() + "\" set model finished.");
+//    LOG(gui, debug, "view \"" + getName() + "\" set model finished.");
 }
 
 
@@ -469,7 +469,7 @@ void
 View::updateLayout()
 {
     if (_pLayout) {
-        LOG(gui, debug, "view \"" + getName() + "\" update layout");
+//        LOG(gui, debug, "view \"" + getName() + "\" update layout");
         _pLayout->layoutView();
 //        _pLayout->layoutViewEquiDistant();
     }

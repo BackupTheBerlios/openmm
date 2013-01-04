@@ -207,12 +207,12 @@ ViewImpl::setSizeConstraint(int width, int height, View::SizeConstraint size)
 {
     switch(size) {
         case View::Min:
-            _pNativeView->setMinimumSize(width, height);
+//            _pNativeView->setMinimumSize(width, height);
             break;
         case View::Pref:
             break;
         case View::Max:
-            _pNativeView->setMaximumSize(width, height);
+//            _pNativeView->setMaximumSize(width, height);
             break;
     }
 }

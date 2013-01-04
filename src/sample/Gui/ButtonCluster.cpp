@@ -51,15 +51,15 @@ class Application : public Omm::Gui::Application
         Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Column);
         pCluster->attachController(new ButtonClusterController);
 
-        const int subviewCount = 8;
+        const int subviewCount = 4;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
-            pButton->setSizeConstraint(80, 50, Omm::Gui::View::Min);
-            pButton->setSizeConstraint(150, 120, Omm::Gui::View::Pref);
-            pButton->setSizeConstraint(450, 450, Omm::Gui::View::Max);
+//            pButton->setSizeConstraint(80, 50, Omm::Gui::View::Min);
+            pButton->setSizeConstraint(150, 420, Omm::Gui::View::Pref);
+//            pButton->setSizeConstraint(250, 250, Omm::Gui::View::Max);
 
 //            pButton->setSizeConstraint(150, 50, Omm::Gui::View::Min);
 //            pButton->setSizeConstraint(850, 550, Omm::Gui::View::Max);

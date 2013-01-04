@@ -79,7 +79,9 @@ void
 ImageViewImpl::scaleBestFit(int width, int height)
 {
     QPixmap* pImage = static_cast<QPixmap*>(_pImage);
-    static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(width, height, Qt::KeepAspectRatio));
+    if (!pImage->isNull()) {
+        static_cast<QLabel*>(_pNativeView)->setPixmap(pImage->scaled(width, height, Qt::KeepAspectRatio));
+    }
 }
 
 

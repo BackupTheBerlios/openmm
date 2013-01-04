@@ -294,21 +294,21 @@ GenericClusterViewImpl::sizeConstraintReached(View::SizeConstraint& width, View:
             + Poco::NumberFormatter::format(pView->width(View::Max)) + ", "
             + Poco::NumberFormatter::format(pView->height(View::Max)) + "]");
 
-        if ((*it)->width(View::Current) <= (*it)->width(View::Min)) {
+        if ((*it)->width(View::Current) <= (*it)->width(View::Pref) * 0.66) {
             width = View::Min;
         }
 //        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
 //            width = View::Max;
-        else if ((*it)->width(View::Current) > (*it)->width(View::Pref)) {
-            width = View::Pref;
+        else if ((*it)->width(View::Current) > (*it)->width(View::Pref) * 1.33) {
+            width = View::Max;
         }
-        if ((*it)->height(View::Current) <= (*it)->height(View::Min)) {
+        if ((*it)->height(View::Current) <= (*it)->height(View::Pref) * 0.66) {
             height = View::Min;
         }
 //        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
 //            height = View::Max;
-        else if ((*it)->height(View::Current) > (*it)->height(View::Pref)) {
-            height = View::Pref;
+        else if ((*it)->height(View::Current) > (*it)->height(View::Pref) * 1.33) {
+            height = View::Max;
         }
     }
 }
