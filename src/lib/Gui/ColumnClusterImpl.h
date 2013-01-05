@@ -83,6 +83,7 @@ private:
     void removeEmptyCols();
 
     void movedView(View* pView);
+    void changedConfiguration();
     void getOriginConfiguration(ClusterConfiguration& configuration);
     void getCurrentConfiguration(ClusterConfiguration& configuration);
     void getDefaultConfiguration(ClusterConfiguration& configuration);

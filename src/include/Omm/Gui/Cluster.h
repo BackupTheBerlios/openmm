@@ -43,7 +43,7 @@ class ClusterController : public Controller
 protected:
     virtual void insertedView(View* pView) {}
     virtual void movedView(View* pView) {}
-    virtual void sizeConstraintReached(View* pView) {}
+    virtual void changedConfiguration() {}
 };
 
 

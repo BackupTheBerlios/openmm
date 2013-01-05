@@ -44,7 +44,7 @@ namespace Gui {
 class GenericClusterController : public Controller
 {
 public:
-    GenericClusterController(ClusterView* pClusterView, View* pView) : _pClusterView(pClusterView), _pView(pView) {}
+    GenericClusterController(GenericClusterViewImpl* pViewImpl, ClusterView* pClusterView, View* pView) : _pViewImpl(pViewImpl), _pClusterView(pClusterView), _pView(pView) {}
 
     virtual void dragStarted()
     {
@@ -65,11 +65,13 @@ public:
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
         int index = _pClusterView->getIndexFromView(_pView);
         _pClusterView->insertView(pDrag->getSource(), pDrag->getSource()->getName(), index);
+        _pViewImpl->changedConfiguration();
     }
 
 private:
-    ClusterView*    _pClusterView;
-    View*           _pView;
+    GenericClusterViewImpl*     _pViewImpl;
+    ClusterView*                _pClusterView;
+    View*                       _pView;
 };
 
 
@@ -166,7 +168,7 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
     HandleController* pHandleController = new HandleController(this, pView);
     pHandle->attachController(pHandleController);
     pHandle->setAcceptDrops(true);
-    pHandle->attachController(new GenericClusterController(static_cast<ClusterView*>(_pView), pView));
+    pHandle->attachController(new GenericClusterController(this, static_cast<ClusterView*>(_pView), pView));
     pHandle->show();
 
     _handles[pView] = pHandle;
@@ -297,6 +299,13 @@ const int
 GenericClusterViewImpl::getHandleHeight()
 {
     return _handleHeight;
+}
+
+
+void
+GenericClusterViewImpl::changedConfiguration()
+{
+    IMPL_NOTIFY_CONTROLLER(ClusterController, changedConfiguration);
 }
 
 

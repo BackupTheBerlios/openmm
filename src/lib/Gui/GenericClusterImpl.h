@@ -36,6 +36,7 @@ namespace Gui {
 class GenericClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
 {
     friend class GenericClusterStackedLayout;
+    friend class GenericClusterController;
 
 public:
     GenericClusterViewImpl(View* pView);
@@ -60,6 +61,7 @@ public:
 
 private:
 //    void updateSizeConstraints();
+    void changedConfiguration();
 
     int                                 _handleHeight;
     int                                 _handleWidth;

@@ -116,6 +116,7 @@ public:
         if (pNewCluster) {
             pNewCluster->insertView(pDrag->getSource(), pDrag->getSource()->getName(), 0);
         }
+        _pColumnClusterViewImpl->changedConfiguration();
     }
 
     virtual void insertedView(View* pView)
@@ -124,6 +125,10 @@ public:
         _pColumnClusterViewImpl->movedView(pView);
     }
 
+    virtual void changedConfiguration()
+    {
+        _pColumnClusterViewImpl->changedConfiguration();
+    }
 
     ClusterView*            _pClusterView;
     ColumnView*             _pColumnView;
@@ -770,6 +775,21 @@ void
 ColumnClusterViewImpl::movedView(View* pView)
 {
     IMPL_NOTIFY_CONTROLLER(ClusterController, movedView, pView);
+}
+
+
+void
+ColumnClusterViewImpl::changedConfiguration()
+{
+    if (_pTargetConfiguration) {
+        delete _pTargetConfiguration;
+    }
+    _pTargetConfiguration = new ClusterConfiguration;
+    getCurrentConfiguration(*_pTargetConfiguration);
+
+    IMPL_NOTIFY_CONTROLLER(ClusterController, changedConfiguration);
+
+    LOG(gui, debug, "column cluster target configuration:" + Poco::LineEnding::NEWLINE_DEFAULT + _pTargetConfiguration->write());
 }
 
 
