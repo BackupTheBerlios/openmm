@@ -422,6 +422,7 @@ UpnpApplication::saveConfig()
         LOGNS(Av, upnpav, information, "saving config file ...");
         _pConf->setInt("application.width", width());
         _pConf->setInt("application.height", height());
+        _pConf->setString("application.cluster", _pControllerWidget->getConfiguration());
         try {
             _pConf->save(_confFilePath);
             LOGNS(Av, upnpav, information, "saving config file done.");
@@ -981,6 +982,7 @@ _pApplication(pApplication)
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
+    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
