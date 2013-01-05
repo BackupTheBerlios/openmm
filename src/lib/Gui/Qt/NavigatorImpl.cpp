@@ -197,12 +197,12 @@ NavigatorViewImpl::~NavigatorViewImpl()
 
 
 void
-NavigatorViewImpl::pushView(View* pView, const std::string name)
+NavigatorViewImpl::pushView(View* pView, const std::string label)
 {
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
     _pStackedWidget->addWidget(pWidget);
     _pStackedWidget->setCurrentWidget(pWidget);
-    _pNavigatorPanel->push(pView, name);
+    _pNavigatorPanel->push(pView, label);
     pWidget->show();
 }
 

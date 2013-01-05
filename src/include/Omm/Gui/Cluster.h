@@ -34,12 +34,6 @@ namespace Omm {
 namespace Gui {
 
 
-class Label;
-class Button;
-class ListItemView;
-class SubClusterView;
-
-
 class ClusterController : public Controller
 {
     friend class ClusterView;
@@ -51,6 +45,12 @@ protected:
     virtual void movedView(View* pView) {}
     virtual void sizeConstraintReached(View* pView) {}
 };
+
+
+//class ClusterConfiguration
+//{
+//
+//};
 
 
 class ClusterView : public View
@@ -67,7 +67,12 @@ public:
     ClusterView(View* pParent = 0, const std::string& type = Native);
     virtual ~ClusterView();
 
-    void insertView(View* pView, const std::string& name = "", int index = 0);
+    void insertView(View* pView, const std::string& label = "", int index = 0);
+    void setConfiguration(const std::string& configuration);
+//    void addView(View* pView, const std::string& label = "");
+//    void setConfiguration(const ClusterConfiguration& configuration);
+//    const ClusterConfiguration& getDefaultConfiguration();
+
     int getViewCount();
     int getCurrentViewIndex(); /// current view has focus
     void setCurrentViewIndex(int index);
@@ -77,8 +82,8 @@ public:
     void setHandlesHidden(bool hidden = true);
     const int getHandleHeight();
 
-    void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
-    std::string writeLayout();
+//    void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
+//    std::string writeLayout();
 
 private:
     virtual void removedSubview(View* pView);

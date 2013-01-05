@@ -63,10 +63,10 @@ ClusterViewImpl::~ClusterViewImpl()
 
 
 void
-ClusterViewImpl::insertView(View* pView, const std::string& name, int index)
+ClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
 //    LOG(gui, debug, "QTab widget implementation insert widget");
-    static_cast<QtClusterWidget*>(_pNativeView)->insertTab(index, static_cast<QWidget*>(pView->getNativeView()), name.c_str());
+    static_cast<QtClusterWidget*>(_pNativeView)->insertTab(index, static_cast<QWidget*>(pView->getNativeView()), label.c_str());
     _views.insert(_views.begin() + index, pView);
 }
 
@@ -78,6 +78,13 @@ ClusterViewImpl::removeView(View* pView)
     pClusterWidget->removeTab(pClusterWidget->indexOf(static_cast<QWidget*>(pView->getNativeView())));
     std::vector<View*>::iterator it = std::find(_views.begin(), _views.end(), pView);
     _views.erase(it);
+}
+
+
+void
+ClusterViewImpl::setConfiguration(const std::string& configuration)
+{
+
 }
 
 

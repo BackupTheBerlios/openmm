@@ -22,6 +22,7 @@
 #include <Poco/NumberFormatter.h>
 #include <map>
 #include <vector>
+#include <Poco/StringTokenizer.h>
 
 #include "Log.h"
 #include "Gui/Cluster.h"
@@ -86,9 +87,9 @@ public:
 void
 GenericClusterStackedLayout::layoutView()
 {
-    LOG(gui, debug, "generic cluster view " + _pView->getName() + " resized [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
+    LOG(gui, debug, "generic cluster view " + _pView->getName() + " update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
 
-    if (!_pViewImpl->_views.size()) {
+    if (!_pViewImpl->_visibleViews.size()) {
         return;
     }
 
@@ -96,7 +97,7 @@ GenericClusterStackedLayout::layoutView()
     int handleWidth = _pView->width() / _pViewImpl->_handles.size();
 
     int handleIndex = 0;
-    for (ClusterView::SubviewIterator itv = _pViewImpl->_views.begin(); itv != _pViewImpl->_views.end(); ++handleIndex, ++itv) {
+    for (ClusterView::SubviewIterator itv = _pViewImpl->_visibleViews.begin(); itv != _pViewImpl->_visibleViews.end(); ++handleIndex, ++itv) {
         ListItemView* pHandle = _pViewImpl->_handles[*itv];
         pHandle->resize(handleWidth, handleHeight);
         pHandle->move(handleIndex * handleWidth, 0);
@@ -146,7 +147,7 @@ GenericClusterViewImpl::init()
 
 
 void
-GenericClusterViewImpl::insertView(View* pView, const std::string& name, int index)
+GenericClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
     LOG(gui, debug, "cluster " + _pView->getName() + " insert view: " + pView->getName());
     pView->setParent(_pView);
@@ -154,9 +155,9 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
     pView->move(0, _handleHeight);
     pView->show();
 
-    std::string handleName = "handle " + Poco::NumberFormatter::format(_views.size());
+    std::string handleName = "handle " + Poco::NumberFormatter::format(_visibleViews.size());
     LabelModel* pHandleLabelModel = new LabelModel;
-    pHandleLabelModel->setLabel(name);
+    pHandleLabelModel->setLabel(label);
     ListItemModel* pHandleModel = new ListItemModel;
     pHandleModel->setLabelModel(pHandleLabelModel);
     ListItemView* pHandle = new ListItemView(_pView);
@@ -169,9 +170,10 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
     pHandle->show();
 
     _handles[pView] = pHandle;
-    _views.insert(_views.begin() + index, pView);
+    _visibleViews.insert(_visibleViews.begin() + index, pView);
+    _views.insert(std::make_pair(pView->getName(), pView));
     _currentViewIndex = index;
-    updateSizeConstraints();
+//    updateSizeConstraints();
     _pView->updateLayout();
 }
 
@@ -179,27 +181,40 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& name, int ind
 void
 GenericClusterViewImpl::removeView(View* pView)
 {
-    ClusterView::SubviewIterator it = std::find(_views.begin(), _views.end(), pView);
-    if (it != _views.end()) {
+    ClusterView::SubviewIterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it != _visibleViews.end()) {
         ListItemView* pHandle = _handles[pView];
         pHandle->hide();
         _handles.erase(pView);
-        _views.erase(it);
+        _visibleViews.erase(it);
     }
-    if (!_views.size()) {
+    _views.erase(pView->getName());
+    if (!_visibleViews.size()) {
         _pView->hide();
     }
     else {
-        updateSizeConstraints();
+//        updateSizeConstraints();
         _pView->updateLayout();
     }
+}
+
+
+void
+GenericClusterViewImpl::setConfiguration(const std::string& configuration)
+{
+    _visibleViews.clear();
+    Poco::StringTokenizer views(configuration, ",");
+    for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
+        _visibleViews.push_back(_views[*it]);
+    }
+    _pView->updateLayout();
 }
 
 
 int
 GenericClusterViewImpl::getViewCount()
 {
-    return _views.size();
+    return _visibleViews.size();
 }
 
 
@@ -219,7 +234,7 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
         return;
     }
 
-    View* pCurrentView = _views[_currentViewIndex];
+    View* pCurrentView = _visibleViews[_currentViewIndex];
     if (pCurrentView) {
         View* pHandle = _handles[pCurrentView];
         if (pHandle) {
@@ -227,10 +242,10 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
         }
     }
     _currentViewIndex = index;
-    pCurrentView = _views[_currentViewIndex];
+    pCurrentView = _visibleViews[_currentViewIndex];
     LOG(gui, debug, "cluster " + _pView->getName() + " set current view index: " + Poco::NumberFormatter::format(index) + ", view: " + pCurrentView->getName());
     if (pCurrentView) {
-        _views[_currentViewIndex]->raise();
+        _visibleViews[_currentViewIndex]->raise();
         View* pHandle = _handles[pCurrentView];
         if (pHandle) {
             pHandle->setBackgroundColor(Color(200, 200, 200, 255));
@@ -243,9 +258,9 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
 int
 GenericClusterViewImpl::getIndexFromView(View* pView)
 {
-    std::vector<View*>::iterator it = std::find(_views.begin(), _views.end(), pView);
-    if (it != _views.end()) {
-        return it - _views.begin();
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it != _visibleViews.end()) {
+        return it - _visibleViews.begin();
     }
     else {
         return -1;
@@ -256,7 +271,7 @@ GenericClusterViewImpl::getIndexFromView(View* pView)
 View*
 GenericClusterViewImpl::getViewFromIndex(int index)
 {
-    return _views[index];
+    return _visibleViews[index];
 }
 
 
@@ -264,7 +279,7 @@ void
 GenericClusterViewImpl::setHandlesHidden(bool hidden)
 {
     _handleBarHidden = hidden;
-    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
+    for (View::SubviewIterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it) {
         (*it)->resize(_pView->width(), _pView->height() - (hidden ? 0 : _handleHeight));
         (*it)->move(0, (hidden ? 0 : _handleHeight));
     }
@@ -278,70 +293,70 @@ GenericClusterViewImpl::getHandleHeight()
 }
 
 
-void
-GenericClusterViewImpl::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
-{
-    width = View::None;
-    height = View::None;
-    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
-        View* pView = (*it);
-        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " current size ["
-            + Poco::NumberFormatter::format(pView->width(View::Current)) + ", "
-            + Poco::NumberFormatter::format(pView->height(View::Current)) + "]");
-        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " size constraint Min ["
-            + Poco::NumberFormatter::format(pView->width(View::Min)) + ", "
-            + Poco::NumberFormatter::format(pView->height(View::Min)) + "] : Max ["
-            + Poco::NumberFormatter::format(pView->width(View::Max)) + ", "
-            + Poco::NumberFormatter::format(pView->height(View::Max)) + "]");
-
-        if ((*it)->width(View::Current) <= (*it)->width(View::Pref) * 0.66) {
-            width = View::Min;
-        }
-//        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
+//void
+//GenericClusterViewImpl::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
+//{
+//    width = View::None;
+//    height = View::None;
+//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
+//        View* pView = (*it);
+//        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " current size ["
+//            + Poco::NumberFormatter::format(pView->width(View::Current)) + ", "
+//            + Poco::NumberFormatter::format(pView->height(View::Current)) + "]");
+//        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " size constraint Min ["
+//            + Poco::NumberFormatter::format(pView->width(View::Min)) + ", "
+//            + Poco::NumberFormatter::format(pView->height(View::Min)) + "] : Max ["
+//            + Poco::NumberFormatter::format(pView->width(View::Max)) + ", "
+//            + Poco::NumberFormatter::format(pView->height(View::Max)) + "]");
+//
+//        if ((*it)->width(View::Current) <= (*it)->width(View::Pref) * 0.66) {
+//            width = View::Min;
+//        }
+////        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
+////            width = View::Max;
+//        else if ((*it)->width(View::Current) > (*it)->width(View::Pref) * 1.33) {
 //            width = View::Max;
-        else if ((*it)->width(View::Current) > (*it)->width(View::Pref) * 1.33) {
-            width = View::Max;
-        }
-        if ((*it)->height(View::Current) <= (*it)->height(View::Pref) * 0.66) {
-            height = View::Min;
-        }
-//        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
+//        }
+//        if ((*it)->height(View::Current) <= (*it)->height(View::Pref) * 0.66) {
+//            height = View::Min;
+//        }
+////        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
+////            height = View::Max;
+//        else if ((*it)->height(View::Current) > (*it)->height(View::Pref) * 1.33) {
 //            height = View::Max;
-        else if ((*it)->height(View::Current) > (*it)->height(View::Pref) * 1.33) {
-            height = View::Max;
-        }
-    }
-}
+//        }
+//    }
+//}
 
 
-std::string
-GenericClusterViewImpl::writeLayout()
-{
-    std::string res;
-    int index = 0;
-    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++index, ++it) {
-        res += "{" + Poco::NumberFormatter::format(index) + ":\"" + (*it)->getName() + "\"}";
-    }
-    return res;
-}
+//std::string
+//GenericClusterViewImpl::writeLayout()
+//{
+//    std::string res;
+//    int index = 0;
+//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++index, ++it) {
+//        res += "{" + Poco::NumberFormatter::format(index) + ":\"" + (*it)->getName() + "\"}";
+//    }
+//    return res;
+//}
 
 
-void
-GenericClusterViewImpl::updateSizeConstraints()
-{
-    int minWidth = 0;
-    int maxWidth = (*_views.begin())->width(View::Max);
-    int minHeight = 0;
-    int maxHeight = (*_views.begin())->height(View::Max);
-    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
-        minWidth = minWidth > (*it)->width(View::Min) ? minWidth : (*it)->width(View::Min);
-        maxWidth = maxWidth < (*it)->width(View::Max) ? maxWidth : (*it)->width(View::Max);
-        minHeight = minHeight > (*it)->height(View::Min) ? minHeight : (*it)->height(View::Min);
-        maxHeight = maxHeight < (*it)->height(View::Max) ? maxHeight : (*it)->height(View::Max);
-    }
-    _pView->setSizeConstraint(minWidth, minHeight + _handleHeight, View::Min);
-    _pView->setSizeConstraint(maxWidth, maxHeight + _handleHeight, View::Max);
-}
+//void
+//GenericClusterViewImpl::updateSizeConstraints()
+//{
+//    int minWidth = 0;
+//    int maxWidth = (*_views.begin())->width(View::Max);
+//    int minHeight = 0;
+//    int maxHeight = (*_views.begin())->height(View::Max);
+//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
+//        minWidth = minWidth > (*it)->width(View::Min) ? minWidth : (*it)->width(View::Min);
+//        maxWidth = maxWidth < (*it)->width(View::Max) ? maxWidth : (*it)->width(View::Max);
+//        minHeight = minHeight > (*it)->height(View::Min) ? minHeight : (*it)->height(View::Min);
+//        maxHeight = maxHeight < (*it)->height(View::Max) ? maxHeight : (*it)->height(View::Max);
+//    }
+//    _pView->setSizeConstraint(minWidth, minHeight + _handleHeight, View::Min);
+//    _pView->setSizeConstraint(maxWidth, maxHeight + _handleHeight, View::Max);
+//}
 
 
 } // namespace Gui

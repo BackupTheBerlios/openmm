@@ -46,7 +46,7 @@ public:
     NavigatorView(View* pParent = 0);
     virtual ~NavigatorView();
 
-    void push(View* pView, const std::string& name = "");
+    void push(View* pView, const std::string& label = "");
     void pop(bool keepRootView = true);
     void popToRoot();
     View* getVisibleView();

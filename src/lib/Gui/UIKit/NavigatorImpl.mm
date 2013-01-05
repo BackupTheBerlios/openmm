@@ -98,13 +98,13 @@ NavigatorViewImpl::~NavigatorViewImpl()
 
 
 void
-NavigatorViewImpl::pushView(View* pView, const std::string name)
+NavigatorViewImpl::pushView(View* pView, const std::string label)
 {
     LOG(gui, debug, "navigator view implementation push view");
 
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
-    NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
+    NSString* pName = [[NSString alloc] initWithUTF8String:label.c_str()];
     pViewController.title = pName;
 
     [pNativeViewController pushViewController:pViewController animated:YES];

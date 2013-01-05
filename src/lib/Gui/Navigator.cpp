@@ -45,12 +45,12 @@ NavigatorView::~NavigatorView()
 
 
 void
-NavigatorView::push(View* pView, const std::string& name)
+NavigatorView::push(View* pView, const std::string& label)
 {
-    LOG(gui, debug, "navigator push: " + name + " ...");
-    static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, name);
+    LOG(gui, debug, "navigator push: " + pView->getName() + " ...");
+    static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, label);
     pView->resize(width(), height());
-    LOG(gui, debug, "navigator push: " + name + " finished.");
+    LOG(gui, debug, "navigator push: " + pView->getName() + " finished.");
 }
 
 

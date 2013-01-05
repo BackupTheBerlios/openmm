@@ -38,12 +38,15 @@ private:
     ClusterViewImpl(View* pView);
     virtual ~ClusterViewImpl();
 
-    virtual void insertView(View* pView, const std::string& name, int index);
+    virtual void insertView(View* pView, const std::string& label, int index);
     virtual void removeView(View* pView);
+    virtual void setConfiguration(const std::string& configuration);
+
     virtual int getViewCount();
     virtual int getCurrentViewIndex();
     virtual void setCurrentViewIndex(int index);
     virtual int getIndexFromView(View* pView);
+    virtual View* getViewFromIndex(int index);
 
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();

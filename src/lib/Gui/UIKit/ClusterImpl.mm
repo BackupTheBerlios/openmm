@@ -44,13 +44,13 @@ ClusterViewImpl::~ClusterViewImpl()
 
 
 void
-ClusterViewImpl::insertView(View* pView, const std::string& name, int index)
+ClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
     LOG(gui, debug, "cluster view implementation add view");
 
     UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
-    NSString* pName = [[NSString alloc] initWithUTF8String:name.c_str()];
+    NSString* pName = [[NSString alloc] initWithUTF8String:label.c_str()];
     pViewController.title = pName;
 
     NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
@@ -67,6 +67,13 @@ ClusterViewImpl::removeView(View* pView)
     NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
     [array removeObject:pViewController];
     pNativeViewController.viewControllers = array;
+}
+
+
+void
+ClusterViewImpl::setConfiguration(const std::string& configuration)
+{
+
 }
 
 
@@ -98,6 +105,14 @@ ClusterViewImpl::getIndexFromView(View* pView)
     NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
     return [array indexOfObject:pViewController];
+}
+
+
+View*
+ClusterViewImpl::getViewFromIndex(int index)
+{
+    // TODO: implement UIKit implementation of getViewFromIndex()
+    return 0;
 }
 
 

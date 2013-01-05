@@ -55,6 +55,9 @@ void
 Application::resizeMainView(int width, int height)
 {
     _pImpl->resize(width, height);
+//    if (_pMainView) {
+//        _pMainView->resize(width, height);
+//    }
 }
 
 

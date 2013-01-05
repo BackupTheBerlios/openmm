@@ -68,13 +68,21 @@ ClusterView::~ClusterView()
 
 
 void
-ClusterView::insertView(View* pView, const std::string& name, int index)
+ClusterView::insertView(View* pView, const std::string& label, int index)
 {
     // NOTE: this is somewhat crude, a dynamic_cast wouldn't work with GenericClusterViewImpl
     // or ColumnClusterViewImpl: there's no direct inheritance, but the same interface.
 //    LOG(gui, debug, "cluster view insert view: " + pView->getName());
-    static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, name, index);
+    static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, label, index);
     NOTIFY_CONTROLLER(ClusterController, insertedView, pView);
+}
+
+
+
+void
+ClusterView::setConfiguration(const std::string& configuration)
+{
+    static_cast<ClusterViewImpl*>(_pImpl)->setConfiguration(configuration);
 }
 
 
@@ -127,18 +135,18 @@ ClusterView::getHandleHeight()
 }
 
 
-void
-ClusterView::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
-{
-    static_cast<ClusterViewImpl*>(_pImpl)->sizeConstraintReached(width, height);
-}
+//void
+//ClusterView::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
+//{
+//    static_cast<ClusterViewImpl*>(_pImpl)->sizeConstraintReached(width, height);
+//}
 
 
-std::string
-ClusterView::writeLayout()
-{
-    return static_cast<ClusterViewImpl*>(_pImpl)->writeLayout();
-}
+//std::string
+//ClusterView::writeLayout()
+//{
+//    return static_cast<ClusterViewImpl*>(_pImpl)->writeLayout();
+//}
 
 
 void

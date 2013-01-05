@@ -43,7 +43,7 @@ public:
     NavigatorViewImpl(View* pView);
     virtual ~NavigatorViewImpl();
 
-    void pushView(View* pView, const std::string name);
+    void pushView(View* pView, const std::string label);
     void popView(bool keepRootView);
     void popToRootView();
     View* getVisibleView();

@@ -41,8 +41,10 @@ public:
     GenericClusterViewImpl(View* pView);
 
     virtual void init();
-    virtual void insertView(View* pView, const std::string& name = "", int index = 0);
+    virtual void insertView(View* pView, const std::string& label = "", int index = 0);
     virtual void removeView(View* pView);
+    virtual void setConfiguration(const std::string& configuration);
+
     virtual int getViewCount();
     virtual int getCurrentViewIndex(); /// current view has focus
     virtual void setCurrentViewIndex(int index);
@@ -52,17 +54,18 @@ public:
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
 
-    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
-    virtual std::string writeLayout();
+//    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
+//    virtual std::string writeLayout();
 
 private:
-    void updateSizeConstraints();
+//    void updateSizeConstraints();
 
     int                                 _handleHeight;
     int                                 _handleWidth;
     bool                                _handleBarHidden;
     std::map<View*, ListItemView*>      _handles;
-    std::vector<View*>                  _views;
+    std::map<std::string, View*>        _views;
+    std::vector<View*>                  _visibleViews;
     int                                 _currentViewIndex;
 };
 

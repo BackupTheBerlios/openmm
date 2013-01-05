@@ -33,6 +33,8 @@ class AbstractClusterViewImpl
 public:
     virtual void insertView(View* pView, const std::string& name = "", int index = 0) = 0;
     virtual void removeView(View* pView) = 0;
+    virtual void setConfiguration(const std::string& configuration) = 0;
+    
     virtual int getViewCount() = 0;
     virtual int getCurrentViewIndex() = 0; /// current view has focus
     virtual void setCurrentViewIndex(int index) = 0;
@@ -42,8 +44,8 @@ public:
     virtual void setHandlesHidden(bool hidden = true) = 0;
     virtual const int getHandleHeight() = 0;
 
-    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height) { }
-    virtual std::string writeLayout() { return ""; }
+//    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height) { }
+//    virtual std::string writeLayout() { return ""; }
 };
 
 

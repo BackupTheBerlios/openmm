@@ -23,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <stack>
+#include <Poco/LineEndingConverter.h>
 
 #include "Log.h"
 #include "Gui/Cluster.h"
@@ -98,7 +99,7 @@ public:
 
 //        ClusterView* pSourceCluster = dynamic_cast<ClusterView*>(pDrag->getSource()->getParent());
 //        if (pSourceCluster && pSourceCluster->getViewCount() == 1) {
-//            pSourceCluster->hide();
+//            pSourceCluster->hide(false);
 //        }
 
         ClusterView* pNewCluster = 0;
@@ -128,6 +129,123 @@ public:
 };
 
 
+class ClusterCoordinate
+{
+public:
+//    ClusterCoordinate() : _column(0), _cluster(0), _index(0) {}
+    ClusterCoordinate(const ClusterCoordinate& coord) : _column(coord._column), _cluster(coord._cluster), _index(coord._index) {}
+    ClusterCoordinate(int column, int cluster, int index) : _column(column), _cluster(cluster), _index(index) {}
+
+//    bool
+//    operator()(const ClusterCoordinate& c1, const ClusterCoordinate& c2) const
+//    {
+//        return c1._column < c2._column && c1._cluster < c2._cluster && c1._index < c2._index;
+//    }
+
+    void read(const std::string& configuration);
+    std::string write() const;
+
+    bool equal(const ClusterCoordinate& coord) const
+    {
+        return _column == coord._column && _cluster == coord._cluster && _index == coord._index;
+    }
+
+    int     _column;
+    int     _cluster;
+    int     _index;
+};
+
+
+struct ClusterCoordinateCompare
+{
+    bool
+    operator()(const ClusterCoordinate& c1, const ClusterCoordinate& c2) const
+    {
+        return c1._column < c2._column && c1._cluster < c2._cluster && c1._index < c2._index;
+    }
+};
+
+
+std::string
+ClusterCoordinate::write() const
+{
+    return "[" + Poco::NumberFormatter::format(_column) + ", "
+            + Poco::NumberFormatter::format(_cluster) + ", "
+            + Poco::NumberFormatter::format(_index) + "]";
+}
+
+
+class ClusterConfiguration
+{
+public:
+    void addView(const std::string& name, const ClusterCoordinate& coord);
+    void read(const std::string& configuration);
+    std::string write();
+
+    int countColumns();
+    int countClusters(int column);
+    std::string clusterConfiguration(int column, int cluster);
+
+    std::map<std::string, ClusterCoordinate>                               _coords;
+    std::map< int, std::map< int, std::map< int, std::string > > >         _views;
+//    std::map<ClusterCoordinate, std::string, ClusterCoordinateCompare>     _views;
+};
+
+
+void
+ClusterConfiguration::addView(const std::string& name, const ClusterCoordinate& coord)
+{
+    _coords.insert(std::make_pair(name, coord));
+    _views[coord._column][coord._cluster][coord._index] = name;
+//    _views.insert(std::make_pair(coord, name));
+}
+
+
+std::string
+ClusterConfiguration::write()
+{
+    std::string res;
+//    for (std::map<ClusterCoordinate, std::string, ClusterCoordinateCompare>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
+//        res += it->first.write() + " " + it->second + Poco::LineEnding::NEWLINE_DEFAULT;
+//    }
+//    for (std::map<std::string, ClusterCoordinate>::const_iterator it = _coords.begin(); it != _coords.end(); ++it) {
+//        res += it->first + " " + it->second.write() + Poco::LineEnding::NEWLINE_DEFAULT;
+//    }
+    for (int col = 0; col < countColumns(); ++col) {
+        for (int cluster = 0; cluster < countClusters(col); ++cluster) {
+            res += "[" + Poco::NumberFormatter::format(col) + "," + Poco::NumberFormatter::format(cluster) + "] "
+                    + clusterConfiguration(col, cluster) + Poco::LineEnding::NEWLINE_DEFAULT;
+        }
+    }
+    return res;
+}
+
+
+int
+ClusterConfiguration::countColumns()
+{
+    return _views.size();
+}
+
+
+int
+ClusterConfiguration::countClusters(int column)
+{
+    return _views[column].size();
+}
+
+
+std::string
+ClusterConfiguration::clusterConfiguration(int column, int cluster)
+{
+    std::string res;
+    for (std::map<int, std::string>::iterator it = _views[column][cluster].begin(); it != _views[column][cluster].end(); ++it) {
+        res += it->second + ",";
+    }
+    return res.substr(0, res.length() - 1);
+}
+
+
 class ColumnClusterLayout : public Layout
 {
 public:
@@ -142,8 +260,8 @@ public:
 void
 ColumnClusterLayout::layoutView()
 {
-    LOG(gui, debug, "column cluster view resized [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
-    static_cast<ColumnClusterViewImpl*>(_pView->getViewImpl())->onResize(_pView->width(), _pView->height());
+    LOG(gui, debug, "column cluster view update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
+    static_cast<ColumnClusterViewImpl*>(_pView->getViewImpl())->layoutViews(_pView->width(), _pView->height());
 }
 
 
@@ -265,7 +383,7 @@ ColumnView::getCluster()
     if (_clusterPool.size()) {
         pCluster = _clusterPool.top();
         _clusterPool.pop();
-        pCluster->show();
+        pCluster->show(false);
     }
     else {
         pCluster = new ClusterView(0, ClusterView::Generic);
@@ -286,9 +404,17 @@ ColumnView::putCluster(ClusterView* pCluster)
 }
 
 
-ColumnClusterViewImpl::ColumnClusterViewImpl(View* pView, bool createInitialCluster) :
-SplitterViewImpl(pView, View::Horizontal)
+ColumnClusterViewImpl::ColumnClusterViewImpl(View* pView) :
+SplitterViewImpl(pView, View::Horizontal),
+_layoutNeedsUpdate(true)
+//_pTargetLayout(new ClusterLayout)
 {
+}
+
+
+ColumnClusterViewImpl::~ColumnClusterViewImpl()
+{
+//    delete _pTargetLayout;
 }
 
 
@@ -305,12 +431,13 @@ ColumnClusterViewImpl::init()
 
 
 void
-ColumnClusterViewImpl::insertView(View* pView, const std::string& name, int index)
+ColumnClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
     LOG(gui, debug, "column cluster view impl insert view: " + pView->getName());
 
-    getOriginCluster()->insertView(pView, name, index);
+    getOriginCluster()->insertView(pView, label, index);
     _views.insert(_views.begin() + index, pView);
+    _viewMap.insert(std::make_pair(pView->getName(), pView));
 }
 
 
@@ -325,6 +452,14 @@ ColumnClusterViewImpl::removeView(View* pView)
     if (it != _views.end()) {
         _views.erase(it);
     }
+    _viewMap.erase(pView->getName());
+}
+
+
+void
+ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
+{
+
 }
 
 
@@ -444,21 +579,34 @@ ColumnClusterViewImpl::getHandleHeight()
 }
 
 
-std::string
-ColumnClusterViewImpl::writeLayout()
-{
-    std::string res;
-    int column = 0;
-    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
-        int cluster = 0;
-        res += "[" + Poco::NumberFormatter::format(column);
-        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
-            res += "(" + Poco::NumberFormatter::format(cluster) + ":\"" + (*it)->getName() + "\"" + (*it)->writeLayout() + ")";
-        }
-        res += "]";
-    }
-    return res;
-}
+//std::string
+//ColumnClusterViewImpl::writeLayout()
+//{
+////    std::string res;
+////    int column = 0;
+////    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+////        int cluster = 0;
+////        res += "[" + Poco::NumberFormatter::format(column);
+////        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
+////            res += "(" + Poco::NumberFormatter::format(cluster) + ":\"" + (*it)->getName() + "\"" + (*it)->writeLayout() + ")";
+////        }
+////        res += "]";
+////    }
+////    return res;
+//
+//    ClusterLayout layout;
+//    int column = 0;
+//    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+//        int cluster = 0;
+//        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
+//            for (int index = 0; index < (*it)->getViewCount(); ++index) {
+//                ClusterCoordinate coord(column, cluster, index);
+//                layout.addCluster((*it)->getViewFromIndex(index)->getName(), coord);
+//            }
+//        }
+//    }
+//    return layout.write();
+//}
 
 
 int
@@ -519,7 +667,7 @@ ColumnClusterViewImpl::createClusterInNewColumn(int column)
 //    ColumnView* pCol = new ColumnView(this);
     ColumnView* pCol = getColumn();
     SplitterViewImpl::insertView(pCol, column);
-    pCol->show();
+    pCol->show(false);
     _grid.insert(_grid.begin() + column, pCol);
     return pCol->getTopCluster();
 }
@@ -532,6 +680,13 @@ ColumnClusterViewImpl::createClusterInRow(int column, int row)
         return 0;
     }
     return _grid[column]->createCluster(row);
+}
+
+
+ClusterView*
+ColumnClusterViewImpl::getCluster(int column, int cluster)
+{
+    return *(_grid[column]->beginCluster() + cluster);
 }
 
 
@@ -576,7 +731,7 @@ ColumnClusterViewImpl::removeEmptyCols()
         }
     }
     while (emptyCols.size()) {
-        (*emptyCols.top())->hide();
+        (*emptyCols.top())->hide(false);
         putColumn(*emptyCols.top());
         _grid.erase(emptyCols.top());
         emptyCols.pop();
@@ -592,42 +747,153 @@ ColumnClusterViewImpl::movedView(View* pView)
 
 
 void
-ColumnClusterViewImpl::onResize(int width, int height)
+ColumnClusterViewImpl::getCurrentConfiguration(ClusterConfiguration& configuration)
+{
+    int column = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+        int cluster = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
+            for (int index = 0; index < (*it)->getViewCount(); ++index) {
+                ClusterCoordinate coord(column, cluster, index);
+                configuration.addView((*it)->getViewFromIndex(index)->getName(), coord);
+            }
+        }
+    }
+}
+
+
+void
+ColumnClusterViewImpl::getDefaultConfiguration(ClusterConfiguration& configuration)
+{
+    int i = 0;
+    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
+        ClusterCoordinate coord(0, 0, i);
+        configuration.addView((*it)->getName(), coord);
+    }
+}
+
+
+void
+ColumnClusterViewImpl::getTargetConfiguration(ClusterConfiguration& configuration)
+{
+    int i = 0;
+    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
+        ClusterCoordinate coord(i, 0, 0);
+        configuration.addView((*it)->getName(), coord);
+    }
+}
+
+
+void
+ColumnClusterViewImpl::layoutViews(int width, int height)
 {
 //    int widthOriginMin = _views[0]->width(View::Pref) * 0.66;
     if (!_views.size()) {
         return;
     }
 
-    int index = 0;
-    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++index, ++it) {
-        getOriginCluster()->insertView(*it, (*it)->getName(), index);
+//    int index = 0;
+//    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++index, ++it) {
+//        getOriginCluster()->insertView(*it, (*it)->getName(), index);
+//    }
+//    removeEmptyCols();
+//
+//    int widthOriginMax = _views[0]->width(View::Pref) * 1.33;
+//
+//    int viewIndex = _views.size() - 1;
+//    int widthSum = widthOriginMax;
+//    while (viewIndex && widthSum < width) {
+//        widthSum += _views[viewIndex]->width(View::Pref) * 1.33;
+//        viewIndex--;
+//    }
+//
+//    for (int i = 0; i < _views.size(); ++i) {
+//        if (i <= viewIndex) {
+//            getOriginCluster()->insertView(_views[i], _views[i]->getName(), i);
+//        }
+//        else {
+//            ClusterView* pCluster = createClusterInNewColumn(i - viewIndex);
+//            pCluster->insertView(_views[i], _views[i]->getName());
+//        }
+//    }
+
+// ----------------------------------
+
+//    int firstUnfoldedCluster = 4;
+//    if (_layoutNeedsUpdate) {
+//        for (int i = firstUnfoldedCluster; i < _views.size(); ++i) {
+//            ClusterView* pCluster = createClusterInNewColumn(i - firstUnfoldedCluster + 1);
+//            pCluster->insertView(_views[i], _views[i]->getName());
+//        }
+//        _layoutNeedsUpdate = false;
+//    }
+
+//    LOG(gui, debug, "column cluster layout:" + Poco::LineEnding::NEWLINE_DEFAULT + writeLayout());
+
+// ----------------------------------
+    ClusterConfiguration targetConfiguration;
+    if (width < 500) {
+        getDefaultConfiguration(targetConfiguration);
     }
-    removeEmptyCols();
+    else {
+        getTargetConfiguration(targetConfiguration);
+    }
+    layoutViews(targetConfiguration);
 
-    int widthOriginMax = _views[0]->width(View::Pref) * 1.33;
+}
 
-    int viewIndex = _views.size() - 1;
-    int widthSum = widthOriginMax;
-    while (viewIndex && widthSum < width) {
-        widthSum += _views[viewIndex]->width(View::Pref) * 1.33;
-        viewIndex--;
+
+void
+ColumnClusterViewImpl::layoutViews(ClusterConfiguration& targetConfiguration)
+{
+    ClusterConfiguration currentConfiguration;
+    getCurrentConfiguration(currentConfiguration);
+
+    LOG(gui, debug, "column cluster current configuration:" + Poco::LineEnding::NEWLINE_DEFAULT + currentConfiguration.write());
+    LOG(gui, debug, "column cluster target configuration:" + Poco::LineEnding::NEWLINE_DEFAULT + targetConfiguration.write());
+
+    for (int col = _grid.size(); col < targetConfiguration.countColumns(); ++col) {
+        createClusterInNewColumn(col);
     }
 
-    for (int i = 0; i < _views.size(); ++i) {
-        if (i <= viewIndex) {
-            getOriginCluster()->insertView(_views[i], _views[i]->getName(), i);
+    for (int col = 0; col < _grid.size(); ++col) {
+        for (int cluster = _grid[col]->getSize(); cluster < targetConfiguration.countClusters(col); ++cluster) {
+            createClusterInRow(col, cluster);
+        }
+    }
+
+    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++it) {
+        std::map<std::string, ClusterCoordinate>::const_iterator currentPos = currentConfiguration._coords.find((*it)->getName());
+        std::map<std::string, ClusterCoordinate>::const_iterator targetPos = targetConfiguration._coords.find((*it)->getName());
+        if (targetPos == targetConfiguration._coords.end()) {
+            // move view to invisible area
         }
         else {
-            ClusterView* pCluster = createClusterInNewColumn(i - viewIndex);
-            pCluster->insertView(_views[i], _views[i]->getName());
+            if (currentPos != currentConfiguration._coords.end() && currentPos->second.equal(targetPos->second)) {
+                // do nothing, view is at same position as before
+                continue;
+            }
+            else {
+                // move view to new destination
+//                ClusterView* pCluster = *(_grid[targetPos->second._column]->beginCluster() + targetPos->second._cluster);
+                ClusterView* pCluster = getCluster(targetPos->second._column, targetPos->second._cluster);
+                pCluster->insertView(*it, (*it)->getName());
+            }
+        }
+    }
+
+    removeEmptyCols();
+
+    for (int col = 0; col < _grid.size(); ++col) {
+        for (int cluster = 0; cluster < _grid[col]->getSize(); ++cluster) {
+            getCluster(col, cluster)->setConfiguration(targetConfiguration.clusterConfiguration(col, cluster));
         }
     }
 }
 
 
 //void
-//ColumnClusterViewImpl::onResize(int width, int height)
+//ColumnClusterViewImpl::layoutViews(int width, int height)
 //{
 //    View::SizeConstraint widthConstrained;
 //    View::SizeConstraint heightConstrained;

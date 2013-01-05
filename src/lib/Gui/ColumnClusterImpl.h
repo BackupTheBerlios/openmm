@@ -37,6 +37,7 @@ namespace Gui {
 
 class SplitterView;
 class ColumnView;
+class ClusterConfiguration;
 
 class ColumnClusterViewImpl : public AbstractClusterViewImpl, public SplitterViewImpl
 {
@@ -45,11 +46,14 @@ class ColumnClusterViewImpl : public AbstractClusterViewImpl, public SplitterVie
     friend class ColumnView;
 
 public:
-    ColumnClusterViewImpl(View* pView, bool createInitialCluster = true);
+    ColumnClusterViewImpl(View* pView);
+    virtual ~ColumnClusterViewImpl();
 
     virtual void init();
-    virtual void insertView(View* pView, const std::string& name = "", int index = 0);
+    virtual void insertView(View* pView, const std::string& label = "", int index = 0);
     virtual void removeView(View* pView);
+    virtual void setConfiguration(const std::string& configuration);
+
     virtual int getViewCount();
     virtual int getCurrentViewIndex(); /// current view has focus
     virtual void setCurrentViewIndex(int index);
@@ -59,7 +63,7 @@ public:
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
 
-    virtual std::string writeLayout();
+//    virtual std::string writeLayout();
 
 private:
     typedef std::vector<ColumnView*>::iterator GridIterator;
@@ -71,17 +75,25 @@ private:
     ClusterView* getOriginCluster();
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
+    ClusterView* getCluster(int column, int cluster);
     ClusterView* getCluster(View* pView);
     void mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster);
     void removeCluster(ClusterView* pCluster);
     void removeEmptyCols();
 
     void movedView(View* pView);
-    void onResize(int width, int height);
+    void getCurrentConfiguration(ClusterConfiguration& configuration);
+    void getDefaultConfiguration(ClusterConfiguration& configuration);
+    void getTargetConfiguration(ClusterConfiguration& configuration);
+    void layoutViews(int width, int height);
+    void layoutViews(ClusterConfiguration& targetConfiguration);
 
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;
     std::vector<View*>                              _views;
+    std::map<std::string, View*>                    _viewMap;
+    bool                                            _layoutNeedsUpdate;
+//    ClusterLayout*                                  _pTargetLayout;
 };
 
 
