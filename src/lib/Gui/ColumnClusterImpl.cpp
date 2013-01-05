@@ -24,6 +24,8 @@
 #include <vector>
 #include <stack>
 #include <Poco/LineEndingConverter.h>
+#include <Poco/StringTokenizer.h>
+#include <Poco/NumberParser.h>
 
 #include "Log.h"
 #include "Gui/Cluster.h"
@@ -214,7 +216,8 @@ ClusterConfiguration::write()
     for (int col = 0; col < countColumns(); ++col) {
         for (int cluster = 0; cluster < countClusters(col); ++cluster) {
             res += "[" + Poco::NumberFormatter::format(col) + "," + Poco::NumberFormatter::format(cluster) + "] "
-                    + clusterConfiguration(col, cluster) + Poco::LineEnding::NEWLINE_DEFAULT;
+                    + clusterConfiguration(col, cluster) + " ";
+//                    + Poco::LineEnding::NEWLINE_DEFAULT;
         }
     }
     return res;
@@ -406,8 +409,8 @@ ColumnView::putCluster(ClusterView* pCluster)
 
 ColumnClusterViewImpl::ColumnClusterViewImpl(View* pView) :
 SplitterViewImpl(pView, View::Horizontal),
-_layoutNeedsUpdate(true)
-//_pTargetLayout(new ClusterLayout)
+_pTargetConfiguration(0)
+//_layoutNeedsUpdate(true)
 {
 }
 
@@ -456,10 +459,34 @@ ColumnClusterViewImpl::removeView(View* pView)
 }
 
 
+std::string
+ColumnClusterViewImpl::getConfiguration()
+{
+    ClusterConfiguration res;
+    getCurrentConfiguration(res);
+    return res.write();
+}
+
+
 void
 ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
 {
+    if (_pTargetConfiguration) {
+        delete _pTargetConfiguration;
+    }
+    _pTargetConfiguration = new ClusterConfiguration;
 
+    Poco::StringTokenizer columnTokens(configuration, " ");
+    for (int i = 0; i < columnTokens.count(); i+=2) {
+        Poco::StringTokenizer coords(columnTokens[i].substr(1, columnTokens[i].length() - 2), ",");
+        int col = Poco::NumberParser::parse(coords[0]);
+        int cluster = Poco::NumberParser::parse(coords[1]);
+        Poco::StringTokenizer views(columnTokens[i + 1], ",");
+        for (int index = 0; index < views.count(); ++index) {
+            ClusterCoordinate coord(col, cluster, index);
+            _pTargetConfiguration->addView(views[index], coord);
+        }
+    }
 }
 
 
@@ -747,6 +774,17 @@ ColumnClusterViewImpl::movedView(View* pView)
 
 
 void
+ColumnClusterViewImpl::getOriginConfiguration(ClusterConfiguration& configuration)
+{
+    int i = 0;
+    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
+        ClusterCoordinate coord(0, 0, i);
+        configuration.addView((*it)->getName(), coord);
+    }
+}
+
+
+void
 ColumnClusterViewImpl::getCurrentConfiguration(ClusterConfiguration& configuration)
 {
     int column = 0;
@@ -764,17 +802,6 @@ ColumnClusterViewImpl::getCurrentConfiguration(ClusterConfiguration& configurati
 
 void
 ColumnClusterViewImpl::getDefaultConfiguration(ClusterConfiguration& configuration)
-{
-    int i = 0;
-    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
-        ClusterCoordinate coord(0, 0, i);
-        configuration.addView((*it)->getName(), coord);
-    }
-}
-
-
-void
-ColumnClusterViewImpl::getTargetConfiguration(ClusterConfiguration& configuration)
 {
     int i = 0;
     for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
@@ -831,15 +858,23 @@ ColumnClusterViewImpl::layoutViews(int width, int height)
 //    LOG(gui, debug, "column cluster layout:" + Poco::LineEnding::NEWLINE_DEFAULT + writeLayout());
 
 // ----------------------------------
-    ClusterConfiguration targetConfiguration;
+//    ClusterConfiguration targetConfiguration;
     if (width < 500) {
-        getDefaultConfiguration(targetConfiguration);
+        ClusterConfiguration originConfiguration;
+        getOriginConfiguration(originConfiguration);
+        layoutViews(originConfiguration);
     }
     else {
-        getTargetConfiguration(targetConfiguration);
+        if (_pTargetConfiguration) {
+            layoutViews(*_pTargetConfiguration);
+        }
+        else {
+            ClusterConfiguration defaultConfiguration;
+            getDefaultConfiguration(defaultConfiguration);
+            layoutViews(defaultConfiguration);
+        }
     }
-    layoutViews(targetConfiguration);
-
+//    layoutViews(targetConfiguration);
 }
 
 

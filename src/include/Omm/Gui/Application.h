@@ -50,6 +50,8 @@ public:
     View* getMainView();
     int width();
     int height();
+    void getArguments(std::vector<std::string>& arguments);
+
     void setToolBar(View* pView);
     void showToolBar(bool show = true);
     void setStatusBar(View* pView);
@@ -69,6 +71,8 @@ private:
     ApplicationImpl*           _pImpl;
     View*                      _pMainView;
     float                      _scaleFactor;
+    int                        _argc;
+    char**                     _argv;
 };
 
 

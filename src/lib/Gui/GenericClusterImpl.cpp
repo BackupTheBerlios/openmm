@@ -199,6 +199,13 @@ GenericClusterViewImpl::removeView(View* pView)
 }
 
 
+std::string
+GenericClusterViewImpl::getConfiguration()
+{
+
+}
+
+
 void
 GenericClusterViewImpl::setConfiguration(const std::string& configuration)
 {

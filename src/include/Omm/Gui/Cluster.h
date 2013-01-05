@@ -47,12 +47,6 @@ protected:
 };
 
 
-//class ClusterConfiguration
-//{
-//
-//};
-
-
 class ClusterView : public View
 {
     friend class ClusterViewImpl;
@@ -68,10 +62,8 @@ public:
     virtual ~ClusterView();
 
     void insertView(View* pView, const std::string& label = "", int index = 0);
+    std::string getConfiguration();
     void setConfiguration(const std::string& configuration);
-//    void addView(View* pView, const std::string& label = "");
-//    void setConfiguration(const ClusterConfiguration& configuration);
-//    const ClusterConfiguration& getDefaultConfiguration();
 
     int getViewCount();
     int getCurrentViewIndex(); /// current view has focus
@@ -81,9 +73,6 @@ public:
 
     void setHandlesHidden(bool hidden = true);
     const int getHandleHeight();
-
-//    void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
-//    std::string writeLayout();
 
 private:
     virtual void removedSubview(View* pView);

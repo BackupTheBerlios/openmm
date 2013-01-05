@@ -52,6 +52,7 @@ public:
     virtual void init();
     virtual void insertView(View* pView, const std::string& label = "", int index = 0);
     virtual void removeView(View* pView);
+    virtual std::string getConfiguration();
     virtual void setConfiguration(const std::string& configuration);
 
     virtual int getViewCount();
@@ -82,9 +83,9 @@ private:
     void removeEmptyCols();
 
     void movedView(View* pView);
+    void getOriginConfiguration(ClusterConfiguration& configuration);
     void getCurrentConfiguration(ClusterConfiguration& configuration);
     void getDefaultConfiguration(ClusterConfiguration& configuration);
-    void getTargetConfiguration(ClusterConfiguration& configuration);
     void layoutViews(int width, int height);
     void layoutViews(ClusterConfiguration& targetConfiguration);
 
@@ -92,8 +93,8 @@ private:
     std::stack<ColumnView*>                         _columnPool;
     std::vector<View*>                              _views;
     std::map<std::string, View*>                    _viewMap;
-    bool                                            _layoutNeedsUpdate;
-//    ClusterLayout*                                  _pTargetLayout;
+    ClusterConfiguration*                           _pTargetConfiguration;
+//    bool                                            _layoutNeedsUpdate;
 };
 
 

@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
+#include <vector>
 
 #include "Gui/Application.h"
 #include "Gui/GuiLogger.h"
@@ -33,7 +34,9 @@ namespace Gui {
 Application::Application() :
 _pImpl(new ApplicationImpl(this)),
 _pMainView(0),
-_scaleFactor(1.0)
+_scaleFactor(1.0),
+_argc(0),
+_argv(0)
 {
 //    LOG(gui, debug, "application ctor.");
 }
@@ -97,6 +100,15 @@ Application::height()
 
 
 void
+Application::getArguments(std::vector<std::string>& arguments)
+{
+    for (int i = 0; i < _argc; ++i) {
+        arguments.push_back(_argv[i]);
+    }
+}
+
+
+void
 Application::setToolBar(View* pView)
 {
     _pImpl->setToolBar(pView);
@@ -136,6 +148,8 @@ Application::createAndSetMainView()
 int
 Application::runEventLoop(int argc, char** argv)
 {
+    _argc = argc;
+    _argv = argv;
     return _pImpl->run(argc, argv);
 }
 

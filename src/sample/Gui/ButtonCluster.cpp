@@ -56,23 +56,25 @@ class Application : public Omm::Gui::Application
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
-//            pButton->setSizeConstraint(80, 50, Omm::Gui::View::Min);
             pButton->setSizeConstraint(150, 420, Omm::Gui::View::Pref);
-//            pButton->setSizeConstraint(250, 250, Omm::Gui::View::Max);
-
-//            pButton->setSizeConstraint(150, 50, Omm::Gui::View::Min);
-//            pButton->setSizeConstraint(850, 550, Omm::Gui::View::Max);
-//            pButton->setSizeConstraint(650, 550, Omm::Gui::View::Max);
             pCluster->insertView(pButton, pButton->getLabel());
         }
-//        resizeMainView(800, 120);
-
+        std::vector<std::string> arguments;
+        getArguments(arguments);
+        if (arguments.size() > 1) {
+            pCluster->setConfiguration(arguments[1]);
+        }
         return pCluster;
     }
 
     virtual void presentedMainView()
     {
         resizeMainView(300, 120);
+    }
+
+    virtual void finishedEventLoop()
+    {
+        std::cout << "cluster configuration: " << static_cast<Omm::Gui::ClusterView*>(getMainView())->getConfiguration() << std::endl;
     }
 
 };

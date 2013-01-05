@@ -36,6 +36,7 @@
 #include "ClusterImpl.h"
 #include "GenericClusterImpl.h"
 #include "ColumnClusterImpl.h"
+#include "UIKit/ClusterImpl.h"
 
 
 namespace Omm {
@@ -77,6 +78,12 @@ ClusterView::insertView(View* pView, const std::string& label, int index)
     NOTIFY_CONTROLLER(ClusterController, insertedView, pView);
 }
 
+
+std::string
+ClusterView::getConfiguration()
+{
+    return static_cast<ClusterViewImpl*>(_pImpl)->getConfiguration();
+}
 
 
 void
@@ -133,20 +140,6 @@ ClusterView::getHandleHeight()
 {
     return static_cast<ClusterViewImpl*>(_pImpl)->getHandleHeight();
 }
-
-
-//void
-//ClusterView::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
-//{
-//    static_cast<ClusterViewImpl*>(_pImpl)->sizeConstraintReached(width, height);
-//}
-
-
-//std::string
-//ClusterView::writeLayout()
-//{
-//    return static_cast<ClusterViewImpl*>(_pImpl)->writeLayout();
-//}
 
 
 void
