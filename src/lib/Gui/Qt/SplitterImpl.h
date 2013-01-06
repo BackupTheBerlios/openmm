@@ -40,6 +40,8 @@ private:
 
     void setOrientation(View::Orientation orientation);
     void insertView(View* pView, int index);
+    std::vector<float> getSizes();
+    void setSizes(const std::vector<float>& sizes);
 };
 
 

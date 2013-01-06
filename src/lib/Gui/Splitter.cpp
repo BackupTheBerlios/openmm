@@ -59,5 +59,19 @@ SplitterView::insertView(View* pView, int index)
 }
 
 
+std::vector<float>
+SplitterView::getSizes()
+{
+    return static_cast<SplitterViewImpl*>(_pImpl)->getSizes();
+}
+
+
+void
+SplitterView::setSizes(const std::vector<float>& sizes)
+{
+    static_cast<SplitterViewImpl*>(_pImpl)->setSizes(sizes);
+}
+
+
 } // namespace Gui
 } // namespace Omm

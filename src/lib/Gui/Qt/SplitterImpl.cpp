@@ -72,5 +72,36 @@ SplitterViewImpl::insertView(View* pView, int index)
 }
 
 
+std::vector<float>
+SplitterViewImpl::getSizes()
+{
+    QSplitter* pSplitter = static_cast<QSplitter*>(_pNativeView);
+    std::vector<float> res;
+    QList<int> sizes = pSplitter->sizes();
+    int totalSize = (pSplitter->orientation() == Qt::Horizontal ? pSplitter->width() : pSplitter->height());
+    for (QList<int>::ConstIterator it = sizes.begin(); it != sizes.end(); ++it) {
+        if (totalSize) {
+            res.push_back(*it / (float)totalSize);
+        }
+    }
+    return res;
+}
+
+
+void
+SplitterViewImpl::setSizes(const std::vector<float>& sizes)
+{
+    QSplitter* pSplitter = static_cast<QSplitter*>(_pNativeView);
+    QList<int> qSizes;
+    int totalSize = (pSplitter->orientation() == Qt::Horizontal ? pSplitter->width() : pSplitter->height());
+    for (std::vector<float>::const_iterator it = sizes.begin(); it != sizes.end(); ++it) {
+        if (totalSize) {
+            qSizes.push_back(*it * totalSize);
+        }
+    }
+    pSplitter->setSizes(qSizes);
+}
+
+
 }  // namespace Omm
 }  // namespace Gui

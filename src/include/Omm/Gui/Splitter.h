@@ -22,6 +22,8 @@
 #ifndef Splitter_INCLUDED
 #define Splitter_INCLUDED
 
+#include <vector>
+
 #include "View.h"
 #include "Model.h"
 #include "Controller.h"
@@ -38,9 +40,8 @@ public:
 
     void setOrientation(Orientation orientation);
     void insertView(View* pView, int index = 0);
-
-private:
-
+    std::vector<float> getSizes();
+    void setSizes(const std::vector<float>& sizes);
 };
 
 

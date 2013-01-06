@@ -139,17 +139,9 @@ public:
 class ClusterCoordinate
 {
 public:
-//    ClusterCoordinate() : _column(0), _cluster(0), _index(0) {}
     ClusterCoordinate(const ClusterCoordinate& coord) : _column(coord._column), _cluster(coord._cluster), _index(coord._index) {}
     ClusterCoordinate(int column, int cluster, int index) : _column(column), _cluster(cluster), _index(index) {}
 
-//    bool
-//    operator()(const ClusterCoordinate& c1, const ClusterCoordinate& c2) const
-//    {
-//        return c1._column < c2._column && c1._cluster < c2._cluster && c1._index < c2._index;
-//    }
-
-    void read(const std::string& configuration);
     std::string write() const;
 
     bool equal(const ClusterCoordinate& coord) const
@@ -160,16 +152,6 @@ public:
     int     _column;
     int     _cluster;
     int     _index;
-};
-
-
-struct ClusterCoordinateCompare
-{
-    bool
-    operator()(const ClusterCoordinate& c1, const ClusterCoordinate& c2) const
-    {
-        return c1._column < c2._column && c1._cluster < c2._cluster && c1._index < c2._index;
-    }
 };
 
 
@@ -185,17 +167,21 @@ ClusterCoordinate::write() const
 class ClusterConfiguration
 {
 public:
+    ClusterConfiguration() : _width(0), _height(0) {}
+
     void addView(const std::string& name, const ClusterCoordinate& coord);
-    void read(const std::string& configuration);
     std::string write();
 
     int countColumns();
     int countClusters(int column);
-    std::string clusterConfiguration(int column, int cluster);
+    std::string subClusterConfiguration(int column, int cluster);
 
-    std::map<std::string, ClusterCoordinate>                               _coords;
-    std::map< int, std::map< int, std::map< int, std::string > > >         _views;
-//    std::map<ClusterCoordinate, std::string, ClusterCoordinateCompare>     _views;
+    std::map<std::string, ClusterCoordinate>                                _coords;
+    std::map< int, std::map< int, std::map< int, std::string > > >          _views;
+    int                                                                     _width;
+    int                                                                     _height;
+    std::vector<float>                                                      _colWidth;
+    std::vector< std::vector<float > >                                      _clusterHeight;
 };
 
 
@@ -212,17 +198,35 @@ std::string
 ClusterConfiguration::write()
 {
     std::string res;
-//    for (std::map<ClusterCoordinate, std::string, ClusterCoordinateCompare>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
-//        res += it->first.write() + " " + it->second + Poco::LineEnding::NEWLINE_DEFAULT;
-//    }
-//    for (std::map<std::string, ClusterCoordinate>::const_iterator it = _coords.begin(); it != _coords.end(); ++it) {
-//        res += it->first + " " + it->second.write() + Poco::LineEnding::NEWLINE_DEFAULT;
-//    }
     for (int col = 0; col < countColumns(); ++col) {
         for (int cluster = 0; cluster < countClusters(col); ++cluster) {
             res += "[" + Poco::NumberFormatter::format(col) + "," + Poco::NumberFormatter::format(cluster) + "] "
-                    + clusterConfiguration(col, cluster) + " ";
-//                    + Poco::LineEnding::NEWLINE_DEFAULT;
+                    + subClusterConfiguration(col, cluster) + " ";
+        }
+    }
+    if (_width && _height) {
+        res += "{" + Poco::NumberFormatter::format(_width) + ";" + Poco::NumberFormatter::format(_height) + "} ";
+    }
+    if (_colWidth.size()) {
+        res += "{";
+        for (std::vector<float>::const_iterator it = _colWidth.begin(); it != _colWidth.end(); ++it) {
+            res += Poco::NumberFormatter::format(*it, 2);
+            if (it + 1 != _colWidth.end()) {
+                res += ";";
+            }
+        }
+        res += "} ";
+    }
+    if (_clusterHeight.size()) {
+        for (std::vector< std::vector<float > >::const_iterator cit = _clusterHeight.begin(); cit != _clusterHeight.end(); ++cit) {
+            res += "{";
+            for (std::vector<float>::const_iterator it = cit->begin(); it != cit->end(); ++it) {
+                res += Poco::NumberFormatter::format(*it, 2);
+                if (it + 1 != cit->end()) {
+                    res += ";";
+                }
+            }
+            res += "} ";
         }
     }
     return res;
@@ -244,7 +248,7 @@ ClusterConfiguration::countClusters(int column)
 
 
 std::string
-ClusterConfiguration::clusterConfiguration(int column, int cluster)
+ClusterConfiguration::subClusterConfiguration(int column, int cluster)
 {
     std::string res;
     for (std::map<int, std::string>::iterator it = _views[column][cluster].begin(); it != _views[column][cluster].end(); ++it) {
@@ -482,7 +486,8 @@ ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
     _pTargetConfiguration = new ClusterConfiguration;
 
     Poco::StringTokenizer columnTokens(configuration, " ");
-    for (int i = 0; i < columnTokens.count(); i+=2) {
+    int i = 0;
+    while (i < columnTokens.count() && columnTokens[i][0] != '{') {
         Poco::StringTokenizer coords(columnTokens[i].substr(1, columnTokens[i].length() - 2), ",");
         int col = Poco::NumberParser::parse(coords[0]);
         int cluster = Poco::NumberParser::parse(coords[1]);
@@ -491,6 +496,31 @@ ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
             ClusterCoordinate coord(col, cluster, index);
             _pTargetConfiguration->addView(views[index], coord);
         }
+        i += 2;
+    }
+    if (i < columnTokens.count()) {
+        Poco::StringTokenizer viewSize(columnTokens[i].substr(1, columnTokens[i].length() - 2), ";");
+        _pTargetConfiguration->_width = Poco::NumberParser::parse(viewSize[0]);
+        _pTargetConfiguration->_height = Poco::NumberParser::parse(viewSize[1]);
+        i++;
+    }
+    if (i < columnTokens.count()) {
+        Poco::StringTokenizer colSizes(columnTokens[i].substr(1, columnTokens[i].length() - 2), ";");
+        std::vector<float> sizes;
+        for (Poco::StringTokenizer::Iterator it = colSizes.begin(); it != colSizes.end(); ++it) {
+            sizes.push_back(Poco::NumberParser::parseFloat(*it));
+        }
+        _pTargetConfiguration->_colWidth = sizes;
+        i++;
+    }
+    while (i < columnTokens.count()) {
+        Poco::StringTokenizer colSizes(columnTokens[i].substr(1, columnTokens[i].length() - 2), ";");
+        std::vector<float> sizes;
+        for (Poco::StringTokenizer::Iterator it = colSizes.begin(); it != colSizes.end(); ++it) {
+            sizes.push_back(Poco::NumberParser::parseFloat(*it));
+        }
+        _pTargetConfiguration->_clusterHeight.push_back(sizes);
+        i++;
     }
 }
 
@@ -807,8 +837,13 @@ ColumnClusterViewImpl::getOriginConfiguration(ClusterConfiguration& configuratio
 void
 ColumnClusterViewImpl::getCurrentConfiguration(ClusterConfiguration& configuration)
 {
+    configuration._width = _pView->width();
+    configuration._height = _pView->height();
+    configuration._colWidth = getSizes();
+
     int column = 0;
     for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
+        configuration._clusterHeight.push_back((*colIt)->getSizes());
         int cluster = 0;
         for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++cluster, ++it) {
             for (int index = 0; index < (*it)->getViewCount(); ++index) {
@@ -939,9 +974,15 @@ ColumnClusterViewImpl::layoutViews(ClusterConfiguration& targetConfiguration)
 
     removeEmptyCols();
 
+    if (targetConfiguration._colWidth.size()) {
+        setSizes(targetConfiguration._colWidth);
+    }
     for (int col = 0; col < _grid.size(); ++col) {
+        if (targetConfiguration._clusterHeight.size() && targetConfiguration._clusterHeight[col].size()) {
+            _grid[col]->setSizes(targetConfiguration._clusterHeight[col]);
+        }
         for (int cluster = 0; cluster < _grid[col]->getSize(); ++cluster) {
-            getCluster(col, cluster)->setConfiguration(targetConfiguration.clusterConfiguration(col, cluster));
+            getCluster(col, cluster)->setConfiguration(targetConfiguration.subClusterConfiguration(col, cluster));
         }
     }
 }
