@@ -64,8 +64,6 @@ public:
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
 
-//    virtual std::string writeLayout();
-
 private:
     typedef std::vector<ColumnView*>::iterator GridIterator;
 
@@ -87,15 +85,17 @@ private:
     void getOriginConfiguration(ClusterConfiguration& configuration);
     void getCurrentConfiguration(ClusterConfiguration& configuration);
     void getDefaultConfiguration(ClusterConfiguration& configuration);
+    void getTransitionConfiguration(int width, int height, ClusterConfiguration& targetConfiguration, ClusterConfiguration& transitionConfiguration);
+//    void getTransition(int width, int height, const ClusterConfiguration& targetConfiguration, ClusterConfiguration& transitionConfiguration);
     void layoutViews(int width, int height);
     void layoutViews(ClusterConfiguration& targetConfiguration);
+//    void layoutViews(const ClusterConfiguration& targetConfiguration);
 
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;
     std::vector<View*>                              _views;
     std::map<std::string, View*>                    _viewMap;
     ClusterConfiguration*                           _pTargetConfiguration;
-//    bool                                            _layoutNeedsUpdate;
 };
 
 
