@@ -576,26 +576,19 @@ ColumnClusterViewImpl::setCurrentViewIndex(int index)
 int
 ColumnClusterViewImpl::getIndexFromView(View* pView)
 {
-//    int topColClusterIndex = 0;
-//    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
-//        int rowClusterIndex = 0;
-//        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
-//            int index = (*it)->getIndexFromView(pView);
-//            if (index != -1) {
-//                return topColClusterIndex + rowClusterIndex + index;
-//            }
-//            else {
-//                rowClusterIndex += (*it)->getViewCount();
-//            }
-//        }
-//        topColClusterIndex += rowClusterIndex;
-//    }
-    std::vector<View*>::iterator it = std::find(_views.begin(), _views.end(), pView);
-    if (it != _views.end()) {
-        return it - _views.begin();
-    }
-    else {
-        return -1;
+    int topColClusterIndex = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        int rowClusterIndex = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            int index = (*it)->getIndexFromView(pView);
+            if (index != -1) {
+                return topColClusterIndex + rowClusterIndex + index;
+            }
+            else {
+                rowClusterIndex += (*it)->getViewCount();
+            }
+        }
+        topColClusterIndex += rowClusterIndex;
     }
 }
 
@@ -603,24 +596,18 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
 View*
 ColumnClusterViewImpl::getViewFromIndex(int index)
 {
-//    int topColClusterIndex = 0;
-//    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
-//        int rowClusterIndex = 0;
-//        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
-//            if (index < topColClusterIndex + rowClusterIndex + (*it)->getViewCount()) {
-//                return (*it)->getViewFromIndex(index - topColClusterIndex - rowClusterIndex);
-//            }
-//            rowClusterIndex += (*it)->getViewCount();
-//        }
-//        topColClusterIndex += rowClusterIndex;
-//    }
-//    return 0;
-    if (0 <= index && index < _views.size()) {
-        return _views[index];
+    int topColClusterIndex = 0;
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        int rowClusterIndex = 0;
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            if (index < topColClusterIndex + rowClusterIndex + (*it)->getViewCount()) {
+                return (*it)->getViewFromIndex(index - topColClusterIndex - rowClusterIndex);
+            }
+            rowClusterIndex += (*it)->getViewCount();
+        }
+        topColClusterIndex += rowClusterIndex;
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 

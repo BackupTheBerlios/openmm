@@ -92,7 +92,7 @@ SliderView::syncViewImpl()
         _activeMode = false;
         return;
     }
-    LOG(gui, debug, "slider view sync view: " + getName());
+//    LOG(gui, debug, "slider view sync view: " + getName());
     SliderModel* pSliderModel = static_cast<SliderModel*>(_pModel);
     SliderViewImpl* pImpl = static_cast<SliderViewImpl*>(_pImpl);
     _passiveMode = true;
@@ -109,7 +109,7 @@ SliderView::valueChangedView(int value)
         return;
     }
     _activeMode = true;
-    LOG(gui, debug, "slider view, calling value changed virtual method");
+//    LOG(gui, debug, "slider view, calling value changed virtual method");
     NOTIFY_CONTROLLER(SliderController, valueChanged, value);
 }
 

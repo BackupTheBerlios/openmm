@@ -1752,7 +1752,7 @@ MediaRendererView::selectedRenderer()
 void
 MediaRendererView::syncViewImpl()
 {
-    LOGNS(Gui, gui, debug, "media renderer view sync view impl");
+//    LOGNS(Gui, gui, debug, "media renderer view sync view impl");
     // FIXME: submodels should by synced implicitely
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();

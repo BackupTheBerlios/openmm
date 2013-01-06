@@ -56,11 +56,7 @@ public:
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
 
-//    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height);
-//    virtual std::string writeLayout();
-
 private:
-//    void updateSizeConstraints();
     void changedConfiguration();
 
     int                                 _handleHeight;

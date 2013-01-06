@@ -105,12 +105,6 @@ GenericClusterStackedLayout::layoutView()
         pHandle->move(handleIndex * handleWidth, 0);
         (*itv)->resize(_pView->width(), _pView->height() - handleHeight);
         (*itv)->move(0, handleHeight);
-//        if (_pView->width() < (*itv)->width(View::Min)
-//                || _pView->width() > (*itv)->width(View::Max)
-//                || _pView->height() - handleHeight < (*itv)->height(View::Min)
-//                || _pView->height() - handleHeight > (*itv)->height(View::Max))  {
-//            _pViewImpl->sizeConstraintReached(*itv);
-//        }
     }
 }
 
@@ -175,7 +169,6 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
     _visibleViews.insert(_visibleViews.begin() + index, pView);
     _views.insert(std::make_pair(pView->getName(), pView));
     _currentViewIndex = index;
-//    updateSizeConstraints();
     _pView->updateLayout();
 }
 
@@ -195,7 +188,6 @@ GenericClusterViewImpl::removeView(View* pView)
         _pView->hide();
     }
     else {
-//        updateSizeConstraints();
         _pView->updateLayout();
     }
 }
@@ -217,6 +209,7 @@ GenericClusterViewImpl::setConfiguration(const std::string& configuration)
         _visibleViews.push_back(_views[*it]);
     }
     _pView->updateLayout();
+    setCurrentViewIndex(0);
 }
 
 
@@ -307,72 +300,6 @@ GenericClusterViewImpl::changedConfiguration()
 {
     IMPL_NOTIFY_CONTROLLER(ClusterController, changedConfiguration);
 }
-
-
-//void
-//GenericClusterViewImpl::sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height)
-//{
-//    width = View::None;
-//    height = View::None;
-//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
-//        View* pView = (*it);
-//        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " current size ["
-//            + Poco::NumberFormatter::format(pView->width(View::Current)) + ", "
-//            + Poco::NumberFormatter::format(pView->height(View::Current)) + "]");
-//        LOG(gui, debug, "cluster " + _pView->getName() + " subview " + pView->getName() + " size constraint Min ["
-//            + Poco::NumberFormatter::format(pView->width(View::Min)) + ", "
-//            + Poco::NumberFormatter::format(pView->height(View::Min)) + "] : Max ["
-//            + Poco::NumberFormatter::format(pView->width(View::Max)) + ", "
-//            + Poco::NumberFormatter::format(pView->height(View::Max)) + "]");
-//
-//        if ((*it)->width(View::Current) <= (*it)->width(View::Pref) * 0.66) {
-//            width = View::Min;
-//        }
-////        else if ((*it)->width(View::Current) > (*it)->width(View::Max)) {
-////            width = View::Max;
-//        else if ((*it)->width(View::Current) > (*it)->width(View::Pref) * 1.33) {
-//            width = View::Max;
-//        }
-//        if ((*it)->height(View::Current) <= (*it)->height(View::Pref) * 0.66) {
-//            height = View::Min;
-//        }
-////        else if ((*it)->height(View::Current) > (*it)->height(View::Max)) {
-////            height = View::Max;
-//        else if ((*it)->height(View::Current) > (*it)->height(View::Pref) * 1.33) {
-//            height = View::Max;
-//        }
-//    }
-//}
-
-
-//std::string
-//GenericClusterViewImpl::writeLayout()
-//{
-//    std::string res;
-//    int index = 0;
-//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++index, ++it) {
-//        res += "{" + Poco::NumberFormatter::format(index) + ":\"" + (*it)->getName() + "\"}";
-//    }
-//    return res;
-//}
-
-
-//void
-//GenericClusterViewImpl::updateSizeConstraints()
-//{
-//    int minWidth = 0;
-//    int maxWidth = (*_views.begin())->width(View::Max);
-//    int minHeight = 0;
-//    int maxHeight = (*_views.begin())->height(View::Max);
-//    for (View::SubviewIterator it = _views.begin(); it != _views.end(); ++it) {
-//        minWidth = minWidth > (*it)->width(View::Min) ? minWidth : (*it)->width(View::Min);
-//        maxWidth = maxWidth < (*it)->width(View::Max) ? maxWidth : (*it)->width(View::Max);
-//        minHeight = minHeight > (*it)->height(View::Min) ? minHeight : (*it)->height(View::Min);
-//        maxHeight = maxHeight < (*it)->height(View::Max) ? maxHeight : (*it)->height(View::Max);
-//    }
-//    _pView->setSizeConstraint(minWidth, minHeight + _handleHeight, View::Min);
-//    _pView->setSizeConstraint(maxWidth, maxHeight + _handleHeight, View::Max);
-//}
 
 
 } // namespace Gui
