@@ -196,7 +196,14 @@ GenericClusterViewImpl::removeView(View* pView)
 std::string
 GenericClusterViewImpl::getConfiguration()
 {
-
+    std::string res;
+    for (std::vector<View*>::const_iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it) {
+        res += (*it)->getName();
+        if (it + 1 != _visibleViews.end()) {
+            res += ",";
+        }
+    }
+    return res;
 }
 
 
@@ -204,9 +211,18 @@ void
 GenericClusterViewImpl::setConfiguration(const std::string& configuration)
 {
     _visibleViews.clear();
-    Poco::StringTokenizer views(configuration, ",");
-    for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
-        _visibleViews.push_back(_views[*it]);
+    Poco::StringTokenizer columnTokens(configuration, " ");
+    for (Poco::StringTokenizer::Iterator cit = columnTokens.begin(); cit != columnTokens.end(); ++cit) {
+        // remove all metrical and topological information (e.g. from column cluster view)
+        if ((*cit)[0] != '[' && (*cit)[0] != '{') {
+            Poco::StringTokenizer views(*cit, ",");
+            for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
+                std::map<std::string, View*>::iterator pos = _views.find(*it);
+                if (pos != _views.end()) {
+                    _visibleViews.push_back(pos->second);
+                }
+            }
+        }
     }
     _pView->updateLayout();
     setCurrentViewIndex(0);
@@ -240,7 +256,8 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
     if (pCurrentView) {
         View* pHandle = _handles[pCurrentView];
         if (pHandle) {
-            pHandle->setBackgroundColor(Color("white"));
+            // FIXME: setBackgroundColor needs to be async
+//            pHandle->setBackgroundColor(Color("white"));
         }
     }
     _currentViewIndex = index;
@@ -250,7 +267,7 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
         _visibleViews[_currentViewIndex]->raise();
         View* pHandle = _handles[pCurrentView];
         if (pHandle) {
-            pHandle->setBackgroundColor(Color(200, 200, 200, 255));
+//            pHandle->setBackgroundColor(Color(200, 200, 200, 255));
         }
     }
 }

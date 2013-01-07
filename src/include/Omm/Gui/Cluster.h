@@ -33,6 +33,9 @@
 namespace Omm {
 namespace Gui {
 
+/// Cluster is a composite view where all subviews can be arranged, hidden or shown individually
+/// Each subview is assigned a handle to manage it interactively.
+/// There are several types of clusters, currently tab views and column clusters.
 
 class ClusterController : public Controller
 {
@@ -61,21 +64,47 @@ public:
     ClusterView(View* pParent = 0, const std::string& type = Native);
     virtual ~ClusterView();
 
-    void insertView(View* pView, const std::string& label = "", int index = 0);
+    void insertView(View* pView, const std::string& label, int index = 0);
+    /// Inserts view pView at index index into cluster, sets cluster as parent
+    /// and makes it visible showing label on the attached handle.
+    /// Index must be less than the number of visible views (otherwise ignored).
+    /// Removing a view can only be done by assigning a new parent (e.g. setParent()
+    /// or insertView()).
+
     std::string getConfiguration();
+    /// Returns the layout configuration of the visible views. Format of the layout configuration string depends
+    /// on the cluster type and includes topological and possible metrical information.
+
     void setConfiguration(const std::string& configuration);
+    /// Sets the layout configuration of the visible views. Any views that are not inserted
+    /// are ignored.
 
     int getViewCount();
-    int getCurrentViewIndex(); /// current view has focus
+    /// Returns the number of visible views.
+
+    int getCurrentViewIndex();
+    /// Returns the index of the view, that is visible and has focus.
+
     void setCurrentViewIndex(int index);
+    /// Makes the view with index visible and gives focus to it.
+
     int getIndexFromView(View* pView);
+    /// Returns the index of view pView and -1 if view is not visible.
+
     View* getViewFromIndex(int index);
+    /// Returns a pointer to the view with index and 0 if view is not visible.
 
     void setHandlesHidden(bool hidden = true);
+    /// Hides/shows all handles.
+
     const int getHandleHeight();
+    /// Returns the height of the handles.
 
 private:
     virtual void removedSubview(View* pView);
+    // TODO: shownSubview(), hiddenSubview()
+//    virtual void shownSubview(View* pView);
+//    virtual void hiddenSubview(View* pView);
 };
 
 

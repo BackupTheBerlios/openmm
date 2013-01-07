@@ -84,14 +84,34 @@ ClusterViewImpl::removeView(View* pView)
 std::string
 ClusterViewImpl::getConfiguration()
 {
-
+    std::string res;
+    for (std::vector<View*>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
+        res += (*it)->getName();
+        if (it + 1 != _views.end()) {
+            res += ",";
+        }
+    }
+    return res;
 }
 
 
 void
 ClusterViewImpl::setConfiguration(const std::string& configuration)
 {
-
+//    QtClusterWidget* pClusterWidget = static_cast<QtClusterWidget*>(_pNativeView);
+//   _views.clear();
+//    Poco::StringTokenizer columnTokens(configuration, " ");
+//    for (Poco::StringTokenizer::Iterator cit = columnTokens.begin(); cit != columnTokens.end(); ++cit) {
+//        // remove all metrical and topological information (e.g. from column cluster view)
+//        if ((*cit)[0] != '[' && (*cit)[0] != '{') {
+//            Poco::StringTokenizer views(*cit, ",");
+//            for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
+//                _views.push_back(_views[*it]);
+//            }
+//        }
+//    }
+//    _pView->updateLayout();
+//    setCurrentViewIndex(0);
 }
 
 

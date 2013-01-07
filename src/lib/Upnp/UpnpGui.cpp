@@ -982,7 +982,8 @@ _pApplication(pApplication)
     _pActivityIndicator = new ActivityIndicator;
 //    _pStatusBar->resize(20, 20);
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
-    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
+//    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
+    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup,Player,List,Video {800;480} {1,00} {1,00}"));
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));

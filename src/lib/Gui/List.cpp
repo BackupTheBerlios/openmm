@@ -553,7 +553,7 @@ ListView::clearVisibleViews()
 void
 ListView::addItemView(View* pView)
 {
-    LOG(gui, debug, "list view add item view.");
+//    LOG(gui, debug, "list view add item view.");
 
     pView->resize(getViewportWidth(), getItemViewHeight());
     pView->setSizeConstraint(getViewportWidth(), getItemViewHeight(), View::Pref);
@@ -564,7 +564,7 @@ ListView::addItemView(View* pView)
 void
 ListView::moveItemView(int row, View* pView)
 {
-    LOG(gui, debug, "move list item view \"" + pView->getName() + "\" to row: " + Poco::NumberFormatter::format(row));
+//    LOG(gui, debug, "move list item view \"" + pView->getName() + "\" to row: " + Poco::NumberFormatter::format(row));
     pView->move(0, getItemViewHeight() * row);
 }
 
@@ -660,7 +660,7 @@ ListView::rowFromView(View* pView)
 void
 ListView::setItemViewWidth(int width)
 {
-    LOG(gui, debug, "list view set item view width: " + Poco::NumberFormatter::format(width));
+//    LOG(gui, debug, "list view set item view width: " + Poco::NumberFormatter::format(width));
     if (!_viewPool.size()) {
         return;
     }

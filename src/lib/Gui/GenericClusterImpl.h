@@ -59,13 +59,14 @@ public:
 private:
     void changedConfiguration();
 
+    std::map<std::string, View*>        _views;
+    std::vector<View*>                  _visibleViews;
+
+    int                                 _currentViewIndex;
     int                                 _handleHeight;
     int                                 _handleWidth;
     bool                                _handleBarHidden;
     std::map<View*, ListItemView*>      _handles;
-    std::map<std::string, View*>        _views;
-    std::vector<View*>                  _visibleViews;
-    int                                 _currentViewIndex;
 };
 
 

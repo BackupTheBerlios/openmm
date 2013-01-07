@@ -71,12 +71,14 @@ private:
     int getColumnIndex(ColumnView* pColumn);
     ColumnView* getColumn();
     void putColumn(ColumnView* pColumn);
+
     ClusterView* getOriginCluster();
     ClusterView* createClusterInNewColumn(int column);
     ClusterView* createClusterInRow(int column, int row);
     ClusterView* getCluster(int column, int cluster);
     ClusterView* getCluster(View* pView);
-    void mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster);
+//    void mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster);
+
     void removeCluster(ClusterView* pCluster);
     void removeEmptyCols();
 
@@ -91,10 +93,11 @@ private:
     void layoutViews(ClusterConfiguration& targetConfiguration);
 //    void layoutViews(const ClusterConfiguration& targetConfiguration);
 
+    std::vector<View*>                              _views;
+//    std::map<std::string, View*>                    _viewMap;
+
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;
-    std::vector<View*>                              _views;
-    std::map<std::string, View*>                    _viewMap;
     ClusterConfiguration*                           _pTargetConfiguration;
 };
 

@@ -450,7 +450,7 @@ ColumnClusterViewImpl::insertView(View* pView, const std::string& label, int ind
 
     getOriginCluster()->insertView(pView, label, index);
     _views.insert(_views.begin() + index, pView);
-    _viewMap.insert(std::make_pair(pView->getName(), pView));
+//    _viewMap.insert(std::make_pair(pView->getName(), pView));
 }
 
 
@@ -465,7 +465,7 @@ ColumnClusterViewImpl::removeView(View* pView)
     if (it != _views.end()) {
         _views.erase(it);
     }
-    _viewMap.erase(pView->getName());
+//    _viewMap.erase(pView->getName());
 }
 
 
@@ -716,18 +716,18 @@ ColumnClusterViewImpl::getCluster(View* pView)
 }
 
 
-void
-ColumnClusterViewImpl::mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster)
-{
-    if (pCluster == pTargetCluster) {
-        return;
-    }
-    for (int viewIndex = 0; viewIndex < pCluster->getViewCount(); ++viewIndex) {
-        View* pView = pCluster->getViewFromIndex(viewIndex);
-        pTargetCluster->insertView(pView, pView->getName(), pTargetCluster->getViewCount());
-    }
-    removeCluster(pCluster);
-}
+//void
+//ColumnClusterViewImpl::mergeClusterWithCluster(ClusterView* pCluster, ClusterView* pTargetCluster)
+//{
+//    if (pCluster == pTargetCluster) {
+//        return;
+//    }
+//    for (int viewIndex = 0; viewIndex < pCluster->getViewCount(); ++viewIndex) {
+//        View* pView = pCluster->getViewFromIndex(viewIndex);
+//        pTargetCluster->insertView(pView, pView->getName(), pTargetCluster->getViewCount());
+//    }
+//    removeCluster(pCluster);
+//}
 
 
 void
@@ -826,6 +826,12 @@ ColumnClusterViewImpl::getDefaultConfiguration(ClusterConfiguration& configurati
 void
 ColumnClusterViewImpl::getTransitionConfiguration(int width, int height, ClusterConfiguration& targetConfiguration, ClusterConfiguration& transitionConfiguration)
 {
+    // we need metrical (not only topological) information to calculate transitional configurations
+    if (!(targetConfiguration._width || targetConfiguration._colWidth.size() || targetConfiguration._clusterHeight.size())) {
+        transitionConfiguration = targetConfiguration;
+        return;
+    }
+
     // calculate the number of columns we need for the transition configuration
     int widthSum = 0;
     int maxColCount = 0;
@@ -884,7 +890,7 @@ ColumnClusterViewImpl::layoutViews(int width, int height)
     }
     else {
         pConfiguration = new ClusterConfiguration;
-        getDefaultConfiguration(*pConfiguration);
+        getOriginConfiguration(*pConfiguration);
     }
     LOG(gui, debug, "column cluster target configuration:" + Poco::LineEnding::NEWLINE_DEFAULT + pConfiguration->write());
 
@@ -892,6 +898,7 @@ ColumnClusterViewImpl::layoutViews(int width, int height)
     getTransitionConfiguration(width, height, *pConfiguration, transitionConfiguration);
     LOG(gui, debug, "column cluster transition configuration:" + Poco::LineEnding::NEWLINE_DEFAULT + transitionConfiguration.write());
 
+//    layoutViews(*pConfiguration);
     layoutViews(transitionConfiguration);
     if (pConfiguration != _pTargetConfiguration) {
         delete pConfiguration;
