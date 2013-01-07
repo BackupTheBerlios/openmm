@@ -91,20 +91,28 @@ GenericClusterStackedLayout::layoutView()
 {
     LOG(gui, debug, "generic cluster view " + _pView->getName() + " update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
 
-    if (!_pViewImpl->_visibleViews.size()) {
+    if (!_pViewImpl->_views.size()) {
+        // cluster contains no views
         return;
     }
 
     int handleHeight = (_pViewImpl->_handleBarHidden ? 0 : _pViewImpl->_handleHeight);
-    int handleWidth = _pView->width() / _pViewImpl->_handles.size();
+    int handleWidth = _pView->width() / _pViewImpl->_visibleViews.size();
+    _pViewImpl->_pSelection->resize(handleWidth, handleHeight);
 
     int handleIndex = 0;
-    for (ClusterView::SubviewIterator itv = _pViewImpl->_visibleViews.begin(); itv != _pViewImpl->_visibleViews.end(); ++handleIndex, ++itv) {
-        ListItemView* pHandle = _pViewImpl->_handles[*itv];
+    for (std::vector<View*>::iterator it = _pViewImpl->_visibleViews.begin(); it != _pViewImpl->_visibleViews.end(); ++handleIndex, ++it) {
+        GenericClusterViewImpl::HandleView* pHandle = _pViewImpl->_handles[*it];
         pHandle->resize(handleWidth, handleHeight);
         pHandle->move(handleIndex * handleWidth, 0);
-        (*itv)->resize(_pView->width(), _pView->height() - handleHeight);
-        (*itv)->move(0, handleHeight);
+        (*it)->resize(_pView->width(), _pView->height() - handleHeight);
+        (*it)->move(0, handleHeight);
+    }
+    handleIndex = 0;
+    for (std::set<View*>::iterator it = _pViewImpl->_hiddenViews.begin(); it != _pViewImpl->_hiddenViews.end(); ++handleIndex, ++it) {
+        GenericClusterViewImpl::HandleView* pHandle = _pViewImpl->_handles[*it];
+        pHandle->hide(false);
+        (*it)->hide(false);
     }
 }
 
@@ -132,6 +140,7 @@ _handleWidth(150),
 _handleBarHidden(false),
 _currentViewIndex(-1)
 {
+    _pSelection = new SelectionView;
 }
 
 
@@ -139,6 +148,9 @@ void
 GenericClusterViewImpl::init()
 {
     _pView->setLayout(new GenericClusterStackedLayout(this));
+    _pSelection->setParentView(_pView);
+    _pSelection->resize(_handleWidth, _handleHeight);
+    _pSelection->hide(false);
 }
 
 
@@ -156,7 +168,8 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
     pHandleLabelModel->setLabel(label);
     ListItemModel* pHandleModel = new ListItemModel;
     pHandleModel->setLabelModel(pHandleLabelModel);
-    ListItemView* pHandle = new ListItemView(_pView);
+    HandleView* pHandle = new HandleView(_pView);
+//    pHandle->setModel(pHandleLabelModel);
     pHandle->setModel(pHandleModel);
     pHandle->setName(handleName);
     HandleController* pHandleController = new HandleController(this, pView);
@@ -166,8 +179,8 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
     pHandle->show();
 
     _handles[pView] = pHandle;
-    _visibleViews.insert(_visibleViews.begin() + index, pView);
     _views.insert(std::make_pair(pView->getName(), pView));
+    _visibleViews.insert(_visibleViews.begin() + index, pView);
     _currentViewIndex = index;
     _pView->updateLayout();
 }
@@ -176,14 +189,15 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
 void
 GenericClusterViewImpl::removeView(View* pView)
 {
-    ClusterView::SubviewIterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    _views.erase(pView->getName());
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
     if (it != _visibleViews.end()) {
-        ListItemView* pHandle = _handles[pView];
+        HandleView* pHandle = _handles[pView];
         pHandle->hide();
         _handles.erase(pView);
         _visibleViews.erase(it);
     }
-    _views.erase(pView->getName());
+    _hiddenViews.erase(pView);
     if (!_visibleViews.size()) {
         _pView->hide();
     }
@@ -211,15 +225,19 @@ void
 GenericClusterViewImpl::setConfiguration(const std::string& configuration)
 {
     _visibleViews.clear();
+    for (ViewIterator it = _views.begin(); it != _views.end(); ++it) {
+        _hiddenViews.insert(it->second);
+    }
     Poco::StringTokenizer columnTokens(configuration, " ");
     for (Poco::StringTokenizer::Iterator cit = columnTokens.begin(); cit != columnTokens.end(); ++cit) {
         // remove all metrical and topological information (e.g. from column cluster view)
         if ((*cit)[0] != '[' && (*cit)[0] != '{') {
             Poco::StringTokenizer views(*cit, ",");
             for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
-                std::map<std::string, View*>::iterator pos = _views.find(*it);
+                ViewIterator pos = _views.find(*it);
                 if (pos != _views.end()) {
                     _visibleViews.push_back(pos->second);
+                    _hiddenViews.erase(pos->second);
                 }
             }
         }
@@ -252,26 +270,19 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
         return;
     }
 
-    View* pCurrentView = _visibleViews[_currentViewIndex];
-    if (pCurrentView) {
-        View* pHandle = _handles[pCurrentView];
-        if (pHandle) {
-            // FIXME: setBackgroundColor needs to be async
-//            pHandle->setBackgroundColor(Color("white"));
-        }
-    }
     _currentViewIndex = index;
-    pCurrentView = _visibleViews[_currentViewIndex];
+    View* pCurrentView = _visibleViews[_currentViewIndex];
     LOG(gui, debug, "cluster " + _pView->getName() + " set current view index: " + Poco::NumberFormatter::format(index) + ", view: " + pCurrentView->getName());
     if (pCurrentView) {
         _visibleViews[_currentViewIndex]->raise();
         View* pHandle = _handles[pCurrentView];
         if (pHandle) {
-//            pHandle->setBackgroundColor(Color(200, 200, 200, 255));
+            _pSelection->move(pHandle->posX(), pHandle->posY());
+            _pSelection->show();
+            _pSelection->raise();
         }
     }
 }
-
 
 
 int

@@ -23,11 +23,13 @@
 #define GenericClusterImpl_INCLUDED
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include "Gui/View.h"
 #include "ViewImpl.h"
 #include "AbstractClusterImpl.h"
+#include "SelectionView.h"
 
 namespace Omm {
 namespace Gui {
@@ -57,16 +59,25 @@ public:
     virtual const int getHandleHeight();
 
 private:
+    typedef std::map<std::string, View*>::iterator ViewIterator;
+//    typedef LabelView HandleView;
+    typedef ListItemView HandleView;
+
     void changedConfiguration();
 
     std::map<std::string, View*>        _views;
+    /// all views
     std::vector<View*>                  _visibleViews;
+    /// visible views in the indexed order
+    std::set<View*>                     _hiddenViews;
+    /// hidden views (all views minus visible views)
 
     int                                 _currentViewIndex;
     int                                 _handleHeight;
     int                                 _handleWidth;
     bool                                _handleBarHidden;
-    std::map<View*, ListItemView*>      _handles;
+    std::map<View*, HandleView*>        _handles;
+    SelectionView*                      _pSelection;
 };
 
 
