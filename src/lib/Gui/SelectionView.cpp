@@ -90,13 +90,13 @@ SelectionView::setParentView(View* pParent)
 
 
 void
-SelectionView::raise()
+SelectionView::raise(bool async)
 {
-    View::raise();
+    View::raise(async);
 #ifdef DoNotUseSelectionViewImpl
-    _pBottom->raise();
-    _pLeft->raise();
-    _pRight->raise();
+    _pBottom->raise(async);
+    _pLeft->raise(async);
+    _pRight->raise(async);
 #endif
 }
 

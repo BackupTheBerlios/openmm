@@ -37,7 +37,7 @@ public:
 
     void setParentView(View* pParent);
 
-    virtual void raise();
+    virtual void raise(bool async = true);
     virtual void show(bool async = true);
     virtual void hide(bool async = true);
     virtual void resize(int width, int height);

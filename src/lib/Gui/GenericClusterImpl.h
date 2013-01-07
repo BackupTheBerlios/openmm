@@ -34,11 +34,31 @@
 namespace Omm {
 namespace Gui {
 
+class HandleBarView;
+
+
+class StackView : public View
+{
+    friend class StackLayout;
+
+public:
+    StackView(View* pParent = 0);
+
+    void insertView(View* pView);
+    void setCurrentView(View* pView);
+
+private:
+    virtual void removedSubview(View* pView);
+
+    std::set<View*>             _views;
+};
+
 
 class GenericClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
 {
-    friend class GenericClusterStackedLayout;
-    friend class GenericClusterController;
+    friend class HandleBarView;
+    friend class HandleBarController;
+    friend class HandleBarLayout;
 
 public:
     GenericClusterViewImpl(View* pView);
@@ -60,10 +80,10 @@ public:
 
 private:
     typedef std::map<std::string, View*>::iterator ViewIterator;
-//    typedef LabelView HandleView;
-    typedef ListItemView HandleView;
+    typedef ListItemView HandleViewType;
 
     void changedConfiguration();
+    void setCurrentView(View* pView);
 
     std::map<std::string, View*>        _views;
     /// all views
@@ -71,13 +91,11 @@ private:
     /// visible views in the indexed order
     std::set<View*>                     _hiddenViews;
     /// hidden views (all views minus visible views)
-
     int                                 _currentViewIndex;
-    int                                 _handleHeight;
-    int                                 _handleWidth;
+
+    HandleBarView*                      _pHandleBarView;
     bool                                _handleBarHidden;
-    std::map<View*, HandleView*>        _handles;
-    SelectionView*                      _pSelection;
+    StackView*                          _pStackView;
 };
 
 

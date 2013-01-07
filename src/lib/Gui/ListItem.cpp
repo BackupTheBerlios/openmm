@@ -117,7 +117,11 @@ ListItemView::syncViewImpl()
         _pLabelView->syncViewImpl();
     }
     if (pItemModel->_pImageModel) {
+        _pImageView->setStretchFactor(-1.0);
         _pImageView->syncViewImpl();
+    }
+    else {
+        _pImageView->setStretchFactor(0.2);
     }
 //    LOG(gui, debug, "list item view sync view impl: " + getName() + " finished.");
 }
