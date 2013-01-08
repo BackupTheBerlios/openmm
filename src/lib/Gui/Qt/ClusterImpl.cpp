@@ -20,7 +20,6 @@
  ***************************************************************************/
 
 #include <QtGui>
-#include <qt4/QtGui/qtabwidget.h>
 
 #include "ClusterImpl.h"
 #include "Gui/Cluster.h"

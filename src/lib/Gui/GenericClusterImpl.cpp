@@ -23,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <Poco/StringTokenizer.h>
+#include <list>
 
 #include "Log.h"
 #include "Gui/Cluster.h"
@@ -129,7 +130,7 @@ public:
 void
 HandleBarLayout::layoutView()
 {
-    LOG(gui, debug, "handle bar view \"" + _pView->getName() + "\" update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
+//    LOG(gui, debug, "handle bar view \"" + _pView->getName() + "\" update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
 
     HandleBarView* pView = static_cast<HandleBarView*>(_pView);
     GenericClusterViewImpl* pCluster = pView->_pCluster;
@@ -221,7 +222,7 @@ HandleBarView::getHandleHeight()
 void
 HandleBarView::syncViewImpl()
 {
-    LOG(gui, debug, "handle bar sync view impl");
+//    LOG(gui, debug, "handle bar sync view impl");
 
     View* pHandle = _handles[_pCurrentView];
     if (pHandle) {
@@ -237,66 +238,6 @@ HandleBarView::updateCurrentView(View* pView)
 {
     _pCurrentView = pView;
     syncView();
-}
-
-
-class StackController : public Controller
-{
-    friend class StackView;
-
-    StackController(StackView* pView) : _pView(pView) {}
-
-    virtual void removedSubview(View* pView)
-    {
-        _pView->_views.erase(pView);
-    }
-
-    StackView*  _pView;
-};
-
-
-class StackLayout : public Layout
-{
-public:
-    virtual void layoutView();
-};
-
-
-void
-StackLayout::layoutView()
-{
-    LOG(gui, debug, "stack view update layout");
-
-    StackView* pView = static_cast<StackView*>(_pView);
-    for (std::set<View*>::iterator it = pView->_views.begin(); it != pView->_views.end(); ++it) {
-        (*it)->resize(pView->width(), pView->height());
-    }
-}
-
-
-StackView::StackView(View* pParent) :
-View(pParent, true)
-{
-    setName("stack");
-    setLayout(new StackLayout);
-    attachController(new StackController(this));
-}
-
-
-void
-StackView::insertView(View* pView)
-{
-    _views.insert(pView);
-    pView->setParent(this);
-    pView->show(false);
-    updateLayout();
-}
-
-
-void
-StackView::setCurrentView(View* pView)
-{
-    pView->raise(true);
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2013                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,62 +19,53 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Application_INCLUDED
-#define Application_INCLUDED
+#ifndef Stack_INCLUDED
+#define Stack_INCLUDED
 
-#include <vector>
+#include <set>
 
-#include <Omm/Sys/Signal.h>
+#include "View.h"
+#include "Model.h"
+#include "Controller.h"
 
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class ApplicationImpl;
 
-
-class Application : public Sys::SignalHandler
+class StackController : public Controller
 {
-    friend class ApplicationImpl;
+    friend class StackView;
+
+protected:
+    virtual void shownView(View* pView) {}
+};
+
+
+class StackView : public View
+{
+    friend class StackLayout;
+    friend class PrivateStackController;
 
 public:
-    Application();
-    virtual ~Application();
+    StackView(View* pParent = 0);
 
-    int runEventLoop(int argc = 0, char** argv = 0);
-    void quit();
-
-    void showMainView(bool show = true);
-    void resizeMainView(int width, int height);
-    void scaleMainView(float factor);
-    void setFullscreen(bool fullscreen);
-    View* getMainView();
-    int width();
-    int height();
-    void getArguments(std::vector<std::string>& arguments);
-
-    void setToolBar(View* pView);
-    void showToolBar(bool show = true);
-    void setStatusBar(View* pView);
-    void showStatusBar(bool show = true);
-
-    View* createAndSetMainView();
-    virtual View* createMainView() = 0;
-    virtual void presentedMainView() {}
-    virtual void finishedEventLoop() {}
-    virtual void start() {}
-    virtual void stop() {}
+    void insertView(View* pView);
+    void setCurrentView(View* pView);
 
 private:
-    void createdMainView();
-    virtual void receivedSignal(SignalType signal);
+    virtual void syncViewImpl();
 
-    ApplicationImpl*           _pImpl;
-    View*                      _pMainView;
-    float                      _scaleFactor;
-    int                        _argc;
-    char**                     _argv;
+    std::set<View*>             _views;
+    View*                       _pCurrentView;
+    View*                       _pLastView;
+};
+
+
+class Stack : public Widget<StackView, StackController, Model>
+{
+public:
+    Stack(View* pParent = 0) : Widget<StackView, StackController, Model>(pParent) {}
 };
 
 

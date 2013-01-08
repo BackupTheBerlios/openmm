@@ -486,6 +486,20 @@ View::syncView()
 }
 
 
+bool
+View::getEnableRedraw()
+{
+    return _pImpl->getEnableRedraw();
+}
+
+
+void
+View::setEnableRedraw(bool enable)
+{
+    _pImpl->setEnableRedraw(enable);
+}
+
+
 void
 View::triggerKeyEvent(Controller::KeyCode key)
 {

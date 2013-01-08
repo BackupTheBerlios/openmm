@@ -73,7 +73,7 @@ ClusterViewImpl::removeView(View* pView)
 std::string
 ClusterViewImpl::getConfiguration()
 {
-
+    return "";
 }
 
 

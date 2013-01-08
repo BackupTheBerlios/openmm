@@ -127,6 +127,9 @@ public:
     void syncView();
     virtual void syncViewImpl() {}
 
+    bool getEnableRedraw();
+    void setEnableRedraw(bool enable = true);
+
     void triggerKeyEvent(Controller::KeyCode key);
     void setAcceptDrops(bool accept = true);
 

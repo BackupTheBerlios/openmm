@@ -23,10 +23,10 @@
 #define GenericClusterImpl_INCLUDED
 
 #include <map>
-#include <set>
 #include <vector>
 
 #include "Gui/View.h"
+#include "Gui/Stack.h"
 #include "ViewImpl.h"
 #include "AbstractClusterImpl.h"
 #include "SelectionView.h"
@@ -35,22 +35,6 @@ namespace Omm {
 namespace Gui {
 
 class HandleBarView;
-
-
-class StackView : public View
-{
-    friend class StackLayout;
-    friend class StackController;
-
-public:
-    StackView(View* pParent = 0);
-
-    void insertView(View* pView);
-    void setCurrentView(View* pView);
-
-private:
-    std::set<View*>             _views;
-};
 
 
 class GenericClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl

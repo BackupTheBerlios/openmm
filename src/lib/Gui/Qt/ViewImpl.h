@@ -69,6 +69,8 @@ public:
     virtual void moveView(int x, int y);
     virtual void setHighlighted(bool highlighted);
     virtual void setBackgroundColor(const Color& color);
+    bool getEnableRedraw();
+    void setEnableRedraw(bool enable);
     void setAcceptDrops(bool accept);
 
 protected:

@@ -262,6 +262,20 @@ ViewImpl::setBackgroundColor(const Color& color)
 }
 
 
+bool
+ViewImpl::getEnableRedraw()
+{
+    return _pNativeView->updatesEnabled();
+}
+
+
+void
+ViewImpl::setEnableRedraw(bool enable)
+{
+    _pNativeView->setUpdatesEnabled(enable);
+}
+
+
 void
 ViewImpl::setAcceptDrops(bool accept)
 {

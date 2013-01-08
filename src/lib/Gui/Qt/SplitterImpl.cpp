@@ -21,7 +21,6 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
-#include <qt4/QtGui/qsplitter.h>
 
 #include "SplitterImpl.h"
 #include "QtViewImpl.h"
