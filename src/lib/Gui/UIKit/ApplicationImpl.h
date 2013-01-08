@@ -22,6 +22,8 @@
 #ifndef ApplicationImpl_INCLUDED
 #define ApplicationImpl_INCLUDED
 
+#include <vector>
+
 #include "ViewImpl.h"
 
 namespace Omm {
@@ -43,15 +45,16 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
-    void setToolBar(View* pView);
-    void showToolBar(bool show);
-    void setStatusBar(View* pView);
-    void showStatusBar(bool show);
+    void addToolBar(View* pView);
+    void showToolBars(bool show);
     int run(int argc, char** argv);
     void quit() {}
 
     static Application*    _pApplication;
-    static View*           _pToolBar;
+//    static View*           _pToolBar;
+    static std::vector<View*> _pToolBar;
+    static int              _toolBarHeight;
+    static int              _toolBarIndex;
     int                    _width;
     int                    _height;
 };

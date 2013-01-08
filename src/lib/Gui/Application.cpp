@@ -109,30 +109,16 @@ Application::getArguments(std::vector<std::string>& arguments)
 
 
 void
-Application::setToolBar(View* pView)
+Application::addToolBar(View* pView)
 {
-    _pImpl->setToolBar(pView);
+    _pImpl->addToolBar(pView);
 }
 
 
 void
-Application::showToolBar(bool show)
+Application::showToolBars(bool show)
 {
-    _pImpl->showToolBar(show);
-}
-
-
-void
-Application::setStatusBar(View* pView)
-{
-    _pImpl->setStatusBar(pView);
-}
-
-
-void
-Application::showStatusBar(bool show)
-{
-    _pImpl->showStatusBar(show);
+    _pImpl->showToolBars(show);
 }
 
 

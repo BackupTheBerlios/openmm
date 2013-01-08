@@ -253,8 +253,8 @@ UpnpApplication::createMainView()
 {
     _pControllerWidget = new Omm::ControllerWidget(this);
     if (!_showRendererVisualOnly) {
-        setToolBar(_pControllerWidget->getControlPanel());
-        setStatusBar(_pControllerWidget->getStatusBar());
+        addToolBar(_pControllerWidget->getStatusBar());
+        addToolBar(_pControllerWidget->getControlPanel());
     }
     return _pControllerWidget;
 }
@@ -651,8 +651,7 @@ UpnpApplication::showRendererVisualOnly(bool show)
 //    _pControllerWidget->showOnlyRendererVisual(show);
     _showRendererVisualOnly = show;
     _mode = ModeRendererOnly;
-    showToolBar(false);
-    showStatusBar(false);
+    showToolBars(false);
 }
 
 

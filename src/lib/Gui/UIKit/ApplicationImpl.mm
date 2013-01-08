@@ -53,12 +53,13 @@
     _pMainView->resize(appFrame.size.width, appFrame.size.height);
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
     Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
-    if (Omm::Gui::ApplicationImpl::_pToolBar) {
-        Omm::Gui::ApplicationImpl::_pToolBar->setParent(_pMainView);
-        int toolBarHeight = _pMainView->height() / 4;
-        Omm::Gui::ApplicationImpl::_pToolBar->resize(_pMainView->width(), toolBarHeight);
-        Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height());
-        _toolBarVisible = false;
+    Omm::Gui::ApplicationImpl::_toolBarIndex = Omm::Gui::ApplicationImpl::_pToolBar.size();
+    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_pToolBar.begin(); it != Omm::Gui::ApplicationImpl::_pToolBar.end(); ++it) {
+        (*it)->setParent(_pMainView);
+        Omm::Gui::ApplicationImpl::_toolBarHeight = _pMainView->height() / 5;
+        (*it)->resize(_pMainView->width(), Omm::Gui::ApplicationImpl::_toolBarHeight);
+        (*it)->move(0, _pMainView->height());
+//        _toolBarVisible = false;
 
         UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
         UIButton* pToolBarButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
@@ -116,14 +117,36 @@
 
 - (void)handleToolBarButtonPressed
 {
-    int offset = _toolBarVisible ? 0 : Omm::Gui::ApplicationImpl::_pToolBar->height();
-    _toolBarVisible = !_toolBarVisible;
-    UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
-    [UIView beginAnimations:@"pToolBar" context:nil];
-    [UIView setAnimationDuration:0.4];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-    Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height() - offset);
-    [UIView commitAnimations];
+    int countToolbars = Omm::Gui::ApplicationImpl::_pToolBar.size();
+    int index = Omm::Gui::ApplicationImpl::_toolBarIndex;
+    int nextIndex = (index + 1) % (countToolbars + 1);
+    int offset = Omm::Gui::ApplicationImpl::_toolBarHeight;
+    if (index != countToolbars) {
+        UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar[index]->getNativeView());
+        [UIView beginAnimations:@"pToolBar" context:nil];
+        [UIView setAnimationDuration:0.4];
+        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+        Omm::Gui::ApplicationImpl::_pToolBar[index]->move(0, _pMainView->height());
+        [UIView commitAnimations];
+    }
+    if (nextIndex != countToolbars) {
+        UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->getNativeView());
+        [UIView beginAnimations:@"pToolBar" context:nil];
+        [UIView setAnimationDuration:0.4];
+        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+        Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->move(0, _pMainView->height() - offset);
+        [UIView commitAnimations];
+    }
+    Omm::Gui::ApplicationImpl::_toolBarIndex = nextIndex;
+
+//    int offset = _toolBarVisible ? 0 : Omm::Gui::ApplicationImpl::_pToolBar->height();
+//    _toolBarVisible = !_toolBarVisible;
+//    UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
+//    [UIView beginAnimations:@"pToolBar" context:nil];
+//    [UIView setAnimationDuration:0.4];
+//    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+//    Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height() - offset);
+//    [UIView commitAnimations];
 }
 
 
@@ -141,7 +164,10 @@ namespace Gui {
 
 
 Application* ApplicationImpl::_pApplication = 0;
-View* ApplicationImpl::_pToolBar = 0;
+//View* ApplicationImpl::_pToolBar = 0;
+std::vector<View*> ApplicationImpl::_pToolBar;
+int ApplicationImpl::_toolBarHeight = 0;
+int ApplicationImpl::_toolBarIndex = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
@@ -186,29 +212,15 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::setToolBar(View* pView)
+ApplicationImpl::addToolBar(View* pView)
 {
-    _pToolBar = pView;
+    _pToolBar.push_back(pView);
 }
 
 
 void
-ApplicationImpl::showToolBar(bool show)
+ApplicationImpl::showToolBars(bool show)
 {
-}
-
-
-void
-ApplicationImpl::setStatusBar(View* pView)
-{
-    // TODO: implement UIKit status bar
-}
-
-
-void
-ApplicationImpl::showStatusBar(bool show)
-{
-    // TODO: implement UIKit status bar
 }
 
 

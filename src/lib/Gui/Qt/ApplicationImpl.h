@@ -22,6 +22,8 @@
 #ifndef ApplicationImpl_INCLUDED
 #define ApplicationImpl_INCLUDED
 
+#include <set>
+
 #include "ViewImpl.h"
 
 class QMainWindow;
@@ -51,18 +53,15 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
-    void setToolBar(View* pView);
-    void showToolBar(bool show);
-    void setStatusBar(View* pView);
-    void showStatusBar(bool show);
+    void addToolBar(View* pView);
+    void showToolBars(bool show);
     int run(int argc, char** argv);
     void quit();
 
     Application*            _pApplication;
     QMainWindow*            _pMainWindow;
     QApplication*           _pQtApplication;
-    QToolBar*               _pToolBar;
-    QStatusBar*             _pStatusBar;
+    std::set<QToolBar*>     _pToolBars;
     QtEventFilter*          _pEventFilter;
     QString*                _pFullscreenStyleSheet;
     bool                    _visible;

@@ -36,7 +36,6 @@ namespace Gui {
 ApplicationImpl::ApplicationImpl(Application* pApplication) :
 _pApplication(pApplication),
 _pMainWindow(0),
-_pToolBar(0),
 _visible(true),
 _width(800),
 _height(480),
@@ -172,40 +171,22 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::setToolBar(View* pView)
+ApplicationImpl::addToolBar(View* pView)
 {
-    _pToolBar = new QToolBar;
-    _pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    QToolBar* pToolBar = new QToolBar;
+    _pToolBars.insert(pToolBar);
+    pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    _pToolBar->addWidget(pWidget);
-    _pMainWindow->addToolBar(Qt::BottomToolBarArea, _pToolBar);
+    pToolBar->addWidget(pWidget);
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, pToolBar);
 }
 
 
 void
-ApplicationImpl::showToolBar(bool show)
+ApplicationImpl::showToolBars(bool show)
 {
-    if (_pToolBar) {
-        _pToolBar->setVisible(show);
-    }
-}
-
-
-void
-ApplicationImpl::setStatusBar(View* pView)
-{
-    _pStatusBar = new QStatusBar;
-    QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
-    _pStatusBar->addWidget(pWidget);
-    _pMainWindow->setStatusBar(_pStatusBar);
-}
-
-
-void
-ApplicationImpl::showStatusBar(bool show)
-{
-    if (_pStatusBar) {
-        _pStatusBar->setVisible(show);
+    for (std::set<QToolBar*>::iterator it = _pToolBars.begin(); it != _pToolBars.end(); ++it) {
+        (*it)->setVisible(show);
     }
 }
 
@@ -234,8 +215,7 @@ ApplicationImpl::run(int argc, char** argv)
     // for now key navigation is only enabled in fullscreen mode
     if (_fullscreen) {
         _pQtApplication->installEventFilter(_pEventFilter);
-        showToolBar(false);
-        showStatusBar(false);
+        showToolBars(false);
     }
 
     _pApplication->start();
