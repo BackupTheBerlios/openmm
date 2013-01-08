@@ -85,7 +85,6 @@ private:
     void setCurrentView(View* pView);
 
     HandleBarView*                      _pHandleBarView;
-    bool                                _handleBarHidden;
     StackView*                          _pStackView;
 };
 

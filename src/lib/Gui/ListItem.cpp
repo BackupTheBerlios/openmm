@@ -46,10 +46,24 @@ _pImageModel(model._pImageModel)
 }
 
 
+LabelModel*
+ListItemModel::getLabelModel()
+{
+    return _pLabelModel;
+}
+
+
 void
 ListItemModel::setLabelModel(LabelModel* pLabelModel)
 {
     _pLabelModel = pLabelModel;
+}
+
+
+ImageModel*
+ListItemModel::getImageModel()
+{
+    return _pImageModel;
 }
 
 

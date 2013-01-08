@@ -37,23 +37,26 @@ class AbstractClusterViewImpl
 public:
     AbstractClusterViewImpl() : _currentViewIndex(-1) {}
 
-    virtual void insertView(View* pView, const std::string& name = "", int index = 0) = 0;
-    virtual void removeView(View* pView) = 0;
+    virtual void insertView(View* pView, const std::string& label = "", int index = 0) = 0;
+//    virtual void updateWithVisibleViews() = 0;                                              // implementation specific, should replace insertView()
+    virtual void removeView(View* pView) = 0;                                               // implementation specific, also replaced by updateWithVisibleViews()?
+
     virtual std::string getConfiguration() = 0;
     virtual void setConfiguration(const std::string& configuration) = 0;
 
     virtual int getViewCount() = 0;
-    virtual int getCurrentViewIndex() = 0; /// current view has focus
+    virtual int getCurrentViewIndex() = 0;
     virtual void setCurrentViewIndex(int index) = 0;
     virtual int getIndexFromView(View* pView) = 0;
     virtual View* getViewFromIndex(int index) = 0;
+//    virtual void setCurrentView(View* pView) = 0;                                           // implementation specific, should replace getViewFromIndex()
 
-    virtual void setHandlesHidden(bool hidden = true) = 0;
-    virtual const int getHandleHeight() = 0;
+    virtual void setHandlesHidden(bool hidden = true) = 0;                                  // implementation specific
+    virtual const int getHandleHeight() = 0;                                                // implementation specific
 
 protected:
     std::map<std::string, View*>        _views;
-    /// all views
+    /// all views, key is view name (not label)
     std::vector<View*>                  _visibleViews;
     /// visible views in the indexed order
     std::set<View*>                     _hiddenViews;

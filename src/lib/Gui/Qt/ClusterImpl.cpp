@@ -65,6 +65,7 @@ ClusterViewImpl::~ClusterViewImpl()
 void
 ClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
+    // TODO: should be replaced with updateWithVisibleViews() with refactor of cluster code
 //    LOG(gui, debug, "QTab widget implementation insert widget");
     static_cast<QtClusterWidget*>(_pNativeView)->insertTab(index, static_cast<QWidget*>(pView->getNativeView()), label.c_str());
     _views.insert(_views.begin() + index, pView);
@@ -84,6 +85,7 @@ ClusterViewImpl::removeView(View* pView)
 std::string
 ClusterViewImpl::getConfiguration()
 {
+    // TODO: should be removed with refactor of cluster code
     std::string res;
     for (std::vector<View*>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
         res += (*it)->getName();
@@ -98,26 +100,14 @@ ClusterViewImpl::getConfiguration()
 void
 ClusterViewImpl::setConfiguration(const std::string& configuration)
 {
-//    QtClusterWidget* pClusterWidget = static_cast<QtClusterWidget*>(_pNativeView);
-//   _views.clear();
-//    Poco::StringTokenizer columnTokens(configuration, " ");
-//    for (Poco::StringTokenizer::Iterator cit = columnTokens.begin(); cit != columnTokens.end(); ++cit) {
-//        // remove all metrical and topological information (e.g. from column cluster view)
-//        if ((*cit)[0] != '[' && (*cit)[0] != '{') {
-//            Poco::StringTokenizer views(*cit, ",");
-//            for (Poco::StringTokenizer::Iterator it = views.begin(); it != views.end(); ++it) {
-//                _views.push_back(_views[*it]);
-//            }
-//        }
-//    }
-//    _pView->updateLayout();
-//    setCurrentViewIndex(0);
+    // TODO: should be removed with refactor of cluster code
 }
 
 
 int
 ClusterViewImpl::getViewCount()
 {
+    // TODO: should be removed with refactor of cluster code
     return static_cast<QtClusterWidget*>(_pNativeView)->count();
 }
 
@@ -125,6 +115,7 @@ ClusterViewImpl::getViewCount()
 int
 ClusterViewImpl::getCurrentViewIndex()
 {
+    // TODO: should be removed with refactor of cluster code
     static_cast<QtClusterWidget*>(_pNativeView)->currentIndex();
 }
 
@@ -132,6 +123,7 @@ ClusterViewImpl::getCurrentViewIndex()
 void
 ClusterViewImpl::setCurrentViewIndex(int index)
 {
+    // TODO: should be replaced with setCurrentView() with refactor of cluster code
     static_cast<QtClusterWidget*>(_pNativeView)->setCurrentIndex(index);
 }
 
@@ -139,6 +131,7 @@ ClusterViewImpl::setCurrentViewIndex(int index)
 int
 ClusterViewImpl::getIndexFromView(View* pView)
 {
+    // TODO: should be removed with refactor of cluster code
     return static_cast<QtClusterWidget*>(_pNativeView)->indexOf(static_cast<QWidget*>(pView->getNativeView()));
 }
 
@@ -146,6 +139,7 @@ ClusterViewImpl::getIndexFromView(View* pView)
 View*
 ClusterViewImpl::getViewFromIndex(int index)
 {
+    // TODO: should be removed with refactor of cluster code
     return _views[index];
 }
 

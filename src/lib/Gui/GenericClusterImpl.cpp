@@ -85,7 +85,8 @@ public:
     virtual void dragStarted()
     {
         LOG(gui, debug, "generic cluster controller drag started in source view: " + _pView->getName());
-        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pView, _pView->getModel());
+//        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pView, _pView->getModel());
+        Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pView, _pHandleBarView->_handles[_pView]->getModel());
         pDrag->start();
     }
 
@@ -99,8 +100,16 @@ public:
     {
         LOG(gui, debug, "generic cluster controller dropped in target view: " + _pView->getName() + ", source view: " + pDrag->getSource()->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+
+        std::string label = pDrag->getSource()->getName();
+        ListItemModel* pHandleModel = dynamic_cast<ListItemModel*>(pDrag->getModel());
+        if (pHandleModel) {
+            label = pHandleModel->getLabelModel()->getLabel();
+        }
+
         int index = _pHandleBarView->_pCluster->getIndexFromView(_pView);
-        _pHandleBarView->_pCluster->insertView(pDrag->getSource(), pDrag->getSource()->getName(), index);
+
+        _pHandleBarView->_pCluster->insertView(pDrag->getSource(), label, index);
         _pHandleBarView->_pCluster->changedConfiguration();
     }
 
@@ -130,7 +139,7 @@ HandleBarLayout::layoutView()
         return;
     }
 
-    int handleHeight = (pCluster->_handleBarHidden ? 0 : pView->_handleHeight);
+    int handleHeight = pView->_handleHeight;
     int handleWidth = pView->width() / pCluster->_visibleViews.size();
     pView->_pSelection->resize(handleWidth, handleHeight);
     pView->_pSelection->move(pCluster->getCurrentViewIndex() * handleWidth, 0);
@@ -280,6 +289,7 @@ StackView::insertView(View* pView)
     _views.insert(pView);
     pView->setParent(this);
     pView->show(false);
+    updateLayout();
 }
 
 
@@ -306,8 +316,7 @@ class ClusterStackController : public Controller
 
 
 GenericClusterViewImpl::GenericClusterViewImpl(View* pView) :
-PlainViewImpl(pView),
-_handleBarHidden(false)
+PlainViewImpl(pView)
 {
     _pHandleBarView = new HandleBarView(this);
     _pStackView = new StackView;
@@ -336,8 +345,14 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
 
     if (_views.find(pView->getName()) == _views.end()) {
         // cluster does not contain view
-        _pStackView->insertView(pView);
+
+        // insert view into generic cluster view
+        // TODO: should move into update layout of handle and stack
+        //       then implementation specific and visible changes are done once at the end
+        //       also store label and images in a std::map<View*, ...>
         _pHandleBarView->insertView(pView, label, index);
+        _pStackView->insertView(pView);
+
         _views.insert(std::make_pair(pView->getName(), pView));
         _visibleViews.insert(_visibleViews.begin() + index, pView);
     }
@@ -359,10 +374,9 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
         }
     }
 
-    // update layouts and selection
+    // update generic cluster view layouts
     _pHandleBarView->updateLayout();
-    _pStackView->updateLayout();
-    _pView->updateLayout();
+
     setCurrentViewIndex(index);
 }
 
@@ -381,15 +395,19 @@ GenericClusterViewImpl::removeView(View* pView)
     std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
     if (it != _visibleViews.end()) {
         // view is visible
+
+        // remove view from generic cluster view
+        // TODO: move this into update layout of handle and stack
         _pHandleBarView->removeView(pView);
+
         _visibleViews.erase(it);
         if (!_visibleViews.size()) {
             _pView->hide();
         }
         else {
-            // update layouts and selection
+            // update generic cluster view layouts
             _pHandleBarView->updateLayout();
-            _pView->updateLayout();
+
             setCurrentViewIndex(0);
         }
     }
@@ -457,6 +475,7 @@ GenericClusterViewImpl::setConfiguration(const std::string& configuration)
         }
     }
 
+    // update generic cluster view layouts
     _pHandleBarView->updateLayout();
 
     // maintain selected view, if still visible
@@ -499,9 +518,9 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
     View* pCurrentView = _visibleViews[_currentViewIndex];
     LOG(gui, debug, "cluster \"" + _pView->getName() + "\" set current view index: " + Poco::NumberFormatter::format(index) + ", name: " + pCurrentView->getName());
 
+    // generic cluster view: push view to front
     // set current view in stack
     _pStackView->setCurrentView(pCurrentView);
-
     // set current view in handle view bar
     _pHandleBarView->updateCurrentView(pCurrentView);
 }
@@ -530,7 +549,7 @@ GenericClusterViewImpl::getViewFromIndex(int index)
 void
 GenericClusterViewImpl::setHandlesHidden(bool hidden)
 {
-    _handleBarHidden = hidden;
+    // generic cluster view: hide/show handles
     if (hidden) {
         _pHandleBarView->setSizeConstraint(_pView->width(), 0, View::Pref);
 //        _pHandleBarView->setStretchFactor(0.0);
@@ -546,8 +565,8 @@ GenericClusterViewImpl::setHandlesHidden(bool hidden)
 const int
 GenericClusterViewImpl::getHandleHeight()
 {
+    // generic cluster view: get handle height
     return _pHandleBarView->getHandleHeight();
-//    return _handleHeight;
 }
 
 

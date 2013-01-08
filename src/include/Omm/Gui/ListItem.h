@@ -40,7 +40,9 @@ public:
     ListItemModel();
     ListItemModel(const ListItemModel& model);
 
+    LabelModel* getLabelModel();
     void setLabelModel(LabelModel* pLabelModel);
+    ImageModel* getImageModel();
     void setImageModel(ImageModel* pImageModel);
 
 private:

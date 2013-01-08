@@ -53,12 +53,13 @@ class Application : public Omm::Gui::Application
         const int subviewCount = 5;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
-            std::string name = "B" + Poco::NumberFormatter::format(i);
+            std::string name = "V" + Poco::NumberFormatter::format(i);
             std::string label = "Button " + Poco::NumberFormatter::format(i);
+            std::string handle = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(name);
             pButton->setLabel(label);
             pButton->setSizeConstraint(150, 420, Omm::Gui::View::Pref);
-            pCluster->insertView(pButton, pButton->getName());
+            pCluster->insertView(pButton, handle);
         }
         std::vector<std::string> arguments;
         getArguments(arguments);

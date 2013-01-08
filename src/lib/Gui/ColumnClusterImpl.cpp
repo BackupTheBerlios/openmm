@@ -98,6 +98,12 @@ public:
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
         bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
 
+        std::string label = pDrag->getSource()->getName();
+        ListItemModel* pHandleModel = dynamic_cast<ListItemModel*>(pDrag->getModel());
+        if (pHandleModel) {
+            label = pHandleModel->getLabelModel()->getLabel();
+        }
+
         ClusterView* pNewCluster = 0;
         int row = _pColumnView->getRow(_pClusterView);
         int col = _pColumnClusterViewImpl->getColumnIndex(_pColumnView);
@@ -108,7 +114,7 @@ public:
             pNewCluster = _pColumnClusterViewImpl->createClusterInRow(col, row + 1);
         }
         if (pNewCluster) {
-            pNewCluster->insertView(pDrag->getSource(), pDrag->getSource()->getName(), 0);
+            pNewCluster->insertView(pDrag->getSource(), label, 0);
         }
         _pColumnClusterViewImpl->changedConfiguration();
     }
