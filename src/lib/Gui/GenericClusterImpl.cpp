@@ -403,7 +403,7 @@ GenericClusterViewImpl::removeView(View* pView)
 std::string
 GenericClusterViewImpl::getConfiguration()
 {
-    std::string res;
+    std::string res = "tab ";
     for (std::vector<View*>::const_iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it) {
         res += (*it)->getName();
         if (it + 1 != _visibleViews.end()) {
@@ -421,14 +421,29 @@ GenericClusterViewImpl::setConfiguration(const std::string& configuration)
         return;
     }
 
+    // parse layout configuration string ("tab" and "col" types are valid, "tab" can also be the simple V1,V2,...,Vn form w/o prefix)
+    Poco::StringTokenizer columnTokens(configuration, " ");
+    if (!columnTokens.count()) {
+        LOG(gui, error, "generic cluster configuration empty ");
+        return;
+    }
+    std::string configType = *columnTokens.begin();
+    bool simpleType = (columnTokens.count() == 1);
+    if (!simpleType && (configType != "tab" || configType != "col")) {
+        LOG(gui, error, "generic cluster cannot parse configuration of type: " + configType);
+        return;
+    }
+
+    // save current view
     View* pSelectedView = getViewFromIndex(_currentViewIndex);
 
+    // reset visible/hidden views
     _visibleViews.clear();
     for (ViewIterator it = _views.begin(); it != _views.end(); ++it) {
         _hiddenViews.insert(it->second);
     }
-    Poco::StringTokenizer columnTokens(configuration, " ");
-    for (Poco::StringTokenizer::Iterator cit = columnTokens.begin(); cit != columnTokens.end(); ++cit) {
+
+    for (Poco::StringTokenizer::Iterator cit = columnTokens.begin() + (simpleType ? 0 : 1); cit != columnTokens.end(); ++cit) {
         // remove all metrical and topological information (e.g. from column cluster view)
         if ((*cit)[0] != '[' && (*cit)[0] != '{') {
             Poco::StringTokenizer views(*cit, ",");

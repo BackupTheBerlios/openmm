@@ -191,7 +191,7 @@ ClusterConfiguration::addView(const std::string& name, const ClusterCoordinate& 
 std::string
 ClusterConfiguration::write()
 {
-    std::string res;
+    std::string res = "col ";
     for (int col = 0; col < countColumns(); ++col) {
         for (int cluster = 0; cluster < countClusters(col); ++cluster) {
             res += "[" + Poco::NumberFormatter::format(col) + "," + Poco::NumberFormatter::format(cluster) + "] "
@@ -251,6 +251,8 @@ ClusterConfiguration::countViews(int column, int cluster)
 std::string
 ClusterConfiguration::subClusterConfiguration(int column, int cluster)
 {
+    // we know, that subclusters have "tab" type configurations, so we generate the simple form w/o "tab" prefix
+    // instead of calling getConfiguration() of subcluster
     std::string res;
     for (std::map<int, std::string>::iterator it = _views[column][cluster].begin(); it != _views[column][cluster].end(); ++it) {
         res += it->second + ",";
@@ -479,13 +481,22 @@ ColumnClusterViewImpl::getConfiguration()
 void
 ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
 {
+    Poco::StringTokenizer columnTokens(configuration, " ");
+    if (!columnTokens.count()) {
+        LOG(gui, error, "column cluster configuration empty ");
+        return;
+    }
+    std::string configType = *columnTokens.begin();
+    if (configType != "col") {
+        LOG(gui, error, "column cluster cannot parse configuration of type: " + configType);
+        return;
+    }
+
     if (_pTargetConfiguration) {
         delete _pTargetConfiguration;
     }
     _pTargetConfiguration = new ClusterConfiguration;
-
-    Poco::StringTokenizer columnTokens(configuration, " ");
-    int i = 0;
+    int i = 1;
     while (i < columnTokens.count() && columnTokens[i][0] != '{') {
         Poco::StringTokenizer coords(columnTokens[i].substr(1, columnTokens[i].length() - 2), ",");
         int col = Poco::NumberParser::parse(coords[0]);
