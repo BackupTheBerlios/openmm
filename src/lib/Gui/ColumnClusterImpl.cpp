@@ -449,8 +449,7 @@ ColumnClusterViewImpl::insertView(View* pView, const std::string& label, int ind
     LOG(gui, debug, "column cluster view impl insert view: " + pView->getName());
 
     getOriginCluster()->insertView(pView, label, index);
-    _views.insert(_views.begin() + index, pView);
-//    _viewMap.insert(std::make_pair(pView->getName(), pView));
+    _visibleViews.insert(_visibleViews.begin() + index, pView);
 }
 
 
@@ -461,11 +460,10 @@ ColumnClusterViewImpl::removeView(View* pView)
 
     // TODO: do we need to also remove the view from the subcluster (and clean up columns)?
 
-    std::vector<View*>::iterator it = std::find(_views.begin(), _views.end(), pView);
-    if (it != _views.end()) {
-        _views.erase(it);
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it != _visibleViews.end()) {
+        _visibleViews.erase(it);
     }
-//    _viewMap.erase(pView->getName());
 }
 
 
@@ -536,7 +534,7 @@ ColumnClusterViewImpl::getViewCount()
 //        }
 //    }
 //    return viewCount;
-    return _views.size();
+    return _visibleViews.size();
 }
 
 
@@ -784,7 +782,7 @@ void
 ColumnClusterViewImpl::getOriginConfiguration(ClusterConfiguration& configuration)
 {
     int i = 0;
-    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
+    for (std::vector<View*>::iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++i, ++it) {
         ClusterCoordinate coord(0, 0, i);
         configuration.addView((*it)->getName(), coord);
     }
@@ -816,7 +814,7 @@ void
 ColumnClusterViewImpl::getDefaultConfiguration(ClusterConfiguration& configuration)
 {
     int i = 0;
-    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++i, ++it) {
+    for (std::vector<View*>::iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++i, ++it) {
         ClusterCoordinate coord(i, 0, 0);
         configuration.addView((*it)->getName(), coord);
     }
@@ -881,7 +879,7 @@ ColumnClusterViewImpl::getTransitionConfiguration(int width, int height, Cluster
 void
 ColumnClusterViewImpl::layoutViews(int width, int height)
 {
-    if (!_views.size()) {
+    if (!_visibleViews.size()) {
         return;
     }
     ClusterConfiguration* pConfiguration;
@@ -923,7 +921,7 @@ ColumnClusterViewImpl::layoutViews(ClusterConfiguration& targetConfiguration)
         }
     }
 
-    for (std::vector<View*>::iterator it = _views.begin(); it != _views.end(); ++it) {
+    for (std::vector<View*>::iterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it) {
         std::map<std::string, ClusterCoordinate>::const_iterator currentPos = currentConfiguration._coords.find((*it)->getName());
         std::map<std::string, ClusterCoordinate>::const_iterator targetPos = targetConfiguration._coords.find((*it)->getName());
         if (targetPos == targetConfiguration._coords.end()) {

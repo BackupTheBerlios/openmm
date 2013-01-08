@@ -56,7 +56,7 @@ public:
     virtual void setConfiguration(const std::string& configuration);
 
     virtual int getViewCount();
-    virtual int getCurrentViewIndex(); /// current view has focus
+    virtual int getCurrentViewIndex();
     virtual void setCurrentViewIndex(int index);
     virtual int getIndexFromView(View* pView);
     virtual View* getViewFromIndex(int index);
@@ -92,9 +92,6 @@ private:
     void layoutViews(int width, int height);
     void layoutViews(ClusterConfiguration& targetConfiguration);
 //    void layoutViews(const ClusterConfiguration& targetConfiguration);
-
-    std::vector<View*>                              _views;
-//    std::map<std::string, View*>                    _viewMap;
 
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;

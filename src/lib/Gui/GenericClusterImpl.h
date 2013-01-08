@@ -84,14 +84,6 @@ private:
     void changedConfiguration();
     void setCurrentView(View* pView);
 
-    std::map<std::string, View*>        _views;
-    /// all views
-    std::vector<View*>                  _visibleViews;
-    /// visible views in the indexed order
-    std::set<View*>                     _hiddenViews;
-    /// hidden views (all views minus visible views)
-    int                                 _currentViewIndex;
-
     HandleBarView*                      _pHandleBarView;
     bool                                _handleBarHidden;
     StackView*                          _pStackView;

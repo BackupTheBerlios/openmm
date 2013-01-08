@@ -86,10 +86,10 @@ public:
     /// Returns the number of visible views.
 
     int getCurrentViewIndex();
-    /// Returns the index of the view, that is visible and has focus.
+    /// Returns the index of the view, that is visible (and has focus if only one view is visible at a time).
 
     void setCurrentViewIndex(int index);
-    /// Makes the view with index visible and gives focus to it.
+    /// Makes the view with index visible (and gives focus to it if only one view is visible at a time).
 
     int getIndexFromView(View* pView);
     /// Returns the index of view pView and -1 if view is not visible.

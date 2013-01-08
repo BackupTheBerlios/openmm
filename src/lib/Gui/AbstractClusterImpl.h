@@ -22,6 +22,10 @@
 #ifndef AbstractClusterImpl_INCLUDED
 #define AbstractClusterImpl_INCLUDED
 
+#include <map>
+#include <vector>
+#include <set>
+
 //#include "ViewImpl.h"
 
 namespace Omm {
@@ -31,6 +35,8 @@ namespace Gui {
 class AbstractClusterViewImpl
 {
 public:
+    AbstractClusterViewImpl() : _currentViewIndex(-1) {}
+
     virtual void insertView(View* pView, const std::string& name = "", int index = 0) = 0;
     virtual void removeView(View* pView) = 0;
     virtual std::string getConfiguration() = 0;
@@ -45,8 +51,15 @@ public:
     virtual void setHandlesHidden(bool hidden = true) = 0;
     virtual const int getHandleHeight() = 0;
 
-//    virtual void sizeConstraintReached(View::SizeConstraint& width, View::SizeConstraint& height) { }
-//    virtual std::string writeLayout() { return ""; }
+protected:
+    std::map<std::string, View*>        _views;
+    /// all views
+    std::vector<View*>                  _visibleViews;
+    /// visible views in the indexed order
+    std::set<View*>                     _hiddenViews;
+    /// hidden views (all views minus visible views)
+    int                                 _currentViewIndex;
+    /// view that is visible
 };
 
 

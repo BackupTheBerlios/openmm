@@ -307,8 +307,7 @@ class ClusterStackController : public Controller
 
 GenericClusterViewImpl::GenericClusterViewImpl(View* pView) :
 PlainViewImpl(pView),
-_handleBarHidden(false),
-_currentViewIndex(-1)
+_handleBarHidden(false)
 {
     _pHandleBarView = new HandleBarView(this);
     _pStackView = new StackView;
