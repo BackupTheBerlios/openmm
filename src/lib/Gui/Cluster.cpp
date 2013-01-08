@@ -142,12 +142,5 @@ ClusterView::getHandleHeight()
 }
 
 
-void
-ClusterView::removedSubview(View* pView)
-{
-    static_cast<ClusterViewImpl*>(_pImpl)->removeView(pView);
-}
-
-
 } // namespace Gui
 } // namespace Omm

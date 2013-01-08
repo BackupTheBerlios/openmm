@@ -134,8 +134,8 @@ protected:
     View(View* pParent, bool createPlainView);
 
     void initView(View* pParent);
-    virtual void removedSubview(View* pView);
-    virtual void addedSubview(View* pView);
+    void removedSubview(View* pView);
+    void addedSubview(View* pView);
 
     View*                       _pParent;
     std::vector<View*>          _subviews;

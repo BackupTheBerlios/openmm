@@ -47,6 +47,9 @@ protected:
     virtual void insertedView(View* pView) {}
     virtual void movedView(View* pView) {}
     virtual void changedConfiguration() {}
+    // TODO: shownSubview(), hiddenSubview()
+//    virtual void shownSubview(View* pView);
+//    virtual void hiddenSubview(View* pView);
 };
 
 
@@ -99,12 +102,6 @@ public:
 
     const int getHandleHeight();
     /// Returns the height of the handles.
-
-private:
-    virtual void removedSubview(View* pView);
-    // TODO: shownSubview(), hiddenSubview()
-//    virtual void shownSubview(View* pView);
-//    virtual void hiddenSubview(View* pView);
 };
 
 

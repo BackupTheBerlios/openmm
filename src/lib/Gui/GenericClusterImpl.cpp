@@ -360,10 +360,10 @@ GenericClusterViewImpl::insertView(View* pView, const std::string& label, int in
         }
     }
 
+    // update layouts and selection
     _pHandleBarView->updateLayout();
     _pStackView->updateLayout();
     _pView->updateLayout();
-
     setCurrentViewIndex(index);
 }
 
@@ -373,20 +373,30 @@ GenericClusterViewImpl::removeView(View* pView)
 {
     LOG(gui, debug, "cluster " + _pView->getName() + " remove view: " + pView->getName());
 
+    if (_views.find(pView->getName()) == _views.end()) {
+        // cluster does not contain view
+        return;
+    }
     _views.erase(pView->getName());
+
     std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
     if (it != _visibleViews.end()) {
+        // view is visible
         _pHandleBarView->removeView(pView);
         _visibleViews.erase(it);
-    }
-
-    _hiddenViews.erase(pView);
-    if (!_visibleViews.size()) {
-        _pView->hide();
+        if (!_visibleViews.size()) {
+            _pView->hide();
+        }
+        else {
+            // update layouts and selection
+            _pHandleBarView->updateLayout();
+            _pView->updateLayout();
+            setCurrentViewIndex(0);
+        }
     }
     else {
-        _pHandleBarView->updateLayout();
-        _pView->updateLayout();
+        // view is hidden
+        _hiddenViews.erase(pView);
     }
 }
 
@@ -408,6 +418,12 @@ GenericClusterViewImpl::getConfiguration()
 void
 GenericClusterViewImpl::setConfiguration(const std::string& configuration)
 {
+    if (configuration == getConfiguration()) {
+        return;
+    }
+
+    View* pSelectedView = getViewFromIndex(_currentViewIndex);
+
     _visibleViews.clear();
     for (ViewIterator it = _views.begin(); it != _views.end(); ++it) {
         _hiddenViews.insert(it->second);
@@ -426,9 +442,20 @@ GenericClusterViewImpl::setConfiguration(const std::string& configuration)
             }
         }
     }
+
     _pHandleBarView->updateLayout();
-    _pView->updateLayout();
-    setCurrentViewIndex(0);
+
+    // maintain selected view, if still visible
+    int currentViewIndex = getIndexFromView(pSelectedView);
+    if (currentViewIndex == -1) {
+        // view is not visible anymore, select first view
+        // FIXME: setCurrentViewIndex(0) seems to trigger that video is not visible on first play
+        setCurrentViewIndex(0);
+    }
+    else if (currentViewIndex != _currentViewIndex) {
+        // view is still visible, but order has changed
+        setCurrentViewIndex(currentViewIndex);
+    }
 }
 
 
