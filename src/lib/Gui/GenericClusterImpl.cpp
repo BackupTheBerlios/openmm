@@ -125,8 +125,8 @@ HandleBarLayout::layoutView()
     HandleBarView* pView = static_cast<HandleBarView*>(_pView);
     GenericClusterViewImpl* pCluster = pView->_pCluster;
 
-    if (!pCluster->_views.size()) {
-        // cluster contains no views
+    if (!pCluster->_visibleViews.size()) {
+        // cluster contains no visible views, nothing to layout
         return;
     }
 
@@ -517,12 +517,15 @@ void
 GenericClusterViewImpl::setHandlesHidden(bool hidden)
 {
     _handleBarHidden = hidden;
-    (hidden ? _pHandleBarView->hide(false) : _pHandleBarView->show(false));
-
-//    for (View::SubviewIterator it = _visibleViews.begin(); it != _visibleViews.end(); ++it) {
-//        (*it)->resize(_pView->width(), _pView->height() - (hidden ? 0 : _handleHeight));
-//        (*it)->move(0, (hidden ? 0 : _handleHeight));
-//    }
+    if (hidden) {
+        _pHandleBarView->setSizeConstraint(_pView->width(), 0, View::Pref);
+//        _pHandleBarView->setStretchFactor(0.0);
+    }
+    else {
+        _pHandleBarView->setSizeConstraint(_pView->width(), _pHandleBarView->getHandleHeight(), View::Pref);
+//        _pHandleBarView->setStretchFactor(-1.0);
+    }
+    _pView->updateLayout();
 }
 
 

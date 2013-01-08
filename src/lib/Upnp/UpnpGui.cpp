@@ -422,7 +422,9 @@ UpnpApplication::saveConfig()
         LOGNS(Av, upnpav, information, "saving config file ...");
         _pConf->setInt("application.width", width());
         _pConf->setInt("application.height", height());
-        _pConf->setString("application.cluster", _pControllerWidget->getConfiguration());
+        if (!config().getBool("application.fullscreen", false)) {
+            _pConf->setString("application.cluster", _pControllerWidget->getConfiguration());
+        }
         try {
             _pConf->save(_confFilePath);
             LOGNS(Av, upnpav, information, "saving config file done.");
@@ -968,7 +970,12 @@ _pApplication(pApplication)
 //    _pStatusBar->resize(20, 20);
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 //    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
-    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup,Player,List,Video {800;480} {1,00} {1,00}"));
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup,Player,List,Video {800;480} {1,00} {1,00}"));
+    }
+    else {
+        setConfiguration("[0,0] Media,Video {800;480} {1,00} {1,00}");
+    }
 
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, Av::StreamTypeNotification>(*this, &ControllerWidget::newStreamType));
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, TransportStateNotification>(*this, &ControllerWidget::newTransportState));
