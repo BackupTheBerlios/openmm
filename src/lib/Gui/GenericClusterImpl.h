@@ -40,6 +40,7 @@ class HandleBarView;
 class StackView : public View
 {
     friend class StackLayout;
+    friend class StackController;
 
 public:
     StackView(View* pParent = 0);
@@ -48,8 +49,6 @@ public:
     void setCurrentView(View* pView);
 
 private:
-    virtual void removedSubview(View* pView);
-
     std::set<View*>             _views;
 };
 

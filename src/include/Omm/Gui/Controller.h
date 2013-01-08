@@ -69,6 +69,8 @@ public:
     virtual void dragMoved(const Position& pos, Drag* pDrag) {}
     virtual void dragLeft() {}
     virtual void dropped(const Position& pos, Drag* pDrag) {}
+    virtual void removedSubview(View* pView) {}
+    virtual void addedSubview(View* pView) {}
 
     typedef std::vector<Model*>::iterator ModelIterator;
     ModelIterator beginModel();

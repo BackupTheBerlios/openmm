@@ -404,6 +404,7 @@ View::removedSubview(View* pView)
         _subviews.erase(it);
     }
     updateLayout();
+    NOTIFY_CONTROLLER(Controller, removedSubview, pView);
 }
 
 
@@ -413,6 +414,7 @@ View::addedSubview(View* pView)
     _subviews.push_back(pView);
     pView->_scaleFactor = _scaleFactor;
     updateLayout();
+    NOTIFY_CONTROLLER(Controller, addedSubview, pView);
 }
 
 

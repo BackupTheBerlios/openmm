@@ -231,6 +231,21 @@ HandleBarView::updateCurrentView(View* pView)
 }
 
 
+class StackController : public Controller
+{
+    friend class StackView;
+
+    StackController(StackView* pView) : _pView(pView) {}
+
+    virtual void removedSubview(View* pView)
+    {
+        _pView->_views.erase(pView);
+    }
+
+    StackView*  _pView;
+};
+
+
 class StackLayout : public Layout
 {
 public:
@@ -255,6 +270,7 @@ View(pParent, true)
 {
     setName("stack");
     setLayout(new StackLayout);
+    attachController(new StackController(this));
 }
 
 
@@ -274,11 +290,19 @@ StackView::setCurrentView(View* pView)
 }
 
 
-void
-StackView::removedSubview(View* pView)
+class ClusterStackController : public Controller
 {
-    _views.erase(pView);
-}
+    friend class GenericClusterViewImpl;
+
+    ClusterStackController(GenericClusterViewImpl* pViewImpl) : _pViewImpl(pViewImpl) {}
+
+    virtual void removedSubview(View* pView)
+    {
+        _pViewImpl->removeView(pView);
+    }
+
+    GenericClusterViewImpl*  _pViewImpl;
+};
 
 
 GenericClusterViewImpl::GenericClusterViewImpl(View* pView) :
@@ -298,6 +322,7 @@ GenericClusterViewImpl::init()
     _pView->setLayout(new VerticalLayout);
     _pHandleBarView->setParent(_pView);
     _pStackView->setParent(_pView);
+    _pStackView->attachController(new ClusterStackController(this));
 }
 
 
