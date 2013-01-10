@@ -23,11 +23,23 @@
 #define ImageImpl_INCLUDED
 
 #include "ViewImpl.h"
+#include "ModelImpl.h"
+
 
 namespace Omm {
 namespace Gui {
 
 class View;
+
+
+class ImageModelImpl : public ModelImpl
+{
+public:
+    ImageModelImpl(Model* pModel);
+
+    void setData(const std::string& data);
+};
+
 
 class ImageViewImpl : public ViewImpl
 {
@@ -38,12 +50,9 @@ private:
     ImageViewImpl(View* pView);
     ~ImageViewImpl();
 
-    void setData(const std::string& data);
+    void syncViewImpl();
     void setAlignment(View::Alignment alignment);
-
     void scaleBestFit(int width, int height);
-
-    void* getImage();
 };
 
 

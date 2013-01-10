@@ -2472,6 +2472,7 @@ _stopIndicatorCallback(*this, &ActivityIndicator::stopIndicator)
     _pActivityOnModel->setData(MediaImages::instance()->getResource("activity-on.png"));
     resize(20, 20);
     setModel(_pActivityOffModel);
+    setBackgroundColor(Gui::Color("white"));
 }
 
 
@@ -2483,7 +2484,7 @@ ActivityIndicator::~ActivityIndicator()
 void
 ActivityIndicator::startActivity()
 {
-//    LOGNS(Gui, gui, debug, "activity indicator start activity");
+    LOGNS(Gui, gui, debug, "activity indicator start activity");
 
     setActivityInProgress(true);
     if (!indicatorOn()) {
@@ -2499,7 +2500,7 @@ ActivityIndicator::startActivity()
 void
 ActivityIndicator::stopActivity()
 {
-//    LOGNS(Gui, gui, debug, "activity indicator stop activity");
+    LOGNS(Gui, gui, debug, "activity indicator stop activity");
 
     setActivityInProgress(false);
     if (indicatorOn() && !timerActive()) {

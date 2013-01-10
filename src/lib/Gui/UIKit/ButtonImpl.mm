@@ -96,8 +96,10 @@ ButtonViewImpl::setEnabled(bool enabled)
 void
 ButtonViewImpl::setImage(Image* pImage)
 {
-    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
-    [static_cast<UIButton*>(_pNativeView) setImage:(UIImage*)pImageImpl->getImage() forState:UIControlStateNormal];
+    UIImage* pUiImage = static_cast<UIImage*>(pImage->getModel()->getNativeModel());
+    if (pUiImage) {
+        [static_cast<UIButton*>(_pNativeView) setImage:(UIImage*)pUiImage forState:UIControlStateNormal];
+    }
 }
 
 

@@ -28,74 +28,37 @@
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmGuiImage : UIView
-{
-    Omm::Gui::ImageViewImpl*    _pImageViewImpl;
-    UIImageView*                _pImageView;
-}
-
-@end
-
-
-@implementation OmmGuiImage
-
-
-- (id)initWithImpl:(Omm::Gui::ImageViewImpl*)pImpl
-{
-    LOGNS(Omm::Gui, gui, debug, "OmmGuiImage initWithImpl ...");
-    if (self = [super init]) {
-        _pImageViewImpl = pImpl;
-        _pImageView = [UIImageView alloc];
-//        self.contentMode = UIViewContentModeCenter;
-        self.contentMode = UIViewContentModeScaleAspectFit;
-        self.clipsToBounds = YES;
-        self.clearsContextBeforeDrawing = YES;
-    }
-    return self;
-}
-
-
-- (id)setData:(NSData*)pImageData
-{
-    LOGNS(Omm::Gui, gui, debug, "OmmGuiImage setData ...");
-    UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
-    [_pImageView removeFromSuperview];
-    [_pImageView initWithImage:pImage];
-//    [[_pImageView alloc] initWithImage:pImage];
-//    _pImageView.contentMode = UIViewContentModeCenter;
-//    _pImageView.frame = self.frame;
-    _pImageView.center = self.center;
-    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
-//    _pImageView.clearsContextBeforeDrawing = YES;
-//    _pImageView.contentMode = UIViewContentModeScaleAspectFit;
-//    _pImageView.frame = CGRectMake(0.0, 0.0, 100.0, 100.0);
-    [self addSubview:_pImageView];
-}
-
-
-- (UIImage*)getImage
-{
-    return _pImageView.image;
-}
-
-//- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-//{
-////    LOGNS(Omm::Gui, gui, debug, "Label view impl touch began");
-//    _pImageViewImpl->pushed();
-//    [super touchesBegan:touches withEvent:event];
-//}
-
-@end
-
-
 namespace Omm {
 namespace Gui {
+
+
+ImageModelImpl::ImageModelImpl(Model* pModel) :
+ModelImpl(pModel)
+{
+}
+
+
+void
+ImageModelImpl::setData(const std::string& data)
+{
+    NSData* pImageData = [NSData dataWithBytes:data.data() length:data.size()];
+    if (pImageData == nil) {
+        LOG(gui, error, "no image data");
+        return;
+    }
+    UIImage* pImage = [[UIImage alloc] initWithData:pImageData];
+    if (pImage == nil) {
+        LOG(gui, error, "failed to create UIImage from data");
+        return;
+    }
+    _pNativeModel = pImage;
+}
 
 
 ImageViewImpl::ImageViewImpl(View* pView)
 {
     LOG(gui, debug, "image view impl ctor");
-    OmmGuiImage* pNativeView = [[OmmGuiImage alloc] initWithImpl:this];
+    UIImageView* pNativeView = [[UIImageView alloc] init];
 
     initViewImpl(pView, pNativeView);
 }
@@ -107,15 +70,9 @@ ImageViewImpl::~ImageViewImpl()
 
 
 void
-ImageViewImpl::setData(const std::string& data)
+ImageViewImpl::syncViewImpl()
 {
-    LOG(gui, debug, "image view impl set data");
-    NSData* pImageData = [NSData dataWithBytes:data.data() length:data.size()];
-    if (pImageData == nil) {
-        LOG(gui, error, "no image data");
-        return;
-    }
-    [static_cast<OmmGuiImage*>(_pNativeView) setData:pImageData];
+    static_cast<UIImageView*>(_pNativeView).image = static_cast<UIImage*>(_pView->getNativeModel());
 }
 
 
@@ -140,15 +97,9 @@ ImageViewImpl::setAlignment(View::Alignment alignment)
 void
 ImageViewImpl::scaleBestFit(int width, int height)
 {
-    static_cast<OmmGuiImage*>(_pNativeView).contentMode = UIViewContentModeScaleAspectFit;
+    static_cast<UIImageView*>(_pNativeView).contentMode = UIViewContentModeScaleAspectFit;
 }
 
-
-void*
-ImageViewImpl::getImage()
-{
-    return [static_cast<OmmGuiImage*>(_pNativeView) getImage];
-}
 
 }  // namespace Omm
 }  // namespace Gui

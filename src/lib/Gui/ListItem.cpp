@@ -84,6 +84,7 @@ View(pParent)
     _pImageView = new ImageView(this);
     // FIXME: stretch factor -1.0 on image view gives wrong sum of width of subviews.
     _pImageView->setStretchFactor(-1.0);
+    _pImageView->setBackgroundColor(Color("white"));
 
 //    View* pSpacer = new LabelView(this);
 //    pSpacer->setSizeConstraint(4, height(View::Pref), View::Pref);

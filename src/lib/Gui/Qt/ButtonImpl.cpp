@@ -64,8 +64,13 @@ ButtonViewImpl::setEnabled(bool enabled)
 void
 ButtonViewImpl::setImage(Image* pImage)
 {
-    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
-    static_cast<QPushButton*>(_pNativeView)->setIcon(QIcon(*pImageImpl->_pImage));
+//    ImageViewImpl* pImageImpl = static_cast<ImageViewImpl*>(static_cast<Image*>(pImage)->getViewImpl());
+//    QPixmap* pPixmap = static_cast<QPixmap*>(pImageImpl->getImage());
+
+    QPixmap* pPixmap = static_cast<QPixmap*>(pImage->getModel()->getNativeModel());
+    if (pPixmap) {
+        static_cast<QPushButton*>(_pNativeView)->setIcon(QIcon(*pPixmap));
+    }
 }
 
 

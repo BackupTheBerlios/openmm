@@ -57,13 +57,16 @@ private:
 ItemListModel::ItemListModel(int itemCount) :
 _viewCount(0)
 {
+    // same image for all list items
+    Omm::Gui::ImageModel* pImageModel = new Omm::Gui::ImageModel;
+    pImageModel->setData(std::string(ImageData, ImageSize));
+
     for (int i = 0; i < itemCount; i++) {
         Omm::Gui::ListItemModel* pItemModel = new Omm::Gui::ListItemModel;
 
-        Omm::Gui::ImageModel* pImageModel = new Omm::Gui::ImageModel;
-        pImageModel->setData(std::string(ImageData, ImageSize));
         pItemModel->setImageModel(pImageModel);
 
+        // items differ only in label
         Omm::Gui::LabelModel* pLabelModel = new Omm::Gui::LabelModel;
         pLabelModel->setLabel("list item " + Poco::NumberFormatter::format(i));
         pItemModel->setLabelModel(pLabelModel);

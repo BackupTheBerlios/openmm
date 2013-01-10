@@ -26,16 +26,16 @@
 #include "Gui/Image.h"
 #include "Gui/GuiLogger.h"
 #include "ImageImpl.h"
+#include "UIKit/ImageImpl.h"
 
 
 namespace Omm {
 namespace Gui {
 
 
-const std::string&
-ImageModel::getData() const
+ImageModel::ImageModel()
 {
-    return _data;
+    _pImpl = new ImageModelImpl(this);
 }
 
 
@@ -43,7 +43,7 @@ void
 ImageModel::setData(const std::string& data)
 {
 //    LOG(gui, debug, "Image model set data");
-    _data = data;
+    static_cast<ImageModelImpl*>(_pImpl)->setData(data);
 }
 
 
@@ -52,12 +52,14 @@ ImageModel::setFile(const std::string& fileName)
 {
 //    LOG(gui, debug, "Image model set file");
     std::ifstream ifs(fileName.c_str());
+    std::string data;
     const int bufSize = 512;
-    char data[bufSize];
+    char buf[bufSize];
     while(ifs) {
-        ifs.read(data, bufSize);
-        _data += std::string(data, ifs.gcount());
+        ifs.read(buf, bufSize);
+        data += std::string(buf, ifs.gcount());
     }
+    setData(data);
 }
 
 
@@ -70,8 +72,6 @@ View(pParent, false)
     _minWidth = 20;
     _minHeight = 20;
     _prefWidth = 50;
-//    _prefWidth = 50 * _scaleFactor;
-//    _prefWidth = 50 * _stretchFactor;
     _prefHeight = 50;
     _pImpl = new ImageViewImpl(this);
     setAlignment(View::AlignCenter);
@@ -89,7 +89,6 @@ void
 ImageView::resize(int width, int height)
 {
 //    LOG(gui, debug, "Image view resize");
-//    _prefWidth = 50 * _scaleFactor;
     View::resize(width, height);
     static_cast<ImageViewImpl*>(_pImpl)->scaleBestFit(width, height);
 }
@@ -102,11 +101,8 @@ ImageView::syncViewImpl()
     if (!_pModel) {
         return;
     }
-    ImageModel* pImageModel = static_cast<ImageModel*>(_pModel);
-    ImageViewImpl* pImpl = static_cast<ImageViewImpl*>(_pImpl);
-    pImpl->setData(pImageModel->getData());
-//    _prefWidth = pImpl->originalWidth();
-//    _prefHeight = pImpl->originalHeight();
+
+    static_cast<ImageViewImpl*>(_pImpl)->syncViewImpl();
 }
 
 

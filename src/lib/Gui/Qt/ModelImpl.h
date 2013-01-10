@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2013                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,80 +19,34 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include "Gui/Model.h"
-#include "Gui/GuiLogger.h"
-#include "Gui/View.h"
-#include "ModelImpl.h"
-#include "UIKit/ModelImpl.h"
+#ifndef ModelImpl_INCLUDED
+#define ModelImpl_INCLUDED
 
+#include "Gui/Model.h"
 
 namespace Omm {
 namespace Gui {
 
 
-Model::Model()
+class ModelImpl
 {
-    _pImpl = new ModelImpl(this);
-}
+    friend class Model;
+
+public:
+    ModelImpl(Model* pModel);
+    virtual ~ModelImpl();
+
+    Model* getModel();
+    void* getNativeModel();
+
+protected:
+    Model*                       _pModel;
+    void*                        _pNativeModel;
+};
 
 
-Model::Model(const Model& model) :
-_views(model._views)
-{
-}
+}  // namespace Omm
+}  // namespace Gui
 
+#endif
 
-void*
-Model::getNativeModel()
-{
-    return _pImpl->getNativeModel();
-}
-
-
-void
-Model::attachView(View* pView)
-{
-//    LOG(gui, debug, "model attach view ...");
-    _views.push_back(pView);
-//    LOG(gui, debug, "model attach view finished.");
-}
-
-
-void
-Model::detachView(View* pView)
-{
-//    LOG(gui, debug, "model detach view ...");
-    ViewIterator pos = std::find(beginView(), endView(), pView);
-    if (pos != _views.end()) {
-        _views.erase(pos);
-    }
-//    LOG(gui, debug, "model detach view finished.");
-}
-
-
-Model::ViewIterator
-Model::beginView()
-{
-    return _views.begin();
-}
-
-
-Model::ViewIterator
-Model::endView()
-{
-    return _views.end();
-}
-
-
-void
-Model::syncViews()
-{
-//    LOG(gui, debug, "model sync views");
-    for (ViewIterator it = beginView(); it != endView(); ++it) {
-       (*it)->syncView();
-    }
-}
-
-
-} // namespace Gui
-} // namespace Omm

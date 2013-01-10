@@ -20,6 +20,7 @@ set(OMMGUI_QT_SRC
 QtViewImpl.cpp
 ColorImpl.cpp
 ViewImpl.cpp
+ModelImpl.cpp
 ApplicationImpl.cpp
 LabelImpl.cpp
 ButtonImpl.cpp

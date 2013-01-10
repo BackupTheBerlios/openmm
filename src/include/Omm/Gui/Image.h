@@ -34,13 +34,13 @@ namespace Gui {
 
 class ImageModel : public Model
 {
+    friend class ImageModelImpl;
+
 public:
-    virtual const std::string& getData() const;
+    ImageModel();
+
     void setData(const std::string& data);
     void setFile(const std::string& fileName);
-
-private:
-    std::string _data;
 };
 
 

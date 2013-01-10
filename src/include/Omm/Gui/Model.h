@@ -30,6 +30,7 @@ namespace Omm {
 namespace Gui {
 
 class View;
+class ModelImpl;
 
 class Model
 {
@@ -39,6 +40,8 @@ public:
 
     Model();
     Model(const Model& model);
+
+    void* getNativeModel();
 
     void attachView(View* pView);
     void detachView(View* pView);
@@ -50,7 +53,8 @@ protected:
 
     virtual void syncViews();
 
-    std::vector<View*>     _views;
+    std::vector<View*>      _views;
+    ModelImpl*              _pImpl;
 };
 
 

@@ -304,6 +304,18 @@ View::getModel() const
 }
 
 
+void*
+View::getNativeModel()
+{
+    if (_pModel) {
+        return _pModel->getNativeModel();
+    }
+    else {
+        return 0;
+    }
+}
+
+
 void
 View::setModel(Model* pModel)
 {

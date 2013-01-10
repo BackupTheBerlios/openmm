@@ -93,6 +93,7 @@ public:
     virtual void move(int x, int y);
 
     Model* getModel() const;
+    void* getNativeModel();
     virtual void setModel(Model* pModel = 0);
     void detachModel();
     void attachController(Controller* pController);
