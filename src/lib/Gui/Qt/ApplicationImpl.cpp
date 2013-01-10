@@ -171,7 +171,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::addToolBar(View* pView)
+ApplicationImpl::addControlPanel(View* pView)
 {
     QToolBar* pToolBar = new QToolBar;
     _pToolBars.insert(pToolBar);
@@ -183,7 +183,7 @@ ApplicationImpl::addToolBar(View* pView)
 
 
 void
-ApplicationImpl::showToolBars(bool show)
+ApplicationImpl::showControlPanels(bool show)
 {
     for (std::set<QToolBar*>::iterator it = _pToolBars.begin(); it != _pToolBars.end(); ++it) {
         (*it)->setVisible(show);
@@ -215,7 +215,7 @@ ApplicationImpl::run(int argc, char** argv)
     // for now key navigation is only enabled in fullscreen mode
     if (_fullscreen) {
         _pQtApplication->installEventFilter(_pEventFilter);
-        showToolBars(false);
+        showControlPanels(false);
     }
 
     _pApplication->start();

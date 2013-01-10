@@ -53,8 +53,8 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
-    void addToolBar(View* pView);
-    void showToolBars(bool show);
+    void addControlPanel(View* pView);
+    void showControlPanels(bool show);
     int run(int argc, char** argv);
     void quit();
 

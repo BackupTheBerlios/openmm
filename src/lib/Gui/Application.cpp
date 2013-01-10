@@ -109,16 +109,16 @@ Application::getArguments(std::vector<std::string>& arguments)
 
 
 void
-Application::addToolBar(View* pView)
+Application::addControlPanel(View* pView)
 {
-    _pImpl->addToolBar(pView);
+    _pImpl->addControlPanel(pView);
 }
 
 
 void
-Application::showToolBars(bool show)
+Application::showControlPanels(bool show)
 {
-    _pImpl->showToolBars(show);
+    _pImpl->showControlPanels(show);
 }
 
 

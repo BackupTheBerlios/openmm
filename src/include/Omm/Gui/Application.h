@@ -54,8 +54,8 @@ public:
     int height();
     void getArguments(std::vector<std::string>& arguments);
 
-    void addToolBar(View* pView);
-    void showToolBars(bool show = true);
+    void addControlPanel(View* pView);
+    void showControlPanels(bool show = true);
 
     View* createAndSetMainView();
     virtual View* createMainView() = 0;

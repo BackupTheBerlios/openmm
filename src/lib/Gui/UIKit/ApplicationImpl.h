@@ -45,18 +45,15 @@ public:
     int width();
     int height();
     void setFullscreen(bool fullscreen);
-    void addToolBar(View* pView);
-    void showToolBars(bool show);
+    void addControlPanel(View* pView);
+    void showControlPanels(bool show);
     int run(int argc, char** argv);
     void quit() {}
 
-    static Application*    _pApplication;
-//    static View*           _pToolBar;
-    static std::vector<View*> _pToolBar;
-//    static int              _toolBarHeight;
-    static int              _toolBarIndex;
-    int                    _width;
-    int                    _height;
+    static Application*         _pApplication;
+    static std::vector<View*>   _pControlPanels;
+    int                         _width;
+    int                         _height;
 };
 
 

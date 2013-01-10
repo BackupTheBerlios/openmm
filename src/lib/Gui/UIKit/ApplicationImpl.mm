@@ -29,13 +29,78 @@
 #include "Gui/GuiLogger.h"
 
 
+@interface SlideView : UIScrollView<UIScrollViewDelegate>
+{
+    NSInteger                       numPages;
+    NSInteger                       previousPage;
+    NSInteger                       currentPage;
+}
+
+- (void)initView;
+
+@end
+
+
+@implementation SlideView
+
+- (void)addView:(Omm::Gui::View*)pSubView position:(NSInteger)index
+{
+    UIView* subView = static_cast<UIView*>(pSubView->getNativeView());
+    [self addSubview:subView];
+    CGRect frame = subView.frame;
+    frame.origin.x = index * frame.size.width;
+    frame.origin.y = 100 - frame.size.height;
+    subView.frame = frame;
+}
+
+
+- (void)scrollToPage:(NSInteger)index
+{
+    CGRect frame = self.frame;
+    frame.origin.x = frame.size.width * index;
+    frame.origin.y = 0;
+    [self scrollRectToVisible:frame animated:NO];
+}
+
+
+- (void)initView:(NSInteger)numPages
+{
+    numPages = Omm::Gui::ApplicationImpl::_pControlPanels.size();
+    previousPage = -1;
+
+    self.delegate = self;
+    self.pagingEnabled = YES;
+    self.showsHorizontalScrollIndicator = NO;
+    self.showsVerticalScrollIndicator = NO;
+    self.scrollsToTop = NO;
+    self.contentSize = CGSizeMake((self.frame.size.width) * numPages, self.frame.size.height);
+//    [self scrollToPage:currentPage];
+}
+
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView
+{
+    // Switch the indicator when more than 50% of the previous/next page is visible
+    CGFloat pageWidth = scrollView.frame.size.width;
+    currentPage = floor(scrollView.contentOffset.x / pageWidth + 0.5);
+
+    if (fabs(scrollView.contentOffset.x / pageWidth - previousPage) > 1.2 && previousPage != -1) {
+        previousPage = currentPage;
+    }
+}
+
+@end
+
+
 @interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
-    UIWindow*           _pWindow;
-    Omm::Gui::View*     _pMainView;
-    bool                _toolBarVisible;
+    UIWindow*               _pWindow;
+    Omm::Gui::View*         _pMainView;
+    SlideView*              _pControlPanel;
+    bool                    _controlBarVisible;
 }
 
 @property (nonatomic, retain) UIWindow* _pWindow;
+@property (nonatomic, retain) SlideView* _pControlPanel;
 
 @end
 
@@ -57,14 +122,16 @@
     UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
 
     // add control panels and global gesture for making them visible
-    Omm::Gui::ApplicationImpl::_toolBarIndex = Omm::Gui::ApplicationImpl::_pToolBar.size();
-//        _toolBarVisible = false;
-    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_pToolBar.begin(); it != Omm::Gui::ApplicationImpl::_pToolBar.end(); ++it) {
-        (*it)->setParent(_pMainView);
-//        Omm::Gui::ApplicationImpl::_toolBarHeight = _pMainView->height() / 5;
-//        (*it)->resize(_pMainView->width(), Omm::Gui::ApplicationImpl::_toolBarHeight);
+    _pControlPanel = [[SlideView alloc] init];
+    [pMainView addSubview:_pControlPanel];
+    _pControlPanel.frame = CGRectMake(0.0, _pMainView->height(), _pMainView->width(), 100.0);
+    [_pControlPanel initView:Omm::Gui::ApplicationImpl::_pControlPanels.size()];
+
+    _controlBarVisible = false;
+    int i = 0;
+    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_pControlPanels.begin(); it != Omm::Gui::ApplicationImpl::_pControlPanels.end(); ++i, ++it) {
         (*it)->resize(_pMainView->width(), (*it)->height());
-        (*it)->move(0, _pMainView->height());
+        [_pControlPanel addView:(*it) position:i];
     }
     UISwipeGestureRecognizer* pSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
     pSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
@@ -128,27 +195,15 @@
         return;
     }
 
-    int countToolbars = Omm::Gui::ApplicationImpl::_pToolBar.size();
-    int index = Omm::Gui::ApplicationImpl::_toolBarIndex;
-    int nextIndex = (index + 1) % (countToolbars + 1);
-    if (index != countToolbars) {
-        UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar[index]->getNativeView());
-        [UIView beginAnimations:@"pToolBar" context:nil];
-        [UIView setAnimationDuration:0.4];
-        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-        Omm::Gui::ApplicationImpl::_pToolBar[index]->move(0, _pMainView->height());
-        [UIView commitAnimations];
-    }
-    if (nextIndex != countToolbars) {
-        UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->getNativeView());
-        [UIView beginAnimations:@"pToolBar" context:nil];
-        [UIView setAnimationDuration:0.4];
-        [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-        int offset = Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->height();
-        Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->move(0, _pMainView->height() - offset);
-        [UIView commitAnimations];
-    }
-    Omm::Gui::ApplicationImpl::_toolBarIndex = nextIndex;
+    [UIView beginAnimations:@"_pControlPanel" context:nil];
+    [UIView setAnimationDuration:0.4];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+    CGRect frame = _pControlPanel.frame;
+//    frame.origin.y = _pMainView->height() - pControlBar.frame.size.height;
+    frame.origin.y = _pMainView->height() - (_controlBarVisible ? 0 : 100);
+    _pControlPanel.frame = frame;
+    [UIView commitAnimations];
+    _controlBarVisible = !_controlBarVisible;
 }
 
 
@@ -166,10 +221,7 @@ namespace Gui {
 
 
 Application* ApplicationImpl::_pApplication = 0;
-//View* ApplicationImpl::_pToolBar = 0;
-std::vector<View*> ApplicationImpl::_pToolBar;
-//int ApplicationImpl::_toolBarHeight = 0;
-int ApplicationImpl::_toolBarIndex = 0;
+std::vector<View*> ApplicationImpl::_pControlPanels;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
@@ -214,14 +266,14 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 
 
 void
-ApplicationImpl::addToolBar(View* pView)
+ApplicationImpl::addControlPanel(View* pView)
 {
-    _pToolBar.push_back(pView);
+    _pControlPanels.push_back(pView);
 }
 
 
 void
-ApplicationImpl::showToolBars(bool show)
+ApplicationImpl::showControlPanels(bool show)
 {
 }
 
