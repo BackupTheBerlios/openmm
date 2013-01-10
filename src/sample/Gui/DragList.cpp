@@ -28,6 +28,7 @@
 #include <Omm/Gui/List.h>
 #include <Omm/Gui/ListModel.h>
 #include <Omm/Gui/Label.h>
+#include <Omm/Gui/ListItem.h>
 
 
 class DragListModel : public Omm::Gui::ListModel
@@ -40,7 +41,8 @@ public:
     virtual Omm::Gui::View* createItemView();
 
 private:
-    std::vector<Omm::Gui::LabelModel*>    _itemModels;
+//    std::vector<Omm::Gui::LabelModel*>    _itemModels;
+    std::vector<Omm::Gui::ListItemModel*>    _itemModels;
     int                                   _viewCount;
 };
 
@@ -50,8 +52,10 @@ _viewCount(0)
 {
     for (int i = 0; i < itemCount; i++) {
         Omm::Gui::LabelModel* pItemModel = new Omm::Gui::LabelModel;
+        Omm::Gui::ListItemModel* pListItemModel = new Omm::Gui::ListItemModel;
         pItemModel->setLabel("item " + Poco::NumberFormatter::format(i));
-        _itemModels.push_back(pItemModel);
+        pListItemModel->setLabelModel(pItemModel);
+        _itemModels.push_back(pListItemModel);
     }
 }
 
@@ -66,7 +70,8 @@ DragListModel::totalItemCount()
 Omm::Gui::View*
 DragListModel::createItemView()
 {
-    Omm::Gui::LabelView* pView = new Omm::Gui::LabelView;
+//    Omm::Gui::LabelView* pView = new Omm::Gui::LabelView;
+    Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
     pView->setName("item view " + Poco::NumberFormatter::format(_viewCount++));
     return pView;
 }
@@ -87,6 +92,7 @@ class Application : public Omm::Gui::Application
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setName("list view");
         pList->setModel(pListModel);
+        pList->setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
         resizeMainView(800, 480);
         return pList;
     }

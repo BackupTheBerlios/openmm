@@ -46,6 +46,7 @@
 
 -(void)applicationDidFinishLaunching:(UIApplication*)application
 {
+    // create main view
     _pWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     _pWindow.backgroundColor = [UIColor whiteColor];
     CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
@@ -53,24 +54,25 @@
     _pMainView->resize(appFrame.size.width, appFrame.size.height);
     _pMainView->move(appFrame.origin.x, appFrame.origin.y);
     Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
+    UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
+
+    // add control panels and global gesture for making them visible
     Omm::Gui::ApplicationImpl::_toolBarIndex = Omm::Gui::ApplicationImpl::_pToolBar.size();
+//        _toolBarVisible = false;
     for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_pToolBar.begin(); it != Omm::Gui::ApplicationImpl::_pToolBar.end(); ++it) {
         (*it)->setParent(_pMainView);
-        Omm::Gui::ApplicationImpl::_toolBarHeight = _pMainView->height() / 5;
-        (*it)->resize(_pMainView->width(), Omm::Gui::ApplicationImpl::_toolBarHeight);
+//        Omm::Gui::ApplicationImpl::_toolBarHeight = _pMainView->height() / 5;
+//        (*it)->resize(_pMainView->width(), Omm::Gui::ApplicationImpl::_toolBarHeight);
+        (*it)->resize(_pMainView->width(), (*it)->height());
         (*it)->move(0, _pMainView->height());
-//        _toolBarVisible = false;
-
-        UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
-        UIButton* pToolBarButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
-        [pMainView addSubview:pToolBarButton];
-        CGRect buttonFrame = pToolBarButton.frame;
-        buttonFrame.origin.x = _pMainView->width() - buttonFrame.size.width;
-        buttonFrame.origin.y = _pMainView->height() - buttonFrame.size.height;
-        pToolBarButton.frame = buttonFrame;
-        [pToolBarButton addTarget:self action:@selector(handleToolBarButtonPressed) forControlEvents:UIControlEventTouchDown];
     }
-    [_pWindow addSubview:static_cast<UIView*>(_pMainView->getNativeView())];
+    UISwipeGestureRecognizer* pSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+    pSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
+    [pMainView addGestureRecognizer:pSwipeGesture];
+    [pSwipeGesture release];
+
+    // add main view to app window and show
+    [_pWindow addSubview:pMainView];
     [_pWindow makeKeyAndVisible];
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }
@@ -115,12 +117,20 @@
 }
 
 
-- (void)handleToolBarButtonPressed
+- (void)handleSwipeGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
+    CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pMainView->getNativeView())];
+//    LOGNS(Omm::Gui, gui, debug, "main view swipe gesture offset: " + Poco::NumberFormatter::format(position.y));
+//    LOGNS(Omm::Gui, gui, debug, "main view height: " + Poco::NumberFormatter::format(_pMainView->height()));
+//    LOGNS(Omm::Gui, gui, debug, "difference: " + Poco::NumberFormatter::format(_pMainView->height() - position.y));
+    int lowerMainViewTolerance = 25;
+    if (position.y < _pMainView->height() - lowerMainViewTolerance) {
+        return;
+    }
+
     int countToolbars = Omm::Gui::ApplicationImpl::_pToolBar.size();
     int index = Omm::Gui::ApplicationImpl::_toolBarIndex;
     int nextIndex = (index + 1) % (countToolbars + 1);
-    int offset = Omm::Gui::ApplicationImpl::_toolBarHeight;
     if (index != countToolbars) {
         UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar[index]->getNativeView());
         [UIView beginAnimations:@"pToolBar" context:nil];
@@ -134,19 +144,11 @@
         [UIView beginAnimations:@"pToolBar" context:nil];
         [UIView setAnimationDuration:0.4];
         [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+        int offset = Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->height();
         Omm::Gui::ApplicationImpl::_pToolBar[nextIndex]->move(0, _pMainView->height() - offset);
         [UIView commitAnimations];
     }
     Omm::Gui::ApplicationImpl::_toolBarIndex = nextIndex;
-
-//    int offset = _toolBarVisible ? 0 : Omm::Gui::ApplicationImpl::_pToolBar->height();
-//    _toolBarVisible = !_toolBarVisible;
-//    UIView* pToolBar = static_cast<UIView*>(Omm::Gui::ApplicationImpl::_pToolBar->getNativeView());
-//    [UIView beginAnimations:@"pToolBar" context:nil];
-//    [UIView setAnimationDuration:0.4];
-//    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-//    Omm::Gui::ApplicationImpl::_pToolBar->move(0, _pMainView->height() - offset);
-//    [UIView commitAnimations];
 }
 
 
@@ -166,7 +168,7 @@ namespace Gui {
 Application* ApplicationImpl::_pApplication = 0;
 //View* ApplicationImpl::_pToolBar = 0;
 std::vector<View*> ApplicationImpl::_pToolBar;
-int ApplicationImpl::_toolBarHeight = 0;
+//int ApplicationImpl::_toolBarHeight = 0;
 int ApplicationImpl::_toolBarIndex = 0;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)

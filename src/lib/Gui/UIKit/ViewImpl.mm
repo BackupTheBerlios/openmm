@@ -61,11 +61,11 @@
 //        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDTap];
 //        [pSingleFingerDTap release];
 
-        UIPanGestureRecognizer* pPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
-        pPanGesture.minimumNumberOfTouches = 2;
+        UIPanGestureRecognizer* pSwipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
+        pSwipeGesture.minimumNumberOfTouches = 2;
 //        pPanGesture.cancelsTouchesInView = NO;
-        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pPanGesture];
-        [pPanGesture release];
+        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSwipeGesture];
+        [pSwipeGesture release];
     }
     return self;
 }
@@ -84,8 +84,8 @@
 
 - (void)handleDragGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
-//    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture");
     CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
+//    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture [" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + "]");
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         Omm::Gui::UIDrag::instance()->getPointerView()->show();
         _pViewImpl->dragStarted();

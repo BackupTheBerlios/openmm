@@ -53,7 +53,7 @@ public:
     static Application*    _pApplication;
 //    static View*           _pToolBar;
     static std::vector<View*> _pToolBar;
-    static int              _toolBarHeight;
+//    static int              _toolBarHeight;
     static int              _toolBarIndex;
     int                    _width;
     int                    _height;
