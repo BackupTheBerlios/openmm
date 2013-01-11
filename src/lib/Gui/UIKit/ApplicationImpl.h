@@ -51,7 +51,9 @@ public:
     void quit() {}
 
     static Application*         _pApplication;
-    static std::vector<View*>   _pControlPanels;
+    static std::vector<View*>   _controlPanels;
+    static int                  _controlPanelHeight;
+    static int                  _swipeUpStartMargin;
     int                         _width;
     int                         _height;
 };

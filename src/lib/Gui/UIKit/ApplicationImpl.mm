@@ -31,13 +31,7 @@
 
 @interface SlideView : UIScrollView<UIScrollViewDelegate>
 {
-    NSInteger                       numPages;
-    NSInteger                       previousPage;
-    NSInteger                       currentPage;
 }
-
-- (void)initView;
-
 @end
 
 
@@ -46,47 +40,114 @@
 - (void)addView:(Omm::Gui::View*)pSubView position:(NSInteger)index
 {
     UIView* subView = static_cast<UIView*>(pSubView->getNativeView());
-    [self addSubview:subView];
     CGRect frame = subView.frame;
-    frame.origin.x = index * frame.size.width;
-    frame.origin.y = 100 - frame.size.height;
+    frame.origin.x = index * self.frame.size.width;
+    frame.origin.y = 0;
+    frame.size.width = self.frame.size.width;
+    frame.size.height = self.frame.size.height;
     subView.frame = frame;
+    [self addSubview:subView];
 }
 
 
-- (void)scrollToPage:(NSInteger)index
+- (void)scrollToPage:(NSInteger)index animated:(BOOL)animated
 {
     CGRect frame = self.frame;
-    frame.origin.x = frame.size.width * index;
+    frame.origin.x = index * frame.size.width;
     frame.origin.y = 0;
-    [self scrollRectToVisible:frame animated:NO];
+    [self scrollRectToVisible:frame animated:animated];
 }
 
 
-- (void)initView:(NSInteger)numPages
+- (void)initViewWithNumPages:(NSInteger)numPages
 {
-    numPages = Omm::Gui::ApplicationImpl::_pControlPanels.size();
-    previousPage = -1;
-
-    self.delegate = self;
     self.pagingEnabled = YES;
     self.showsHorizontalScrollIndicator = NO;
     self.showsVerticalScrollIndicator = NO;
     self.scrollsToTop = NO;
-    self.contentSize = CGSizeMake((self.frame.size.width) * numPages, self.frame.size.height);
-//    [self scrollToPage:currentPage];
+    self.contentSize = CGSizeMake(numPages * (self.frame.size.width), self.frame.size.height);
+    self.backgroundColor = [UIColor whiteColor];
+}
+
+@end
+
+
+@interface ControlPanel : UIView<UIScrollViewDelegate>
+{
+    NSInteger                       _numPages;
+    NSInteger                       _pBorderHeight;
+    SlideView*                      _pSlideView;
+    UIPageControl*                  _pPager;
+    UIButton*                       _leftButton;
+    UIButton*                       _rightButton;
+    NSInteger                       _pagerHeight;
+}
+@end
+
+
+@implementation ControlPanel
+
+- (void)initViewWithNumPages:(NSInteger)numPages
+{
+    _pBorderHeight = 1;
+    UIView* pBorder = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, self.frame.size.width, _pBorderHeight)];
+    pBorder.backgroundColor = [UIColor grayColor];
+    [self addSubview:pBorder];
+
+    _pagerHeight = 20;
+    NSInteger buttonWidth = 40;
+
+    _pPager = [[UIPageControl alloc] initWithFrame:CGRectMake(buttonWidth, self.frame.size.height - _pagerHeight, self.frame.size.width - 2 * buttonWidth, _pagerHeight)];
+    _pPager.currentPage = 0;
+    _pPager.numberOfPages = numPages;
+    _pPager.backgroundColor = [UIColor blackColor];
+    [self addSubview:_pPager];
+    [_pPager addTarget:self action:@selector(handlePagerEvent) forControlEvents:UIControlEventValueChanged];
+
+    UIButton* pLeftButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
+    pLeftButton.backgroundColor = [UIColor darkGrayColor];
+    [self addSubview:pLeftButton];
+    [pLeftButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
+
+    UIButton* pRightButton = [[UIButton alloc] initWithFrame:CGRectMake(self.frame.size.width - buttonWidth, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
+    pRightButton.backgroundColor = [UIColor darkGrayColor];
+    [self addSubview:pRightButton];
+    [pRightButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
+
+    _pSlideView = [[SlideView alloc] initWithFrame:CGRectMake(0.0, _pBorderHeight, self.frame.size.width, self.frame.size.height - _pagerHeight - _pBorderHeight)];
+    _pSlideView.delegate = self;
+    [_pSlideView initViewWithNumPages:numPages];
+    [self addSubview:_pSlideView];
 }
 
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView
+- (void)addView:(Omm::Gui::View*)pSubView position:(NSInteger)index
 {
-    // Switch the indicator when more than 50% of the previous/next page is visible
-    CGFloat pageWidth = scrollView.frame.size.width;
-    currentPage = floor(scrollView.contentOffset.x / pageWidth + 0.5);
+    [_pSlideView addView:pSubView position:index];
+}
 
-    if (fabs(scrollView.contentOffset.x / pageWidth - previousPage) > 1.2 && previousPage != -1) {
-        previousPage = currentPage;
-    }
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView
+{
+    _pPager.currentPage = floor(scrollView.contentOffset.x / scrollView.frame.size.width);
+}
+
+
+- (void)handlePagerEvent
+{
+    [_pSlideView scrollToPage:_pPager.currentPage animated:YES];
+}
+
+
+- (void)buttonPushed
+{
+    [UIView beginAnimations:@"self" context:nil];
+    [UIView setAnimationDuration:0.4];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+    CGRect frame = self.frame;
+    frame.origin.y = Omm::Gui::ApplicationImpl::_pApplication->getMainView()->height();
+    self.frame = frame;
+    [UIView commitAnimations];
 }
 
 @end
@@ -96,7 +157,7 @@
     UIWindow*               _pWindow;
     Omm::Gui::View*         _pMainView;
     SlideView*              _pControlPanel;
-    bool                    _controlBarVisible;
+    bool                    _controlPanelVisible;
 }
 
 @property (nonatomic, retain) UIWindow* _pWindow;
@@ -121,22 +182,25 @@
     Omm::Gui::UIDrag::instance()->setMainView(_pMainView);
     UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
 
-    // add control panels and global gesture for making them visible
-    _pControlPanel = [[SlideView alloc] init];
+    // add control panel
+    _pControlPanel = [[ControlPanel alloc] initWithFrame:CGRectMake(0.0, _pMainView->height(), _pMainView->width(), Omm::Gui::ApplicationImpl::_controlPanelHeight)];
+    [_pControlPanel initViewWithNumPages:Omm::Gui::ApplicationImpl::_controlPanels.size()];
     [pMainView addSubview:_pControlPanel];
-    _pControlPanel.frame = CGRectMake(0.0, _pMainView->height(), _pMainView->width(), 100.0);
-    [_pControlPanel initView:Omm::Gui::ApplicationImpl::_pControlPanels.size()];
-
-    _controlBarVisible = false;
+    _controlPanelVisible = false;
     int i = 0;
-    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_pControlPanels.begin(); it != Omm::Gui::ApplicationImpl::_pControlPanels.end(); ++i, ++it) {
-        (*it)->resize(_pMainView->width(), (*it)->height());
+    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_controlPanels.begin(); it != Omm::Gui::ApplicationImpl::_controlPanels.end(); ++i, ++it) {
         [_pControlPanel addView:(*it) position:i];
     }
-    UISwipeGestureRecognizer* pSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
-    pSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
-    [pMainView addGestureRecognizer:pSwipeGesture];
-    [pSwipeGesture release];
+
+    // add gestures for showing/hiding control panel
+    UISwipeGestureRecognizer* pGlobalSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleGlobalSwipeGesture:)];
+    pGlobalSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
+    [pMainView addGestureRecognizer:pGlobalSwipeGesture];
+    [pGlobalSwipeGesture release];
+    UISwipeGestureRecognizer* pPanelSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanelSwipeGesture:)];
+    pPanelSwipeGesture.direction = UISwipeGestureRecognizerDirectionDown;
+    [_pControlPanel addGestureRecognizer:pPanelSwipeGesture];
+    [pPanelSwipeGesture release];
 
     // add main view to app window and show
     [_pWindow addSubview:pMainView];
@@ -184,14 +248,13 @@
 }
 
 
-- (void)handleSwipeGesture:(UIGestureRecognizer*)pGestureRecognizer
+- (void)handleGlobalSwipeGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
     CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pMainView->getNativeView())];
 //    LOGNS(Omm::Gui, gui, debug, "main view swipe gesture offset: " + Poco::NumberFormatter::format(position.y));
 //    LOGNS(Omm::Gui, gui, debug, "main view height: " + Poco::NumberFormatter::format(_pMainView->height()));
 //    LOGNS(Omm::Gui, gui, debug, "difference: " + Poco::NumberFormatter::format(_pMainView->height() - position.y));
-    int lowerMainViewTolerance = 25;
-    if (position.y < _pMainView->height() - lowerMainViewTolerance) {
+    if (position.y < _pMainView->height() - Omm::Gui::ApplicationImpl::_swipeUpStartMargin) {
         return;
     }
 
@@ -199,11 +262,23 @@
     [UIView setAnimationDuration:0.4];
     [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
     CGRect frame = _pControlPanel.frame;
-//    frame.origin.y = _pMainView->height() - pControlBar.frame.size.height;
-    frame.origin.y = _pMainView->height() - (_controlBarVisible ? 0 : 100);
+    frame.origin.y = _pMainView->height() - (_controlPanelVisible ? 0 : Omm::Gui::ApplicationImpl::_controlPanelHeight);
     _pControlPanel.frame = frame;
     [UIView commitAnimations];
-    _controlBarVisible = !_controlBarVisible;
+    _controlPanelVisible = !_controlPanelVisible;
+}
+
+
+- (void)handlePanelSwipeGesture:(UIGestureRecognizer*)pGestureRecognizer
+{
+    [UIView beginAnimations:@"_pControlPanel" context:nil];
+    [UIView setAnimationDuration:0.4];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+    CGRect frame = _pControlPanel.frame;
+    frame.origin.y = _pMainView->height();
+    _pControlPanel.frame = frame;
+    [UIView commitAnimations];
+    _controlPanelVisible = !_controlPanelVisible;
 }
 
 
@@ -221,7 +296,9 @@ namespace Gui {
 
 
 Application* ApplicationImpl::_pApplication = 0;
-std::vector<View*> ApplicationImpl::_pControlPanels;
+std::vector<View*> ApplicationImpl::_controlPanels;
+int ApplicationImpl::_controlPanelHeight = 100;
+int ApplicationImpl::_swipeUpStartMargin = 50;
 
 ApplicationImpl::ApplicationImpl(Application* pApplication)
 {
@@ -268,7 +345,7 @@ ApplicationImpl::setFullscreen(bool fullscreen)
 void
 ApplicationImpl::addControlPanel(View* pView)
 {
-    _pControlPanels.push_back(pView);
+    _controlPanels.push_back(pView);
 }
 
 
