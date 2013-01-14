@@ -37,16 +37,35 @@
 
 @implementation SlideView
 
-- (void)addView:(Omm::Gui::View*)pSubView position:(NSInteger)index
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.pagingEnabled = YES;
+        self.showsHorizontalScrollIndicator = NO;
+        self.showsVerticalScrollIndicator = NO;
+        self.scrollsToTop = NO;
+        self.backgroundColor = [UIColor whiteColor];
+        self.contentSize = CGSizeMake(0, self.frame.size.height);
+    }
+    return self;
+}
+
+
+- (void)addView:(Omm::Gui::View*)pSubView
 {
     UIView* subView = static_cast<UIView*>(pSubView->getNativeView());
     CGRect frame = subView.frame;
-    frame.origin.x = index * self.frame.size.width;
+    frame.origin.x = self.contentSize.width;
     frame.origin.y = 0;
     frame.size.width = self.frame.size.width;
     frame.size.height = self.frame.size.height;
     subView.frame = frame;
     [self addSubview:subView];
+
+    CGSize size = self.contentSize;
+    size.width += self.frame.size.width;
+    self.contentSize = size;
 }
 
 
@@ -58,21 +77,10 @@
     [self scrollRectToVisible:frame animated:animated];
 }
 
-
-- (void)initViewWithNumPages:(NSInteger)numPages
-{
-    self.pagingEnabled = YES;
-    self.showsHorizontalScrollIndicator = NO;
-    self.showsVerticalScrollIndicator = NO;
-    self.scrollsToTop = NO;
-    self.contentSize = CGSizeMake(numPages * (self.frame.size.width), self.frame.size.height);
-    self.backgroundColor = [UIColor whiteColor];
-}
-
 @end
 
 
-@interface ControlPanel : UIView<UIScrollViewDelegate>
+@interface ControlPanel : UIControl<UIScrollViewDelegate>
 {
     NSInteger                       _numPages;
     NSInteger                       _pBorderHeight;
@@ -87,43 +95,47 @@
 
 @implementation ControlPanel
 
-- (void)initViewWithNumPages:(NSInteger)numPages
+- (id)initWithFrame:(CGRect)frame
 {
-    _pBorderHeight = 1;
-    UIView* pBorder = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, self.frame.size.width, _pBorderHeight)];
-    pBorder.backgroundColor = [UIColor grayColor];
-    [self addSubview:pBorder];
+    self = [super initWithFrame:frame];
+    if (self) {
+        _pBorderHeight = 1;
+        _pagerHeight = 20;
+        NSInteger buttonWidth = 40;
 
-    _pagerHeight = 20;
-    NSInteger buttonWidth = 40;
+        UIView* pBorder = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, self.frame.size.width, _pBorderHeight)];
+        pBorder.backgroundColor = [UIColor grayColor];
+        [self addSubview:pBorder];
 
-    _pPager = [[UIPageControl alloc] initWithFrame:CGRectMake(buttonWidth, self.frame.size.height - _pagerHeight, self.frame.size.width - 2 * buttonWidth, _pagerHeight)];
-    _pPager.currentPage = 0;
-    _pPager.numberOfPages = numPages;
-    _pPager.backgroundColor = [UIColor blackColor];
-    [self addSubview:_pPager];
-    [_pPager addTarget:self action:@selector(handlePagerEvent) forControlEvents:UIControlEventValueChanged];
+        _pPager = [[UIPageControl alloc] initWithFrame:CGRectMake(buttonWidth, self.frame.size.height - _pagerHeight, self.frame.size.width - 2 * buttonWidth, _pagerHeight)];
+        _pPager.currentPage = 0;
+        _pPager.numberOfPages = 0;
+        _pPager.backgroundColor = [UIColor blackColor];
+        [self addSubview:_pPager];
+        [_pPager addTarget:self action:@selector(handlePagerEvent) forControlEvents:UIControlEventValueChanged];
 
-    UIButton* pLeftButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
-    pLeftButton.backgroundColor = [UIColor darkGrayColor];
-    [self addSubview:pLeftButton];
-    [pLeftButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
+        UIButton* pLeftButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
+        pLeftButton.backgroundColor = [UIColor darkGrayColor];
+        [self addSubview:pLeftButton];
+        [pLeftButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
 
-    UIButton* pRightButton = [[UIButton alloc] initWithFrame:CGRectMake(self.frame.size.width - buttonWidth, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
-    pRightButton.backgroundColor = [UIColor darkGrayColor];
-    [self addSubview:pRightButton];
-    [pRightButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
+        UIButton* pRightButton = [[UIButton alloc] initWithFrame:CGRectMake(self.frame.size.width - buttonWidth, self.frame.size.height - _pagerHeight, buttonWidth, _pagerHeight)];
+        pRightButton.backgroundColor = [UIColor darkGrayColor];
+        [self addSubview:pRightButton];
+        [pRightButton addTarget:self action:@selector(buttonPushed) forControlEvents:UIControlEventTouchUpInside];
 
-    _pSlideView = [[SlideView alloc] initWithFrame:CGRectMake(0.0, _pBorderHeight, self.frame.size.width, self.frame.size.height - _pagerHeight - _pBorderHeight)];
-    _pSlideView.delegate = self;
-    [_pSlideView initViewWithNumPages:numPages];
-    [self addSubview:_pSlideView];
+        _pSlideView = [[SlideView alloc] initWithFrame:CGRectMake(0.0, _pBorderHeight, self.frame.size.width, self.frame.size.height - _pagerHeight - _pBorderHeight)];
+        _pSlideView.delegate = self;
+        [self addSubview:_pSlideView];
+    }
+    return self;
 }
 
 
-- (void)addView:(Omm::Gui::View*)pSubView position:(NSInteger)index
+- (void)addView:(Omm::Gui::View*)pSubView
 {
-    [_pSlideView addView:pSubView position:index];
+    [_pSlideView addView:pSubView];
+    _pPager.numberOfPages++;
 }
 
 
@@ -141,13 +153,7 @@
 
 - (void)buttonPushed
 {
-    [UIView beginAnimations:@"self" context:nil];
-    [UIView setAnimationDuration:0.4];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-    CGRect frame = self.frame;
-    frame.origin.y = Omm::Gui::ApplicationImpl::_pApplication->getMainView()->height();
-    self.frame = frame;
-    [UIView commitAnimations];
+    [self sendActionsForControlEvents:UIControlEventTouchUpInside];
 }
 
 @end
@@ -184,23 +190,23 @@
 
     // add control panel
     _pControlPanel = [[ControlPanel alloc] initWithFrame:CGRectMake(0.0, _pMainView->height(), _pMainView->width(), Omm::Gui::ApplicationImpl::_controlPanelHeight)];
-    [_pControlPanel initViewWithNumPages:Omm::Gui::ApplicationImpl::_controlPanels.size()];
-    [pMainView addSubview:_pControlPanel];
     _controlPanelVisible = false;
     int i = 0;
     for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_controlPanels.begin(); it != Omm::Gui::ApplicationImpl::_controlPanels.end(); ++i, ++it) {
-        [_pControlPanel addView:(*it) position:i];
+        [_pControlPanel addView:(*it)];
     }
+    [pMainView addSubview:_pControlPanel];
 
     // add gestures for showing/hiding control panel
     UISwipeGestureRecognizer* pGlobalSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleGlobalSwipeGesture:)];
     pGlobalSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
     [pMainView addGestureRecognizer:pGlobalSwipeGesture];
     [pGlobalSwipeGesture release];
-    UISwipeGestureRecognizer* pPanelSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanelSwipeGesture:)];
+    UISwipeGestureRecognizer* pPanelSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(hideControlPanel:)];
     pPanelSwipeGesture.direction = UISwipeGestureRecognizerDirectionDown;
     [_pControlPanel addGestureRecognizer:pPanelSwipeGesture];
     [pPanelSwipeGesture release];
+    [_pControlPanel addTarget:self action:@selector(hideControlPanel:) forControlEvents:UIControlEventTouchUpInside];
 
     // add main view to app window and show
     [_pWindow addSubview:pMainView];
@@ -208,7 +214,7 @@
     Omm::Gui::ApplicationImpl::_pApplication->presentedMainView();
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
+- (void)applicationWillTerminate:(UIApplication*)application
 {
 //    Omm::LOGNS(Gui, gui, debug, "event loop exec finished.");
     Omm::Gui::ApplicationImpl::_pApplication->finishedEventLoop();
@@ -216,27 +222,27 @@
 }
 
 
-- (void)applicationDidBecomeActive:(UIApplication *)application
+- (void)applicationDidBecomeActive:(UIApplication*)application
 {
     // return from suspend
     Omm::Gui::ApplicationImpl::_pApplication->start();
 }
 
 
-- (void)applicationWillResignActive:(UIApplication *)application
+- (void)applicationWillResignActive:(UIApplication*)application
 {
     // suspend application
     Omm::Gui::ApplicationImpl::_pApplication->stop();
 }
 
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
+- (void)applicationDidEnterBackground:(UIApplication*)application
 {
 
 }
 
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
+- (void)applicationWillEnterForeground:(UIApplication*)application
 {
 
 }
@@ -245,6 +251,19 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+}
+
+
+- (void) showControlPanelAnimated:(BOOL)show
+{
+    [UIView beginAnimations:@"_pControlPanel" context:nil];
+    [UIView setAnimationDuration:0.4];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+    CGRect frame = _pControlPanel.frame;
+    frame.origin.y = _pMainView->height() - (show ? Omm::Gui::ApplicationImpl::_controlPanelHeight : 0);
+    _pControlPanel.frame = frame;
+    [UIView commitAnimations];
+    _controlPanelVisible = show;
 }
 
 
@@ -258,27 +277,13 @@
         return;
     }
 
-    [UIView beginAnimations:@"_pControlPanel" context:nil];
-    [UIView setAnimationDuration:0.4];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-    CGRect frame = _pControlPanel.frame;
-    frame.origin.y = _pMainView->height() - (_controlPanelVisible ? 0 : Omm::Gui::ApplicationImpl::_controlPanelHeight);
-    _pControlPanel.frame = frame;
-    [UIView commitAnimations];
-    _controlPanelVisible = !_controlPanelVisible;
+    [self showControlPanelAnimated:!_controlPanelVisible];
 }
 
 
-- (void)handlePanelSwipeGesture:(UIGestureRecognizer*)pGestureRecognizer
+- (void)hideControlPanel:(UIGestureRecognizer*)pGestureRecognizer
 {
-    [UIView beginAnimations:@"_pControlPanel" context:nil];
-    [UIView setAnimationDuration:0.4];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-    CGRect frame = _pControlPanel.frame;
-    frame.origin.y = _pMainView->height();
-    _pControlPanel.frame = frame;
-    [UIView commitAnimations];
-    _controlPanelVisible = !_controlPanelVisible;
+    [self showControlPanelAnimated:FALSE];
 }
 
 
