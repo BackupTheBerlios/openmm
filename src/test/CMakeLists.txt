@@ -95,12 +95,12 @@ MediaObjectTest.cpp
 # )
 
 
-add_executable( avstreamstress
+add_executable(avstreamstress
 ../plugin/Engine/AvStream/AvStreamEngine.cpp
 AvStreamStress.cpp
 )
 
-target_link_libraries( avstreamstress
+target_link_libraries(avstreamstress
 ${POCO_UTIL}
 ${OMM_UTIL}
 ${OMM}
@@ -135,16 +135,16 @@ ${OMM_AVSTREAM}
 )
 
 
-add_executable(upnpavstress
-UpnpAvStress.cpp
-)
-
-target_link_libraries(upnpavstress
-${POCO_UTIL}
-${OMM_UTIL}
-${OMM}
-${OMM_AV}
-)
+#add_executable(upnpavstress
+#UpnpAvStress.cpp
+#)
+#
+#target_link_libraries(upnpavstress
+#${POCO_UTIL}
+#${OMM_UTIL}
+#${OMM}
+#${OMM_AV}
+#)
 
 
 add_executable(search

@@ -45,7 +45,6 @@ class CtlMediaObject : public MediaObjectOld //, public Util::WidgetListModel
 
     friend class AvServerView;
     friend class AvRendererView;
-    friend class AvUserInterface;
 
 public:
     CtlMediaObject();

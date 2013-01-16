@@ -45,7 +45,6 @@ class CtlMediaObject2 : public MemoryMediaObject, public BlockCache
 
     friend class AvServerView;
     friend class AvRendererView;
-    friend class AvUserInterface;
 
 public:
     CtlMediaObject2();

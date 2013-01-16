@@ -110,7 +110,6 @@ add_library(ommupnpav
 Upnp/Av/UpnpAvLogger.cpp
 Upnp/Av/UpnpAv.cpp
 Upnp/Av/UpnpAvDescriptions.cpp
-Upnp/Av/UpnpAvController.cpp # depricated
 Upnp/Av/UpnpAvCtlDevices.cpp
 Upnp/Av/UpnpAvCtlRenderer.cpp
 Upnp/Av/UpnpAvCtlServer.cpp

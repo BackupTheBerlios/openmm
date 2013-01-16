@@ -26,7 +26,6 @@
 #include <Poco/Random.h>
 
 #include <Omm/AvStream.h>
-#include <Omm/UpnpAvController.h>
 
 
 class Writer : public Poco::Runnable
@@ -41,23 +40,23 @@ public:
     {
         _writeSizeGenerator.seed();
     }
-    
+
 private:
     virtual void run()
     {
         for(int i = 0; i < _numberWrites; ++i) {
             int writeSize = _writeSizeGenerator.next(_maxWriteSize);
             char buffer[writeSize];
-            LOGNS(Omm::AvStream, avstream, debug, _name + " writing: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
+//            LOGNS(Omm::AvStream, avstream, debug, _name + " writing: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
             _pByteQueue->write(buffer, writeSize);
-            LOGNS(Omm::AvStream, avstream, debug, _name + " wrote: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
+//            LOGNS(Omm::AvStream, avstream, debug, _name + " wrote: " + Poco::NumberFormatter::format(writeSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
             if (_pByteQueue->full()) {
-                LOGNS(Omm::AvStream, avstream, debug, "queue full");
+//                LOGNS(Omm::AvStream, avstream, debug, "queue full");
             }
             Poco::Thread::sleep(_delayGenerator.next(_maxDelay));
         }
     }
-    
+
     std::string                 _name;
     Omm::AvStream::ByteQueue*   _pByteQueue;
     int                         _numberWrites;
@@ -80,23 +79,23 @@ public:
     {
         _readSizeGenerator.seed();
     }
-    
+
 private:
     virtual void run()
     {
         for(int i = 0; i < _numberReads; ++i) {
             int readSize = _readSizeGenerator.next(_maxReadSize);
             char buffer[readSize];
-            LOGNS(Omm::AvStream, avstream, debug, _name + " reading: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
+//            LOGNS(Omm::AvStream, avstream, debug, _name + " reading: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()) + ", number: " + Poco::NumberFormatter::format(i));
             _pByteQueue->read(buffer, readSize);
-            LOGNS(Omm::AvStream, avstream, debug, _name + " read: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
+//            LOGNS(Omm::AvStream, avstream, debug, _name + " read: " + Poco::NumberFormatter::format(readSize) + " bytes, level: " + Poco::NumberFormatter::format(_pByteQueue->level()));
             if (_pByteQueue->empty()) {
-                LOGNS(Omm::AvStream, avstream, debug, "queue empty");
+//                LOGNS(Omm::AvStream, avstream, debug, "queue empty");
             }
             Poco::Thread::sleep(_delayGenerator.next(_maxDelay));
         }
     }
-    
+
     std::string                 _name;
     Omm::AvStream::ByteQueue*   _pByteQueue;
     int                         _numberReads;
@@ -119,7 +118,7 @@ int main(int argc, char** argv)
     Poco::Thread t4;
     Reader r2("reader 2", &queue, 1000, 500, 10);
 
-    
+
     std::clog << "starting writer 1 ..." << std::endl;
     t1.start(w1);
     std::clog << "starting writer 2 ..." << std::endl;
@@ -128,7 +127,7 @@ int main(int argc, char** argv)
     t3.start(r1);
     std::clog << "starting reader 2 ..." << std::endl;
     t4.start(r2);
-    
+
     std::clog << "joining writer 1 ..." << std::endl;
     t1.join();
     std::clog << "writer 1 joined." << std::endl;
@@ -141,6 +140,6 @@ int main(int argc, char** argv)
     std::clog << "joining reader 2 ..." << std::endl;
     t4.join();
     std::clog << "reader 2 joined." << std::endl;
-    
+
     return 0;
 }

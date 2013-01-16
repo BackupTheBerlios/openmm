@@ -23,7 +23,6 @@
 
 #include <Omm/AvStream.h>
 // #include <AvStreamFFmpeg.h>
-#include <Omm/UpnpAvController.h>
 
 int main(int argc, char** argv)
 {
@@ -37,7 +36,7 @@ int main(int argc, char** argv)
 
 //     demuxer.attach(&muxer, demuxer.firstAudioStream(), 0);
 //     demuxer.attach(&muxer, demuxer.firstVideoStream(), 1);
-    
+
     demuxer.start();
     Poco::Thread::sleep(2);
     demuxer.stop();

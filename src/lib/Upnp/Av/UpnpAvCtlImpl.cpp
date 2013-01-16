@@ -620,10 +620,6 @@ CtlRenderingControlImpl::_changedLastChange(const std::string& val)
             if (stateVarName == RenderingControlEventedStateVar::VOLUME) {
                 // set volume only when this renderer is selected.
                 LOG(upnpav, debug, "controller, volume changed on device: " + _pService->getDevice()->getUuid());
-                if (_pAvUserInterface && _pAvUserInterface->selectedRendererUuid() == _pService->getDevice()->getUuid()) {
-                    _pAvUserInterface->newVolume(Poco::NumberParser::parse(val));
-                    LOG(upnpav, debug, "user interface, volume changed on device: " + _pService->getDevice()->getUuid());
-                }
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newVolume(Poco::NumberParser::parse(val));
                 }

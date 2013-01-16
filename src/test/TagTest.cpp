@@ -28,7 +28,6 @@
 #include <Poco/Random.h>
 
 #include <Omm/AvStream.h>
-#include <Omm/UpnpAvController.h>
 #include <Omm/Util.h>
 
 const std::string liveStreamAddress = "http://anubis:8888/";

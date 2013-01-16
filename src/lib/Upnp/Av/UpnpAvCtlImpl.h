@@ -22,7 +22,6 @@
 #ifndef UPNPAV_CTRL_IMPL_H
 #define UPNPAV_CTRL_IMPL_H
 
-#include "UpnpAvController.h"
 #include "UpnpAvCtlDevices.h"
 #include "UpnpAvCtlRenderer.h"
 #include "UpnpAvCtlServer.h"
@@ -34,7 +33,7 @@ namespace Av {
 class CtlAVTransportImpl : public CtlAVTransport
 {
 public:
-    CtlAVTransportImpl(AvUserInterface* pAvUserInterface, CtlMediaRenderer* pMediaRenderer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaRenderer(pMediaRenderer) {}
+    CtlAVTransportImpl(CtlMediaRenderer* pMediaRenderer = 0) : _pMediaRenderer(pMediaRenderer) {}
 
 private:
     virtual void _ansSetAVTransportURI(const ui4& InstanceID, const std::string& CurrentURI, const std::string& CurrentURIMetaData);
@@ -52,7 +51,6 @@ private:
 
     virtual void _changedLastChange(const std::string& val);
 
-    AvUserInterface*    _pAvUserInterface;
     CtlMediaRenderer*   _pMediaRenderer;
 };
 
@@ -82,7 +80,7 @@ private:
 class CtlRenderingControlImpl : public CtlRenderingControl
 {
 public:
-    CtlRenderingControlImpl(AvUserInterface* pAvUserInterface, CtlMediaRenderer* pMediaRenderer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaRenderer(pMediaRenderer) {}
+    CtlRenderingControlImpl(CtlMediaRenderer* pMediaRenderer = 0) : _pMediaRenderer(pMediaRenderer) {}
 
 private:
     virtual void _ansListPresets(const ui4& InstanceID, const std::string& CurrentPresetNameList);
@@ -123,7 +121,6 @@ private:
 
     virtual void _changedLastChange(const std::string& val);
 
-    AvUserInterface*    _pAvUserInterface;
     CtlMediaRenderer*   _pMediaRenderer;
 };
 
@@ -131,7 +128,7 @@ private:
 class CtlContentDirectoryImpl : public CtlContentDirectory
 {
 public:
-    CtlContentDirectoryImpl(AvUserInterface* pAvUserInterface, CtlMediaServer* pMediaServer = 0) : _pAvUserInterface(pAvUserInterface), _pMediaServer(pMediaServer)  {}
+    CtlContentDirectoryImpl(CtlMediaServer* pMediaServer = 0) : _pMediaServer(pMediaServer)  {}
 
 private:
     virtual void _ansGetSearchCapabilities(const std::string& SearchCaps);
@@ -151,7 +148,6 @@ private:
     virtual void _changedSystemUpdateID(const ui4& val);
     virtual void _changedContainerUpdateIDs(const std::string& val);
 
-    AvUserInterface*    _pAvUserInterface;
     CtlMediaServer*     _pMediaServer;
 };
 
