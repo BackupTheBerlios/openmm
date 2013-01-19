@@ -38,7 +38,7 @@ class AvController;
 class CtlMediaServerCode;
 class CtlMediaRendererCode;
 class CtlMediaObject;
-class CtlMediaObject2;
+class CtlMediaObject;
 class MediaItemNotification;
 class MediaObjectSelectedNotification;
 class ConnectionManager;
@@ -51,9 +51,8 @@ public:
 
     virtual void addCtlDeviceCode();
 
-    void setObject(CtlMediaObject* pObject);
-    void setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row);
-    CtlMediaObject2* getObject();
+    void setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row);
+    CtlMediaObject* getObject();
     void playPressed();
     void stopPressed();
     void pausePressed();
@@ -80,7 +79,7 @@ private:
 
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
-    CtlMediaObject2*        _pCurrentMediaObject;
+    CtlMediaObject*        _pCurrentMediaObject;
     bool                    _usePlaylistResource;
     Poco::Timer*            _pPositionTimer;
     long                    _positionTimerInterval;
@@ -96,7 +95,6 @@ public:
 private:
     virtual void init();
 
-    void mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification);
     void mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification);
 };
 

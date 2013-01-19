@@ -27,7 +27,6 @@
 #include "UpnpAvCtlImpl.h"
 #include "UpnpAvCtlDevices.h"
 #include "UpnpAvCtlObject.h"
-#include "UpnpAvCtlObject2.h"
 
 
 namespace Omm {
@@ -57,26 +56,7 @@ CtlMediaRenderer::addCtlDeviceCode()
 
 
 void
-CtlMediaRenderer::setObject(CtlMediaObject* pObject)
-{
-    Resource* pRes = pObject->getResource();
-    if (pRes) {
-        std::string metaData;
-        MediaObjectWriter writer(pObject);
-        writer.write(metaData);
-        try {
-            _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(0, pRes->getUri(), metaData);
-        }
-        catch (Poco::Exception e) {
-//            error(e.message());
-            return;
-        }
-    }
-}
-
-
-void
-CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
+CtlMediaRenderer::setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row)
 {
     // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
@@ -95,7 +75,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
             && !AvClass::matchClass(pObject->getClass(), AvClass::ITEM, AvClass::VIDEO_BROADCAST)) {
         LOG(upnpav, debug, "selected object is child of a container with playlist resource");
         std::string metaData;
-        MediaObjectWriter2 writer;
+        MediaObjectWriter writer;
         writer.write(metaData, pParentObject);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(AvTransportId, pContainerRes->getUri(), metaData);
@@ -111,7 +91,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
     }
     else if (pRes) {
         std::string metaData;
-        MediaObjectWriter2 writer;
+        MediaObjectWriter writer;
         writer.write(metaData, pObject);
         try {
             _pCtlMediaRendererCode->AVTransport()->SetAVTransportURI(AvTransportId, pRes->getUri(), metaData);
@@ -128,7 +108,7 @@ CtlMediaRenderer::setObject2(CtlMediaObject2* pObject, CtlMediaObject2* pParentO
 }
 
 
-CtlMediaObject2*
+CtlMediaObject*
 CtlMediaRenderer::getObject()
 {
     return _pCurrentMediaObject;
@@ -359,27 +339,14 @@ MediaRendererGroupDelegate::init()
 
 
 void
-MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaItemNotification* pMediaItemNotification)
-{
-    CtlMediaObject* pItem = pMediaItemNotification->getMediaItem();
-    LOG(upnpav, debug, "media renderer delegate got media item notification: " + pItem->getTitle());
-    CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
-    if (pRenderer) {
-        pRenderer->setObject(pItem);
-        pRenderer->playPressed();
-    }
-}
-
-
-void
 MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification)
 {
-//    CtlMediaObject2* pItem = pMediaItemNotification->getMediaItem();
+//    CtlMediaObject* pItem = pMediaItemNotification->getMediaItem();
     LOG(upnpav, debug, "media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());
     CtlMediaRenderer* pRenderer = static_cast<CtlMediaRenderer*>(_pDeviceGroup->getSelectedDevice());
     if (pRenderer) {
         pRenderer->stopPressed();
-        pRenderer->setObject2(pMediaItemNotification->_pObject, pMediaItemNotification->_pParentObject, pMediaItemNotification->_row);
+        pRenderer->setObject(pMediaItemNotification->_pObject, pMediaItemNotification->_pParentObject, pMediaItemNotification->_row);
         pRenderer->playPressed();
     }
 }

@@ -26,7 +26,7 @@
 
 #include <Omm/UpnpAvController.h>
 #include <Omm/UpnpAvCtlServer.h>
-#include <Omm/UpnpAvCtlObject2.h>
+#include <Omm/UpnpAvCtlObject.h>
 
 #include "QtNavigable.h"
 
@@ -49,7 +49,7 @@ public:
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
     virtual void show();
-    
+
     // QAbstractItemModel
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -63,8 +63,8 @@ public:
     bool hasChildren ( const QModelIndex & parent = QModelIndex() ) const;
     void fetchMore (const QModelIndex & parent);
     bool canFetchMore (const QModelIndex & parent) const;
-    
-    Omm::Av::CtlMediaObject2* getObject(const QModelIndex &index) const;
+
+    Omm::Av::CtlMediaObject* getObject(const QModelIndex &index) const;
 
     QIcon icon(const QModelIndex &index) const;
 

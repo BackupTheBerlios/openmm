@@ -22,7 +22,7 @@
 #ifndef QtMediaObject_INCLUDED
 #define QtMediaObject_INCLUDED
 
-#include <Omm/UpnpAvCtlObject2.h>
+#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/Util.h>
 
 #include "QtWidget.h"
@@ -42,7 +42,7 @@ class QtMediaObject : public QtSimpleListWidget, public QtNavigable, public Widg
 public:
     QtMediaObject();
     ~QtMediaObject();
-    
+
     // QtNavigable interface
     virtual QString getBrowserTitle();
     virtual QWidget* getWidget();
@@ -68,7 +68,7 @@ public slots:
     virtual void unconfigure();
 
 private:
-    Omm::Av::CtlMediaObject2*    _pObject;
+    Omm::Av::CtlMediaObject*    _pObject;
     QtWidgetList*               _pContainerView;
     // lazy model related
     Omm::ui4                    _lastFetched;

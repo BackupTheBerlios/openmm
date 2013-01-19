@@ -24,7 +24,7 @@
 
 #include <QtGui>
 
-#include <Omm/UpnpAvCtlObject2.h>
+#include <Omm/UpnpAvCtlObject.h>
 #include <Omm/Util.h>
 
 #include "QtNavigable.h"
@@ -40,13 +40,13 @@ class QtStdMediaContainer : public QtNavigable
 public:
     QtStdMediaContainer();
     ~QtStdMediaContainer();
-    
+
     // QtNavigable interface
     virtual QString getBrowserTitle();
     virtual void show();
 
 private:
-    Omm::Av::CtlMediaObject2*    _pObject;
+    Omm::Av::CtlMediaObject*    _pObject;
     QtStdMediaServerWidget*      _pServerWidget;
     QModelIndex                  _modelIndex;
 };

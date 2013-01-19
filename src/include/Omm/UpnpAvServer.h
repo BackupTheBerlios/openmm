@@ -309,7 +309,7 @@ private:
 };
 
 
-class ServerObjectWriter : public MediaObjectWriter2
+class ServerObjectWriter : public MediaObjectWriter
 {
 public:
     void writeChildren(std::string& meta, const std::vector<ServerObject*>& children, const std::string& filter = "*");

@@ -1664,7 +1664,7 @@ DatabaseCache::getMediaObjectForIndex(ui4 index, bool isVirtual)
             pObject = _pServerContainer->createMediaItem();
         }
         MediaObjectReader xmlReader;
-        xmlReader.read(pObject, MediaObjectWriter2::getXmlProlog() + xml[0]);
+        xmlReader.read(pObject, MediaObjectWriter::getXmlProlog() + xml[0]);
         return pObject;
     }
     else {
@@ -1712,7 +1712,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             if (xml.size() == 1) {
                 ServerObject* pObject = _pServerContainer->createMediaItem();
                 MediaObjectReader xmlReader;
-                xmlReader.read(pObject, MediaObjectWriter2::getXmlProlog() + xml[0]);
+                xmlReader.read(pObject, MediaObjectWriter::getXmlProlog() + xml[0]);
                 pObject->setIndex(index);
                 block.push_back(pObject);
             }
@@ -1797,7 +1797,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             std::string xml;
             index = recordSet["idx"].convert<ui4>();
             objectClass = recordSet["class"].convert<std::string>();
-            xml = MediaObjectWriter2::getXmlProlog() + recordSet["xml"].convert<std::string>();
+            xml = MediaObjectWriter::getXmlProlog() + recordSet["xml"].convert<std::string>();
             // FIXME: if child object is a container, we need to create a ServerContainer, otherwise getChildAtRowOffset() does nothing
             ServerObject* pObject;
             if (AvClass::matchClass(objectClass, AvClass::CONTAINER)) {
@@ -1861,10 +1861,10 @@ DatabaseCache::insertMediaObject(ServerObject* pObject)
 {
     LOG(upnpav, debug, "database cache insert media object with index: " + Poco::NumberFormatter::format(pObject->getIndex()));
     std::string xml;
-    MediaObjectWriter2 xmlWriter(false);
+    MediaObjectWriter xmlWriter(false);
     xmlWriter.write(xml, pObject);
     // chop off xml prolog:
-    xml = xml.substr(MediaObjectWriter2::getXmlProlog().size());
+    xml = xml.substr(MediaObjectWriter::getXmlProlog().size());
 
     std::string insertString = "INSERT INTO " + _cacheTableName + " (";
     std::string propColString = "idx, paridx, updid";

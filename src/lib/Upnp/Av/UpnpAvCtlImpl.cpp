@@ -22,7 +22,7 @@
 #include "UpnpAv.h"
 #include "UpnpAvPrivate.h"
 #include "UpnpAvCtlImpl.h"
-#include "UpnpAvCtlObject2.h"
+#include "UpnpAvCtlObject.h"
 
 namespace Omm {
 namespace Av {
@@ -162,7 +162,7 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 }
             }
             else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA) {
-                CtlMediaObject2 object;
+                CtlMediaObject object;
                 MediaObjectReader reader;
                 reader.read(&object, val);
                 if (_pMediaRenderer) {

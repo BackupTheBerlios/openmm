@@ -93,7 +93,7 @@ QtMediaServerGroup::selectDevice(Omm::Device* pDevice, int index)
     QtMediaServer* pMediaServer = static_cast<QtMediaServer*>(pDevice);
 
     LOGNS(Omm::Av, upnpav, debug, "Qt media server group select device");
-    Omm::Av::CtlMediaObject2* pRootObject = pMediaServer->getRootObject();
+    Omm::Av::CtlMediaObject* pRootObject = pMediaServer->getRootObject();
     if (pRootObject->isContainer()) {
         LOGNS(Omm::Av, upnpav, debug, "Qt media server root object is container, creating container widget.");
         QtMediaObject* pRootWidget = new QtMediaObject;

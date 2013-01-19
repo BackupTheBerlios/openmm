@@ -1408,7 +1408,7 @@ MediaRendererDevice::newUri(const std::string& uri)
         MediaServerDevice* pServer = _pControllerWidget->getServer(serverUuid);
         if (pServer) {
             LOGNS(Gui, gui, debug, "media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
-            Av::CtlMediaObject2* pObject = pServer->getMediaObjectFromResource(uri);
+            Av::CtlMediaObject* pObject = pServer->getMediaObjectFromResource(uri);
             if (pObject) {
                 LOGNS(Gui, gui, debug, "media renderer device playing object with title: \"" + pObject->getTitle() + "\"");
                 _trackName.setLabel(pObject->getTitle());
@@ -1847,7 +1847,7 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
     if (pServer) {
         // get (object id of) container, that is on top of navigator
         MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(getVisibleView());
-        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
+        Av::CtlMediaObject* pObject = pContainer->_pObjectModel;
 
         std::string searchExp = Poco::replace(_searchString, std::string("%s"), "\"" + searchText + "\"");
         LOGNS(Gui, gui, debug, "search expression: " + searchExp);
@@ -1888,7 +1888,7 @@ MediaServerDevice::initController()
 }
 
 
-Av::CtlMediaObject2*
+Av::CtlMediaObject*
 MediaServerDevice::createMediaObject()
 {
     return new MediaObjectModel;
@@ -1904,7 +1904,7 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
     // FIXME: avoid handling system update id when device is discovered
 
 
-//    Av::CtlMediaObject2* pObject = getRootObject();
+//    Av::CtlMediaObject* pObject = getRootObject();
 //    if (pObject) {
 //        // clear cache (reset data model)
 //        pObject->clear();
@@ -1925,7 +1925,7 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 //    // can also be a MediaServerGroupWidget, thus the dynamic_cast
 //    MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(_pServerGroupWidget->getVisibleView());
 //    if (pContainer && _pServerGroupWidget->getSelectedDevice() && _pServerGroupWidget->getSelectedDevice()->getUuid() == getUuid()) {
-//        Av::CtlMediaObject2* pObject = pContainer->_pObjectModel;
+//        Av::CtlMediaObject* pObject = pContainer->_pObjectModel;
 //        if (pObject) {
 //            // clear cache (reset data model)
 //            pObject->clear();
@@ -2068,7 +2068,7 @@ MediaContainerWidget::createPlaylist(const std::string& playlistName)
     }
     if (!_pObjectModel->isRestricted()) {
         LOGNS(Gui, gui, debug, "media server group widget create playlist");
-        Av::CtlMediaObject2* pObject = new Av::CtlMediaObject2;
+        Av::CtlMediaObject* pObject = new Av::CtlMediaObject;
         pObject->setTitle(playlistName);
         pObject->setIsContainer(false);
         pObject->setClass(Av::AvClass::className(Av::AvClass::ITEM, Av::AvClass::PLAYLIST_ITEM));
@@ -2134,7 +2134,7 @@ MediaObjectModel::MediaObjectModel()
 
 
 MediaObjectModel::MediaObjectModel(const MediaObjectModel& objectModel) :
-Av::CtlMediaObject2(objectModel),
+Av::CtlMediaObject(objectModel),
 Gui::ListItemModel(objectModel),
 _pContainer(objectModel._pContainer)
 {

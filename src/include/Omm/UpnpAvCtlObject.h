@@ -38,7 +38,7 @@ class CtlMediaServerCode;
 class MediaItemNotification;
 
 
-class CtlMediaObject : public MediaObjectOld //, public Util::WidgetListModel
+class CtlMediaObject : public MemoryMediaObject, public BlockCache
 {
     friend class CtlMediaServer;
     friend class CtlMediaRenderer;
@@ -48,46 +48,52 @@ class CtlMediaObject : public MediaObjectOld //, public Util::WidgetListModel
 
 public:
     CtlMediaObject();
+    CtlMediaObject(const CtlMediaObject& mediaObject);
+
+    // factory methods
+    virtual AbstractMediaObject* createChildObject();
 
     CtlMediaServer* getServer() const;
     void setServer(CtlMediaServer* pServer);
     void setServerController(CtlMediaServerCode* pServerCode);
 
-    int fetchChildren(ui4 count = 10);
-    bool fetchedAllChildren();
-    ui4 childCount();
-    CtlMediaObject* parent();
+    virtual std::string getId();
+    virtual void setId(const std::string& id);
+    void setSearch(const std::string& searchText);
 
-    std::string getProperty(const std::string& name);
+    int fetchChildren(ui4 count = 10, ui4 offset = -1);
+    bool fetchedAllChildren();
+    /// offset -1 means fetch from offset = childCount()
+    virtual AbstractMediaObject* getChildForRow(ui4 row);
 
     Icon* getIcon();
     Icon* getImageRepresentation();
 
+    void writeResource(const std::string& sourceUri, int index = 0);
+    void createChildObject(CtlMediaObject* pObject);
+    void destroyObject(const std::string& objectId);
+
 private:
-    Resource* getResource(int num = 0);
-    virtual void addResource(Resource* pResource);
-    void setFetchedAllChildren(bool fetchedAllChildren);
+    virtual void getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, ui4 size);
 
-    void readChildren(const std::string& metaData);
-    void readMetaData(const std::string& metaData);
-    void readNode(Poco::XML::Node* pNode);
-
-    unsigned int                     _childCount;
-    bool                             _fetchedAllChildren;
+    std::string                      _id;
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
+    std::string                      _searchText;
 };
 
 
-class MediaItemNotification : public Poco::Notification
+class MediaObjectSelectedNotification : public Poco::Notification
 {
 public:
-    MediaItemNotification(CtlMediaObject* pItem);
+    MediaObjectSelectedNotification(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row);
 
-    CtlMediaObject* getMediaItem() const;
+//    CtlMediaObject* getMediaItem() const;
 
-private:
-    CtlMediaObject*     _pItem;
+//private:
+    CtlMediaObject*     _pObject;
+    CtlMediaObject*     _pParentObject;
+    ui4                  _row;
 };
 
 

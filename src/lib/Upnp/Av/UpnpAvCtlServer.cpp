@@ -42,14 +42,14 @@ CtlMediaServer::addCtlDeviceCode()
 }
 
 
-CtlMediaObject2*
+CtlMediaObject*
 CtlMediaServer::createMediaObject()
 {
-    return new CtlMediaObject2;
+    return new CtlMediaObject;
 }
 
 
-CtlMediaObject2*
+CtlMediaObject*
 CtlMediaServer::getRootObject() const
 {
     return _pRoot;
@@ -95,7 +95,7 @@ CtlMediaServer::getConnectionManager()
 }
 
 
-CtlMediaObject2*
+CtlMediaObject*
 CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
 {
     std::string result;
@@ -108,7 +108,7 @@ CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
         return 0;
     }
 
-    CtlMediaObject2* pObject = createMediaObject();
+    CtlMediaObject* pObject = createMediaObject();
     MediaObjectReader reader;
     try {
         reader.read(pObject, result);
@@ -122,7 +122,7 @@ CtlMediaServer::getMediaObjectFromResource(const std::string& resource)
 
 
 void
-CtlMediaServer::selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject, ui4 row)
+CtlMediaServer::selectMediaObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row)
 {
     LOG(upnpav, debug, "media server object selected: " + pObject->getTitle());
 

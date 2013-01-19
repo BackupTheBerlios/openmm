@@ -42,7 +42,7 @@
 #include "UpnpAvRenderer.h"
 #include "UpnpAvCtlServer.h"
 
-#include "UpnpAvCtlObject2.h"
+#include "UpnpAvCtlObject.h"
 #include "UpnpAvRenderer.h"
 #include "UpnpAvServer.h"
 
@@ -428,7 +428,7 @@ public:
 
     virtual void initController();
 
-    virtual Av::CtlMediaObject2* createMediaObject();
+    virtual Av::CtlMediaObject* createMediaObject();
 
     virtual void newSystemUpdateId(ui4 id);
 
@@ -481,7 +481,7 @@ private:
 };
 
 
-class MediaObjectModel : public Av::CtlMediaObject2, public Gui::ListItemModel
+class MediaObjectModel : public Av::CtlMediaObject, public Gui::ListItemModel
 {
     friend class MediaContainerWidget;
 

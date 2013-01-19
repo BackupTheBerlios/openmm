@@ -90,7 +90,7 @@ QtMediaObject::selectItem(int row)
         return;
     }
 
-    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
+    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChildForRow(row));
     if (!pChildObject) {
         LOGNS(Omm::Av, upnpav, error, "Qt media container cannot get child object (ignoring)");
         return;
@@ -162,7 +162,7 @@ QtMediaObject::getWidget(int row)
     LOGNS(Omm::Av, upnpav, debug, "Qt media object get object widget row: " + Poco::NumberFormatter::format(row));
 
     if (_pObject) {
-        Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
+        Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChildForRow(row));
         // FIXME: had to comment this out, CtlMediaObject should contain no gui code
 //        return pChildObject->getListWidget();
     }
@@ -184,7 +184,7 @@ QtMediaObject::attachWidget(int row, ListWidget* pWidget)
         LOGNS(Omm::Av, upnpav, error, "Qt media object failed to attach object widget (ignoring)");
         return;
     }
-    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
+    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChildForRow(row));
     if (!pChildObject) {
         LOGNS(Omm::Av, upnpav, error, "Qt media object failed to get child object (ignoring)");
         return;
@@ -213,7 +213,7 @@ QtMediaObject::detachWidget(int row)
         LOGNS(Omm::Av, upnpav, error, "Qt media object failed to detach object widget (ignoring)");
         return;
     }
-    Omm::Av::CtlMediaObject2* pChildObject = static_cast<Omm::Av::CtlMediaObject2*>(_pObject->getChildForRow(row));
+    Omm::Av::CtlMediaObject* pChildObject = static_cast<Omm::Av::CtlMediaObject*>(_pObject->getChildForRow(row));
     // FIXME: had to comment this out, CtlMediaObject should contain no gui code
 //    QtMediaObject* pChildWidget = static_cast<QtMediaObject*>(pChildObject->getListWidget());
 //

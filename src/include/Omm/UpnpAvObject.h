@@ -478,10 +478,10 @@ private:
 };
 
 
-class MediaObjectWriter2
+class MediaObjectWriter
 {
 public:
-    MediaObjectWriter2(bool full = true);
+    MediaObjectWriter(bool full = true);
 
     void write(std::string& meta, AbstractMediaObject* pObject, const std::string& filter = "*");
     void writeChildren(std::string& meta, const std::vector<AbstractMediaObject*>& children, const std::string& filter = "*");
@@ -564,100 +564,6 @@ private:
     std::vector<AbstractMediaObject*>   _cache;
     ui4                                 _offset;
     ui4                                 _blockSize;
-};
-
-
-/*--------------- obsolete classes ------------------*/
-
-class Resource
-{
-    friend class MediaObjectOld;
-
-public:
-    Resource(const std::string& uri, const std::string& protInfo, ui4 size);
-
-    const std::string& getUri();
-    const std::string& getProtInfo();
-    std::streamsize getSize();
-
-    void setUri(const std::string& uri);
-    void setProtInfo(const std::string& protInfo);
-
-private:
-    std::string     _uri;
-    std::string     _protInfo;
-    std::streamsize _size;
-};
-
-
-class MediaObjectOld
-{
-    friend class MediaObjectWriter;
-
-public:
-    MediaObjectOld();
-
-    typedef std::map<std::string,std::string>::iterator PropertyIterator;
-    PropertyIterator beginProperty();
-    PropertyIterator endProperty();
-
-    typedef std::vector<MediaObjectOld*>::iterator ChildIterator;
-    ChildIterator beginChildren();
-    ChildIterator endChildren();
-
-    typedef std::vector<Resource*>::iterator ResourceIterator;
-    ResourceIterator beginResource();
-    ResourceIterator endResource();
-
-    void appendChild(MediaObjectOld* pChild);
-    void addResource(Resource* pResource);
-    virtual std::string getObjectId() const;
-    MediaObjectOld* getChild(ui4 num);
-    std::string getParentId();
-    ui4 getChildCount();
-
-    std::string objectId();
-    std::string getTitle();
-
-    bool isContainer();
-    bool isRestricted();
-
-    void setIsContainer(bool isContainer=true);
-    void setObjectId(const std::string& objectId);
-    void setTitle(const std::string& title);
-    void setProperty(const std::string& name, const std::string& value);
-
-protected:
-
-    std::string                             _objectId;
-    bool                                    _restricted;
-    std::map<std::string,std::string>       _properties;
-
-    bool                                    _isContainer;
-    // is Container:
-    MediaObjectOld*                            _parent;
-    std::vector<MediaObjectOld*>               _children;
-    // is Item:
-    std::vector<Resource*>                  _resources;
-};
-
-
-class MediaObjectWriter
-{
-public:
-    MediaObjectWriter(MediaObjectOld* pMediaObject);
-
-    void write(std::string& metaData);
-    ui4 writeChildren(ui4 startingIndex, ui4 requestedCount, std::string& metaData);
-
-private:
-    void writeMetaDataHeader();
-    void writeMetaDataClose(std::string& metaData);
-    void writeMetaData(Poco::XML::Element* pDidl);
-
-    MediaObjectOld*                            _pMediaObject;
-    Poco::AutoPtr<Poco::XML::Document>      _pDoc;
-    Poco::AutoPtr<Poco::XML::Element>       _pDidl;
 };
 
 

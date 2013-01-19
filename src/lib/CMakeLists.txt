@@ -114,7 +114,6 @@ Upnp/Av/UpnpAvCtlDevices.cpp
 Upnp/Av/UpnpAvCtlRenderer.cpp
 Upnp/Av/UpnpAvCtlServer.cpp
 Upnp/Av/UpnpAvCtlObject.cpp
-Upnp/Av/UpnpAvCtlObject2.cpp
 Upnp/Av/UpnpAvCtlImpl.cpp
 Upnp/Av/UpnpAvDevices.cpp
 Upnp/Av/UpnpAvRenderer.cpp

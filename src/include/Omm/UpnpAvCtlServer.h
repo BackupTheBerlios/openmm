@@ -27,14 +27,14 @@
 
 #include "Upnp.h"
 #include "UpnpInternal.h"
-#include "UpnpAvCtlObject2.h"
+#include "UpnpAvCtlObject.h"
 
 
 namespace Omm {
 namespace Av {
 
 class CtlMediaServerCode;
-class CtlMediaObject2;
+class CtlMediaObject;
 
 
 class CtlMediaServer : public Device
@@ -42,22 +42,22 @@ class CtlMediaServer : public Device
 public:
     virtual void addCtlDeviceCode();
 
-    virtual CtlMediaObject2* createMediaObject();
-    CtlMediaObject2* getRootObject() const;
+    virtual CtlMediaObject* createMediaObject();
+    CtlMediaObject* getRootObject() const;
 
-    void selectMediaObject(CtlMediaObject2* pObject, CtlMediaObject2* pParentObject = 0, ui4 row = 0);
+    void selectMediaObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject = 0, ui4 row = 0);
 
 //protected:
     void browseRootObject();
 
     ConnectionManager* getConnectionManager();
-    CtlMediaObject2* getMediaObjectFromResource(const std::string& resource);
+    CtlMediaObject* getMediaObjectFromResource(const std::string& resource);
 
     virtual void newSystemUpdateId(ui4 id) {}
 
 private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
-    CtlMediaObject2*      _pRoot;
+    CtlMediaObject*      _pRoot;
 };
 
 
