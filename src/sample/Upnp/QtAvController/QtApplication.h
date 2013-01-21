@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -18,57 +18,60 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef Visual_INCLUDED
-#define Visual_INCLUDED
 
-#include <Poco/Types.h>
+#ifndef QtApplication_INCLUDED
+#define QtApplication_INCLUDED
 
-namespace Omm {
-namespace Sys {
+#include <QtGui>
+
+#include <Omm/Upnp.h>
 
 
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
+class QtController;
+class QtMainWindow;
+class QStackedWidget;
+class QtVisual;
+class QtBrowserWidget;
+class QtPlayerRack;
+class QtControlPanel;
+class QtEventFilter;
+
+
+class QtApplication : public QObject
 {
+    Q_OBJECT
+
 public:
-    enum VisualType {VTNone, VTX11, VTFB, VTQt, VTOSX, VTWin};
+    QtApplication();
+    virtual ~QtApplication();
 
-#ifdef __LINUX__
-    typedef Poco::UInt32 WindowHandle;
-#elif __DARWIN__
-    typedef uint32_t WindowHandle;
-#elif __WINDOWS__
-    typedef void* WindowHandle;
-#endif
+    virtual void setWindowTitle(const std::string& title);
+    virtual void initApplication(int argc = 0, char** argv = 0);
+    virtual int eventLoop();
+    virtual void quit();
 
-    Visual();
-    virtual ~Visual() {}
+    void addToolBar(QToolBar* pToolBar);
 
-    virtual void show() {}
-    virtual void hide() {}
-
-    virtual void* getWindow() { return 0; }
-    virtual WindowHandle getWindowId() { return 0; }
-    virtual VisualType getType() { return VTNone; }
-    virtual void renderImage(const std::string& imageData) {}
-    virtual void blank() {}
-
-    int getWidth();
-    int getHeight();
-    bool getFullscreen();
-    void setWidth(int width);
-    void setHeight(int height);
-    void setFullscreen(bool fullscreen = true);
+signals:
+    void doQuit();
 
 private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
+    int                                 _argc;
+
+    QApplication*                       _pApp;
+    QtEventFilter*                      _pEventFilter;
+    QMainWindow*                        _pMainWindow;
+    QStackedWidget*                     _pMainWidget;
+    QtBrowserWidget*                    _pBrowserWidget;
+    QtPlayerRack*                       _pPlayerRack;
+    QtControlPanel*                     _pControlPanel;
+    QtVisual*                           _pVisual;
+    QtController*                       _pController;
+
+    bool                                _menuVisible;
+    bool                                _playerRackVisible;
+    bool                                _fullscreen;
 };
 
-
-}  // namespace Sys
-}  // namespace Omm
 
 #endif

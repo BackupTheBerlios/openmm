@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -18,57 +18,73 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef Visual_INCLUDED
-#define Visual_INCLUDED
 
-#include <Poco/Types.h>
-
-namespace Omm {
-namespace Sys {
+#include "QtApplication.h"
+#include "QtController.h"
 
 
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
+QtApplication::QtApplication()
 {
-public:
-    enum VisualType {VTNone, VTX11, VTFB, VTQt, VTOSX, VTWin};
-
-#ifdef __LINUX__
-    typedef Poco::UInt32 WindowHandle;
-#elif __DARWIN__
-    typedef uint32_t WindowHandle;
-#elif __WINDOWS__
-    typedef void* WindowHandle;
-#endif
-
-    Visual();
-    virtual ~Visual() {}
-
-    virtual void show() {}
-    virtual void hide() {}
-
-    virtual void* getWindow() { return 0; }
-    virtual WindowHandle getWindowId() { return 0; }
-    virtual VisualType getType() { return VTNone; }
-    virtual void renderImage(const std::string& imageData) {}
-    virtual void blank() {}
-
-    int getWidth();
-    int getHeight();
-    bool getFullscreen();
-    void setWidth(int width);
-    void setHeight(int height);
-    void setFullscreen(bool fullscreen = true);
-
-private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
-};
+}
 
 
-}  // namespace Sys
-}  // namespace Omm
+QtApplication::~QtApplication()
+{
+}
 
-#endif
+
+void
+QtApplication::addToolBar(QToolBar* pToolBar)
+{
+    _pMainWindow->addToolBar(Qt::BottomToolBarArea, pToolBar);
+}
+
+
+void
+QtApplication::initApplication(int argc, char** argv)
+{
+    LOGNS(Omm, upnp, debug, "init qt application ...");
+
+    _pApp = new QApplication(_argc, 0);
+
+    _pMainWindow = new QMainWindow;
+    _pController = new QtController(this);
+    _pMainWindow->setCentralWidget(_pController);
+    _pMainWindow->resize(800, 480);
+    _pMainWindow->setWindowTitle("QtAvController");
+
+//    connect(_pVisual, SIGNAL(showMenu(bool)), this, SLOT(showMenu(bool)));
+//    connect(this, SIGNAL(volSliderMoved(int)), _pControlPanel, SIGNAL(volSliderMoved(int)));
+
+    _pMainWindow->show();
+
+    _pController->init();
+    _pController->setState(Omm::Controller::Started);
+
+    LOGNS(Omm, upnp, debug, "finished init qt application.");
+}
+
+
+void
+QtApplication::setWindowTitle(const std::string& title)
+{
+    _pMainWindow->setWindowTitle(QString::fromStdString(title));
+}
+
+
+int
+QtApplication::eventLoop()
+{
+    int ret = _pApp->exec();
+    _pController->setState(Omm::Controller::Stopped);
+    return ret;
+}
+
+
+void
+QtApplication::quit()
+{
+    emit doQuit();
+}
+
+

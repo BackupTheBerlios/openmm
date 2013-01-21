@@ -13,3 +13,7 @@ add_subdirectory(
 Dvb
 )
 endif(OMM_DVB)
+
+add_subdirectory(
+Upnp
+)

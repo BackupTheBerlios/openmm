@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010, 2011                                           |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -18,57 +18,36 @@
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
-#ifndef Visual_INCLUDED
-#define Visual_INCLUDED
 
-#include <Poco/Types.h>
+#include <Omm/UpnpAv.h>
 
-namespace Omm {
-namespace Sys {
+#include "QtController.h"
+#include "QtMediaServerGroup.h"
+#include "QtMediaRendererGroup.h"
+#include "QtApplication.h"
+#include "QtDeviceGroup.h"
+#include "QtMediaRendererControlPanel.h"
 
 
-class Visual
-    /// Visual is a basic window that can be supplied by the graphical user
-    /// interface of the OS.
+QtController::QtController(QtApplication* pQtApplication) :
+_pQtApplication(pQtApplication)
 {
-public:
-    enum VisualType {VTNone, VTX11, VTFB, VTQt, VTOSX, VTWin};
+    LOGNS(Omm, upnp, debug, "qt controller ctor ...");
 
-#ifdef __LINUX__
-    typedef Poco::UInt32 WindowHandle;
-#elif __DARWIN__
-    typedef uint32_t WindowHandle;
-#elif __WINDOWS__
-    typedef void* WindowHandle;
-#endif
+    QtMediaServerGroup* pServerGroup = new QtMediaServerGroup;
+    registerDeviceGroup(pServerGroup);
+    pServerGroup->showDeviceGroup();
 
-    Visual();
-    virtual ~Visual() {}
+    QtMediaRendererGroup* pRendererGroup = new QtMediaRendererGroup;
+    registerDeviceGroup(pRendererGroup);
+    pRendererGroup->showDeviceGroup();
 
-    virtual void show() {}
-    virtual void hide() {}
-
-    virtual void* getWindow() { return 0; }
-    virtual WindowHandle getWindowId() { return 0; }
-    virtual VisualType getType() { return VTNone; }
-    virtual void renderImage(const std::string& imageData) {}
-    virtual void blank() {}
-
-    int getWidth();
-    int getHeight();
-    bool getFullscreen();
-    void setWidth(int width);
-    void setHeight(int height);
-    void setFullscreen(bool fullscreen = true);
-
-private:
-    int             _width;
-    int             _height;
-    bool            _fullscreen;
-};
+    LOGNS(Omm, upnp, debug, "qt controller ctor finished.");
+}
 
 
-}  // namespace Sys
-}  // namespace Omm
-
-#endif
+void
+QtController::addPanel(QToolBar* pPanel)
+{
+    _pQtApplication->addToolBar(pPanel);
+}

@@ -1,23 +1,3 @@
-#add_executable(ommold
-#OldOmmApplication.cpp
-#)
-
-#target_link_libraries(ommold
-#${OMM_AV}
-#${OMM}
-#${OMM_UTIL}
-#)
-
-#add_executable(stdomm
-#OmmStdApplication.cpp
-#)
-
-#target_link_libraries(stdomm
-#${OMM}
-#${OMM_UTIL}
-#${OMM_AV}
-#)
-
 if(OMM_GUI)
 
 if(WINDOWS)
@@ -45,8 +25,3 @@ RUNTIME DESTINATION bin
 LIBRARY DESTINATION lib
 )
 endif(OMM_GUI)
-
-#install(TARGETS stdomm
-#RUNTIME DESTINATION bin
-#LIBRARY DESTINATION lib
-#)

@@ -334,12 +334,12 @@ MediaRendererGroupDelegate::init()
     LOG(upnpav, debug, "media renderer delegate init");
     Controller* pController = _pDeviceGroup->getController();
 //    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaItemNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
-    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaObjectSelectedNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler2));
+    pController->registerDeviceNotificationHandler(Poco::Observer<MediaRendererGroupDelegate, MediaObjectSelectedNotification>(*this, &MediaRendererGroupDelegate::mediaItemSelectedHandler));
 }
 
 
 void
-MediaRendererGroupDelegate::mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification)
+MediaRendererGroupDelegate::mediaItemSelectedHandler(MediaObjectSelectedNotification* pMediaItemNotification)
 {
 //    CtlMediaObject* pItem = pMediaItemNotification->getMediaItem();
     LOG(upnpav, debug, "media renderer delegate got media item notification: " + pMediaItemNotification->_pObject->getTitle());

@@ -33,7 +33,8 @@ namespace Av {
 
 CtlMediaObject::CtlMediaObject() :
 _pServer(0),
-_pServerCode(0)
+_pServerCode(0),
+_pParent(0)
 {
 }
 
@@ -55,6 +56,7 @@ CtlMediaObject::createChildObject()
     CtlMediaObject* pChildObject = _pServer->createMediaObject();
     pChildObject->_pServer = _pServer;
     pChildObject->_pServerCode = _pServerCode;
+    pChildObject->_pParent = this;
     return pChildObject;
 }
 
@@ -107,6 +109,13 @@ AbstractMediaObject*
 CtlMediaObject::getChildForRow(ui4 row)
 {
     return BlockCache::getMediaObjectForRow(row);
+}
+
+
+AbstractMediaObject*
+CtlMediaObject::getParent()
+{
+    return _pParent;
 }
 
 

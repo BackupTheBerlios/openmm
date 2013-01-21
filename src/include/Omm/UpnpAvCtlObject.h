@@ -65,6 +65,7 @@ public:
     bool fetchedAllChildren();
     /// offset -1 means fetch from offset = childCount()
     virtual AbstractMediaObject* getChildForRow(ui4 row);
+    AbstractMediaObject* getParent();
 
     Icon* getIcon();
     Icon* getImageRepresentation();
@@ -80,6 +81,7 @@ private:
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
     std::string                      _searchText;
+    AbstractMediaObject*             _pParent;
 };
 
 
@@ -93,7 +95,7 @@ public:
 //private:
     CtlMediaObject*     _pObject;
     CtlMediaObject*     _pParentObject;
-    ui4                  _row;
+    ui4                 _row;
 };
 
 

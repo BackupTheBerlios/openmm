@@ -95,7 +95,7 @@ public:
 private:
     virtual void init();
 
-    void mediaItemSelectedHandler2(MediaObjectSelectedNotification* pMediaItemNotification);
+    void mediaItemSelectedHandler(MediaObjectSelectedNotification* pMediaItemNotification);
 };
 
 
