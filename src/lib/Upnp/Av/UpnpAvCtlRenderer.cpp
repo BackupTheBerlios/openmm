@@ -58,10 +58,13 @@ CtlMediaRenderer::addCtlDeviceCode()
 void
 CtlMediaRenderer::setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row)
 {
+    CtlMediaServer* pServer = pObject->getServer();
     // TODO: select the best resource, not the first one
     AbstractResource* pRes = pObject->getResource();
-    AbstractResource* pContainerRes = pParentObject->getResource();
-    CtlMediaServer* pServer = pObject->getServer();
+    AbstractResource* pContainerRes = 0;
+    if (pParentObject) {
+        pContainerRes = pParentObject->getResource();
+    }
 
     // when setting AVTransportUri, server and renderer are connected via ControlManager service
     Connection* pConnection = new Connection(pServer->getUuid(), getUuid());

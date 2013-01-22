@@ -23,10 +23,9 @@
 
 
 QtNowPlaying::QtNowPlaying(QWidget* pParent) :
-QPushButton(pParent)
+QLabel(pParent)
 {
     setMinimumWidth(250);
-    setCheckable(true);
 }
 
 
@@ -81,8 +80,8 @@ QToolBar("ControlPanel")
     addWidget(_pVolumeSlider);
     addWidget(_pSeekSlider);
 
-    _pPlayerRackButton = new QtNowPlaying(this);
-    addWidget(_pPlayerRackButton);
+    _pNowPlaying = new QtNowPlaying(this);
+    addWidget(_pNowPlaying);
 
     setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 
@@ -115,7 +114,7 @@ QtMediaRendererControlPanel::~QtMediaRendererControlPanel()
     delete _pPlayButton;
     delete _pStopButton;
     delete _pForwardButton;
-    delete _pPlayerRackButton;
+    delete _pNowPlaying;
     delete _pVolumeSlider;
     delete _pSeekSlider;
 }
@@ -124,55 +123,8 @@ QtMediaRendererControlPanel::~QtMediaRendererControlPanel()
 void
 QtMediaRendererControlPanel::setPlayerName(const std::string& name)
 {
-    _pPlayerRackButton->setPlayerName(name);
+    _pNowPlaying->setPlayerName(name);
 }
-
-
-//void
-//QtMediaRendererControlPanel::playButtonPressed()
-//{
-//    if (_playToggle) {
-//        if (_pAvInterface) {
-//            _pAvInterface->playPressed();
-//        }
-//        else {
-////            _pApplication->playPressed();
-//        }
-//        // TODO: only toggle play button to pause, if media is really playing
-//        _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-//        _playToggle = false;
-//    }
-//    else {
-//        if (_pAvInterface) {
-//            _pAvInterface->pausePressed();
-//        }
-//        else {
-////            _pApplication->pausePressed();
-//        }
-//        _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-//        _playToggle = true;
-//    }
-//    _pStopButton->setEnabled(true);
-//    _pForwardButton->setEnabled(true);
-//    _pBackButton->setEnabled(true);
-//}
-
-
-//void
-//QtMediaRendererControlPanel::stopButtonPressed()
-//{
-//    if (_pAvInterface) {
-//        _pAvInterface->stopPressed();
-//    }
-//    else {
-////        _pApplication->stopPressed();
-//    }
-//    _pPlayButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-//    _playToggle = true;
-//    _pStopButton->setEnabled(false);
-//    _pForwardButton->setEnabled(false);
-//    _pBackButton->setEnabled(false);
-//}
 
 
 void
@@ -206,30 +158,6 @@ QtMediaRendererControlPanel::setTrackInfo(const QString& title, const QString& a
 //    _rendererWidget._artist->setText(artist);
 //    _rendererWidget._album->setText(album);
 }
-
-
-//void
-//QtMediaRendererControlPanel::positionSliderMoved(int position)
-//{
-//    if (_pAvInterface) {
-//        _pAvInterface->positionMoved(position);
-//    }
-//    else {
-////        _pApplication->positionMoved(position);
-//    }
-//}
-
-
-//void
-//QtMediaRendererControlPanel::volumeSliderMoved(int value)
-//{
-//    if (_pAvInterface) {
-//        _pAvInterface->volumeChanged(value);
-//    }
-//    else {
-////        _pApplication->volumeChanged(value);
-//    }
-//}
 
 
 void

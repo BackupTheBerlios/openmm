@@ -47,6 +47,11 @@ QtNavigatorPanel::QtNavigatorPanel(QWidget* pParent) :
 QWidget(pParent)
 {
     _pButtonLayout = new QHBoxLayout(this);
+    _pButtonLayout->setAlignment(Qt::AlignLeft);
+    _pButtonLayout->setSpacing(0);
+    _pButtonLayout->setMargin(0);
+    _pButtonLayout->setContentsMargins(0, 0, 0, 0);
+    
 //    _pSignalMapper = new QSignalMapper(this);
 //    connect(this, SIGNAL(popSignal()), this, SLOT(pop()));
 //    connect(_pSignalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonPushed()));

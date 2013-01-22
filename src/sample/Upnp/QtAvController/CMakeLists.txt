@@ -1,7 +1,7 @@
 find_package(Qt4 4.4 COMPONENTS QtCore QtGui QtSvg)
 if(QT4_FOUND)
 
-# FIXME: on windows, debug builds of Qt plugin fail. The plugin is linked
+# FIXME: on windows, debug builds of Qt sample fail. The plugin is linked
 # against debug and non-debug versions of Qt libs at the same time.
 if(WINDOWS)
 set(CMAKE_BUILD_TYPE "")

@@ -434,13 +434,6 @@ public:
     void registerDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
-//    virtual void showDeviceGroup(DeviceGroup* pDeviceGroup) {}
-
-    // deprecated
-    void setUserInterface(ControllerUserInterface* pUserInterface);
-    // deprecated
-    ControllerUserInterface* getUserInterface();
-
     virtual void signalNetworkActivity(bool on) {}
 
 protected:
@@ -456,10 +449,6 @@ protected:
     virtual void addDeviceContainer(DeviceContainer* pDeviceContainer);
     /// adds device container if not already added before (checks for uuid of root device).
     virtual void removeDeviceContainer(DeviceContainer* pDeviceContainer);
-
-
-    // deprecated
-    ControllerUserInterface*                      _pUserInterface;
 
 private:
     virtual void startSsdp();
@@ -698,41 +687,6 @@ private:
     std::string                     _shortName;
 };
 
-
-
-
-//////////////////////// deprecated ///////////////////////////
-
-
-class ControllerUserInterface
-{
-    friend class Controller;
-    friend class Service;
-
-public:
-    // TODO: pass command line arguments to user interface gui-toolkit
-    virtual int eventLoop() { return 0; }
-    virtual void initGui() {}
-    virtual void showMainWindow() {}
-//     virtual void hideMainWindow() {};
-    virtual Sys::Visual* getVisual() { return 0; }
-    virtual void setFullscreen(bool fullscreen) {}
-    virtual void resize(int width, int height) {}
-
-protected:
-    virtual void beginAddDeviceContainer(int position) {}
-    /// Before a device container is added, beginAddDevice() is called.
-    virtual void beginRemoveDeviceContainer(int position) {}
-    /// Before a device container is removed, beginRemoveDevice() is called.
-    virtual void endAddDeviceContainer(int position) {}
-    /// After adding a device container, endAddDevice() is called.
-    virtual void endRemoveDeviceContainer(int position) {}
-    /// After removing a device container, endRemoveDevice() is called.
-
-    virtual void error(const std::string& message) {}
-    virtual void beginNetworkActivity() {}
-    virtual void endNetworkActivity() {}
-};
 
 } // namespace Omm
 

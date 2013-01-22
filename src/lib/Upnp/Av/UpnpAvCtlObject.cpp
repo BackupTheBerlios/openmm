@@ -62,12 +62,11 @@ CtlMediaObject::createChildObject()
 
 
 int
-CtlMediaObject::fetchChildren(ui4 count, ui4 offset)
+CtlMediaObject::fetchChildren()
 {
     std::string objectId = getId();
-    if (offset == -1) {
-        offset = getChildCount();
-    }
+    ui4 count = 10;
+    ui4 offset = getFetchedChildCount();
     LOG(upnpav, debug, "controller media object fetch children of object with id: " + objectId\
                                     + ", number of requested children: " + Poco::NumberFormatter::format(count)\
                                     + ", child offset: " + Poco::NumberFormatter::format(offset));
@@ -100,15 +99,20 @@ CtlMediaObject::fetchChildren(ui4 count, ui4 offset)
 bool
 CtlMediaObject::fetchedAllChildren()
 {
-//    LOG(upnpav, debug, "AbstractMediaObject::fetchedAllChildren()");
-    return getChildCount() >= getFetchedChildCount();
+    LOG(upnpav, debug, "CtlMediaObject::fetchedAllChildren() fetched children: " + Poco::NumberFormatter::format(getFetchedChildCount()) + ", total: " + Poco::NumberFormatter::format(getChildCount()));
+    return getChildCount() <= getFetchedChildCount();
 }
 
 
 AbstractMediaObject*
-CtlMediaObject::getChildForRow(ui4 row)
+CtlMediaObject::getChildForRow(ui4 row, bool useBlockCache)
 {
-    return BlockCache::getMediaObjectForRow(row);
+    if (useBlockCache) {
+        return BlockCache::getMediaObjectForRow(row);
+    }
+    else {
+        return MemoryMediaObject::getChildForRow(row);
+    }
 }
 
 

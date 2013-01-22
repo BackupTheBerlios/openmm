@@ -123,8 +123,7 @@ QtDeviceGroup::initGui()
     _pDeviceListView->setItemDelegate(_pItemDelegate);
     _pDeviceListView->setModel(this);
     _pDeviceListView->setUniformItemSizes(true);
-    // activated() is return, click or double click, selected() is click or double click on it.
-    connect(_pDeviceListView, SIGNAL(activated(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
+    connect(_pDeviceListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(selectedModelIndex(const QModelIndex&)));
 
     _pNavigator = new QtNavigator;
     // push this Navigable on the Navigator, the actual widget pushed is _pDeviceListView (returned by getWidget()).

@@ -33,7 +33,6 @@ namespace Av {
 void
 CtlMediaServer::addCtlDeviceCode()
 {
-    // FIXME: don't pass UserInterface but this to each service implementation
     _pCtlMediaServerCode = new CtlMediaServerCode(this,
         new CtlContentDirectoryImpl(this),
         new CtlConnectionManagerImpl(this),
@@ -57,7 +56,7 @@ CtlMediaServer::getRootObject() const
 
 
 void
-CtlMediaServer::browseRootObject()
+CtlMediaServer::browseRootObject(bool useBlockCache)
 {
     LOG(upnpav, debug, "browse root object ...");
     _pRoot = createMediaObject();
@@ -78,11 +77,13 @@ CtlMediaServer::browseRootObject()
     }
     _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
-//    _pRoot->setFetchedAllChildren(false);
     if (_pRoot->isContainer()) {
         // don't rely on childCount attribute being present in root container, so we have to fetch some children to get total child count.
         LOG(upnpav, debug, "controller root object is container, fetching children ...");
-        _pRoot->getChildForRow(0);
+        if (!useBlockCache) {
+            _pRoot->fetchChildren();
+        }
+        _pRoot->getChildForRow(0, useBlockCache);
     }
     LOG(upnpav, debug, "browse root object finished.");
 }

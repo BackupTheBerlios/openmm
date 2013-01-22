@@ -2079,15 +2079,6 @@ Service::actionNetworkActivity(bool begin)
     Controller* pController = getDevice()->getDeviceContainer()->getController();
     if (pController) {
         pController->signalNetworkActivity(begin);
-        ControllerUserInterface* pUserInterface = pController->getUserInterface();
-        if (pUserInterface) {
-            if (begin) {
-                pUserInterface->beginNetworkActivity();
-            }
-            else {
-                pUserInterface->endNetworkActivity();
-            }
-        }
     }
 }
 
@@ -3938,8 +3929,7 @@ CtlDeviceCode::init()
 
 
 Controller::Controller() :
-DeviceManager(new Socket),
-_pUserInterface(0)
+DeviceManager(new Socket)
 {
 }
 
@@ -3994,20 +3984,6 @@ Controller::getDeviceGroup(const std::string& deviceType)
     else {
         return 0;
     }
-}
-
-
-void
-Controller::setUserInterface(ControllerUserInterface* pUserInterface)
-{
-    _pUserInterface = pUserInterface;
-}
-
-
-ControllerUserInterface*
-Controller::getUserInterface()
-{
-    return _pUserInterface;
 }
 
 
@@ -4095,10 +4071,6 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (!_deviceContainers.contains(uuid)) {
-        if (_pUserInterface) {
-            _pUserInterface->beginAddDeviceContainer(_deviceContainers.size());
-        }
-
         addDeviceContainer(pDeviceContainer, _deviceContainers.size(), true);
         DeviceManager::addDeviceContainer(pDeviceContainer);
         pDeviceContainer->_pController = this;
@@ -4122,10 +4094,6 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         }
 
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
-
-        if (_pUserInterface) {
-            _pUserInterface->endAddDeviceContainer(_deviceContainers.size() - 1);
-        }
     }
 }
 
@@ -4139,9 +4107,6 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
     if (_deviceContainers.contains(uuid)) {
         DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         int position = _deviceContainers.position(uuid);
-        if (_pUserInterface) {
-            _pUserInterface->beginRemoveDeviceContainer(position);
-        }
         removeDeviceContainer(pDeviceContainer, position, true);
         DeviceManager::removeDeviceContainer(pDeviceContainer);
 
@@ -4155,9 +4120,6 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
         }
 
         removeDeviceContainer(pDeviceContainer, position, false);
-        if (_pUserInterface) {
-            _pUserInterface->endRemoveDeviceContainer(position);
-        }
         pDeviceContainer->_pController = 0;
     }
 }

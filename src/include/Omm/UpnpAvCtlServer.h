@@ -48,7 +48,7 @@ public:
     void selectMediaObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject = 0, ui4 row = 0);
 
 //protected:
-    void browseRootObject();
+    void browseRootObject(bool useBlockCache = true);
 
     ConnectionManager* getConnectionManager();
     CtlMediaObject* getMediaObjectFromResource(const std::string& resource);

@@ -61,11 +61,12 @@ public:
     virtual void setId(const std::string& id);
     void setSearch(const std::string& searchText);
 
-    int fetchChildren(ui4 count = 10, ui4 offset = -1);
+    int fetchChildren();
     bool fetchedAllChildren();
-    /// offset -1 means fetch from offset = childCount()
-    virtual AbstractMediaObject* getChildForRow(ui4 row);
     AbstractMediaObject* getParent();
+
+    virtual AbstractMediaObject* getChildForRow(ui4 row, bool useBlockCache = true);
+    /// if you don't use the block cache, you have to fetch some children first with fetchChildren()
 
     Icon* getIcon();
     Icon* getImageRepresentation();

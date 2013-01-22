@@ -34,8 +34,6 @@ class QtMediaServerWidget;
 class QtMediaContainer : public QtNavigable
 {
     friend class QtMediaServerWidget;
-    friend class QtMediaServer;
-    friend class QtMediaServerGroup;
 
 public:
     QtMediaContainer();
@@ -47,8 +45,8 @@ public:
 
 private:
     Omm::Av::CtlMediaObject*    _pObject;
-    QtMediaServerWidget*      _pServerWidget;
-    QModelIndex                  _modelIndex;
+    QtMediaServerWidget*        _pServerWidget;
+    QModelIndex                 _modelIndex;
 };
 
 

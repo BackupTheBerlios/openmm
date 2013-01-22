@@ -25,7 +25,7 @@
 #include <QtGui>
 
 
-class QtNowPlaying : public QPushButton
+class QtNowPlaying : public QLabel
 {
 public:
     QtNowPlaying(QWidget* pParent = 0);
@@ -66,9 +66,6 @@ public slots:
     void setVolumeSlider(int val);
     void setTrackInfo(const QString& title, const QString& artist, const QString& album);
 
-//    void positionSliderMoved(int position);
-//    void volumeSliderMoved(int value);
-
 private slots:
 //        QAbstractSlider emits signal valueChanged() when the slider was
 //        once moved and some time later (a new track is loaded), the range
@@ -89,7 +86,7 @@ private:
     QSlider*                            _pVolumeSlider;
     QSlider*                            _pSeekSlider;
 
-    QtNowPlaying*                       _pPlayerRackButton;
+    QtNowPlaying*                       _pNowPlaying;
 
     bool                                _sliderMoved;
     bool                                _playToggle;
