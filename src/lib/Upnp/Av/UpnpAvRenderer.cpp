@@ -142,7 +142,12 @@ Engine::seekTrack(ui4 trackNumber)
 {
     LOG(upnpav, debug, "engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
     _trackNumberInPlaylist = trackNumber;
-    setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+    if (_trackNumberInPlaylist && _trackNumberInPlaylist < _playlist.size()) {
+        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+    }
+    else {
+        LOG(upnpav, error, "track number " + Poco::NumberFormatter::format(_trackNumberInPlaylist) + " not in range for playlist size " + Poco::NumberFormatter::format(_playlist.size()));
+    }
 }
 
 
@@ -152,7 +157,12 @@ Engine::nextTrack()
     if (_trackNumberInPlaylist < _playlist.size() - 1) {
         _trackNumberInPlaylist++;
         LOG(upnpav, debug, "engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
-        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+        if (_trackNumberInPlaylist < _playlist.size()) {
+            setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+        }
+        else {
+            LOG(upnpav, error, "track number " + Poco::NumberFormatter::format(_trackNumberInPlaylist) + " too large for playlist size " + Poco::NumberFormatter::format(_playlist.size()));
+        }
     }
 }
 
@@ -163,7 +173,12 @@ Engine::previousTrack()
     if (_trackNumberInPlaylist >= 1) {
         _trackNumberInPlaylist--;
         LOG(upnpav, debug, "engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
-        setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+        if (_trackNumberInPlaylist) {
+            setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
+        }
+        else {
+            LOG(upnpav, error, "track number " + Poco::NumberFormatter::format(_trackNumberInPlaylist) + " must be positive.");
+        }
     }
 }
 

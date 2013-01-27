@@ -1494,8 +1494,6 @@ public:
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->backPressed();
-        pRenderer->stopPressed();
-        pRenderer->playPressed();
     }
 
     Gui::Image _image;
@@ -1589,8 +1587,6 @@ public:
     {
         MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
         pRenderer->forwardPressed();
-        pRenderer->stopPressed();
-        pRenderer->playPressed();
     }
 
     Gui::Image _image;

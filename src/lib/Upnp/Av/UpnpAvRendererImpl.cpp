@@ -272,8 +272,6 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
         }
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
-                // NOTE: not shure if we should stop here, or in the engine (if necessary)
-//                _engines[InstanceID]->stop();
                 std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
@@ -337,6 +335,9 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
             ui4 trackNumber;
             track.getValue(trackNumber);
             _engines[InstanceID]->seekTrack(trackNumber);
+            if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+                _engines[InstanceID]->play();
+            }
         }
         else if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
             ui4 position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
@@ -362,6 +363,9 @@ DevAVTransportRendererImpl::Next(const ui4& InstanceID)
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
         _engines[InstanceID]->nextTrack();
+        if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+            _engines[InstanceID]->play();
+        }
     }
 }
 
@@ -375,6 +379,9 @@ DevAVTransportRendererImpl::Previous(const ui4& InstanceID)
     if (transportState == AvTransportArgument::TRANSPORT_STATE_STOPPED
         || transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
         _engines[InstanceID]->previousTrack();
+        if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+            _engines[InstanceID]->play();
+        }
     }
 }
 
