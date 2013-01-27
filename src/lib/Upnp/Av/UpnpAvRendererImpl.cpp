@@ -237,7 +237,8 @@ DevAVTransportRendererImpl::Stop(const ui4& InstanceID)
             }
         }
 
-        if (transportState == "PLAYING" || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
+        if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING
+                || transportState == AvTransportArgument::TRANSPORT_STATE_PAUSED_PLAYBACK) {
         // TODO: reset positions and speed (this is not mentioned in the AVTransport 1.0 specs ...)?
         //       what does Stop() mean when in TRANSITIONING state?
         //       -> stop transitioning and start playback at current position?
@@ -272,7 +273,7 @@ DevAVTransportRendererImpl::Play(const ui4& InstanceID, const std::string& Speed
         else if (transportState == AvTransportArgument::TRANSPORT_STATE_PLAYING) {
             if (_getCurrentTrackURI() != _lastCurrentTrackUri) {
                 // NOTE: not shure if we should stop here, or in the engine (if necessary)
-                _engines[InstanceID]->stop();
+//                _engines[InstanceID]->stop();
                 std::string pos = AvTransportArgument::CURRENT_TRACK_DURATION_0;
                 _setAbsoluteTimePosition(pos);
                 _setRelativeTimePosition(pos);
