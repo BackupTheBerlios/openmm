@@ -106,7 +106,7 @@ ButtonViewImpl::setImage(Image* pImage)
 void
 ButtonViewImpl::pushed()
 {
-//    LOG(gui, debug, "button implementation, calling pushed virtual method");
+    LOG(gui, debug, "button implementation, calling pushed virtual method");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
     IMPL_NOTIFY_CONTROLLER(ButtonController, pushed);
 }

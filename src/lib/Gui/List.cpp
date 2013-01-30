@@ -57,7 +57,7 @@ void
 ListItemController::selected()
 {
     LOG(gui, debug, "list item controller selected row: " + Poco::NumberFormatter::format(_row));
-    _pListView->selectedItem(_row);
+    _pListView->selectedItem(_row, false);
 }
 
 
@@ -160,10 +160,10 @@ ListScrollAreaController::keyPressed(KeyCode key)
     LOG(gui, debug, "list scroll area key pressed");
     switch (key) {
         case Controller::KeyUp:
-            _pListView->highlightItem(_pListView->_highlightedRow - 1);
+            _pListView->highlightItem(_pListView->_highlightedRow - 1, false);
             break;
         case Controller::KeyDown:
-            _pListView->highlightItem(_pListView->_highlightedRow + 1);
+            _pListView->highlightItem(_pListView->_highlightedRow + 1, false);
             break;
         case Controller::KeyReturn:
             _pListView->selectHighlightedItem();
@@ -172,7 +172,7 @@ ListScrollAreaController::keyPressed(KeyCode key)
 }
 
 
-ListView::ListView(View* pParent) :
+ListView::ListView(View* pParent, SelectionType selectionType) :
 ScrollAreaView(pParent),
 #ifdef __IPHONE__
 _itemViewHeight(50),
@@ -186,7 +186,8 @@ _pSelectionView(0),
 _pSelectedModel(0),
 _highlightedRow(-1),
 _pTopView(0),
-_dragMode(DragNone)
+_dragMode(DragNone),
+_selectionType(selectionType)
 {
     attachController(new ListScrollAreaController(this));
 //    setBackgroundColor(Color("white"));
@@ -210,7 +211,7 @@ ListView::setItemViewHeight(int height)
 void
 ListView::selectRow(int row)
 {
-    selectedItem(row);
+    selectedItem(row, true);
 }
 
 
@@ -246,6 +247,13 @@ void
 ListView::setDragMode(int dragMode)
 {
     _dragMode = dragMode;
+}
+
+
+void
+ListView::setSelectionType(SelectionType selectionType)
+{
+    _selectionType = selectionType;
 }
 
 
@@ -303,8 +311,9 @@ ListView::showItemsAt(int rowOffset, int itemOffset, int countItems)
         moveItemView(rowOffset + index, pView);
         pView->show();
         if (pItemModel == _pSelectedModel) {
-            _pSelectionView->show();
             moveItemView(rowOffset + index, _pSelectionView);
+            _pSelectionView->show();
+            _pSelectionView->raise();
         }
     }
 }
@@ -486,7 +495,7 @@ ListView::extendViewPool()
             return;
         }
 //        LOG(gui, debug, "list view extend view created item view " + pView->getName());
-        pView->hide();
+        pView->hide(false);
         _viewPool.push_back(pView);
         putFreeView(pView);
         addItemView(pView);
@@ -506,12 +515,12 @@ ListView::extendViewPool()
 //        LOG(gui, debug, "allocate view[" + Poco::NumberFormatter::format(i) + "]: " + Poco::NumberFormatter::format(pView));
     }
     if (!_pSelectionView) {
-        _pSelectionView = new SelectionView;
+        _pSelectionView = new SelectionView(_selectionType);
         _pSelectionView->setParentView(getAreaView());
-        _pSelectionView->hide(true);
+        _pSelectionView->hide(false);
     }
     else {
-        _pSelectionView->raise();
+        _pSelectionView->raise(false);
     }
 }
 
@@ -677,7 +686,7 @@ ListView::setItemViewWidth(int width)
 
 
 void
-ListView::selectedItem(int row)
+ListView::selectedItem(int row, bool async)
 {
     LOG(gui, debug, "list view selected item: " + Poco::NumberFormatter::format(row));
 
@@ -685,13 +694,13 @@ ListView::selectedItem(int row)
 //        return;
 //    }
 
-    highlightItem(row);
+    highlightItem(row, async);
     NOTIFY_CONTROLLER(ListController, selectedItem, row);
 }
 
 
 void
-ListView::highlightItem(int row)
+ListView::highlightItem(int row, bool async)
 {
     LOG(gui, debug, "list view highlight row: " + Poco::NumberFormatter::format(row) +\
             ", _rowOffset: " + Poco::NumberFormatter::format(_rowOffset) +\
@@ -721,21 +730,10 @@ ListView::highlightItem(int row)
 
     if (_pSelectionView) {
         _pSelectionView->move(0, (_pTopView ? row + 1 : row) * getItemViewHeight());
-        _pSelectionView->show();
+        _pSelectionView->show(async);
+        _pSelectionView->raise(async);
     }
 
-//    if (_highlightedRow >= 0 && itemIsVisible(_highlightedRow)) {
-//        View* pLastHighlightedView = visibleView(visibleIndex(_highlightedRow));
-//        if (pLastHighlightedView) {
-//            pLastHighlightedView->setHighlighted(false);
-//        }
-//    }
-//
-//    View* pHighlightedView = visibleView(visibleIndex(row));
-//    if (pHighlightedView) {
-//        pHighlightedView->setHighlighted(true);
-//        _pHighlightedView = pHighlightedView;
-//    }
     _pSelectedModel = pModel->getItemModel(row);
     _highlightedRow = row;
 }

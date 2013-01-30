@@ -167,10 +167,10 @@ public:
     }
 
 private:
-    virtual bool eventFilter(QObject* object, QEvent* event)
+    virtual bool eventFilter(QObject* pObject, QEvent* pEvent)
     {
-        if (event->type() == QEvent::KeyPress) {
-            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(event);
+        if (pEvent->type() == QEvent::KeyPress) {
+            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
             _pViewImpl->keyPressed(pKeyEvent->key());
             return true;
         }

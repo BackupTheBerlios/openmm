@@ -19,13 +19,13 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#define DoNotUseSelectionViewImpl
+#define UseSelectionViewImpl
 
 #include "Gui/GuiLogger.h"
 #include "Log.h"
 #include "Gui/Label.h"
 #include "SelectionView.h"
-#ifndef DoNotUseSelectionViewImpl
+#ifdef UseSelectionViewImpl
 #include "SelectionViewImpl.h"
 #endif
 
@@ -34,8 +34,8 @@ namespace Omm {
 namespace Gui {
 
 
-SelectionView::SelectionView() :
-#ifdef DoNotUseSelectionViewImpl
+SelectionView::SelectionView(int selectionType) :
+#ifndef UseSelectionViewImpl
 View(0, true)
 #else
 View(0, false)
@@ -52,7 +52,7 @@ View(0, false)
     _height = _prefHeight;
     Color selectionColor(114, 4, 4, 191);
 
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     setBackgroundColor(selectionColor);
 //    resize(_prefWidth, _lineWidth);
 
@@ -70,7 +70,7 @@ View(0, false)
 
     hide(true);
 #else
-    _pImpl = new SelectionViewImpl(this);
+    _pImpl = new SelectionViewImpl(this, selectionType);
 #endif
 }
 
@@ -80,7 +80,7 @@ SelectionView::setParentView(View* pParent)
 {
     if (pParent) {
         setParent(pParent);
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
         _pBottom->setParent(pParent);
         _pLeft->setParent(pParent);
         _pRight->setParent(pParent);
@@ -93,7 +93,7 @@ void
 SelectionView::raise(bool async)
 {
     View::raise(async);
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     _pBottom->raise(async);
     _pLeft->raise(async);
     _pRight->raise(async);
@@ -105,7 +105,7 @@ void
 SelectionView::show(bool async)
 {
     View::show(async);
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     _pBottom->show(async);
     _pLeft->show(async);
     _pRight->show(async);
@@ -117,7 +117,7 @@ void
 SelectionView::hide(bool async)
 {
     View::hide(async);
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     _pBottom->hide(async);
     _pLeft->hide(async);
     _pRight->hide(async);
@@ -129,7 +129,7 @@ void
 SelectionView::resize(int width, int height)
 {
     _height = height;
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     View::resize(width, _lineWidth);
     _pBottom->resize(width, _lineWidth);
     _pBottom->move(posX(), posY() + height - _lineWidth);
@@ -147,7 +147,7 @@ void
 SelectionView::move(int x, int y)
 {
     View::move(x, y);
-#ifdef DoNotUseSelectionViewImpl
+#ifndef UseSelectionViewImpl
     _pBottom->move(x, y + _height - _lineWidth);
     _pLeft->move(x, y + _lineWidth);
     _pRight->move(x + width() - _lineWidth, y + _lineWidth);

@@ -19,6 +19,7 @@ WebBrowserImpl.mm
 TextLineImpl.mm
 DragImpl.mm
 UIDrag.mm
+SelectionViewImpl.mm
 SplitterImpl.mm
 )
 

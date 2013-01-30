@@ -33,7 +33,7 @@ namespace Gui {
 class SelectionView : public View
 {
 public:
-    SelectionView();
+    SelectionView(int selectionType = 1);
 
     void setParentView(View* pParent);
 

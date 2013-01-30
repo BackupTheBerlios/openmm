@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include <QtGui>
+#include <qt4/QtCore/qnamespace.h>
+#include <qt4/QtCore/qcoreevent.h>
 
 #include "SelectionViewImpl.h"
 #include "Gui/GuiLogger.h"
@@ -31,63 +33,57 @@ namespace Gui {
 class QtSelectionView : public QWidget
 {
 public:
-//    QtSelectionView()
-//    {
-////        setMask(rect());
-//    }
 
-//    void resizeEvent(QResizeEvent* pEvent)
-//    {
-//        if (pEvent->oldSize().height() > 0) {
-//            LOG(gui, debug, "selection view resize");
-//            mask(pEvent->size().width(), pEvent->size().height());
-//        }
-//    }
-
-//    void showEvent(QShowEvent* event)
-//    {
-//        mask(width(), height());
-////        repaint();
-////        QWidget::show();
-//    }
-
-    void paintEvent(QPaintEvent* pEvent)
+    virtual void paintEvent(QPaintEvent* pEvent)
     {
         QPainter painter(this);
-        QPen pen;
-        QColor col(0, 127, 127, 191);
-        pen.setWidth(4);
-        pen.setColor(col);
         painter.setRenderHint(QPainter::Antialiasing);
+
+        float lineWidth = 1.0;
+        float rX = 4.0;
+        float rY = 4.0;
+        float w = width();
+        float h = height();
+        QPainterPath roundRectPath;
+        roundRectPath.moveTo(0.0, rY);
+        roundRectPath.lineTo(0.0, h - rY);
+        roundRectPath.arcTo(0.0, h - 2 * rY, 2 * rX, 2 * rY, 180.0, 90.0);
+        roundRectPath.lineTo(w - rX, h);
+        roundRectPath.arcTo(w - 2 * rX, h - 2 * rY, 2 * rX, 2 * rY, 270.0, 90.0);
+        roundRectPath.lineTo(w, rY);
+        roundRectPath.arcTo(w - 2 * rX, 0.0, 2 * rX, 2 * rY, 0.0, 90.0);
+        roundRectPath.lineTo(rX, 0.0);
+        roundRectPath.arcTo(0.0, 0.0, 2 * rX, 2 * rY, 90.0, 90.0);
+        roundRectPath.closeSubpath();
+
+        QPen pen;
+        QColor col(114, 4, 4);
+        pen.setWidth(_type == 0 ? 2 * lineWidth : lineWidth);
+        pen.setColor(col);
         painter.setPen(pen);
-        QRect rec(x(), y(), width() - 4, height());
-        painter.drawRoundedRect(rec, 10.0, 8.0);
-//        painter.drawRoundedRect(rect(), 10.0, 8.0);
+        painter.drawPath(roundRectPath);
+        if (_type == 1) {
+            QLinearGradient gradient(0, 0, 0, h);
+            gradient.setColorAt(0, QColor(0, 0, 0, 0));
+            gradient.setColorAt(1, QColor(114, 4, 4, 40));
+            painter.fillPath(roundRectPath, QBrush(gradient));
+//            painter.fillPath(roundRectPath, QColor(114, 4, 4, 40));
+        }
     }
 
-
-//    void mask(int w, int h)
-//    {
-//        LOG(gui, debug, "selection view mask");
-//
-//        QRegion outerRegion(rect());
-//        QRect innerRect(x() + 2, y() + 2, w - 4, h - 4);
-//        QRegion innerRegion(innerRect);
-//        setMask(outerRegion.xored(innerRegion));
-//    }
+    int     _type;
 };
 
 
-SelectionViewImpl::SelectionViewImpl(View* pView)
+SelectionViewImpl::SelectionViewImpl(View* pView, int type)
 {
 //    LOG(gui, debug, "label view impl ctor");
     QtSelectionView* pNativeView = new QtSelectionView;
 
-//    pNativeView->hide();
-//    pNativeView->mask(pNativeView->width(), pNativeView->height());
-
     initViewImpl(pView, pNativeView);
     pNativeView->setAutoFillBackground(false);
+    pNativeView->setAttribute(Qt::WA_TransparentForMouseEvents);
+    pNativeView->_type = type;
 }
 
 
@@ -95,12 +91,6 @@ SelectionViewImpl::~SelectionViewImpl()
 {
 }
 
-
-//void
-//SelectionViewImpl::resize(int width, int height)
-//{
-//    static_cast<QtSelectionView*>(_pNativeView)->mask(width, height);
-//}
 
 }  // namespace Omm
 }  // namespace Gui

@@ -1351,6 +1351,7 @@ _pControllerWidget(pControllerWidget)
 #else
     _deviceGroupListView.setItemViewHeight(44);
 #endif
+//    _deviceGroupListView.setSelectionType(Gui::ListView::Frame);
     _deviceGroupListView.attachController(this);
     _deviceGroupListView.setModel(this);
 }

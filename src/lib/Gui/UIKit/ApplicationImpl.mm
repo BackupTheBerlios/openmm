@@ -189,24 +189,26 @@
     UIView* pMainView = static_cast<UIView*>(_pMainView->getNativeView());
 
     // add control panel
-    _pControlPanel = [[ControlPanel alloc] initWithFrame:CGRectMake(0.0, _pMainView->height(), _pMainView->width(), Omm::Gui::ApplicationImpl::_controlPanelHeight)];
-    _controlPanelVisible = false;
-    int i = 0;
-    for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_controlPanels.begin(); it != Omm::Gui::ApplicationImpl::_controlPanels.end(); ++i, ++it) {
-        [_pControlPanel addView:(*it)];
-    }
-    [pMainView addSubview:_pControlPanel];
+    if (Omm::Gui::ApplicationImpl::_controlPanels.size()) {
+        _pControlPanel = [[ControlPanel alloc] initWithFrame:CGRectMake(0.0, _pMainView->height(), _pMainView->width(), Omm::Gui::ApplicationImpl::_controlPanelHeight)];
+        _controlPanelVisible = false;
+        int i = 0;
+        for (std::vector<Omm::Gui::View*>::iterator it = Omm::Gui::ApplicationImpl::_controlPanels.begin(); it != Omm::Gui::ApplicationImpl::_controlPanels.end(); ++i, ++it) {
+            [_pControlPanel addView:(*it)];
+        }
+        [pMainView addSubview:_pControlPanel];
 
-    // add gestures for showing/hiding control panel
-    UISwipeGestureRecognizer* pGlobalSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleGlobalSwipeGesture:)];
-    pGlobalSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
-    [pMainView addGestureRecognizer:pGlobalSwipeGesture];
-    [pGlobalSwipeGesture release];
-    UISwipeGestureRecognizer* pPanelSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(hideControlPanel:)];
-    pPanelSwipeGesture.direction = UISwipeGestureRecognizerDirectionDown;
-    [_pControlPanel addGestureRecognizer:pPanelSwipeGesture];
-    [pPanelSwipeGesture release];
-    [_pControlPanel addTarget:self action:@selector(hideControlPanel:) forControlEvents:UIControlEventTouchUpInside];
+        // add gestures for showing/hiding control panel
+        UISwipeGestureRecognizer* pGlobalSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleGlobalSwipeGesture:)];
+        pGlobalSwipeGesture.direction = UISwipeGestureRecognizerDirectionUp;
+        [pMainView addGestureRecognizer:pGlobalSwipeGesture];
+        [pGlobalSwipeGesture release];
+        UISwipeGestureRecognizer* pPanelSwipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(hideControlPanel:)];
+        pPanelSwipeGesture.direction = UISwipeGestureRecognizerDirectionDown;
+        [_pControlPanel addGestureRecognizer:pPanelSwipeGesture];
+        [pPanelSwipeGesture release];
+        [_pControlPanel addTarget:self action:@selector(hideControlPanel:) forControlEvents:UIControlEventTouchUpInside];
+    }
 
     // add main view to app window and show
     [_pWindow addSubview:pMainView];

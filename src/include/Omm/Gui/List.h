@@ -59,8 +59,9 @@ class ListView : public ScrollAreaView
 
 public:
     enum DragMode { DragNone = 1, DragSource = 2, DragTarget = 4 };
+    enum SelectionType { Frame, Filled };
 
-    ListView(View* pParent = 0);
+    ListView(View* pParent = 0, SelectionType selectionType = Filled);
 
     int getItemViewHeight();
     void setItemViewWidth(int width);
@@ -70,6 +71,7 @@ public:
     void resetListView();
     void addTopView(View* pView);
     void setDragMode(int dragMode);
+    void setSelectionType(SelectionType selectionType);
 
 protected:
     // main operations
@@ -116,11 +118,12 @@ protected:
 
     View*                               _pTopView;
     int                                 _dragMode;
+    SelectionType                       _selectionType;
 
 private:
     // item selection
-    void selectedItem(int row);
-    void highlightItem(int row);
+    void selectedItem(int row, bool async);
+    void highlightItem(int row, bool async);
     void selectHighlightedItem();
 
     // drag'n drop support
