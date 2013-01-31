@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,15 +19,49 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpGui/UpnpApplication.h>
+#ifndef GuiVisual_INCLUDED
+#define GuiVisual_INCLUDED
+
+#include "../Sys/Visual.h"
+
+#include "../Gui/View.h"
+#include "../Gui/Image.h"
 
 
-int main(int argc, char** argv)
+namespace Omm {
+
+class UpnpApplication;
+class ControllerWidget;
+class MediaObjectModel;
+class GuiVisual;
+class MediaServerGroupWidget;
+class MediaServerDevice;
+class MediaRendererGroupWidget;
+class MediaRendererView;
+class MediaObjectView;
+class PlaylistEditor;
+class PlaylistEditorObjectView;
+class ActivityIndicator;
+
+
+class GuiVisual : public Gui::Image, public Sys::Visual
 {
-    Omm::UpnpApplication app(argc, argv);
-    app.setLockInstance(false);
-    app.setIgnoreConfig(true);
-    app.showMainView(false);
-    app.enableController(false);
-    return app.run();
-}
+public:
+    GuiVisual(Gui::View* pParent = 0);
+    virtual ~GuiVisual();
+
+    virtual void show();
+    virtual void hide();
+
+    virtual void* getWindow();
+    virtual WindowHandle getWindowId();
+    virtual VisualType getType();
+    virtual void renderImage(const std::string& imageData);
+    virtual void blank();
+};
+
+
+}  // namespace Omm
+
+
+#endif

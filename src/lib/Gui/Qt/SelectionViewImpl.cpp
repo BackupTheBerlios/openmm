@@ -20,8 +20,6 @@
  ***************************************************************************/
 
 #include <QtGui>
-#include <qt4/QtCore/qnamespace.h>
-#include <qt4/QtCore/qcoreevent.h>
 
 #include "SelectionViewImpl.h"
 #include "Gui/GuiLogger.h"

@@ -19,7 +19,7 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpGui.h>
+#include <Omm/UpnpGui/UpnpApplication.h>
 
 
 int main(int argc, char** argv)

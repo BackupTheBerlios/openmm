@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2009, 2010                                                 |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,15 +19,77 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#include <Omm/UpnpGui/UpnpApplication.h>
+#include "UpnpGui/GuiVisual.h"
 
 
-int main(int argc, char** argv)
+namespace Omm {
+
+GuiVisual::GuiVisual(Gui::View* pParent)
 {
-    Omm::UpnpApplication app(argc, argv);
-    app.setLockInstance(false);
-    app.setIgnoreConfig(true);
-    app.showMainView(false);
-    app.enableController(false);
-    return app.run();
+    setName("Video");
+    setBackgroundColor(Gui::Color("black"));
 }
+
+
+GuiVisual::~GuiVisual()
+{
+}
+
+
+void
+GuiVisual::show()
+{
+    Gui::View::show();
+}
+
+
+void
+GuiVisual::hide()
+{
+    Gui::View::hide();
+}
+
+
+void*
+GuiVisual::getWindow()
+{
+    return Gui::View::getNativeView();
+}
+
+
+GuiVisual::WindowHandle
+GuiVisual::getWindowId()
+{
+    return (GuiVisual::WindowHandle)Gui::View::getNativeWindowId();
+//    return winId();
+}
+
+
+Sys::Visual::VisualType
+GuiVisual::getType()
+{
+    // GuiVisual is multi-platform, and type of visual is platform dependent.
+#ifdef __LINUX__
+    return Omm::Sys::Visual::VTX11;
+#elif __DARWIN__
+    return Omm::Sys::Visual::VTOSX;
+#elif __WINDOWS__
+    return Omm::Sys::Visual::VTWin;
+#else
+    return Omm::Sys::Visual::VTNone;
+#endif
+}
+
+
+void
+GuiVisual::renderImage(const std::string& imageData)
+{
+}
+
+
+void
+GuiVisual::blank()
+{
+}
+
+} // namespace Omm
