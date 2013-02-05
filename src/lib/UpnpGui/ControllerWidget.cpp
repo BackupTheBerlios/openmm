@@ -28,20 +28,27 @@
 #include <Poco/NamedMutex.h>
 #include <Poco/Util/Application.h>
 
+
 #include "Util.h"
-#include "Gui/GuiLogger.h"
 #include "UpnpAv.h"
 #include "UpnpAvCtlServer.h"
-#include "MediaImages.h"
+
+#include "Gui/GuiLogger.h"
+#include "Gui/View.h"
+#include "Gui/Splitter.h"
 
 #include "UpnpGui/ActivityIndicator.h"
 #include "UpnpGui/DeviceGroup.h"
 #include "UpnpGui/GuiVisual.h"
+#include "UpnpGui/MediaObject.h"
 #include "UpnpGui/MediaRenderer.h"
 #include "UpnpGui/MediaServer.h"
 #include "UpnpGui/Playlist.h"
 #include "UpnpGui/UpnpApplication.h"
 #include "UpnpGui/ControllerWidget.h"
+
+#include "MediaImages.h"
+
 
 namespace Omm {
 
@@ -88,24 +95,33 @@ _pApplication(pApplication)
     _pVisual = new GuiVisual;
     insertView(_pVisual, "Video");
 
-    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
-        _pPlaylistEditor = new PlaylistEditor(this);
-        insertView(_pPlaylistEditor, "List");
-    }
-
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         insertView(_pMediaRendererGroupWidget, "Player");
     }
 
+    Omm::Gui::SplitterView* pSplitterView = new Omm::Gui::SplitterView(0, Omm::Gui::View::Vertical);
+    pSplitterView->setName("Media");
+    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        _pPlaylistEditor = new PlaylistEditor(this);
+        _pPlaylistEditorView = new PlaylistEditorView(_pPlaylistEditor);
+        pSplitterView->insertView(_pPlaylistEditorView);
+        _pPlaylistEditorView->hide();
+        Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget,
+        PlaylistNotification>(*this, &ControllerWidget::playlistNotification));
+    }
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
     registerDeviceGroup(_pMediaServerGroupWidget);
-    insertView(_pMediaServerGroupWidget, "Media");
+    pSplitterView->insertView(_pMediaServerGroupWidget);
+    insertView(pSplitterView, "Media");
+    std::vector<float> splitterSizes;
+    splitterSizes.push_back(0.8);
+    splitterSizes.push_back(0.2);
+    pSplitterView->setSizes(splitterSizes);
 
     _pControlPanel = new MediaRendererView;
     _pActivityIndicator = new ActivityIndicator;
-//    _pStatusBar->resize(20, 20);
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 //    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
@@ -319,6 +335,37 @@ Av::CtlMediaRenderer*
 ControllerWidget::getSelectedRenderer()
 {
     return static_cast<Av::CtlMediaRenderer*>(_pMediaRendererGroupWidget->getSelectedDevice());
+}
+
+
+void
+ControllerWidget::playlistNotification(PlaylistNotification* pNotification)
+{
+    MediaObjectModel* pModel = pNotification->_pMediaObject;
+    if (pModel->isContainer()) {
+        if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+            _pPlaylistEditorView->show();
+//            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
+//                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
+//                setPlaylistContainer(pModel);
+//                Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
+//                LOGNS(Gui, gui, debug, "media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+//                for (int r = 0; r < pModel->getChildCount(); r++) {
+//                    LOGNS(Gui, gui, debug, "title: " + pModel->getChildForRow(r)->getTitle());
+//                    _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
+//                }
+//            }
+        }
+    }
+//    else if (_pPlaylistContainer) {
+//        LOGNS(Gui, gui, debug, "media object playlist add item with title: " + pModel->getTitle());
+//        _playlistItems.push_back(new MediaObjectModel(*pModel));
+//        writePlaylistResource();
+//
+//        // FIXME: why does this crash?
+////        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
+//    }
+//    syncViewImpl();
 }
 
 

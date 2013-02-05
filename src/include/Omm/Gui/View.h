@@ -133,6 +133,7 @@ public:
 
     void triggerKeyEvent(Controller::KeyCode key);
     void setAcceptDrops(bool accept = true);
+    void setEnableHover(bool enable = true);
 
 protected:
     View(View* pParent, bool createPlainView);

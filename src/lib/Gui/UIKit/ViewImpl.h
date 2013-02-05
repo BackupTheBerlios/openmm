@@ -60,10 +60,14 @@ public:
     bool getEnableRedraw() { return true; }
     void setEnableRedraw(bool enable) {}
     void setAcceptDrops(bool accept);
+    void setEnableHover(bool enable) {}
 
     void presented();
     void resized(int width, int height);
     void selected();
+    void released();
+    void activated();
+    void mouseMoved(const Position& pos);
     void dragStarted();
     void dragEntered(const Position& pos, Drag* pDrag);
     void dragMoved(const Position& pos, Drag* pDrag);

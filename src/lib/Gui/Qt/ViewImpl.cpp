@@ -284,6 +284,13 @@ ViewImpl::setAcceptDrops(bool accept)
 
 
 void
+ViewImpl::setEnableHover(bool enable)
+{
+    _pNativeView->setMouseTracking(enable);
+}
+
+
+void
 ViewImpl::presented()
 {
 //    LOG(gui, debug, "view impl presented.");
@@ -305,6 +312,22 @@ ViewImpl::selected()
 {
     LOG(gui, debug, "view impl selected view: " + _pView->getName());
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
+ViewImpl::released()
+{
+    LOG(gui, debug, "view impl released view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, released);
+}
+
+
+void
+ViewImpl::activated()
+{
+    LOG(gui, debug, "view impl activated view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, activated);
 }
 
 
@@ -472,6 +495,22 @@ ViewImpl::keyPressed(int key)
             break;
 #endif
     }
+}
+
+
+void
+ViewImpl::mouseHovered(const Position& pos)
+{
+    LOG(gui, debug, "view impl mouse hovered in view: " + _pView->getName() + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+    IMPL_NOTIFY_CONTROLLER(Controller, mouseHovered, pos);
+}
+
+
+void
+ViewImpl::mouseMoved(const Position& pos)
+{
+    LOG(gui, debug, "view impl mouse moved in view: " + _pView->getName() + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+    IMPL_NOTIFY_CONTROLLER(Controller, mouseMoved, pos);
 }
 
 

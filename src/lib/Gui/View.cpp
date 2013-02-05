@@ -526,5 +526,11 @@ View::setAcceptDrops(bool accept)
 }
 
 
+void
+View::setEnableHover(bool enable)
+{
+    _pImpl->setEnableHover(enable);
+}
+
 } // namespace Gui
 } // namespace Omm

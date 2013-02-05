@@ -40,7 +40,7 @@ class MediaObjectModel;
 class PlaylistNotification : public Poco::Notification
 {
 public:
-    PlaylistNotification(MediaObjectModel* pMediaObject);
+    PlaylistNotification(MediaObjectModel* pMediaObject) : _pMediaObject(pMediaObject) {}
 
     MediaObjectModel*   _pMediaObject;
 };
@@ -62,8 +62,6 @@ public:
     virtual void draggedItem(int row);
     virtual void droppedItem(Gui::Model* pModel, int row);
 
-    void playlistNotification(PlaylistNotification* pNotification);
-
     void setPlaylistContainer(MediaObjectModel* pPlaylistContainer);
     std::stringstream* getPlaylistResource();
     std::string getPlaylistResourceUri();
@@ -72,9 +70,20 @@ public:
     void deleteItem(MediaObjectModel* pModel);
 
 private:
+    void playlistNotification(PlaylistNotification* pNotification);
+
     ControllerWidget*                   _pControllerWidget;
     MediaObjectModel*                   _pPlaylistContainer;
     std::vector<MediaObjectModel*>      _playlistItems;
+};
+
+
+class PlaylistEditorView : public Gui::View
+{
+    friend class PlaylistEditorViewHideButtonController;
+    friend class ControllerWidget;
+
+    PlaylistEditorView(PlaylistEditor* pPlaylistEditor);
 };
 
 

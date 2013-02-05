@@ -19,30 +19,41 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef SplitterImpl_INCLUDED
-#define SplitterImpl_INCLUDED
+#ifndef GenericSplitterImpl_INCLUDED
+#define GenericSplitterImpl_INCLUDED
 
 #include "ViewImpl.h"
+#include "AbstractSplitterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
 class View;
+class SplitterBar;
 
-class SplitterViewImpl : public ViewImpl
+class GenericSplitterViewImpl : public AbstractSplitterViewImpl, public PlainViewImpl
 {
+    friend class GenericSplitterLayout;
     friend class SplitterView;
-    friend class ColumnClusterViewImpl;
+    friend class SplitterBar;
 
-private:
-    SplitterViewImpl(View* pView, View::Orientation orientation);
-    ~SplitterViewImpl();
+    GenericSplitterViewImpl(View* pView, View::Orientation orientation);
+    ~GenericSplitterViewImpl();
+
+    virtual void init();
 
     void setOrientation(View::Orientation orientation);
     void insertView(View* pView, int index);
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
     void setSize(int index, float size);
+
+    View::Orientation               _orientation;
+    std::vector<float>              _sizes;
+    std::vector<View*>              _views;
+    std::vector<SplitterBar*>       _bars;
+    int                             _barWidth;
+    int                             _barIndex;
 };
 
 

@@ -23,12 +23,14 @@
 #define SplitterImpl_INCLUDED
 
 #include "ViewImpl.h"
+#include "../AbstractSplitterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
 class View;
 
+//class SplitterViewImpl : public AbstractSplitterViewImpl, public ViewImpl
 class SplitterViewImpl : public ViewImpl
 {
     friend class SplitterView;
@@ -42,6 +44,7 @@ private:
     void insertView(View* pView, int index);
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
+    void setSize(int index, float size) {}
 };
 
 

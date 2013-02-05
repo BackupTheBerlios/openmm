@@ -69,12 +69,12 @@ class QtViewImpl : public W
 public:
     QtViewImpl(ViewImpl* pViewImpl, QWidget* pParent = 0) : W(pParent), _pViewImpl(pViewImpl) {}
 
-    void showEvent(QShowEvent* event)
+    virtual void showEvent(QShowEvent* event)
     {
         _pViewImpl->presented();
     }
 
-    void resizeEvent(QResizeEvent* pEvent)
+    virtual void resizeEvent(QResizeEvent* pEvent)
     {
         if (pEvent->oldSize().height() > 0) {
             _pViewImpl->resized(pEvent->size().width(), pEvent->size().height());
@@ -82,7 +82,7 @@ public:
         W::resizeEvent(pEvent);
     }
 
-    void mousePressEvent(QMouseEvent* pMouseEvent)
+    virtual void mousePressEvent(QMouseEvent* pMouseEvent)
     {
 //        LOG(gui, debug, "mouse press event");
         if (pMouseEvent->button() == Qt::LeftButton) {
@@ -92,12 +92,24 @@ public:
 //        W::mousePressEvent(pMouseEvent);
     }
 
-    void mouseMoveEvent(QMouseEvent* pMouseEvent)
+    virtual void mouseReleaseEvent(QMouseEvent* pMouseEvent)
+    {
+        _pViewImpl->released();
+    }
+
+    virtual void mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
+    {
+        _pViewImpl->activated();
+    }
+
+    virtual void mouseMoveEvent(QMouseEvent* pMouseEvent)
     {
 //        LOG(gui, debug, "mouse move event");
         if (!(pMouseEvent->buttons() & Qt::LeftButton)) {
+            _pViewImpl->mouseHovered(Position(pMouseEvent->x(), pMouseEvent->y()));
             return;
         }
+        _pViewImpl->mouseMoved(Position(pMouseEvent->x(), pMouseEvent->y()));
         if ((pMouseEvent->pos() - _dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
             return;
         }
@@ -105,7 +117,7 @@ public:
 //        W::mouseMoveEvent(pMouseEvent);
     }
 
-    void dragEnterEvent(QDragEnterEvent* pDragEvent)
+    virtual void dragEnterEvent(QDragEnterEvent* pDragEvent)
     {
         LOG(gui, debug, "DRAG ENTER EVENT");
         // if dragging started not in an omm application, mime data is not of type QtMimeData and pDrag is set to 0.
@@ -116,7 +128,7 @@ public:
         }
     }
 
-    void dragMoveEvent(QDragMoveEvent* pDragEvent)
+    virtual void dragMoveEvent(QDragMoveEvent* pDragEvent)
     {
         LOG(gui, debug, "DRAG MOVE EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
@@ -126,13 +138,13 @@ public:
         }
     }
 
-    void dragLeaveEvent()
+    virtual void dragLeaveEvent()
     {
         LOG(gui, debug, "DRAG LEAVE EVENT");
         _pViewImpl->dragLeft();
     }
 
-    void dropEvent(QDropEvent* pDropEvent)
+    virtual void dropEvent(QDropEvent* pDropEvent)
     {
         LOG(gui, debug, "DROP EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDropEvent->mimeData());

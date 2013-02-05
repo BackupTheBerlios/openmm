@@ -72,6 +72,7 @@ public:
     bool getEnableRedraw();
     void setEnableRedraw(bool enable);
     void setAcceptDrops(bool accept);
+    void setEnableHover(bool enable);
 
 protected:
     void initViewImpl(View* pView, QWidget* pNative, SignalProxy* pSignalProxy = 0);
@@ -85,7 +86,11 @@ private:
     void presented();
     void resized(int width, int height);
     void selected();
+    void released();
+    void activated();
     void keyPressed(int key);
+    void mouseHovered(const Position& pos);
+    void mouseMoved(const Position& pos);
     void dragStarted();
     void dragEntered(const Position& pos, Drag* pDrag);
     void dragMoved(const Position& pos, Drag* pDrag);

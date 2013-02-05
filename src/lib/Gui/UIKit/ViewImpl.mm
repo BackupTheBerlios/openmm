@@ -92,6 +92,7 @@
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateChanged) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
+        _pViewImpl->mouseMoved(Omm::Gui::Position(position.x, position.y));
         if (pDropView != Omm::Gui::UIDrag::instance()->getDropView()) {
             Omm::Gui::UIDrag::instance()->setDropView(pDropView);
             pDropView->getViewImpl()->dragEntered(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
@@ -111,7 +112,8 @@
 
 - (void)handleTapGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
-    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget single tap gesture");
+    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget single finger double tap gesture");
+    _pViewImpl->activated();
 }
 
 
@@ -148,6 +150,13 @@
 {
 //    LOGNS(Omm::Gui, gui, debug, "OmmGuiPlainView touch began");
     _pViewImpl->selected();
+}
+
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
+{
+//    LOGNS(Omm::Gui, gui, debug, "OmmGuiPlainView touch began");
+    _pViewImpl->released();
 }
 
 @end
@@ -468,6 +477,30 @@ ViewImpl::selected()
 {
 //    LOG(gui, debug, "view impl selected.");
     IMPL_NOTIFY_CONTROLLER(Controller, selected);
+}
+
+
+void
+ViewImpl::released()
+{
+    LOG(gui, debug, "view impl released view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, released);
+}
+
+
+void
+ViewImpl::activated()
+{
+    LOG(gui, debug, "view impl activated view: " + _pView->getName());
+    IMPL_NOTIFY_CONTROLLER(Controller, activated);
+}
+
+
+void
+ViewImpl::mouseMoved(const Position& pos)
+{
+    LOG(gui, debug, "view impl mouse moved in view: " + _pView->getName() + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+    IMPL_NOTIFY_CONTROLLER(Controller, mouseMoved, pos);
 }
 
 

@@ -68,5 +68,11 @@ SplitterViewImpl::setSizes(const std::vector<float>& sizes)
 }
 
 
+void
+SplitterViewImpl::setSize(int index, float size)
+{
+    // TODO: implement UIKit SplitterViewImpl::setSize()
+}
+
 }  // namespace Omm
 }  // namespace Gui

@@ -31,15 +31,22 @@ class Application : public Omm::Gui::Application
     virtual Omm::Gui::View* createMainView()
     {
         Omm::Gui::Splitter* pSplitter = new Omm::Gui::Splitter;
+        pSplitter->setOrientation(Omm::Gui::View::Vertical);
 
-        const int subviewCount = 2;
+        const int subviewCount = 3;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
+            pButton->setBackgroundColor(Omm::Gui::Color("blue"));
             pSplitter->insertView(pButton);
         }
+//        std::vector<float> sizes;
+//        sizes.push_back(0.25);
+//        sizes.push_back(0.75);
+//        pSplitter->setSizes(sizes);
+//        pSplitter->setSize(0, 0.1);
 
         return pSplitter;
     }

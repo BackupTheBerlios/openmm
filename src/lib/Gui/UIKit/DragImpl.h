@@ -37,7 +37,6 @@ public:
 
     void start();
     Drag* getDrag() const;
-//    QDrag* getNativeDrag() const;
 
 private:
     Drag*    _pDrag;

@@ -24,6 +24,7 @@
 #include "Gui/Splitter.h"
 #include "Gui/GuiLogger.h"
 #include "SplitterImpl.h"
+#include "GenericSplitterImpl.h"
 #include "Log.h"
 
 
@@ -34,14 +35,19 @@ namespace Gui {
 SplitterView::SplitterView(View* pParent, Orientation orientation) :
 View(pParent, false)
 {
-//    LOG(gui, debug, "Splitter view ctor.");
+    LOG(gui, debug, "Splitter view ctor.");
     setName("splitter view");
 
     _minWidth = 50;
     _minHeight = 10;
     _prefWidth = 150;
     _prefHeight = 20;
+//#ifdef __IPHONE__
+//    _pImpl = new GenericSplitterViewImpl(this, orientation);
+//#else
     _pImpl = new SplitterViewImpl(this, orientation);
+//#endif
+    _pImpl->init();
 }
 
 
@@ -72,6 +78,12 @@ SplitterView::setSizes(const std::vector<float>& sizes)
     static_cast<SplitterViewImpl*>(_pImpl)->setSizes(sizes);
 }
 
+
+void
+SplitterView::setSize(int index, float size)
+{
+    static_cast<SplitterViewImpl*>(_pImpl)->setSize(index, size);
+}
 
 } // namespace Gui
 } // namespace Omm

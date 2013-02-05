@@ -41,6 +41,7 @@ class MediaRendererView;
 class MediaServerDevice;
 class MediaServerGroupWidget;
 class PlaylistEditor;
+class PlaylistEditorView;
 class ActivityIndicator;
 class TransportStateNotification;
 class TrackNotification;
@@ -77,9 +78,12 @@ public:
     Av::CtlMediaRenderer* getSelectedRenderer();
 
 private:
+    void playlistNotification(PlaylistNotification* pNotification);
+
     MediaServerGroupWidget*     _pMediaServerGroupWidget;
     MediaRendererGroupWidget*   _pMediaRendererGroupWidget;
     PlaylistEditor*             _pPlaylistEditor;
+    PlaylistEditorView*         _pPlaylistEditorView;
     GuiVisual*                  _pVisual;
     Gui::WebBrowser*            _pConfigBrowser;
     MediaRendererView*          _pControlPanel;

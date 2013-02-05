@@ -63,7 +63,11 @@ public:
     virtual void presented() {}
     virtual void resized(int width, int height) {}
     virtual void selected() {}
+    virtual void released() {}
+    virtual void activated() {}
     virtual void keyPressed(KeyCode key) {}
+    virtual void mouseHovered(const Position& pos) {}
+    virtual void mouseMoved(const Position& pos) {}
     virtual void dragStarted() {}
     virtual void dragEntered(const Position& pos, Drag* pDrag) {}
     virtual void dragMoved(const Position& pos, Drag* pDrag) {}

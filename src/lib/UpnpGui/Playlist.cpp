@@ -19,27 +19,22 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include "Util.h"
+#include "UpnpAv.h"
+#include "UpnpAvCtlServer.h"
+
 #include "UpnpGui/UpnpApplication.h"
 #include "UpnpGui/MediaObject.h"
 #include "UpnpGui/ControllerWidget.h"
 #include "UpnpGui/Playlist.h"
 
-#include "Util.h"
 #include "Gui/GuiLogger.h"
-#include "UpnpAv.h"
-#include "UpnpAvCtlServer.h"
+#include "Gui/VerticalLayout.h"
 
 #include "MediaImages.h"
 
 
-
 namespace Omm {
-
-PlaylistNotification::PlaylistNotification(MediaObjectModel* pMediaObject) :
-_pMediaObject(pMediaObject)
-{
-}
-
 
 PlaylistEditor::PlaylistEditor(ControllerWidget* pControllerWidget) :
 _pControllerWidget(pControllerWidget),
@@ -101,36 +96,6 @@ PlaylistEditor::droppedItem(Gui::Model* pModel, int row)
 
 
 void
-PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
-{
-    MediaObjectModel* pModel = pNotification->_pMediaObject;
-    if (pModel->isContainer()) {
-        if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
-            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
-                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
-                setPlaylistContainer(pModel);
-                Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
-                LOGNS(Gui, gui, debug, "media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
-                for (int r = 0; r < pModel->getChildCount(); r++) {
-                    LOGNS(Gui, gui, debug, "title: " + pModel->getChildForRow(r)->getTitle());
-                    _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
-                }
-            }
-        }
-    }
-    else if (_pPlaylistContainer) {
-        LOGNS(Gui, gui, debug, "media object playlist add item with title: " + pModel->getTitle());
-        _playlistItems.push_back(new MediaObjectModel(*pModel));
-        writePlaylistResource();
-
-        // FIXME: why does this crash?
-//        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
-    }
-    syncViewImpl();
-}
-
-
-void
 PlaylistEditor::setPlaylistContainer(MediaObjectModel* pPlaylistContainer)
 {
     LOGNS(Gui, gui, debug, "set playlist container with title: " + pPlaylistContainer->getTitle());
@@ -177,6 +142,37 @@ PlaylistEditor::deleteItem(MediaObjectModel* pModel)
 }
 
 
+void
+PlaylistEditor::playlistNotification(PlaylistNotification* pNotification)
+{
+    MediaObjectModel* pModel = pNotification->_pMediaObject;
+    if (pModel->isContainer()) {
+        if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
+                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
+                setPlaylistContainer(pModel);
+                Av::AbstractMediaObject* pObject = pModel->getChildForRow(0);
+                LOGNS(Gui, gui, debug, "media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pModel->getChildCount()));
+                _playlistItems.clear();
+                for (int r = 0; r < pModel->getChildCount(); r++) {
+                    LOGNS(Gui, gui, debug, "title: " + pModel->getChildForRow(r)->getTitle());
+                    _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pModel->getChildForRow(r))));
+                }
+            }
+        }
+    }
+    else if (_pPlaylistContainer) {
+        LOGNS(Gui, gui, debug, "media object playlist add item with title: " + pModel->getTitle());
+        _playlistItems.push_back(new MediaObjectModel(*pModel));
+        writePlaylistResource();
+
+        // FIXME: why does this crash?
+//        _pPlaylistContainer->writeResource(getPlaylistResourceUri());
+    }
+    syncViewImpl();
+}
+
+
 PlaylistEditorDeleteObjectController::PlaylistEditorDeleteObjectController(PlaylistEditorObjectView* pPlaylistEditorObjectView) :
 _pPlaylistEditorObjectView(pPlaylistEditorObjectView)
 {
@@ -189,6 +185,63 @@ PlaylistEditorDeleteObjectController::pushed()
     LOGNS(Gui, gui, debug, "playlist editor delete button pushed.");
     MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pPlaylistEditorObjectView->getModel());
     _pPlaylistEditorObjectView->_pPlaylistEditor->deleteItem(pModel);
+}
+
+
+class PlaylistEditorViewTitleBar : public Gui::View
+{
+    friend class PlaylistEditorView;
+
+    PlaylistEditorViewTitleBar(Gui::View* pParent = 0) : View(pParent)
+    {
+        Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditorViewTitleBar,
+            PlaylistNotification>(*this, &PlaylistEditorViewTitleBar::playlistNotification));
+        setLayout(new Gui::HorizontalLayout);
+        _pTitle = new Gui::Label(this);
+        _pHideButton = new Gui::Button(this);
+        _pHideButton->setSizeConstraint(20, 20, Gui::View::Pref);
+        _pHideButton->setStretchFactor(-1.0);
+        _pHideButton->setLabel("x");
+    }
+
+    void playlistNotification(PlaylistNotification* pNotification)
+    {
+        MediaObjectModel* pModel = pNotification->_pMediaObject;
+        if (pModel->isContainer()) {
+            if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+                _pTitle->setLabel("Playlist: " + pModel->getTitle());
+            }
+        }
+    }
+
+    Gui::Label*         _pTitle;
+    Gui::Button*        _pHideButton;
+};
+
+
+class HideButtonController : public Gui::ButtonController
+{
+    friend class PlaylistEditorView;
+
+    HideButtonController(PlaylistEditorView* pPlaylistEditorView) : _pPlaylistEditorView(pPlaylistEditorView) {}
+
+    virtual void pushed()
+    {
+        _pPlaylistEditorView->hide();
+    }
+
+    PlaylistEditorView* _pPlaylistEditorView;
+};
+
+
+PlaylistEditorView::PlaylistEditorView(PlaylistEditor* pPlaylistEditor)
+{
+    setLayout(new Gui::VerticalLayout);
+    PlaylistEditorViewTitleBar* pPlaylistEditorViewTitleBar = new PlaylistEditorViewTitleBar(this);
+    pPlaylistEditorViewTitleBar->setSizeConstraint(200, 20, Gui::View::Pref);
+    pPlaylistEditorViewTitleBar->setStretchFactor(-1.0);
+    pPlaylistEditorViewTitleBar->_pHideButton->attachController(new HideButtonController(this));
+    pPlaylistEditor->setParent(this);
 }
 
 

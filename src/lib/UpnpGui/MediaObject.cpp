@@ -134,6 +134,9 @@ MediaContainerWidget::selectedItem(int row)
             pTopView->setAlignment(Gui::View::AlignCenter);
             pContainer->addTopView(pTopView);
         }
+        if (Av::AvClass::matchClass(pChildObject->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+            Poco::NotificationCenter::defaultCenter().postNotification(new PlaylistNotification(pChildObject));
+        }
         _pServerGroup->push(pContainer, pChildObject->getTitle());
     }
     else {

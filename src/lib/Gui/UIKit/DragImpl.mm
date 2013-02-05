@@ -36,8 +36,6 @@ DragImpl::DragImpl(View* pSource, Drag* pDrag) :
 _pDrag(pDrag)
 {
 //    LOG(gui, debug, "Drag impl ctor");
-//    _pQtDrag = new QDrag(static_cast<QWidget*>(pSource->getNativeView()));
-//    _pQtDrag->setMimeData(new QtMimeData(this));
 }
 
 
@@ -45,7 +43,6 @@ void
 DragImpl::start()
 {
     UIDrag::instance()->setDrag(_pDrag);
-//    _pQtDrag->exec();
 }
 
 
@@ -54,13 +51,6 @@ DragImpl::getDrag() const
 {
     return _pDrag;
 }
-
-
-//QDrag*
-//DragImpl::getNativeDrag() const
-//{
-//    return _pQtDrag;
-//}
 
 
 }  // namespace Omm
