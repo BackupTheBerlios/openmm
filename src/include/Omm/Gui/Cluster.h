@@ -33,6 +33,8 @@
 namespace Omm {
 namespace Gui {
 
+class AbstractClusterViewImpl;
+
 /// Cluster is a composite view where all subviews can be arranged, hidden or shown individually
 /// Each subview is assigned a handle to manage it interactively.
 /// There are several types of clusters, currently tab views and column clusters.
@@ -64,7 +66,7 @@ public:
     static const std::string Generic;
     static const std::string Column;
 
-    ClusterView(View* pParent = 0, const std::string& type = Native);
+    ClusterView(View* pParent = 0, const std::string& type = "");
     virtual ~ClusterView();
 
     void insertView(View* pView, const std::string& label, int index = 0);
@@ -102,6 +104,8 @@ public:
 
     const int getHandleHeight();
     /// Returns the height of the handles.
+
+    AbstractClusterViewImpl*    _pClusterImpl;
 };
 
 

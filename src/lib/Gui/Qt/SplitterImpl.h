@@ -30,8 +30,7 @@ namespace Gui {
 
 class View;
 
-//class SplitterViewImpl : public AbstractSplitterViewImpl, public ViewImpl
-class SplitterViewImpl : public ViewImpl
+class SplitterViewImpl : public AbstractSplitterViewImpl, public ViewImpl
 {
     friend class SplitterView;
     friend class ColumnClusterViewImpl;

@@ -20,10 +20,12 @@
  ***************************************************************************/
 
 #include <Poco/NumberFormatter.h>
+#include <Poco/Environment.h>
 
 #include "Gui/Splitter.h"
 #include "Gui/GuiLogger.h"
 #include "SplitterImpl.h"
+#include "AbstractSplitterImpl.h"
 #include "GenericSplitterImpl.h"
 #include "Log.h"
 
@@ -35,18 +37,28 @@ namespace Gui {
 SplitterView::SplitterView(View* pParent, Orientation orientation) :
 View(pParent, false)
 {
-    LOG(gui, debug, "Splitter view ctor.");
+//    LOG(gui, debug, "Splitter view ctor.");
     setName("splitter view");
 
     _minWidth = 50;
     _minHeight = 10;
     _prefWidth = 150;
     _prefHeight = 20;
-//#ifdef __IPHONE__
-//    _pImpl = new GenericSplitterViewImpl(this, orientation);
-//#else
-    _pImpl = new SplitterViewImpl(this, orientation);
-//#endif
+
+#ifdef __IPHONE__
+    std::string splitterImpl = "Generic";
+#else
+    std::string splitterImpl = Poco::Environment::get("OMMGUI_SPLITTER", "Native");
+#endif
+
+    if (splitterImpl == "Generic") {
+        _pSplitterImpl = new GenericSplitterViewImpl(this, orientation);
+        _pImpl = reinterpret_cast<GenericSplitterViewImpl*>(_pSplitterImpl);
+    }
+    else {
+        _pSplitterImpl = new SplitterViewImpl(this, orientation);
+        _pImpl = reinterpret_cast<SplitterViewImpl*>(_pSplitterImpl);
+    }
     _pImpl->init();
 }
 
@@ -54,35 +66,40 @@ View(pParent, false)
 void
 SplitterView::setOrientation(Orientation orientation)
 {
-    static_cast<SplitterViewImpl*>(_pImpl)->setOrientation(orientation);
+//    static_cast<GenericSplitterViewImpl*>(_pImpl)->setOrientation(orientation);
+    _pSplitterImpl->setOrientation(orientation);
 }
 
 
 void
 SplitterView::insertView(View* pView, int index)
 {
-    static_cast<SplitterViewImpl*>(_pImpl)->insertView(pView, index);
+//    static_cast<GenericSplitterViewImpl*>(_pImpl)->insertView(pView, index);
+    _pSplitterImpl->insertView(pView, index);
 }
 
 
 std::vector<float>
 SplitterView::getSizes()
 {
-    return static_cast<SplitterViewImpl*>(_pImpl)->getSizes();
+//    return static_cast<GenericSplitterViewImpl*>(_pImpl)->getSizes();
+    return _pSplitterImpl->getSizes();
 }
 
 
 void
 SplitterView::setSizes(const std::vector<float>& sizes)
 {
-    static_cast<SplitterViewImpl*>(_pImpl)->setSizes(sizes);
+//    static_cast<GenericSplitterViewImpl*>(_pImpl)->setSizes(sizes);
+    _pSplitterImpl->setSizes(sizes);
 }
 
 
 void
 SplitterView::setSize(int index, float size)
 {
-    static_cast<SplitterViewImpl*>(_pImpl)->setSize(index, size);
+//    static_cast<GenericSplitterViewImpl*>(_pImpl)->setSize(index, size);
+    _pSplitterImpl->setSize(index, size);
 }
 
 } // namespace Gui

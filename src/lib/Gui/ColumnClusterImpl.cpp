@@ -33,11 +33,11 @@
 #include "Gui/Layout.h"
 #include "Gui/HorizontalLayout.h"
 #include "Gui/VerticalLayout.h"
+#include "Gui/Splitter.h"
 #include "Gui/Label.h"
 #include "Gui/Button.h"
 #include "Gui/ListItem.h"
 #include "Gui/Drag.h"
-#include "Gui/Splitter.h"
 #include "ColumnClusterImpl.h"
 
 
@@ -282,7 +282,7 @@ void
 ColumnClusterLayout::layoutView()
 {
     LOG(gui, debug, "column cluster view update layout with current size [" + Poco::NumberFormatter::format(_pView->width()) + ", " + Poco::NumberFormatter::format(_pView->height()) + "]");
-    static_cast<ColumnClusterViewImpl*>(_pView->getViewImpl())->layoutViews(_pView->width(), _pView->height());
+    _pViewImpl->layoutViews(_pView->width(), _pView->height());
 }
 
 
@@ -426,7 +426,7 @@ ColumnView::putCluster(ClusterView* pCluster)
 
 
 ColumnClusterViewImpl::ColumnClusterViewImpl(View* pView) :
-SplitterViewImpl(pView, View::Horizontal),
+PlainViewImpl(pView),
 _pTargetConfiguration(0)
 {
 }
@@ -443,10 +443,12 @@ ColumnClusterViewImpl::~ColumnClusterViewImpl()
 void
 ColumnClusterViewImpl::init()
 {
-    _pView->setName("column cluster");
-    _pView->setLayout(new ColumnClusterLayout(this));
+    _pSplitter = new SplitterView(_pView, View::Horizontal);
+    _pView->setLayout(new HorizontalLayout);
+    _pSplitter->setName("column cluster");
+    _pSplitter->setLayout(new ColumnClusterLayout(this));
     ColumnView* pCol = getColumn();
-    SplitterViewImpl::insertView(pCol, 0);
+    _pSplitter->insertView(pCol, 0);
     _grid.push_back(pCol);
 }
 
@@ -700,7 +702,7 @@ ColumnClusterViewImpl::createClusterInNewColumn(int column)
     LOG(gui, debug, "column cluster create column: " + Poco::NumberFormatter::format(column));
 
     ColumnView* pCol = getColumn();
-    SplitterViewImpl::insertView(pCol, column);
+    _pSplitter->insertView(pCol, column);
     pCol->show(false);
     _grid.insert(_grid.begin() + column, pCol);
     return pCol->getTopCluster();
@@ -809,9 +811,9 @@ ColumnClusterViewImpl::getOriginConfiguration(ClusterConfiguration& configuratio
 void
 ColumnClusterViewImpl::getCurrentConfiguration(ClusterConfiguration& configuration)
 {
-    configuration._width = _pView->width();
-    configuration._height = _pView->height();
-    configuration._colWidth = getSizes();
+    configuration._width = _pSplitter->width();
+    configuration._height = _pSplitter->height();
+    configuration._colWidth = _pSplitter->getSizes();
 
     int column = 0;
     for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++column, ++colIt) {
@@ -960,7 +962,7 @@ ColumnClusterViewImpl::layoutViews(ClusterConfiguration& targetConfiguration)
     removeEmptyCols();
 
     if (targetConfiguration._colWidth.size()) {
-        setSizes(targetConfiguration._colWidth);
+        _pSplitter->setSizes(targetConfiguration._colWidth);
     }
     for (int col = 0; col < _grid.size(); ++col) {
         if (targetConfiguration._clusterHeight.size() && targetConfiguration._clusterHeight[col].size()) {

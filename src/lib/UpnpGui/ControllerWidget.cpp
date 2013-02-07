@@ -74,13 +74,6 @@ class ControllerWidgetClusterController : public Omm::Gui::ClusterController
 
 
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
-#ifdef __IPHONE__
-ClusterView(0, Gui::ClusterView::Native),
-#else
-//ClusterView(0, Gui::ClusterView::Native),
-//ClusterView(0, Gui::ClusterView::Generic),
-ClusterView(0, Gui::ClusterView::Column),
-#endif
 _pApplication(pApplication)
 {
     LOGNS(Gui, gui, debug, "controller widget register device groups ...");

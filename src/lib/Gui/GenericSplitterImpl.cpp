@@ -39,19 +39,9 @@ class SplitterBar : public View, public Controller
     SplitterBar(View* pParent, GenericSplitterViewImpl* pViewImpl, int index) : View(pParent), _pViewImpl(pViewImpl), _index(index)
     {
         setName("splitter bar");
-        setBackgroundColor(Color("blue"));
         attachController(this);
     }
 
-    virtual void selected()
-    {
-        _pViewImpl->_barIndex = _index;
-    }
-
-    virtual void released()
-    {
-        _pViewImpl->_barIndex = -1;
-    }
 
     virtual void mouseMoved(const Position& pos)
     {
@@ -138,8 +128,7 @@ class GenericSplitterLayout : public Layout
 GenericSplitterViewImpl::GenericSplitterViewImpl(View* pView, View::Orientation orientation) :
 PlainViewImpl(pView),
 _orientation(orientation),
-_barWidth(10),
-_barIndex(-1)
+_barWidth(10)
 {
     LOG(gui, debug, "Splitter view impl ctor.");
 }

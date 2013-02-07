@@ -36,6 +36,7 @@ class GenericSplitterViewImpl : public AbstractSplitterViewImpl, public PlainVie
     friend class GenericSplitterLayout;
     friend class SplitterView;
     friend class SplitterBar;
+    friend class ColumnClusterViewImpl;
 
     GenericSplitterViewImpl(View* pView, View::Orientation orientation);
     ~GenericSplitterViewImpl();
@@ -53,7 +54,6 @@ class GenericSplitterViewImpl : public AbstractSplitterViewImpl, public PlainVie
     std::vector<View*>              _views;
     std::vector<SplitterBar*>       _bars;
     int                             _barWidth;
-    int                             _barIndex;
 };
 
 

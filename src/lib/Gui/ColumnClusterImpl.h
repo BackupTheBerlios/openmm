@@ -28,7 +28,6 @@
 
 #include "Gui/View.h"
 #include "ViewImpl.h"
-#include "SplitterImpl.h"
 #include "AbstractClusterImpl.h"
 
 namespace Omm {
@@ -39,7 +38,7 @@ class SplitterView;
 class ColumnView;
 class ClusterConfiguration;
 
-class ColumnClusterViewImpl : public AbstractClusterViewImpl, public SplitterViewImpl
+class ColumnClusterViewImpl : public AbstractClusterViewImpl, public PlainViewImpl
 {
     friend class ColumnClusterController;
     friend class ColumnClusterLayout;
@@ -93,6 +92,7 @@ private:
     void layoutViews(ClusterConfiguration& targetConfiguration);
 //    void layoutViews(const ClusterConfiguration& targetConfiguration);
 
+    SplitterView*                                   _pSplitter;
     std::vector<ColumnView*>                        _grid;
     std::stack<ColumnView*>                         _columnPool;
     ClusterConfiguration*                           _pTargetConfiguration;

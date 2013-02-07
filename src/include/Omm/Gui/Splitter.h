@@ -32,6 +32,7 @@
 namespace Omm {
 namespace Gui {
 
+class AbstractSplitterViewImpl;
 
 class SplitterView : public View
 {
@@ -43,6 +44,8 @@ public:
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
     void setSize(int index, float size);
+
+    AbstractSplitterViewImpl*    _pSplitterImpl;
 };
 
 

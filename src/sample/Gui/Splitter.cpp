@@ -39,14 +39,8 @@ class Application : public Omm::Gui::Application
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
-            pButton->setBackgroundColor(Omm::Gui::Color("blue"));
             pSplitter->insertView(pButton);
         }
-//        std::vector<float> sizes;
-//        sizes.push_back(0.25);
-//        sizes.push_back(0.75);
-//        pSplitter->setSizes(sizes);
-//        pSplitter->setSize(0, 0.1);
 
         return pSplitter;
     }
