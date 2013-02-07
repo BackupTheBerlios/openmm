@@ -23,13 +23,14 @@
 #define SplitterImpl_INCLUDED
 
 #include "ViewImpl.h"
+#include "../AbstractSplitterImpl.h"
 
 namespace Omm {
 namespace Gui {
 
 class View;
 
-class SplitterViewImpl : public ViewImpl
+class SplitterViewImpl : public AbstractSplitterViewImpl, public ViewImpl
 {
     friend class SplitterView;
     friend class ColumnClusterViewImpl;

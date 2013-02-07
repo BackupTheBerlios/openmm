@@ -34,29 +34,29 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttongroup
-ButtonGroup.cpp
+add_executable(group
+Group.cpp
 )
 
-target_link_libraries(buttongroup
+target_link_libraries(group
 ${OMM_GUI}
 )
 
 
-add_executable(buttongrouplayout
-ButtonGroupLayout.cpp
+add_executable(layout
+Layout.cpp
 )
 
-target_link_libraries(buttongrouplayout
+target_link_libraries(layout
 ${OMM_GUI}
 )
 
 
-add_executable(buttongroup1tonmodel
-ButtonGroup1toNModel.cpp
+add_executable(group1tonmodel
+Group1toNModel.cpp
 )
 
-target_link_libraries(buttongroup1tonmodel
+target_link_libraries(group1tonmodel
 ${OMM_GUI}
 )
 
@@ -70,11 +70,11 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttonlist
-ButtonList.cpp
+add_executable(list
+List.cpp
 )
 
-target_link_libraries(buttonlist
+target_link_libraries(list
 ${OMM_GUI}
 )
 
@@ -106,29 +106,29 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttonlazylist
-ButtonLazyList.cpp
+add_executable(lazylist
+LazyList.cpp
 )
 
-target_link_libraries(buttonlazylist
+target_link_libraries(lazylist
 ${OMM_GUI}
 )
 
 
-add_executable(buttonlazylistbidir
-ButtonLazyListBidir.cpp
+add_executable(lazylistbidir
+LazyListBidir.cpp
 )
 
-target_link_libraries(buttonlazylistbidir
+target_link_libraries(lazylistbidir
 ${OMM_GUI}
 )
 
 
-add_executable(buttonnavigator
-ButtonNavigator.cpp
+add_executable(navigator
+Navigator.cpp
 )
 
-target_link_libraries(buttonnavigator
+target_link_libraries(navigator
 ${OMM_GUI}
 )
 
@@ -178,10 +178,10 @@ ${OMM_GUI}
 )
 
 
-add_executable(buttoncluster
-ButtonCluster.cpp
+add_executable(cluster
+Cluster.cpp
 )
 
-target_link_libraries(buttoncluster
+target_link_libraries(cluster
 ${OMM_GUI}
 )
