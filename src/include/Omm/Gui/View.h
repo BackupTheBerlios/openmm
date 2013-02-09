@@ -78,6 +78,8 @@ public:
     virtual void hide(bool async = true);
     virtual void raise(bool async = true);
 
+    bool isVisible();
+
     int posX();
     int posY();
     int width(SizeConstraint size = Current);

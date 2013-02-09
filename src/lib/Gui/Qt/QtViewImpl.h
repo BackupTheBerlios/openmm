@@ -71,7 +71,12 @@ public:
 
     virtual void showEvent(QShowEvent* event)
     {
-        _pViewImpl->presented();
+        _pViewImpl->shown();
+    }
+
+    virtual void hideEvent(QShowEvent* event)
+    {
+        _pViewImpl->hidden();
     }
 
     virtual void resizeEvent(QResizeEvent* pEvent)

@@ -122,7 +122,7 @@ class ListScrollAreaController : public ScrollAreaController
 
     virtual void scrolled(int xOffset, int yOffset);
     virtual void resized(int width, int height);
-    virtual void presented();
+    virtual void shown();
     virtual void keyPressed(KeyCode key);
 
     ListView*   _pListView;
@@ -147,9 +147,9 @@ ListScrollAreaController::resized(int width, int height)
 
 
 void
-ListScrollAreaController::presented()
+ListScrollAreaController::shown()
 {
-    LOG(gui, debug, "list scroll area presented");
+    LOG(gui, debug, "list scroll area shown");
     resized(_pListView->width(), _pListView->height());
 }
 

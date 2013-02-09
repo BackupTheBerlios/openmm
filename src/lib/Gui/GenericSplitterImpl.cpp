@@ -39,25 +39,28 @@ class SplitterBar : public View, public Controller
     SplitterBar(View* pParent, GenericSplitterViewImpl* pViewImpl, int index) : View(pParent), _pViewImpl(pViewImpl), _index(index)
     {
         setName("splitter bar");
+        setBackgroundColor(Color(100, 100, 100, 255));
+        hide(false);
         attachController(this);
     }
 
 
     virtual void mouseMoved(const Position& pos)
     {
+        float size = 0.0;
         if (_pViewImpl->_orientation == View::Horizontal) {
-            float size = (float)(posX() + pos.x() - _pViewImpl->_views[_index]->posX()) / _pViewImpl->_pView->width();
-//            LOG(gui, debug, "posX(): " + Poco::NumberFormatter::format(posX()));
-//            LOG(gui, debug, "pos.x(): " + Poco::NumberFormatter::format(pos.x()));
-//            LOG(gui, debug, "_views[_index]->posX(): " + Poco::NumberFormatter::format(_pViewImpl->_views[_index]->posX()));
-//            LOG(gui, debug, "_pView->width(): " + Poco::NumberFormatter::format(_pViewImpl->_pView->width()));
-//            LOG(gui, debug, "index: " + Poco::NumberFormatter::format(_index));
-//            LOG(gui, debug, "size: " + Poco::NumberFormatter::format(size));
-            _pViewImpl->setSize(_index, size);
+            size = (float)(posX() + pos.x() - _pViewImpl->_views[_index]->posX()) / _pViewImpl->_pView->width();
         }
         else {
-            _pViewImpl->setSize(_index, (float)(posY() + pos.y() - _pViewImpl->_views[_index]->posY()) / _pViewImpl->_pView->height());
+            size = (float)(posY() + pos.y() - _pViewImpl->_views[_index]->posY()) / _pViewImpl->_pView->height();
         }
+        LOG(gui, debug, "posX(): " + Poco::NumberFormatter::format(posX()));
+        LOG(gui, debug, "pos.x(): " + Poco::NumberFormatter::format(pos.x()));
+        LOG(gui, debug, "_views[_index]->posX(): " + Poco::NumberFormatter::format(_pViewImpl->_views[_index]->posX()));
+        LOG(gui, debug, "_pView->width(): " + Poco::NumberFormatter::format(_pViewImpl->_pView->width()));
+        LOG(gui, debug, "index: " + Poco::NumberFormatter::format(_index));
+        LOG(gui, debug, "size: " + Poco::NumberFormatter::format(size));
+        _pViewImpl->setSize(_index, size);
     }
 
     GenericSplitterViewImpl*    _pViewImpl;
@@ -79,42 +82,44 @@ class GenericSplitterLayout : public Layout
             return;
         }
         int viewIndex = 0;
-        int sumSize = 0;
-        int totalBarWidth = _pViewImpl->_views.size() > 1 ? _pViewImpl->_barWidth * (_pViewImpl->_views.size() - 1) : 0;
+        int viewsVisibleCount = 0;
+        float viewsVisibleSizeFactor = 0.0;
+        std::vector<int> visibleIndex;
         for (std::vector<View*>::iterator it = _pViewImpl->_views.begin(); it != _pViewImpl->_views.end(); ++viewIndex, ++it) {
-            if (_pViewImpl->_orientation == View::Horizontal) {
-                int width = 0;
-                if (viewIndex < _pViewImpl->_sizes.size()) {
-                    width = (_pView->width() - totalBarWidth) * _pViewImpl->_sizes[viewIndex];
+            if ((*it)->isVisible()) {
+                viewsVisibleCount++;
+                viewsVisibleSizeFactor += _pViewImpl->_sizes[viewIndex];
+                visibleIndex.push_back(viewIndex);
+            }
+        }
+        int viewsVisibleSize = 0;
+        int countVisibleIndex = 0;
+        viewIndex = 0;
+        int totalBarWidth = viewsVisibleCount > 1 ? _pViewImpl->_barWidth * (viewsVisibleCount - 1) : 0;
+        for (std::vector<View*>::iterator it = _pViewImpl->_views.begin(); it != _pViewImpl->_views.end(); ++viewIndex, ++it) {
+            if ((*it)->isVisible()) {
+                countVisibleIndex++;
+                int pos = 0;
+                if (_pViewImpl->_orientation == View::Horizontal) {
+                    int width = (_pView->width() - totalBarWidth) * _pViewImpl->_sizes[viewIndex] / viewsVisibleSizeFactor;
+                    pos = viewsVisibleSize + (countVisibleIndex - 1) * _pViewImpl->_barWidth;
+                    (*it)->resize(width, _pView->height());
+                    (*it)->move(pos, 0);
+                    viewsVisibleSize += width;
                 }
                 else {
-                    width = (_pView->width() - totalBarWidth) / _pViewImpl->_views.size();
-                }
-                int pos = sumSize + viewIndex * _pViewImpl->_barWidth;
-                sumSize += width;
-                (*it)->resize(width, _pView->height());
-                (*it)->move(pos, 0);
-                if (viewIndex) {
-                    _pViewImpl->_bars[viewIndex - 1]->resize(_pViewImpl->_barWidth, _pView->height());
-                    _pViewImpl->_bars[viewIndex - 1]->move(pos - _pViewImpl->_barWidth, 0);
+                    int height = (_pView->height() - totalBarWidth) * _pViewImpl->_sizes[viewIndex] / viewsVisibleSizeFactor;
+                    pos = viewsVisibleSize + (countVisibleIndex - 1) * _pViewImpl->_barWidth;
+                    (*it)->resize(_pView->width(), height);
+                    (*it)->move(0, pos);
+                    viewsVisibleSize += height;
                 }
             }
-            else {
-                int height = 0;
-                if (viewIndex < _pViewImpl->_sizes.size()) {
-                    height = (_pView->height() - totalBarWidth) * _pViewImpl->_sizes[viewIndex];
-                }
-                else {
-                    height = (_pView->height() - totalBarWidth) / _pViewImpl->_views.size();
-                }
-                int pos = sumSize + viewIndex * _pViewImpl->_barWidth;
-                sumSize += height;
-                (*it)->resize(_pView->width(), height);
-                (*it)->move(0, pos);
-                if (viewIndex) {
-                    _pViewImpl->_bars[viewIndex - 1]->resize(_pView->width(), _pViewImpl->_barWidth);
-                    _pViewImpl->_bars[viewIndex - 1]->move(0, pos - _pViewImpl->_barWidth);
-                }
+            if (countVisibleIndex < visibleIndex.size() && (*it)->isVisible()) {
+                _pViewImpl->showBarAt(viewIndex, viewsVisibleSize + (countVisibleIndex - 1) * _pViewImpl->_barWidth);
+            }
+            if (viewIndex < _pViewImpl->_views.size() - 1 && !(*it)->isVisible()) {
+                _pViewImpl->_bars[viewIndex]->hide(false);
             }
         }
 
@@ -125,10 +130,34 @@ class GenericSplitterLayout : public Layout
 };
 
 
+class SplitterViewController : public Controller
+{
+    friend class GenericSplitterViewImpl;
+
+    SplitterViewController(View* pSplitter) : _pSplitter(pSplitter) {}
+
+    virtual void shown()
+    {
+        _pSplitter->updateLayout();
+    }
+
+    virtual void hidden()
+    {
+        _pSplitter->updateLayout();
+    }
+
+    View* _pSplitter;
+};
+
+
 GenericSplitterViewImpl::GenericSplitterViewImpl(View* pView, View::Orientation orientation) :
 PlainViewImpl(pView),
 _orientation(orientation),
+#ifdef __IPHONE__
+_barWidth(20)
+#else
 _barWidth(10)
+#endif
 {
     LOG(gui, debug, "Splitter view impl ctor.");
 }
@@ -159,13 +188,10 @@ GenericSplitterViewImpl::insertView(View* pView, int index)
     LOG(gui, debug, "Splitter view impl insert view \"" + pView->getName() + "\" at index: " + Poco::NumberFormatter::format(index));
 
     pView->setParent(_pView);
-    if (index < _views.size()) {
-        _views.insert(_views.begin() + index, pView);
+    if (index > _views.size()) {
+        index = _views.size() - 1;
     }
-    else {
-        index = _views.size();
-        _views.push_back(pView);
-    }
+    _views.insert(_views.begin() + index, pView);
     if (_views.size() > 1) {
         _bars.push_back(new SplitterBar(_pView, this, 0));
     }
@@ -176,6 +202,7 @@ GenericSplitterViewImpl::insertView(View* pView, int index)
             _bars[i]->_index = i;
         }
     }
+    pView->attachController(new SplitterViewController(_pView));
     _pView->updateLayout();
 
     LOG(gui, debug, "Splitter view impl insert view finished");
@@ -192,6 +219,18 @@ GenericSplitterViewImpl::getSizes()
 void
 GenericSplitterViewImpl::setSizes(const std::vector<float>& sizes)
 {
+    if (_views.size() != _sizes.size()) {
+        LOG(gui, error, "Splitter view impl set wrong number of size factors");
+        return;
+    }
+    float sum = 0.0;
+    for (std::vector<float>::const_iterator it = sizes.begin(); it != sizes.end(); ++it) {
+        sum += *it;
+    }
+    if (sum < 0.0 || sum >= 1.0) {
+        LOG(gui, error, "Splitter view impl sum of size factors is not in [0.0, 1.0]");
+        return;
+    }
     _sizes = sizes;
     _pView->updateLayout();
 }
@@ -203,18 +242,41 @@ GenericSplitterViewImpl::setSize(int index, float size)
     if (index < 0 || index >= _views.size() - 1 || size < 0.0 || size > 1.0) {
         return;
     }
-    if (_views.size() != _sizes.size()) {
+    int nextVisibleIndex = index + 1;
+    while (nextVisibleIndex < _views.size() && !_views[nextVisibleIndex]->isVisible()) {
+        nextVisibleIndex++;
+    }
+    if (!_views[nextVisibleIndex]->isVisible()) {
         return;
     }
-    float sumSizes = _sizes[index] + _sizes[index + 1];
+    float sumSizes = _sizes[index] + _sizes[nextVisibleIndex];
     if (size <= sumSizes) {
         _sizes[index] = size;
-        _sizes[index + 1] = sumSizes - size;
+        _sizes[nextVisibleIndex] = sumSizes - size;
     }
     else {
-
+        // TODO: also resize all other views of splitter view
     }
     _pView->updateLayout();
+}
+
+
+void
+GenericSplitterViewImpl::showBarAt(int index, int pos)
+{
+    LOG(gui, debug, "show bar at ...");
+
+    if (_orientation == View::Horizontal) {
+        _bars[index]->move(pos, 0);
+        _bars[index]->resize(_barWidth, _pView->height());
+    }
+    else {
+        _bars[index]->move(0, pos);
+        _bars[index]->resize(_pView->width(), _barWidth);
+    }
+    _bars[index]->show(false);
+
+    LOG(gui, debug, "show bar at finished.");
 }
 
 }  // namespace Omm

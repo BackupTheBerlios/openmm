@@ -58,6 +58,7 @@ public:
     virtual void showView(bool async);
     virtual void hideView(bool async);
     virtual void raise(bool async);
+    bool isVisible();
     virtual int posXView();
     virtual int posYView();
     virtual int widthView();
@@ -83,7 +84,8 @@ protected:
     SignalProxy*                _pSignalProxy;
 
 private:
-    void presented();
+    void shown();
+    void hidden();
     void resized(int width, int height);
     void selected();
     void released();

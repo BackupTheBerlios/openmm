@@ -33,13 +33,16 @@ class Application : public Omm::Gui::Application
         Omm::Gui::Splitter* pSplitter = new Omm::Gui::Splitter;
         pSplitter->setOrientation(Omm::Gui::View::Vertical);
 
-        const int subviewCount = 3;
+        const int subviewCount = 2;
         for (int i = 0; i < subviewCount; i++) {
             Omm::Gui::Button* pButton = new Omm::Gui::Button;
             std::string label = "B" + Poco::NumberFormatter::format(i);
             pButton->setName(label);
             pButton->setLabel(label);
-            pSplitter->insertView(pButton);
+            pSplitter->insertView(pButton, i);
+//            if (i == 1) {
+//                pButton->hide();
+//            }
         }
 
         return pSplitter;

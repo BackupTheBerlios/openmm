@@ -29,6 +29,7 @@
 
 #include "../Gui/Cluster.h"
 #include "../Gui/View.h"
+#include "../Gui/Splitter.h"
 #include "../Gui/WebBrowser.h"
 
 

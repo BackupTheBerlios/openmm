@@ -47,6 +47,7 @@ public:
     virtual void showView(bool async);
     virtual void hideView(bool async);
     void raise(bool async);
+    bool isVisible();
     virtual int posXView();
     virtual int posYView();
     virtual int widthView();
@@ -62,7 +63,8 @@ public:
     void setAcceptDrops(bool accept);
     void setEnableHover(bool enable) {}
 
-    void presented();
+    void shown();
+    void hidden();
     void resized(int width, int height);
     void selected();
     void released();

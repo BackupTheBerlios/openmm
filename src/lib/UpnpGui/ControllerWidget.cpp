@@ -35,7 +35,6 @@
 
 #include "Gui/GuiLogger.h"
 #include "Gui/View.h"
-#include "Gui/Splitter.h"
 
 #include "UpnpGui/ActivityIndicator.h"
 #include "UpnpGui/DeviceGroup.h"
@@ -73,6 +72,9 @@ class ControllerWidgetClusterController : public Omm::Gui::ClusterController
 };
 
 
+
+
+
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
 _pApplication(pApplication)
 {
@@ -96,17 +98,17 @@ _pApplication(pApplication)
 
     Omm::Gui::SplitterView* pSplitterView = new Omm::Gui::SplitterView(0, Omm::Gui::View::Vertical);
     pSplitterView->setName("Media");
+    _pMediaServerGroupWidget = new MediaServerGroupWidget;
+    registerDeviceGroup(_pMediaServerGroupWidget);
+    pSplitterView->insertView(_pMediaServerGroupWidget, 0);
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         _pPlaylistEditor = new PlaylistEditor(this);
         _pPlaylistEditorView = new PlaylistEditorView(_pPlaylistEditor);
-        pSplitterView->insertView(_pPlaylistEditorView);
         _pPlaylistEditorView->hide();
+        pSplitterView->insertView(_pPlaylistEditorView, 1);
         Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget,
         PlaylistNotification>(*this, &ControllerWidget::playlistNotification));
     }
-    _pMediaServerGroupWidget = new MediaServerGroupWidget;
-    registerDeviceGroup(_pMediaServerGroupWidget);
-    pSplitterView->insertView(_pMediaServerGroupWidget);
     insertView(pSplitterView, "Media");
     std::vector<float> splitterSizes;
     splitterSizes.push_back(0.8);

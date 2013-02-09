@@ -159,6 +159,13 @@ View::raise(bool async)
 }
 
 
+bool
+View::isVisible()
+{
+    return _pImpl->isVisible();
+}
+
+
 int
 View::posX()
 {

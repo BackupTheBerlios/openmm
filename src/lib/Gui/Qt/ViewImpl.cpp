@@ -164,6 +164,13 @@ ViewImpl::raise(bool async)
 }
 
 
+bool
+ViewImpl::isVisible()
+{
+    return _pNativeView->isVisible();
+}
+
+
 int
 ViewImpl::posXView()
 {
@@ -291,10 +298,18 @@ ViewImpl::setEnableHover(bool enable)
 
 
 void
-ViewImpl::presented()
+ViewImpl::shown()
 {
-//    LOG(gui, debug, "view impl presented.");
-    IMPL_NOTIFY_CONTROLLER(Controller, presented);
+//    LOG(gui, debug, "view impl shown.");
+    IMPL_NOTIFY_CONTROLLER(Controller, shown);
+}
+
+
+void
+ViewImpl::hidden()
+{
+//    LOG(gui, debug, "view impl hidden.");
+    IMPL_NOTIFY_CONTROLLER(Controller, hidden);
 }
 
 

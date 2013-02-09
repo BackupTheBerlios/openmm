@@ -159,6 +159,14 @@
     _pViewImpl->released();
 }
 
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
+{
+//    LOGNS(Omm::Gui, gui, debug, "OmmGuiPlainView touch moved");
+    CGPoint position = [[touches anyObject] locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
+    _pViewImpl->mouseMoved(Omm::Gui::Position(position.x, position.y));
+}
+
 @end
 
 
@@ -330,6 +338,8 @@ ViewImpl::showView(bool async)
     else {
         static_cast<UIView*>(getNativeView()).hidden = NO;
     }
+    // NOTE: there seem to be no event for showing/hiden of an UIView, so we have to call it explicitly on invocation of show()/hide()
+    IMPL_NOTIFY_CONTROLLER(Controller, shown);
 //    LOG(gui, debug, "view impl show finished.");
 }
 
@@ -344,6 +354,8 @@ ViewImpl::hideView(bool async)
     else {
         static_cast<UIView*>(getNativeView()).hidden = YES;
     }
+    // NOTE: there seem to be no event for showing/hiden of an UIView, so we have to call it explicitly on invocation of show()/hide()
+    IMPL_NOTIFY_CONTROLLER(Controller, hidden);
 //    LOG(gui, debug, "view impl hide finished.");
 }
 
@@ -357,6 +369,13 @@ ViewImpl::raise(bool async)
     else {
         [static_cast<UIView*>(getView()->getParent()->getNativeView()) bringSubviewToFront:static_cast<UIView*>(getNativeView())];
     }
+}
+
+
+bool
+ViewImpl::isVisible()
+{
+    return !static_cast<UIView*>(getNativeView()).hidden;
 }
 
 
@@ -456,10 +475,18 @@ ViewImpl::setAcceptDrops(bool accept)
 
 
 void
-ViewImpl::presented()
+ViewImpl::shown()
 {
-//    LOG(gui, debug, "view impl presented.");
-    IMPL_NOTIFY_CONTROLLER(Controller, presented);
+//    LOG(gui, debug, "view impl shown.");
+    IMPL_NOTIFY_CONTROLLER(Controller, shown);
+}
+
+
+void
+ViewImpl::hidden()
+{
+//    LOG(gui, debug, "view impl hidden.");
+    IMPL_NOTIFY_CONTROLLER(Controller, hidden);
 }
 
 

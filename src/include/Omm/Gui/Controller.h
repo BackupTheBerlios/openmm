@@ -60,7 +60,8 @@ public:
     void syncModelViews();
 
 //protected:
-    virtual void presented() {}
+    virtual void shown() {}
+    virtual void hidden() {}
     virtual void resized(int width, int height) {}
     virtual void selected() {}
     virtual void released() {}
