@@ -40,9 +40,9 @@ class Application : public Omm::Gui::Application
             pButton->setName(label);
             pButton->setLabel(label);
             pSplitter->insertView(pButton, i);
-//            if (i == 1) {
-//                pButton->hide();
-//            }
+            if (i == 1) {
+                pButton->hide();
+            }
         }
 
         return pSplitter;

@@ -91,6 +91,9 @@ class GenericSplitterLayout : public Layout
                 viewsVisibleSizeFactor += _pViewImpl->_sizes[viewIndex];
                 visibleIndex.push_back(viewIndex);
             }
+            if (viewIndex < _pViewImpl->_views.size() - 1) {
+                _pViewImpl->_bars[viewIndex]->hide(false);
+            }
         }
         int viewsVisibleSize = 0;
         int countVisibleIndex = 0;
@@ -117,9 +120,6 @@ class GenericSplitterLayout : public Layout
             }
             if (countVisibleIndex < visibleIndex.size() && (*it)->isVisible()) {
                 _pViewImpl->showBarAt(viewIndex, viewsVisibleSize + (countVisibleIndex - 1) * _pViewImpl->_barWidth);
-            }
-            if (viewIndex < _pViewImpl->_views.size() - 1 && !(*it)->isVisible()) {
-                _pViewImpl->_bars[viewIndex]->hide(false);
             }
         }
 
