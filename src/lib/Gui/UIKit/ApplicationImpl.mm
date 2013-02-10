@@ -178,6 +178,7 @@
 
 -(void)applicationDidFinishLaunching:(UIApplication*)application
 {
+    [application setStatusBarStyle:UIStatusBarStyleBlackOpaque];
     // create main view
     _pWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     _pWindow.backgroundColor = [UIColor whiteColor];

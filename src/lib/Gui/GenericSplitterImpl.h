@@ -47,15 +47,17 @@ class GenericSplitterViewImpl : public AbstractSplitterViewImpl, public PlainVie
     void insertView(View* pView, int index);
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
-    void setSize(int index, float size);
 
+    void setSize(int index, float size, bool visibleViewsOnly);
     void showBarAt(int index, int pos);
+    void printSizes();
 
     View::Orientation               _orientation;
     std::vector<float>              _sizes;
     std::vector<View*>              _views;
     std::vector<SplitterBar*>       _bars;
     int                             _barWidth;
+//    bool                            _sizeForVisibleViewsOnly;
 };
 
 

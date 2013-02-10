@@ -89,6 +89,7 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
     [pNativeView setImpl:this];
 
     initViewImpl(pView, pNativeView);
+    pNativeView.navigationBar.barStyle = UIBarStyleBlack;
 }
 
 
@@ -145,6 +146,7 @@ NavigatorViewImpl::showSearchBox(bool show)
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];
+    searchBar.barStyle = UIBarStyleBlack;
     searchBar.showsCancelButton = YES;
     searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 //    searchBar.showsSearchResultsButton = YES;

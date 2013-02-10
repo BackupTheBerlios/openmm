@@ -43,7 +43,7 @@ public:
     void insertView(View* pView, int index = 0);
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
-    void setSize(int index, float size);
+    void setSize(int index, float size, bool visibleViewsOnly = false);
 
     AbstractSplitterViewImpl*    _pSplitterImpl;
 };

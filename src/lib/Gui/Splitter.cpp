@@ -96,10 +96,10 @@ SplitterView::setSizes(const std::vector<float>& sizes)
 
 
 void
-SplitterView::setSize(int index, float size)
+SplitterView::setSize(int index, float size, bool visibleViewsOnly)
 {
 //    static_cast<GenericSplitterViewImpl*>(_pImpl)->setSize(index, size);
-    _pSplitterImpl->setSize(index, size);
+    _pSplitterImpl->setSize(index, size, visibleViewsOnly);
 }
 
 } // namespace Gui

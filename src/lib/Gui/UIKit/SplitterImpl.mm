@@ -69,7 +69,7 @@ SplitterViewImpl::setSizes(const std::vector<float>& sizes)
 
 
 void
-SplitterViewImpl::setSize(int index, float size)
+SplitterViewImpl::setSize(int index, float size, bool visibleViewsOnly)
 {
     // TODO: implement UIKit SplitterViewImpl::setSize()
 }

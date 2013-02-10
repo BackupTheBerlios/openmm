@@ -43,7 +43,7 @@ private:
     void insertView(View* pView, int index);
     std::vector<float> getSizes();
     void setSizes(const std::vector<float>& sizes);
-    void setSize(int index, float size);
+    void setSize(int index, float size, bool visibleViewsOnly);
 };
 
 

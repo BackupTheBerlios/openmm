@@ -54,13 +54,13 @@ class SplitterBar : public View, public Controller
         else {
             size = (float)(posY() + pos.y() - _pViewImpl->_views[_index]->posY()) / _pViewImpl->_pView->height();
         }
-        LOG(gui, debug, "posX(): " + Poco::NumberFormatter::format(posX()));
-        LOG(gui, debug, "pos.x(): " + Poco::NumberFormatter::format(pos.x()));
-        LOG(gui, debug, "_views[_index]->posX(): " + Poco::NumberFormatter::format(_pViewImpl->_views[_index]->posX()));
-        LOG(gui, debug, "_pView->width(): " + Poco::NumberFormatter::format(_pViewImpl->_pView->width()));
+        LOG(gui, debug, "splitter bar pos [" + Poco::NumberFormatter::format(posX()) + ", " + Poco::NumberFormatter::format(posY()) + "]");
+        LOG(gui, debug, "mouse pos [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+        LOG(gui, debug, "_views[_index]->pos [" + Poco::NumberFormatter::format(_pViewImpl->_views[_index]->posX()) + ", " + Poco::NumberFormatter::format(_pViewImpl->_views[_index]->posY()) + "]");
+        LOG(gui, debug, "_pView->width / height: [" + Poco::NumberFormatter::format(_pViewImpl->_pView->width()) + ", " + Poco::NumberFormatter::format(_pViewImpl->_pView->height()) + "]");
         LOG(gui, debug, "index: " + Poco::NumberFormatter::format(_index));
         LOG(gui, debug, "size: " + Poco::NumberFormatter::format(size));
-        _pViewImpl->setSize(_index, size);
+        _pViewImpl->setSize(_index, size, true);
     }
 
     GenericSplitterViewImpl*    _pViewImpl;
@@ -77,6 +77,7 @@ class GenericSplitterLayout : public Layout
     virtual void layoutView()
     {
         LOG(gui, debug, "Splitter view impl layout view ...");
+        _pViewImpl->printSizes();
 
         if (!_pViewImpl->_views.size()) {
             return;
@@ -95,6 +96,9 @@ class GenericSplitterLayout : public Layout
                 _pViewImpl->_bars[viewIndex]->hide(false);
             }
         }
+//        if (_pViewImpl->_sizeForVisibleViewsOnly) {
+//            viewsVisibleSizeFactor = 1.0;
+//        }
         int viewsVisibleSize = 0;
         int countVisibleIndex = 0;
         viewIndex = 0;
@@ -158,6 +162,7 @@ _barWidth(20)
 #else
 _barWidth(10)
 #endif
+//_sizeForVisibleViewsOnly(false)
 {
     LOG(gui, debug, "Splitter view impl ctor.");
 }
@@ -227,28 +232,34 @@ GenericSplitterViewImpl::setSizes(const std::vector<float>& sizes)
     for (std::vector<float>::const_iterator it = sizes.begin(); it != sizes.end(); ++it) {
         sum += *it;
     }
-    if (sum < 0.0 || sum >= 1.0) {
+    if (sum < 0.0 || sum > 1.0) {
         LOG(gui, error, "Splitter view impl sum of size factors is not in [0.0, 1.0]");
         return;
     }
     _sizes = sizes;
+//    _sizeForVisibleViewsOnly = false;
     _pView->updateLayout();
 }
 
 
 void
-GenericSplitterViewImpl::setSize(int index, float size)
+GenericSplitterViewImpl::setSize(int index, float size, bool visibleViewsOnly)
 {
     if (index < 0 || index >= _views.size() - 1 || size < 0.0 || size > 1.0) {
         return;
     }
     int nextVisibleIndex = index + 1;
-    while (nextVisibleIndex < _views.size() && !_views[nextVisibleIndex]->isVisible()) {
-        nextVisibleIndex++;
-    }
-    if (!_views[nextVisibleIndex]->isVisible()) {
-        return;
-    }
+//    if (visibleViewsOnly) {
+        while (nextVisibleIndex < _views.size() && !_views[nextVisibleIndex]->isVisible()) {
+            nextVisibleIndex++;
+            LOG(gui, debug, "next visible index (loop): " + Poco::NumberFormatter::format(nextVisibleIndex));
+        }
+        if (!_views[nextVisibleIndex]->isVisible()) {
+            return;
+        }
+//    }
+    LOG(gui, debug, "next visible index: " + Poco::NumberFormatter::format(nextVisibleIndex));
+
     float sumSizes = _sizes[index] + _sizes[nextVisibleIndex];
     if (size <= sumSizes) {
         _sizes[index] = size;
@@ -257,6 +268,7 @@ GenericSplitterViewImpl::setSize(int index, float size)
     else {
         // TODO: also resize all other views of splitter view
     }
+//    _sizeForVisibleViewsOnly = visibleViewsOnly;
     _pView->updateLayout();
 }
 
@@ -277,6 +289,17 @@ GenericSplitterViewImpl::showBarAt(int index, int pos)
     _bars[index]->show(false);
 
     LOG(gui, debug, "show bar at finished.");
+}
+
+
+void
+GenericSplitterViewImpl::printSizes()
+{
+    std::string sizesString;
+    for (std::vector<float>::const_iterator it = _sizes.begin(); it != _sizes.end(); ++it) {
+        sizesString += Poco::NumberFormatter::format(*it) + " ";
+    }
+    LOG(gui, debug, "splitter sizes: " + sizesString);
 }
 
 }  // namespace Omm
