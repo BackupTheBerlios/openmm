@@ -46,6 +46,17 @@ _pImageModel(model._pImageModel)
 }
 
 
+ListItemModel::~ListItemModel()
+{
+    if (_pLabelModel) {
+        delete _pLabelModel;
+    }
+    if (_pImageModel) {
+        delete _pImageModel;
+    }
+}
+
+
 LabelModel*
 ListItemModel::getLabelModel()
 {

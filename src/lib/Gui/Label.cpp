@@ -31,6 +31,12 @@ namespace Omm {
 namespace Gui {
 
 
+LabelModel::LabelModel(const std::string& label) :
+_label(label)
+{
+}
+
+
 //const std::string&
 //LabelModel::getLabel() const
 //{

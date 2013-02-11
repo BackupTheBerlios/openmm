@@ -29,6 +29,7 @@ MediaRenderer.cpp
 MediaServer.cpp
 MediaObject.cpp
 Playlist.cpp
+Setup.cpp
 UpnpApplication.cpp
 ${OMM_RESOURCES}
 )

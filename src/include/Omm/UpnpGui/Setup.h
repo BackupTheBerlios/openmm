@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2013                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,58 +19,48 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Label_INCLUDED
-#define Label_INCLUDED
+#ifndef Setup_INCLUDED
+#define Setup_INCLUDED
 
-#include <string>
-#include "View.h"
-#include "Model.h"
-#include "Controller.h"
+#include <Poco/Net/HTMLForm.h>
+
+#include "../Gui/View.h"
+#include "../Gui/List.h"
 
 
 namespace Omm {
-namespace Gui {
+
+class SetupModel;
+class UpnpApplication;
+class ControllerWidget;
 
 
-class LabelModel : public Model
+class GuiSetup : public Gui::ListView
 {
 public:
-    LabelModel() {}
-    LabelModel(const std::string& label);
-
-//    virtual const std::string& getLabel() const;
-    virtual std::string getLabel();
-    void setLabel(const std::string& label);
+    GuiSetup(Gui::View* pParent = 0);
+    virtual ~GuiSetup();
 
 private:
-    std::string _label;
+    SetupModel*     _pSetupModel;
 };
 
 
-class LabelView : public View
-{
-    friend class LabelModel;
-
-public:
-    LabelView(View* pParent = 0);
-
-    void setAlignment(Alignment alignment);
-
-//private:
-    virtual void syncViewImpl();
-};
-
-
-class Label : public Widget<LabelView, Controller, LabelModel>
+class WebSetup
 {
 public:
-    Label(View* pParent = 0) : Widget<LabelView, Controller, LabelModel>(pParent) {}
+    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
 
-    void setLabel(const std::string& label);
+    std::stringstream* generateConfigPage();
+    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
+    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
+
+private:
+    UpnpApplication*    _pApp;
+    ControllerWidget*   _pControllerWidget;
 };
-
 
 }  // namespace Omm
-}  // namespace Gui
+
 
 #endif

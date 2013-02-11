@@ -49,6 +49,7 @@
 namespace Omm {
 
 class ControllerWidget;
+class WebSetup;
 
 class UpnpApplication :  public Poco::Util::Application, public Gui::Application
 {
@@ -73,7 +74,10 @@ public:
     std::string getAppHttpUri();
     std::string getConfigHttpUri();
     std::string getMode();
+    Poco::Util::PropertyFileConfiguration* getFileConfiguration();
     Av::MediaRenderer* getLocalRenderer();
+    void restartLocalServers();
+    void setState(const std::string& state);
 
 private:
     // Poco::Util::Application interface
@@ -94,9 +98,6 @@ private:
     void loadConfig();
     void initConfig();
     void saveConfig();
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
 
     // local devices
     void initLocalDevices();
@@ -113,10 +114,12 @@ private:
     char**                                      _argv;
     bool                                        _helpRequested;
     bool                                        _lockInstance;
+    
     bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;
     std::string                                 _mode;
+    WebSetup*                                   _pWebSetup;
 
     ControllerWidget*                           _pControllerWidget;
     bool                                        _enableController;

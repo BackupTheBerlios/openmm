@@ -30,13 +30,13 @@
 #include "../Gui/Cluster.h"
 #include "../Gui/View.h"
 #include "../Gui/Splitter.h"
-#include "../Gui/WebBrowser.h"
 
 
 namespace Omm {
 
 class UpnpApplication;
 class GuiVisual;
+class GuiSetup;
 class MediaRendererGroupWidget;
 class MediaRendererView;
 class MediaServerDevice;
@@ -86,7 +86,7 @@ private:
     PlaylistEditor*             _pPlaylistEditor;
     PlaylistEditorView*         _pPlaylistEditorView;
     GuiVisual*                  _pVisual;
-    Gui::WebBrowser*            _pConfigBrowser;
+    GuiSetup*                      _pSetup;
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;

@@ -43,6 +43,7 @@
 #include "UpnpGui/MediaRenderer.h"
 #include "UpnpGui/MediaServer.h"
 #include "UpnpGui/Playlist.h"
+#include "UpnpGui/Setup.h"
 #include "UpnpGui/UpnpApplication.h"
 #include "UpnpGui/ControllerWidget.h"
 
@@ -72,19 +73,15 @@ class ControllerWidgetClusterController : public Omm::Gui::ClusterController
 };
 
 
-
-
-
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
 _pApplication(pApplication)
 {
     LOGNS(Gui, gui, debug, "controller widget register device groups ...");
 
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
-        _pConfigBrowser = new Gui::WebBrowser;
-        _pConfigBrowser->setName("Setup");
-        insertView(_pConfigBrowser, "Setup");
-        _pConfigBrowser->setUri(_pApplication->getConfigHttpUri());
+        _pSetup = new GuiSetup;
+        _pSetup->setName("Setup");
+        insertView(_pSetup, "Setup");
     }
 
     _pVisual = new GuiVisual;
@@ -285,7 +282,8 @@ ControllerWidget::showOnlyRendererVisual(bool show)
     insertView(_pMediaServerGroupWidget, "Media");
     insertView(_pMediaRendererGroupWidget, "Player");
     insertView(_pPlaylistEditor, "List");
-    insertView(_pConfigBrowser, "Setup");
+    insertView(_pSetup, "Setup");
+//    insertView(_pConfigBrowser, "Setup");
 }
 
 

@@ -39,6 +39,7 @@ class ListItemModel : public Model
 public:
     ListItemModel();
     ListItemModel(const ListItemModel& model);
+    ~ListItemModel();
 
     LabelModel* getLabelModel();
     void setLabelModel(LabelModel* pLabelModel);

@@ -30,19 +30,6 @@
 
 namespace Omm {
 
-class UpnpApplication;
-class ControllerWidget;
-class MediaObjectModel;
-class GuiVisual;
-class MediaServerGroupWidget;
-class MediaServerDevice;
-class MediaRendererGroupWidget;
-class MediaRendererView;
-class MediaObjectView;
-class PlaylistEditor;
-class PlaylistEditorObjectView;
-class ActivityIndicator;
-
 
 class GuiVisual : public Gui::Image, public Sys::Visual
 {
