@@ -22,6 +22,7 @@ UIDrag.mm
 SelectionViewImpl.mm
 SplitterImpl.mm
 SelectorImpl.mm
+SwitchImpl.mm
 )
 
 

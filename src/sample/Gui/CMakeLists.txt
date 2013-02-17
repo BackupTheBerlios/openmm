@@ -194,3 +194,12 @@ Selector.cpp
 target_link_libraries(selector
 ${OMM_GUI}
 )
+
+
+add_executable(switch
+Switch.cpp
+)
+
+target_link_libraries(switch
+${OMM_GUI}
+)

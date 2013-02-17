@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,54 +19,50 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#ifndef Switch_INCLUDED
+#define Switch_INCLUDED
 
-#include <Poco/Net/HTMLForm.h>
+#include <string>
 
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
+#include "View.h"
+#include "Model.h"
+#include "Controller.h"
 
 
 namespace Omm {
-
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
+namespace Gui {
 
 
-class GuiSetup : public Gui::NavigatorView
+class SwitchController : public Controller
 {
-public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
+    friend class SwitchViewImpl;
+    friend class SwitchSignalProxy;
 
-private:
-    UpnpApplication*     _pApp;
-
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
+protected:
+    virtual void switched(bool on) {}
 };
 
 
-class WebSetup
+class SwitchView : public View
+{
+    friend class SwitchModel;
+
+public:
+    SwitchView(View* pParent = 0);
+
+    bool getStateOn();
+    void setState(bool on);
+};
+
+
+class Switch : public Widget<SwitchView, SwitchController, Model>
 {
 public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
-
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
-
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
+    Switch(View* pParent = 0) : Widget<SwitchView, SwitchController, Model>(pParent) {}
 };
+
 
 }  // namespace Omm
-
+}  // namespace Gui
 
 #endif

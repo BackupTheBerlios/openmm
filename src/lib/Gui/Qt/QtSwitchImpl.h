@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,54 +19,30 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#ifndef QtSwitchImpl_INCLUDED
+#define QtSwitchImpl_INCLUDED
 
-#include <Poco/Net/HTMLForm.h>
-
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
-
+#include "QtViewImpl.h"
 
 namespace Omm {
-
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
+namespace Gui {
 
 
-class GuiSetup : public Gui::NavigatorView
+class SwitchSignalProxy : public SignalProxy
 {
+    Q_OBJECT
+
 public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
+    SwitchSignalProxy(ViewImpl* pViewImpl) : SignalProxy(pViewImpl) {}
 
-private:
-    UpnpApplication*     _pApp;
+    virtual void init();
 
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
+private slots:
+    void stateChanged(int state);
 };
 
-
-class WebSetup
-{
-public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
-
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
-
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
-};
 
 }  // namespace Omm
-
+}  // namespace Gui
 
 #endif

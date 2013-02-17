@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2009, 2010                                                 |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -17,56 +17,43 @@
 |                                                                           |
 |  You should have received a copy of the GNU General Public License        |
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
- ***************************************************************************/
+***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#include <iostream>
 
-#include <Poco/Net/HTMLForm.h>
+#include <Poco/NumberFormatter.h>
 
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
-
-
-namespace Omm {
-
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
+#include <Omm/Gui/Application.h>
+#include <Omm/Gui/Label.h>
+#include <Omm/Gui/VerticalLayout.h>
+#include <Omm/Gui/Switch.h>
 
 
-class GuiSetup : public Gui::NavigatorView
+class SwitchController : public Omm::Gui::SwitchController
 {
-public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
-
 private:
-    UpnpApplication*     _pApp;
-
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
+    void switched(bool on)
+    {
+        std::cout << "switched: " << std::string(on ? "on" : "off") << std::endl;
+    }
 };
 
 
-class WebSetup
+class Application : public Omm::Gui::Application
 {
-public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
+    virtual Omm::Gui::View* createMainView()
+    {
+        Omm::Gui::SwitchView* pSwitch = new Omm::Gui::SwitchView;
+        pSwitch->attachController(new SwitchController);
 
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
-
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
+        return pSwitch;
+    }
 };
 
-}  // namespace Omm
 
+int main(int argc, char** argv)
+{
+    Application app;
+    return app.runEventLoop(argc, argv);
+}
 
-#endif

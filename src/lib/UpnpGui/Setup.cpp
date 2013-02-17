@@ -45,11 +45,6 @@ class AppStateSelector : public Gui::Selector
     Selector(pParent),
     _pApp(pApp)
     {
-    }
-
-
-    void init()
-    {
         syncView();
         std::string state = _pApp->getFileConfiguration()->getString("application.state", "Started");
         if (state == DeviceManager::Started) {
@@ -193,8 +188,28 @@ _pApp(pApp)
     _pSetupView->setName("Setup");
     _pSetupView->setLayout(new Gui::VerticalLayout);
 
+    Gui::Label* pControllerLabel = new Gui::Label(_pSetupView);
+    pControllerLabel->setLabel("Controller");
+    pControllerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
+
     _pAppStateSelector = new AppStateSelector(pApp, _pSetupView);
-    _pAppStateSelector->init();
+    _pAppStateSelector->setSizeConstraint(10, 20, Gui::View::Pref);
+
+    Gui::Label* pRendererLabel = new Gui::Label(_pSetupView);
+    pRendererLabel->setLabel("Local Renderer");
+    pRendererLabel->setSizeConstraint(10, 15, Gui::View::Pref);
+
+    Gui::ListItemView* pRendererItem = new Gui::ListItemView(_pSetupView);
+    pRendererItem->setSizeConstraint(10, 20, Gui::View::Pref);
+    Gui::ListItemModel* pRendererItemModel = new Gui::ListItemModel;
+    Gui::LabelModel* pRendererItemLabel = new Gui::LabelModel;
+    pRendererItemLabel->setLabel(_pApp->getFileConfiguration()->getString("renderer.friendlyName", "Local Renderer"));
+    pRendererItemModel->setLabelModel(pRendererItemLabel);
+    pRendererItem->setModel(pRendererItemModel);
+
+    Gui::Label* pServerLabel = new Gui::Label(_pSetupView);
+    pServerLabel->setLabel("Server");
+    pServerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
     _pServerListModel = new ServerListModel;
     _pServerListModel->readConfig();

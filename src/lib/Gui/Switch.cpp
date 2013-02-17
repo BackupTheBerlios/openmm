@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,54 +19,41 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-#include <Poco/Net/HTMLForm.h>
-
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
+#include "Gui/Switch.h"
+#include "Gui/GuiLogger.h"
+#include "SwitchImpl.h"
 
 
 namespace Omm {
+namespace Gui {
 
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
-
-
-class GuiSetup : public Gui::NavigatorView
+SwitchView::SwitchView(View* pParent) :
+View(pParent, false)
 {
-public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
+    setName("switch view");
 
-private:
-    UpnpApplication*     _pApp;
-
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
-};
+    _minWidth = 30;
+    _minHeight = 10;
+    _prefWidth = 20;
+    _prefHeight = 20;
+    _pImpl = new SwitchViewImpl(this);
+}
 
 
-class WebSetup
+bool
+SwitchView::getStateOn()
 {
-public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
-
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
-
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
-};
-
-}  // namespace Omm
+    return static_cast<SwitchViewImpl*>(_pImpl)->getStateOn();
+}
 
 
-#endif
+void
+SwitchView::setState(bool on)
+{
+    static_cast<SwitchViewImpl*>(_pImpl)->setState(on);
+}
+
+} // namespace Gui
+} // namespace Omm

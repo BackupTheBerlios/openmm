@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,54 +19,73 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#import <UIKit/UIKit.h>
 
-#include <Poco/Net/HTMLForm.h>
+#include <Poco/NumberFormatter.h>
 
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
+#include "Gui/Image.h"
+#include "SwitchImpl.h"
+#include "Gui/Switch.h"
+#include "Gui/GuiLogger.h"
+
+
+@interface OmmGuiSwitch : UISwitch {
+    Omm::Gui::SwitchViewImpl* _pSwitchViewImpl;
+}
+
+@end
+
+
+@implementation OmmGuiSwitch
+
+- (void)setImpl:(Omm::Gui::SwitchViewImpl*)pImpl
+{
+    _pSwitchViewImpl = pImpl;
+    [self addTarget:self action:@selector(switched) forControlEvents:UIControlEventValueChanged];
+}
+
+
+- (void)switched
+{
+    _pSwitchViewImpl->switched(self.on);
+}
+
+@end
 
 
 namespace Omm {
-
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
+namespace Gui {
 
 
-class GuiSetup : public Gui::NavigatorView
+SwitchViewImpl::SwitchViewImpl(View* pView)
 {
-public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
+    OmmGuiSwitch* pNativeView = [[OmmGuiSwitch alloc] init];
+    [pNativeView setImpl:this];
 
-private:
-    UpnpApplication*     _pApp;
-
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
-};
+    initViewImpl(pView, pNativeView);
+}
 
 
-class WebSetup
+bool
+SwitchViewImpl::getStateOn()
 {
-public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
+    return static_cast<UISwitch*>(_pNativeView).on;
+}
 
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
 
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
-};
+void
+SwitchViewImpl::setState(bool on)
+{
+    static_cast<UISwitch*>(_pNativeView).on = on;
+}
+
+
+void
+SwitchViewImpl::switched(bool on)
+{
+    LOG(gui, debug, "switch impl: " + std::string(on ? "on" : "off"));
+    IMPL_NOTIFY_CONTROLLER(SwitchController, switched, on);
+}
 
 }  // namespace Omm
-
-
-#endif
+}  // namespace Gui

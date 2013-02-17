@@ -39,6 +39,7 @@ ColumnClusterImpl.cpp
 Stack.cpp
 GenericSplitterImpl.cpp
 Selector.cpp
+Switch.cpp
 )
 
 target_link_libraries(ommgui

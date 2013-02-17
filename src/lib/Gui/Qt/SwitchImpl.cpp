@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2013                                                       |
+|  Copyright (C) 2011                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,54 +19,73 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef Setup_INCLUDED
-#define Setup_INCLUDED
+#include <QtGui>
+#include <Poco/NumberFormatter.h>
+#include <qt4/QtGui/qcombobox.h>
 
-#include <Poco/Net/HTMLForm.h>
-
-#include "../Gui/Navigator.h"
-#include "../Gui/Selector.h"
-#include "../Gui/List.h"
-
+#include "Gui/Image.h"
+#include "SwitchImpl.h"
+#include "QtSwitchImpl.h"
+#include "Gui/Switch.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
-
-class ServerListModel;
-class UpnpApplication;
-class ControllerWidget;
+namespace Gui {
 
 
-class GuiSetup : public Gui::NavigatorView
+SwitchViewImpl::SwitchViewImpl(View* pView)
 {
-public:
-    GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
-    virtual ~GuiSetup();
+    QCheckBox* pNativeView = new QCheckBox;
+    SwitchSignalProxy* pSignalProxy = new SwitchSignalProxy(this);
 
-private:
-    UpnpApplication*     _pApp;
-
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
-};
+    initViewImpl(pView, pNativeView, pSignalProxy);
+}
 
 
-class WebSetup
+bool
+SwitchViewImpl::getStateOn()
 {
-public:
-    WebSetup(UpnpApplication* pApp, ControllerWidget* pControllerWidget);
+    Qt::CheckState res = static_cast<QCheckBox*>(_pNativeView)->checkState();
+    switch(res) {
+        case Qt::Checked:
+            return true;
+        case Qt::Unchecked:
+            return false;
+    }
+}
 
-    std::stringstream* generateConfigPage();
-    void handleAppConfigRequest(const Poco::Net::HTMLForm& form);
-    void handleDevConfigRequest(const Poco::Net::HTMLForm& form);
 
-private:
-    UpnpApplication*    _pApp;
-    ControllerWidget*   _pControllerWidget;
-};
+void
+SwitchViewImpl::setState(bool on)
+{
+    static_cast<QCheckBox*>(_pNativeView)->setCheckState(on ? Qt::Checked : Qt::Unchecked);
+}
+
+
+void
+SwitchSignalProxy::init()
+{
+    SignalProxy::init();
+    connect(_pViewImpl->getNativeView(), SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
+}
+
+
+void
+SwitchSignalProxy::stateChanged(int state)
+{
+    bool switchOn = false;
+    switch(state) {
+        case Qt::Checked:
+            switchOn = true;
+            break;
+        case Qt::Unchecked:
+            switchOn = false;
+            break;
+    }
+    LOG(gui, debug, "switch switched: " + std::string(switchOn ? "on" : "off"));
+    PROXY_NOTIFY_CONTROLLER(SwitchController, switched, switchOn);
+}
+
 
 }  // namespace Omm
-
-
-#endif
+}  // namespace Gui
