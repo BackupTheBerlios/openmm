@@ -232,6 +232,13 @@ NavigatorViewImpl::getVisibleView()
 
 
 void
+NavigatorViewImpl::showNavigatorBar(bool show)
+{
+    _pNavigatorPanel->setHidden(!show);
+}
+
+
+void
 NavigatorViewImpl::showSearchBox(bool show)
 {
     _pNavigatorPanel->_pSearchWidget->setHidden(!show);

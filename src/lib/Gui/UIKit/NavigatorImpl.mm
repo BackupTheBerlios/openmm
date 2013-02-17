@@ -140,9 +140,18 @@ NavigatorViewImpl::getVisibleView()
 
 
 void
+NavigatorViewImpl::showNavigatorBar(bool show)
+{
+    OmmNavigationController* pNativeViewController = static_cast<OmmNavigationController*>(getNativeViewController());
+    pNativeViewController.navigationBarHidden = !show;
+}
+
+
+void
 NavigatorViewImpl::showSearchBox(bool show)
 {
-// TODO: implement showSearchBox for UiKit
+// TODO: maybe better use setToolbarItems:animated: for the UIViewController of the container view that is pushed
+
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];

@@ -19,51 +19,66 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef NavigatorImpl_INCLUDED
-#define NavigatorImpl_INCLUDED
+#include <QtGui>
+#include <Poco/NumberFormatter.h>
+#include <qt4/QtGui/qcombobox.h>
 
-//#include <stack>
-#include "ViewImpl.h"
-
-
-class QStackedWidget;
-class QVBoxLayout;
-
+#include "Gui/Image.h"
+#include "SelectorImpl.h"
+#include "QtSelectorImpl.h"
+#include "Gui/Selector.h"
+#include "Gui/GuiLogger.h"
 
 namespace Omm {
 namespace Gui {
 
-class QtNavigatorPanel;
 
-class NavigatorViewImpl : public ViewImpl
+SelectorViewImpl::SelectorViewImpl(View* pView)
 {
-    friend class QtNavigatorPanel;
+//    LOG(gui, debug, "selector view impl ctor");
+    QComboBox* pNativeView = new QComboBox;
+    SelectorSignalProxy* pSignalProxy = new SelectorSignalProxy(this);
 
-public:
-    NavigatorViewImpl(View* pView);
-    virtual ~NavigatorViewImpl();
-
-    void pushView(View* pView, const std::string label);
-    void popView(bool keepRootView);
-    void popToRootView();
-    View* getVisibleView();
-    void showNavigatorBar(bool show);
-    void showSearchBox(bool show);
-
-private:
-    void removeView(View* pView);
-    void exposeView(View* pView);
-    void changedSearchText(const std::string& searchText);
-
-    QtNavigatorPanel*           _pNavigatorPanel;
-    QStackedWidget*             _pStackedWidget;
-    QVBoxLayout*                _pNavigatorLayout;
-};
+    initViewImpl(pView, pNativeView, pSignalProxy);
+}
 
 
-} // namespace Gui
-} // namespace Omm
+int
+SelectorViewImpl::getCurrentIndex()
+{
+    return static_cast<QComboBox*>(_pNativeView)->currentIndex();
+}
 
 
-#endif
+void
+SelectorViewImpl::clear()
+{
+    static_cast<QComboBox*>(_pNativeView)->clear();
+}
 
+
+void
+SelectorViewImpl::addItem(const std::string& label, Image* pImage)
+{
+    static_cast<QComboBox*>(_pNativeView)->addItem(QString().fromStdString(label));
+}
+
+
+void
+SelectorSignalProxy::init()
+{
+    SignalProxy::init();
+    connect(_pViewImpl->getNativeView(), SIGNAL(activated(int)), this, SLOT(selected(int)));
+}
+
+
+void
+SelectorSignalProxy::selected(int row)
+{
+    LOG(gui, debug, "selector view impl, calling selected virtual method");
+    PROXY_NOTIFY_CONTROLLER(SelectorController, selected, row);
+}
+
+
+}  // namespace Omm
+}  // namespace Gui

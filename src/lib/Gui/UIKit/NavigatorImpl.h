@@ -40,6 +40,7 @@ public:
     void popView(bool keepRootView);
     void popToRootView();
     View* getVisibleView();
+    void showNavigatorBar(bool show);
     void showSearchBox(bool show = true);
 
     void textEdited(const std::string& searchText);

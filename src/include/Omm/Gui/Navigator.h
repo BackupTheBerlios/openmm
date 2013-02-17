@@ -50,6 +50,7 @@ public:
     void pop(bool keepRootView = true);
     void popToRoot();
     View* getVisibleView();
+    void showNavigatorBar(bool show = true);
     void showSearchBox(bool show = true);
 };
 

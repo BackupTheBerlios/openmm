@@ -38,6 +38,7 @@ _pControllerWidget(pControllerWidget)
 //    LOGNS(Gui, gui, debug, "media renderer group widget ctor");
     View::setName("Player");
     _deviceGroupListView.setName("Player");
+    showNavigatorBar(false);
     push(&_deviceGroupListView, "Player");
 
 #ifdef __IPHONE__

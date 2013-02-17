@@ -45,16 +45,18 @@ _pImageModel(model._pImageModel)
 {
 }
 
-
-ListItemModel::~ListItemModel()
-{
-    if (_pLabelModel) {
-        delete _pLabelModel;
-    }
-    if (_pImageModel) {
-        delete _pImageModel;
-    }
-}
+// FIXME: there is a double delete when implementing dtor of ListItemModel
+//ListItemModel::~ListItemModel()
+//{
+//    if (_pLabelModel) {
+//        delete _pLabelModel;
+//        _pLabelModel = 0;
+//    }
+//    if (_pImageModel) {
+//        delete _pImageModel;
+//        _pImageModel = 0;
+//    }
+//}
 
 
 LabelModel*

@@ -77,6 +77,13 @@ NavigatorView::getVisibleView()
 
 
 void
+NavigatorView::showNavigatorBar(bool show)
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->showNavigatorBar(show);
+}
+
+
+void
 NavigatorView::showSearchBox(bool show)
 {
     static_cast<NavigatorViewImpl*>(_pImpl)->showSearchBox(show);

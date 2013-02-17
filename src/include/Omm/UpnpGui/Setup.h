@@ -24,25 +24,27 @@
 
 #include <Poco/Net/HTMLForm.h>
 
-#include "../Gui/View.h"
+#include "../Gui/Navigator.h"
 #include "../Gui/List.h"
 
 
 namespace Omm {
 
-class SetupModel;
+class ServerListModel;
 class UpnpApplication;
 class ControllerWidget;
 
 
-class GuiSetup : public Gui::ListView
+class GuiSetup : public Gui::NavigatorView
 {
 public:
     GuiSetup(Gui::View* pParent = 0);
     virtual ~GuiSetup();
 
 private:
-    SetupModel*     _pSetupModel;
+    Gui::View*           _pSetupView;
+    ServerListModel*     _pServerListModel;
+    Gui::ListView*       _pServerList;
 };
 
 

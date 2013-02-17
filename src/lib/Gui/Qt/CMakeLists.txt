@@ -34,6 +34,7 @@ TextLineImpl.cpp
 DragImpl.cpp
 SelectionViewImpl.cpp
 SplitterImpl.cpp
+SelectorImpl.cpp
 )
 
 set(OMMGUI_QT_MOC
@@ -43,6 +44,7 @@ QtScrollAreaImpl.h
 QtNavigatorPanel.h
 QtSliderImpl.h
 QtTextLineImpl.h
+QtSelectorImpl.h
 )
 
 QT4_ADD_RESOURCES(

@@ -40,6 +40,7 @@ public:
 
     Model();
     Model(const Model& model);
+    virtual ~Model() {}
 
     void* getNativeModel();
 

@@ -26,6 +26,7 @@
 #include <Poco/Util/PropertyFileConfiguration.h>
 
 #include "Gui/ListItem.h"
+#include "Gui/VerticalLayout.h"
 
 #include "UpnpGui/UpnpApplication.h"
 #include "UpnpGui/ControllerWidget.h"
@@ -34,11 +35,11 @@
 
 namespace Omm {
 
-class SetupModel : public Gui::ListModel
+class ServerListModel : public Gui::ListModel
 {
     friend class GuiSetup;
 
-    SetupModel();
+    ServerListModel();
 
     void clearConfigItems();
     void readConfig();
@@ -46,13 +47,13 @@ class SetupModel : public Gui::ListModel
 
     virtual int totalItemCount()
     {
-        return _configItems.size();
+        return _configServerItems.size();
     }
 
 
     virtual Gui::Model* getItemModel(int row)
     {
-        return _configItems[row];
+        return _configServerItems[row];
     }
 
 
@@ -61,32 +62,29 @@ class SetupModel : public Gui::ListModel
         return new Gui::ListItemView;
     }
 
-
-
-
-    std::vector<Gui::ListItemModel*>    _configItems;
+    std::vector<Gui::ListItemModel*>    _configServerItems;
     Poco::Util::LayeredConfiguration&   _config;
 };
 
 
-SetupModel::SetupModel() :
+ServerListModel::ServerListModel() :
 _config(Poco::Util::Application::instance().config())
 {
 }
 
 
 void
-SetupModel::clearConfigItems()
+ServerListModel::clearConfigItems()
 {
-    for (std::vector<Gui::ListItemModel*>::iterator it = _configItems.begin(); it != _configItems.end(); ++it) {
+    for (std::vector<Gui::ListItemModel*>::iterator it = _configServerItems.begin(); it != _configServerItems.end(); ++it) {
         delete *it;
     }
-    _configItems.clear();
+    _configServerItems.clear();
 }
 
 
 void
-SetupModel::readConfig()
+ServerListModel::readConfig()
 {
     clearConfigItems();
 
@@ -106,21 +104,28 @@ SetupModel::readConfig()
 
 
 void
-SetupModel::appendConfigItem(const std::string& label)
+ServerListModel::appendConfigItem(const std::string& label)
 {
     Gui::ListItemModel* pConfigItemModel = new Gui::ListItemModel;
     pConfigItemModel->setLabelModel(new Gui::LabelModel(label));
-    _configItems.push_back(pConfigItemModel);
+    _configServerItems.push_back(pConfigItemModel);
 }
 
 
-GuiSetup::GuiSetup(Gui::View* pParent)
+GuiSetup::GuiSetup(Gui::View* pParent) :
+NavigatorView(pParent)
 {
-    setName("Setup");
+    _pSetupView = new View;
+    _pSetupView->setName("Setup");
+    _pSetupView->setLayout(new Gui::VerticalLayout);
 
-    _pSetupModel = new SetupModel;
-    _pSetupModel->readConfig();
-    setModel(_pSetupModel);
+    _pServerListModel = new ServerListModel;
+    _pServerListModel->readConfig();
+    _pServerList = new Gui::ListView(_pSetupView);
+    _pServerList->setModel(_pServerListModel);
+
+    showNavigatorBar(false);
+    push(_pSetupView, "Setup");
 }
 
 

@@ -19,51 +19,62 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef NavigatorImpl_INCLUDED
-#define NavigatorImpl_INCLUDED
+#ifndef Selector_INCLUDED
+#define Selector_INCLUDED
 
-//#include <stack>
-#include "ViewImpl.h"
+#include <string>
 
-
-class QStackedWidget;
-class QVBoxLayout;
+#include "View.h"
+#include "Model.h"
+#include "Controller.h"
+#include "Image.h"
 
 
 namespace Omm {
 namespace Gui {
 
-class QtNavigatorPanel;
 
-class NavigatorViewImpl : public ViewImpl
+class SelectorController : public Controller
 {
-    friend class QtNavigatorPanel;
+    friend class SelectorViewImpl;
+    friend class SelectorSignalProxy;
 
-public:
-    NavigatorViewImpl(View* pView);
-    virtual ~NavigatorViewImpl();
-
-    void pushView(View* pView, const std::string label);
-    void popView(bool keepRootView);
-    void popToRootView();
-    View* getVisibleView();
-    void showNavigatorBar(bool show);
-    void showSearchBox(bool show);
-
-private:
-    void removeView(View* pView);
-    void exposeView(View* pView);
-    void changedSearchText(const std::string& searchText);
-
-    QtNavigatorPanel*           _pNavigatorPanel;
-    QStackedWidget*             _pStackedWidget;
-    QVBoxLayout*                _pNavigatorLayout;
+protected:
+    virtual void selected(int row) {}
 };
 
 
-} // namespace Gui
-} // namespace Omm
+class SelectorModel : public Model
+{
+public:
+    virtual int totalItemCount() { return 0; }
+    virtual std::string getItemLabel(int row) { return ""; }
+    virtual Image* getItemImage(int row) { return 0; }
+};
 
+
+class SelectorView : public View
+{
+    friend class SelectorModel;
+
+public:
+    SelectorView(View* pParent = 0);
+
+    int getCurrentIndex();
+
+private:
+    virtual void syncViewImpl();
+};
+
+
+class Selector : public Widget<SelectorView, SelectorController, SelectorModel>
+{
+public:
+    Selector(View* pParent = 0) : Widget<SelectorView, SelectorController, SelectorModel>(pParent) {}
+};
+
+
+}  // namespace Omm
+}  // namespace Gui
 
 #endif
-

@@ -185,3 +185,12 @@ Cluster.cpp
 target_link_libraries(cluster
 ${OMM_GUI}
 )
+
+
+add_executable(selector
+Selector.cpp
+)
+
+target_link_libraries(selector
+${OMM_GUI}
+)

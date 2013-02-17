@@ -19,51 +19,53 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef NavigatorImpl_INCLUDED
-#define NavigatorImpl_INCLUDED
+#include <Poco/NumberFormatter.h>
 
-//#include <stack>
-#include "ViewImpl.h"
-
-
-class QStackedWidget;
-class QVBoxLayout;
+#include "Gui/Selector.h"
+#include "Gui/GuiLogger.h"
+#include "SelectorImpl.h"
 
 
 namespace Omm {
 namespace Gui {
 
-class QtNavigatorPanel;
-
-class NavigatorViewImpl : public ViewImpl
+SelectorView::SelectorView(View* pParent) :
+View(pParent, false)
 {
-    friend class QtNavigatorPanel;
+    setName("selector view");
 
-public:
-    NavigatorViewImpl(View* pView);
-    virtual ~NavigatorViewImpl();
+    _minWidth = 30;
+    _minHeight = 10;
+    _prefWidth = 40;
+    _prefHeight = 30;
+    _pImpl = new SelectorViewImpl(this);
+}
 
-    void pushView(View* pView, const std::string label);
-    void popView(bool keepRootView);
-    void popToRootView();
-    View* getVisibleView();
-    void showNavigatorBar(bool show);
-    void showSearchBox(bool show);
 
-private:
-    void removeView(View* pView);
-    void exposeView(View* pView);
-    void changedSearchText(const std::string& searchText);
+int
+SelectorView::getCurrentIndex()
+{
+    return static_cast<SelectorViewImpl*>(_pImpl)->getCurrentIndex();
+}
 
-    QtNavigatorPanel*           _pNavigatorPanel;
-    QStackedWidget*             _pStackedWidget;
-    QVBoxLayout*                _pNavigatorLayout;
-};
 
+void
+SelectorView::syncViewImpl()
+{
+    if (!_pModel) {
+        return;
+    }
+    SelectorViewImpl* pImpl = static_cast<SelectorViewImpl*>(_pImpl);
+    SelectorModel* pSelectorModel = dynamic_cast<SelectorModel*>(_pModel);
+    if (!pSelectorModel) {
+        LOG(gui, error, "wrong model for selector view.");
+        return;
+    }
+    pImpl->clear();
+    for (int row = 0; row < pSelectorModel->totalItemCount(); ++row) {
+        pImpl->addItem(pSelectorModel->getItemLabel(row), 0);
+    }
+}
 
 } // namespace Gui
 } // namespace Omm
-
-
-#endif
-

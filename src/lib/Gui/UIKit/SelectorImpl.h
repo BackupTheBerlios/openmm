@@ -19,51 +19,39 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef NavigatorImpl_INCLUDED
-#define NavigatorImpl_INCLUDED
+#ifndef SelectorImpl_INCLUDED
+#define SelectorImpl_INCLUDED
 
-//#include <stack>
 #include "ViewImpl.h"
-
-
-class QStackedWidget;
-class QVBoxLayout;
-
 
 namespace Omm {
 namespace Gui {
 
-class QtNavigatorPanel;
+class View;
+class Image;
 
-class NavigatorViewImpl : public ViewImpl
+
+class SelectorViewImpl : public ViewImpl
 {
-    friend class QtNavigatorPanel;
+    friend class SelectorView;
 
 public:
-    NavigatorViewImpl(View* pView);
-    virtual ~NavigatorViewImpl();
+    SelectorViewImpl(View* pView);
 
-    void pushView(View* pView, const std::string label);
-    void popView(bool keepRootView);
-    void popToRootView();
-    View* getVisibleView();
-    void showNavigatorBar(bool show);
-    void showSearchBox(bool show);
+    int getCurrentIndex();
+    void clear();
+    void addItem(const std::string& label, Image* pImage);
 
-private:
-    void removeView(View* pView);
-    void exposeView(View* pView);
-    void changedSearchText(const std::string& searchText);
+    void selected();
 
-    QtNavigatorPanel*           _pNavigatorPanel;
-    QStackedWidget*             _pStackedWidget;
-    QVBoxLayout*                _pNavigatorLayout;
+    std::vector<std::string>    _items;
+    int                         _currentIndex;
+    int                         _pickedIndex;
 };
 
 
-} // namespace Gui
-} // namespace Omm
-
+}  // namespace Omm
+}  // namespace Gui
 
 #endif
 
