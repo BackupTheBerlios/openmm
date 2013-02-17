@@ -35,7 +35,6 @@ namespace Gui {
 
 SelectorViewImpl::SelectorViewImpl(View* pView)
 {
-//    LOG(gui, debug, "selector view impl ctor");
     QComboBox* pNativeView = new QComboBox;
     SelectorSignalProxy* pSignalProxy = new SelectorSignalProxy(this);
 
@@ -47,6 +46,13 @@ int
 SelectorViewImpl::getCurrentIndex()
 {
     return static_cast<QComboBox*>(_pNativeView)->currentIndex();
+}
+
+
+void
+SelectorViewImpl::setCurrentIndex(int index)
+{
+    static_cast<QComboBox*>(_pNativeView)->setCurrentIndex(index);
 }
 
 
@@ -73,10 +79,10 @@ SelectorSignalProxy::init()
 
 
 void
-SelectorSignalProxy::selected(int row)
+SelectorSignalProxy::selected(int index)
 {
-    LOG(gui, debug, "selector view impl, calling selected virtual method");
-    PROXY_NOTIFY_CONTROLLER(SelectorController, selected, row);
+    LOG(gui, debug, "selector selected index: " + Poco::NumberFormatter::format(index));
+    PROXY_NOTIFY_CONTROLLER(SelectorController, selected, index);
 }
 
 

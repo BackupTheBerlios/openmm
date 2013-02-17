@@ -50,6 +50,13 @@ SelectorView::getCurrentIndex()
 
 
 void
+SelectorView::setCurrentIndex(int index)
+{
+    static_cast<SelectorViewImpl*>(_pImpl)->setCurrentIndex(index);
+}
+
+
+void
 SelectorView::syncViewImpl()
 {
     if (!_pModel) {
@@ -62,8 +69,8 @@ SelectorView::syncViewImpl()
         return;
     }
     pImpl->clear();
-    for (int row = 0; row < pSelectorModel->totalItemCount(); ++row) {
-        pImpl->addItem(pSelectorModel->getItemLabel(row), 0);
+    for (int index = 0; index < pSelectorModel->totalItemCount(); ++index) {
+        pImpl->addItem(pSelectorModel->getItemLabel(index), 0);
     }
 }
 

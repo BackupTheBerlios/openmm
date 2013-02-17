@@ -39,6 +39,7 @@ public:
     SelectorViewImpl(View* pView);
 
     int getCurrentIndex();
+    void setCurrentIndex(int index);
     void clear();
     void addItem(const std::string& label, Image* pImage);
 

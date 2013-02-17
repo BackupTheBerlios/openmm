@@ -40,7 +40,7 @@ class SelectorController : public Controller
     friend class SelectorSignalProxy;
 
 protected:
-    virtual void selected(int row) {}
+    virtual void selected(int index) {}
 };
 
 
@@ -48,8 +48,8 @@ class SelectorModel : public Model
 {
 public:
     virtual int totalItemCount() { return 0; }
-    virtual std::string getItemLabel(int row) { return ""; }
-    virtual Image* getItemImage(int row) { return 0; }
+    virtual std::string getItemLabel(int index) { return ""; }
+    virtual Image* getItemImage(int index) { return 0; }
 };
 
 
@@ -61,6 +61,7 @@ public:
     SelectorView(View* pParent = 0);
 
     int getCurrentIndex();
+    void setCurrentIndex(int index);
 
 private:
     virtual void syncViewImpl();

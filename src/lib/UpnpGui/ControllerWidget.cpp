@@ -79,7 +79,7 @@ _pApplication(pApplication)
     LOGNS(Gui, gui, debug, "controller widget register device groups ...");
 
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
-        _pSetup = new GuiSetup;
+        _pSetup = new GuiSetup(_pApplication);
         _pSetup->setName("Setup");
         insertView(_pSetup, "Setup");
     }

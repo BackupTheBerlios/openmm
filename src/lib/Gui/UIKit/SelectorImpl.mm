@@ -188,6 +188,14 @@ SelectorViewImpl::getCurrentIndex()
 
 
 void
+SelectorViewImpl::setCurrentIndex(int index)
+{
+    _currentIndex = index;
+    [static_cast<OmmGuiSelector*>(_pNativeView) updateLabelToCurrentIndex];
+}
+
+
+void
 SelectorViewImpl::clear()
 {
     _items.clear();

@@ -19,7 +19,9 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <string>
 #include <vector>
+
 #include <Poco/StringTokenizer.h>
 #include <Poco/UUIDGenerator.h>
 #include <Poco/Util/Application.h>
@@ -34,6 +36,77 @@
 
 
 namespace Omm {
+
+class AppStateSelector : public Gui::Selector
+{
+    friend class GuiSetup;
+
+    AppStateSelector(UpnpApplication* pApp, View* pParent) :
+    Selector(pParent),
+    _pApp(pApp)
+    {
+    }
+
+
+    void init()
+    {
+        syncView();
+        std::string state = _pApp->getFileConfiguration()->getString("application.state", "Started");
+        if (state == DeviceManager::Started) {
+            setCurrentIndex(0);
+        }
+        else if (state == DeviceManager::Local) {
+            setCurrentIndex(1);
+        }
+        else if (state == DeviceManager::Stopped) {
+            setCurrentIndex(2);
+        }
+    }
+
+
+    virtual int totalItemCount()
+    {
+        return 3;
+    }
+
+
+    virtual std::string getItemLabel(int index)
+    {
+        switch(index) {
+            case 0:
+                return DeviceManager::Started;
+                break;
+            case 1:
+                return DeviceManager::Local;
+                break;
+            case 2:
+                return DeviceManager::Stopped;
+                break;
+        }
+    }
+
+
+    virtual void selected(int index)
+    {
+        switch(index) {
+            case 0:
+                _pApp->setState(DeviceManager::Started);
+                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Started);
+                break;
+            case 1:
+                _pApp->setState(DeviceManager::Local);
+                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Local);
+                break;
+            case 2:
+                _pApp->setState(DeviceManager::Stopped);
+                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Stopped);
+                break;
+        }
+    }
+
+    UpnpApplication*    _pApp;
+};
+
 
 class ServerListModel : public Gui::ListModel
 {
@@ -112,12 +185,16 @@ ServerListModel::appendConfigItem(const std::string& label)
 }
 
 
-GuiSetup::GuiSetup(Gui::View* pParent) :
-NavigatorView(pParent)
+GuiSetup::GuiSetup(UpnpApplication* pApp, Gui::View* pParent) :
+NavigatorView(pParent),
+_pApp(pApp)
 {
     _pSetupView = new View;
     _pSetupView->setName("Setup");
     _pSetupView->setLayout(new Gui::VerticalLayout);
+
+    _pAppStateSelector = new AppStateSelector(pApp, _pSetupView);
+    _pAppStateSelector->init();
 
     _pServerListModel = new ServerListModel;
     _pServerListModel->readConfig();
