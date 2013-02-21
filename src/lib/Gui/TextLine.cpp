@@ -87,6 +87,33 @@ TextLineView::syncViewImpl()
 }
 
 
+class TextLineWidgetController : public TextLineController
+{
+    friend class TextLine;
+
+    TextLineWidgetController(TextLineModel* pModel) : _pModel(pModel) {}
+
+    virtual void editedText(const std::string& text)
+    {
+        _pModel->setTextLine(text);
+    }
+
+    virtual void changedText(const std::string& text)
+    {
+        _pModel->setTextLine(text);
+    }
+
+    TextLineModel*  _pModel;
+};
+
+
+TextLine::TextLine(View* pParent) :
+Widget<TextLineView, TextLineController, TextLineModel>(pParent)
+{
+    attachController(new TextLineWidgetController(static_cast<TextLineModel*>(_pModel)));
+}
+
+
 void
 TextLine::setTextLine(const std::string& line)
 {

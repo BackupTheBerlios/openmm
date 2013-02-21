@@ -38,7 +38,7 @@ class Color
 
 public:
     Color(const std::string& colorName);
-    Color(int red, int green, int blue, int alpha);
+    Color(int red, int green, int blue, int alpha = 255);
 
     void* getNativeColor() const;
 

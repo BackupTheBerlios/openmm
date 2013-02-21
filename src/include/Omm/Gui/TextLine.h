@@ -72,7 +72,7 @@ public:
 class TextLine : public Widget<TextLineView, TextLineController, TextLineModel>
 {
 public:
-    TextLine(View* pParent = 0) : Widget<TextLineView, TextLineController, TextLineModel>(pParent) {}
+    TextLine(View* pParent = 0);
 
     void setTextLine(const std::string& line);
 };

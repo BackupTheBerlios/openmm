@@ -38,17 +38,30 @@ class ControllerWidget;
 
 class GuiSetup : public Gui::NavigatorView
 {
+    friend class RendererItemController;
+    friend class RendererDoneButton;
+    friend class RendererConfView;
+    friend class ServerItemController;
+    friend class ServerDoneButton;
+    friend class ServerConfView;
+    friend class ServerConfModel;
+
 public:
     GuiSetup(UpnpApplication* pApp, Gui::View* pParent = 0);
     virtual ~GuiSetup();
 
 private:
-    UpnpApplication*     _pApp;
+//    void writeConf();
 
-    Gui::View*           _pSetupView;
-    Gui::Selector*       _pAppStateSelector;
-    ServerListModel*     _pServerListModel;
-    Gui::ListView*       _pServerList;
+    UpnpApplication*    _pApp;
+
+    Gui::View*          _pSetupView;
+    Gui::Selector*      _pAppStateSelector;
+    Gui::View*          _pRendererConfig;
+    Gui::ListItemModel* _pRendererItemModel;
+    Gui::ListItemView*  _pRendererItem;
+    ServerListModel*    _pServerListModel;
+    Gui::ListView*      _pServerList;
 };
 
 

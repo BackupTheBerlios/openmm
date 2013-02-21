@@ -76,7 +76,7 @@ public:
     std::string getMode();
     Poco::Util::PropertyFileConfiguration* getFileConfiguration();
     Av::MediaRenderer* getLocalRenderer();
-    void restartLocalServers();
+    void restartLocalDeviceContainer();
     void setState(const std::string& state);
 
 private:
@@ -114,7 +114,7 @@ private:
     char**                                      _argv;
     bool                                        _helpRequested;
     bool                                        _lockInstance;
-    
+
     bool                                        _ignoreConfig;
     Poco::Util::PropertyFileConfiguration*      _pConf;
     std::string                                 _confFilePath;

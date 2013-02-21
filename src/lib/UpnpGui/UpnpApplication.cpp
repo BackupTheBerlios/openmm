@@ -466,6 +466,7 @@ void
 UpnpApplication::initLocalDevices()
 {
     // add local renderer
+    _enableRenderer = false;
     LOGNS(Av, upnpav, debug, "omm application init local devices ...");
     if (config().getBool("renderer.enable", false)) {
         setLocalRenderer(config().getString("renderer.friendlyName", "OMM Renderer"),
@@ -577,7 +578,7 @@ UpnpApplication::getLocalRenderer()
 
 
 void
-UpnpApplication::restartLocalServers()
+UpnpApplication::restartLocalDeviceContainer()
 {
     _pLocalDeviceServer->setState(DeviceManager::Stopped);
     _pLocalDeviceServer = new DeviceServer;
