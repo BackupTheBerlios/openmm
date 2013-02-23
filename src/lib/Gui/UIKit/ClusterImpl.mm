@@ -48,6 +48,8 @@ ClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 {
     LOG(gui, debug, "cluster view implementation add view");
 
+    _labels[pView] = label;
+
     UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
     NSString* pName = [[NSString alloc] initWithUTF8String:label.c_str()];
@@ -62,11 +64,55 @@ ClusterViewImpl::insertView(View* pView, const std::string& label, int index)
 void
 ClusterViewImpl::removeView(View* pView)
 {
+    _labels.erase(pView);
+
     UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
     UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
     NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
     [array removeObject:pViewController];
     pNativeViewController.viewControllers = array;
+}
+
+
+void
+ClusterViewImpl::showViewAtIndex(View* pView, int index)
+{
+    std::map<View*,std::string>::iterator it = _labels.find(pView);
+    if (it == _labels.end()) {
+        // cluster does not contain view
+        return;
+    }
+    std::string label = it->second;
+
+    UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
+    UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
+    NSString* pName = [[NSString alloc] initWithUTF8String:label.c_str()];
+    pViewController.title = pName;
+
+    NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
+    [array insertObject:pViewController atIndex:index];
+    pNativeViewController.viewControllers = array;
+
+    setCurrentViewIndex(index);
+}
+
+
+void
+ClusterViewImpl::hideView(View* pView)
+{
+    std::map<View*,std::string>::iterator it = _labels.find(pView);
+    if (it == _labels.end()) {
+        // cluster does not contain view
+        return;
+    }
+
+    UITabBarController* pNativeViewController = static_cast<UITabBarController*>(getNativeViewController());
+    UIViewController* pViewController = static_cast<UIViewController*>(pView->getViewImpl()->getNativeViewController());
+    NSMutableArray *array = [NSMutableArray arrayWithArray:pNativeViewController.viewControllers];
+    [array removeObject:pViewController];
+    pNativeViewController.viewControllers = array;
+
+    setCurrentViewIndex(0);
 }
 
 

@@ -57,7 +57,7 @@ View(pParent, false)
 #else
     std::string clusterViewImpl = (type == "" ? clusterViewImpl = Poco::Environment::get("OMMGUI_CLUSTER", Column) : type);
 #endif
-    
+
     if (clusterViewImpl == Native) {
         _pClusterImpl = new ClusterViewImpl(this);
         _pImpl = reinterpret_cast<ClusterViewImpl*>(_pClusterImpl);
@@ -88,6 +88,20 @@ ClusterView::insertView(View* pView, const std::string& label, int index)
 //    static_cast<ClusterViewImpl*>(_pImpl)->insertView(pView, label, index);
     _pClusterImpl->insertView(pView, label, index);
     NOTIFY_CONTROLLER(ClusterController, insertedView, pView);
+}
+
+
+void
+ClusterView::showViewAtIndex(View* pView, int index)
+{
+    _pClusterImpl->showViewAtIndex(pView, index);
+}
+
+
+void
+ClusterView::hideView(View* pView)
+{
+    _pClusterImpl->hideView(pView);
 }
 
 

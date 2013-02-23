@@ -76,6 +76,14 @@ public:
     /// Removing a view can only be done by assigning a new parent (e.g. setParent()
     /// or insertView()).
 
+    void showViewAtIndex(View* pView, int index = 0);
+    /// If view pView is already inserted, but hidden, it shows the view at index.
+    /// If view pView is not inserted this does nothing.
+
+    void hideView(View* pView);
+    /// If view pView is already inserted and visible, it is hidden, but remains inserted
+    /// If view pView is not inserted this does nothing.
+
     std::string getConfiguration();
     /// Returns the layout configuration of the visible views. Format of the layout configuration string depends
     /// on the cluster type and includes topological and possible metrical information.
@@ -94,7 +102,7 @@ public:
     /// Makes the view with index visible (and gives focus to it if only one view is visible at a time).
 
     int getIndexFromView(View* pView);
-    /// Returns the index of view pView and -1 if view is not visible.
+    /// Returns the index of view pView, -1 if view is not visible, and -2 if view is not in the cluster.
 
     View* getViewFromIndex(int index);
     /// Returns a pointer to the view with index and 0 if view is not visible.

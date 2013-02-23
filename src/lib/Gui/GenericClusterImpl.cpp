@@ -150,11 +150,12 @@ HandleBarLayout::layoutView()
         HandleBarView::HandleView* pHandle = pView->_handles[*it];
         pHandle->resize(handleWidth, handleHeight);
         pHandle->move(handleIndex * handleWidth, 0);
+        pHandle->show(true);
     }
     handleIndex = 0;
     for (std::set<View*>::iterator it = pCluster->_hiddenViews.begin(); it != pCluster->_hiddenViews.end(); ++handleIndex, ++it) {
         HandleBarView::HandleView* pHandle = pView->_handles[*it];
-        pHandle->hide(false);
+        pHandle->hide(true);
     }
 }
 
@@ -191,7 +192,9 @@ HandleBarView::insertView(View* pView, const std::string& label, int index)
     pHandle->setName(handleName);
     pHandle->attachController(new HandleBarController(this, pView));
     pHandle->setAcceptDrops(true);
-    pHandle->show();
+    if (pView->isVisible()) {
+        pHandle->show();
+    }
     _handles[pView] = pHandle;
 }
 
@@ -359,6 +362,40 @@ GenericClusterViewImpl::removeView(View* pView)
 }
 
 
+void
+GenericClusterViewImpl::showViewAtIndex(View* pView, int index)
+{
+    if (_views.find(pView->getName()) == _views.end()) {
+        // cluster does not contain view
+        return;
+    }
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it == _visibleViews.end()) {
+        _visibleViews.insert(_visibleViews.begin() + index, pView);
+        _hiddenViews.erase(pView);
+        _pHandleBarView->updateLayout();
+        setCurrentViewIndex(index);
+    }
+}
+
+
+void
+GenericClusterViewImpl::hideView(View* pView)
+{
+    if (_views.find(pView->getName()) == _views.end()) {
+        // cluster does not contain view
+        return;
+    }
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it != _visibleViews.end()) {
+        _visibleViews.erase(it);
+        _hiddenViews.insert(pView);
+        _pHandleBarView->updateLayout();
+        setCurrentViewIndex(0);
+    }
+}
+
+
 std::string
 GenericClusterViewImpl::getConfiguration()
 {
@@ -470,6 +507,10 @@ GenericClusterViewImpl::setCurrentViewIndex(int index)
 int
 GenericClusterViewImpl::getIndexFromView(View* pView)
 {
+    if (_views.find(pView->getName()) == _views.end()) {
+        // cluster does not contain view
+        return -2;
+    }
     std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
     if (it != _visibleViews.end()) {
         return it - _visibleViews.begin();

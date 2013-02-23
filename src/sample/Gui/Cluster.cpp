@@ -45,6 +45,8 @@ class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
     {
+//        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Native);
+//        Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView(0, Omm::Gui::ClusterView::Generic);
         Omm::Gui::ClusterView* pCluster = new Omm::Gui::ClusterView;
         pCluster->attachController(new ButtonClusterController);
 
@@ -57,7 +59,7 @@ class Application : public Omm::Gui::Application
             pButton->setName(name);
             pButton->setLabel(label);
             pButton->setSizeConstraint(150, 420, Omm::Gui::View::Pref);
-            pCluster->insertView(pButton, handle);
+            pCluster->insertView(pButton, handle, i);
         }
         std::vector<std::string> arguments;
         getArguments(arguments);

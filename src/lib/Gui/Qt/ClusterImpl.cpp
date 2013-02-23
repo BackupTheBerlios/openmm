@@ -81,6 +81,20 @@ ClusterViewImpl::removeView(View* pView)
 }
 
 
+void
+ClusterViewImpl::showViewAtIndex(View* pView, int index)
+{
+
+}
+
+
+void
+ClusterViewImpl::hideView(View* pView)
+{
+
+}
+
+
 std::string
 ClusterViewImpl::getConfiguration()
 {

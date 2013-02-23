@@ -74,6 +74,7 @@ class ControllerWidgetClusterController : public Omm::Gui::ClusterController
 
 
 ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
+//ClusterView(0, Gui::ClusterView::Generic),
 _pApplication(pApplication)
 {
     LOGNS(Gui, gui, debug, "controller widget register device groups ...");
@@ -214,9 +215,11 @@ ControllerWidget::newStreamType(Av::StreamTypeNotification* pNotification)
     LOGNS(Gui, gui, debug, "controller widget stream type notification, instance id: "
         + Poco::NumberFormatter::format(pNotification->_instanceId) + ", transport state: " + pNotification->_transportState + ", stream type: " + pNotification->_streamType);
     if (pNotification->_streamType == Av::Engine::StreamTypeVideo && pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING) {
+        setRendererVisualVisible(true);
         setCurrentViewIndex(getIndexFromView(_pVisual));
     }
     else if (pNotification->_transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED) {
+        setRendererVisualVisible(false);
         showMainMenu();
     }
 }
@@ -284,6 +287,18 @@ ControllerWidget::showOnlyRendererVisual(bool show)
     insertView(_pPlaylistEditor, "List");
     insertView(_pSetup, "Setup");
 //    insertView(_pConfigBrowser, "Setup");
+}
+
+
+void
+ControllerWidget::setRendererVisualVisible(bool show)
+{
+    if (show) {
+        showViewAtIndex(_pVisual, 1);
+    }
+    else {
+        hideView(_pVisual);
+    }
 }
 
 

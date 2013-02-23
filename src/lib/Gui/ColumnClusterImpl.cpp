@@ -477,6 +477,40 @@ ColumnClusterViewImpl::removeView(View* pView)
 }
 
 
+void
+ColumnClusterViewImpl::showViewAtIndex(View* pView, int index)
+{
+    LOG(gui, debug, "column cluster view impl show view: " + pView->getName());
+
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it == _visibleViews.end()) {
+        _visibleViews.insert(_visibleViews.begin() + index, pView);
+        _hiddenViews.erase(pView);
+    }
+    ClusterView* pCluster = getCluster(pView);
+    if (pCluster) {
+        pCluster->showViewAtIndex(pView, index);
+    }
+}
+
+
+void
+ColumnClusterViewImpl::hideView(View* pView)
+{
+    LOG(gui, debug, "column cluster view impl hide view: " + pView->getName());
+
+    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+    if (it != _visibleViews.end()) {
+        _visibleViews.erase(it);
+        _hiddenViews.insert(pView);
+    }
+    ClusterView* pCluster = getCluster(pView);
+    if (pCluster) {
+        pCluster->hideView(pView);
+    }
+}
+
+
 std::string
 ColumnClusterViewImpl::getConfiguration()
 {
@@ -491,7 +525,7 @@ ColumnClusterViewImpl::setConfiguration(const std::string& configuration)
 {
     Poco::StringTokenizer columnTokens(configuration, " ");
     if (!columnTokens.count()) {
-        LOG(gui, error, "column cluster configuration empty ");
+        LOG(gui, error, "column cluster configuration empty");
         return;
     }
     std::string configType = *columnTokens.begin();
@@ -729,7 +763,15 @@ ColumnClusterViewImpl::getCluster(int column, int cluster)
 ClusterView*
 ColumnClusterViewImpl::getCluster(View* pView)
 {
-    return dynamic_cast<ClusterView*>(pView->getParent());
+//    return dynamic_cast<ClusterView*>(pView->getParent());
+    for (std::vector<ColumnView*>::iterator colIt = _grid.begin(); colIt != _grid.end(); ++colIt) {
+        for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
+            if ((*it)->getIndexFromView(pView) != -2) {
+                return *it;
+            }
+        }
+    }
+    return 0;
 }
 
 

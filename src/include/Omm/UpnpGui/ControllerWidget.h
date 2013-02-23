@@ -70,6 +70,7 @@ public:
     void showMainMenu();
 //    void showOnlyBasicDeviceGroups(bool show = false);
     void showOnlyRendererVisual(bool show = false);
+    void setRendererVisualVisible(bool show = true);
     void navigateListWithKey(Gui::Controller::KeyCode key);
     void back();
     virtual void signalNetworkActivity(bool on);

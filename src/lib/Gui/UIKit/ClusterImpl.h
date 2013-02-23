@@ -40,6 +40,8 @@ private:
 
     virtual void insertView(View* pView, const std::string& label, int index);
     virtual void removeView(View* pView);
+    virtual void showViewAtIndex(View* pView, int index);
+    virtual void hideView(View* pView);
     virtual std::string getConfiguration();
     virtual void setConfiguration(const std::string& configuration);
 
@@ -51,6 +53,8 @@ private:
 
     virtual void setHandlesHidden(bool hidden = true);
     virtual const int getHandleHeight();
+
+    std::map<View*,std::string>     _labels;
 };
 
 

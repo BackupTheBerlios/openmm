@@ -274,6 +274,9 @@ UpnpApplication::presentedMainView()
         _pControllerWidget->showOnlyRendererVisual(true);
         _pControllerWidget->setHandlesHidden(true);
     }
+    else {
+        _pControllerWidget->setRendererVisualVisible(false);
+    }
     _pControllerWidget->init();
 }
 

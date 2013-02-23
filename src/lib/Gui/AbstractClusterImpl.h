@@ -40,6 +40,8 @@ public:
     virtual void insertView(View* pView, const std::string& label = "", int index = 0) = 0;
 //    virtual void updateWithVisibleViews() = 0;                                              // implementation specific, should replace insertView()
     virtual void removeView(View* pView) = 0;                                               // implementation specific, also replaced by updateWithVisibleViews()?
+    virtual void showViewAtIndex(View* pView, int index) = 0;                               // implementation specific, also replaced by updateWithVisibleViews()?
+    virtual void hideView(View* pView) = 0;                                                 // implementation specific, also replaced by updateWithVisibleViews()?
 
     virtual std::string getConfiguration() = 0;
     virtual void setConfiguration(const std::string& configuration) = 0;
