@@ -118,7 +118,8 @@ _pApplication(pApplication)
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 //    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
-        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup,Player,List,Video {800;480} {1,00} {1,00}"));
+//        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media,Player,Setup,Video {800;480} {1,00} {1,00}"));
+        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media [1,0] Player [1,1] Setup,Video {800;480} {0,5;0,5} {1,00} {0,34;0,65}"));
     }
     else {
         setConfiguration("[0,0] Media,Video {800;480} {1,00} {1,00}");

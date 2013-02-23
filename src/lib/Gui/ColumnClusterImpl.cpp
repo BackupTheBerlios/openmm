@@ -480,34 +480,34 @@ ColumnClusterViewImpl::removeView(View* pView)
 void
 ColumnClusterViewImpl::showViewAtIndex(View* pView, int index)
 {
-    LOG(gui, debug, "column cluster view impl show view: " + pView->getName());
-
-    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
-    if (it == _visibleViews.end()) {
-        _visibleViews.insert(_visibleViews.begin() + index, pView);
-        _hiddenViews.erase(pView);
-    }
-    ClusterView* pCluster = getCluster(pView);
-    if (pCluster) {
-        pCluster->showViewAtIndex(pView, index);
-    }
+//    LOG(gui, debug, "column cluster view impl show view: " + pView->getName());
+//
+//    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+//    if (it == _visibleViews.end()) {
+//        _visibleViews.insert(_visibleViews.begin() + index, pView);
+//        _hiddenViews.erase(pView);
+//    }
+//    ClusterView* pCluster = getCluster(pView);
+//    if (pCluster) {
+//        pCluster->showViewAtIndex(pView, index);
+//    }
 }
 
 
 void
 ColumnClusterViewImpl::hideView(View* pView)
 {
-    LOG(gui, debug, "column cluster view impl hide view: " + pView->getName());
-
-    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
-    if (it != _visibleViews.end()) {
-        _visibleViews.erase(it);
-        _hiddenViews.insert(pView);
-    }
-    ClusterView* pCluster = getCluster(pView);
-    if (pCluster) {
-        pCluster->hideView(pView);
-    }
+//    LOG(gui, debug, "column cluster view impl hide view: " + pView->getName());
+//
+//    std::vector<View*>::iterator it = std::find(_visibleViews.begin(), _visibleViews.end(), pView);
+//    if (it != _visibleViews.end()) {
+//        _visibleViews.erase(it);
+//        _hiddenViews.insert(pView);
+//    }
+//    ClusterView* pCluster = getCluster(pView);
+//    if (pCluster) {
+//        pCluster->hideView(pView);
+//    }
 }
 
 
@@ -632,7 +632,8 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
         int rowClusterIndex = 0;
         for (ColumnView::ClusterIterator it = (*colIt)->beginCluster(); it != (*colIt)->endCluster(); ++it) {
             int index = (*it)->getIndexFromView(pView);
-            if (index != -1) {
+            if (index >= 0) {
+                LOG(gui, debug, "column cluster view impl get current view index: " + Poco::NumberFormatter::format(topColClusterIndex + rowClusterIndex + index));
                 return topColClusterIndex + rowClusterIndex + index;
             }
             else {
@@ -641,6 +642,8 @@ ColumnClusterViewImpl::getIndexFromView(View* pView)
         }
         topColClusterIndex += rowClusterIndex;
     }
+    LOG(gui, debug, "column cluster view impl get current view index: -1");
+    return -1;
 }
 
 

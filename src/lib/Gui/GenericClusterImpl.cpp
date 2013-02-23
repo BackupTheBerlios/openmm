@@ -458,7 +458,7 @@ GenericClusterViewImpl::setConfiguration(const std::string& configuration)
 
     // maintain selected view, if still visible
     int currentViewIndex = getIndexFromView(pSelectedView);
-    if (currentViewIndex == -1) {
+    if (currentViewIndex >= 0) {
         // view is not visible anymore, select first view
         // FIXME: setCurrentViewIndex(0) seems to trigger that video is not visible on first play
         setCurrentViewIndex(0);
