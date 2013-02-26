@@ -36,6 +36,7 @@ SelectionViewImpl.cpp
 SplitterImpl.cpp
 SelectorImpl.cpp
 SwitchImpl.cpp
+GraphicImpl.cpp
 )
 
 set(OMMGUI_QT_MOC

@@ -40,6 +40,7 @@ Stack.cpp
 GenericSplitterImpl.cpp
 Selector.cpp
 Switch.cpp
+Graphic.cpp
 )
 
 target_link_libraries(ommgui

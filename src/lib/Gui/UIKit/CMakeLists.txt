@@ -23,6 +23,7 @@ SelectionViewImpl.mm
 SplitterImpl.mm
 SelectorImpl.mm
 SwitchImpl.mm
+GraphicImpl.mm
 )
 
 

@@ -26,7 +26,6 @@
 #include "Gui/Image.h"
 #include "Gui/GuiLogger.h"
 #include "ImageImpl.h"
-#include "UIKit/ImageImpl.h"
 
 
 namespace Omm {
