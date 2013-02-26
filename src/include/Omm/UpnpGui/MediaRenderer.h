@@ -95,7 +95,7 @@ private:
 class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 {
     friend class MediaRendererView;
-    friend class SeekSlider;
+    friend class VolSeekSlider;
 
 public:
     MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _duration(0), _pControllerWidget(pControllerWidget) {}
@@ -123,8 +123,12 @@ private:
 
 class MediaRendererView : public Gui::View
 {
+    friend class MediaRendererLayout;
+    friend class VolSeekButton;
+    friend class VolSeekSlider;
+
 public:
-    MediaRendererView();
+    MediaRendererView(bool lineBreak = true);
 
     // FIXME: add submodels in setModel, no needed if submodels are supported
     virtual void setModel(Gui::Model* pModel);
@@ -133,16 +137,23 @@ public:
 
 private:
     virtual void syncViewImpl();
+    void switchVolSeekSlider();
 
-    Gui::HorizontalLayout   _layout;
+    bool                    _lineBreak;
+    Gui::View*              _pButtonPanel;
+    Gui::View*              _pSliderPanel;
+    Gui::View*              _pLabelPanel;
+
     Gui::Button*            _pBackButton;
     Gui::Button*            _pPlayButton;
     Gui::Button*            _pStopButton;
     Gui::Button*            _pForwButton;
-    Gui::Slider*            _pVolSlider;
-    Gui::Slider*            _pSeekSlider;
+    Gui::Button*            _pVolSeekButton;
+    Gui::Slider*            _pVolSeekSlider;
     Gui::LabelView*         _pRendererName;
     Gui::LabelView*         _pTrackName;
+
+    bool                    _modeVolume;
 };
 
 }  // namespace Omm

@@ -113,7 +113,11 @@ _pApplication(pApplication)
     splitterSizes.push_back(0.2);
     pSplitterView->setSizes(splitterSizes);
 
-    _pControlPanel = new MediaRendererView;
+#ifdef __IPHONE__
+    _pControlPanel = new MediaRendererView(true);
+#else
+    _pControlPanel = new MediaRendererView(false);
+#endif
     _pActivityIndicator = new ActivityIndicator;
     setCurrentViewIndex(getIndexFromView(_pMediaServerGroupWidget));
 //    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));

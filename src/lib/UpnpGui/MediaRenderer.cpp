@@ -42,9 +42,9 @@ _pControllerWidget(pControllerWidget)
     push(&_deviceGroupListView, "Player");
 
 #ifdef __IPHONE__
-    _deviceGroupListView.setItemViewHeight(88);
+    _deviceGroupListView.setItemViewHeight(3 * 60);
 #else
-    _deviceGroupListView.setItemViewHeight(44);
+    _deviceGroupListView.setItemViewHeight(3 * 30);
 #endif
 //    _deviceGroupListView.setSelectionType(Gui::ListView::Frame);
     _deviceGroupListView.attachController(this);
@@ -64,7 +64,7 @@ Gui::View*
 MediaRendererGroupWidget::createItemView()
 {
 //    LOGNS(Gui, gui, debug, "media renderer group widget create renderer view.");
-    return new MediaRendererView;
+    return new MediaRendererView(true);
 }
 
 
@@ -88,6 +88,7 @@ void
 MediaRendererDevice::initController()
 {
     _rendererName.setLabel(getFriendlyName());
+    _trackName.setLabel("- no track -");
     _volume.setValue(getVolume());
     _position.setValue(0);
 }
@@ -177,7 +178,7 @@ MediaRendererDevice::getTransportState()
 class BackButton : public Gui::Button
 {
 public:
-    BackButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    BackButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
     {
         _image.setData(MediaImages::instance()->getResource("media-skip-backward.png"));
         setImage(&_image);
@@ -188,18 +189,21 @@ public:
 
     virtual void pushed()
     {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->backPressed();
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pRendererView->getModel());
+        if (pRenderer) {
+            pRenderer->backPressed();
+        }
     }
 
-    Gui::Image _image;
+    MediaRendererView*      _pRendererView;
+    Gui::Image              _image;
 };
 
 
 class PlayButton : public Gui::Button
 {
 public:
-    PlayButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    PlayButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
     {
         _image.setData(MediaImages::instance()->getResource("media-start.png"));
         setImage(&_image);
@@ -209,8 +213,10 @@ public:
 
     virtual void pushed()
     {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->playPressed();
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pRendererView->getModel());
+        if (pRenderer) {
+            pRenderer->playPressed();
+        }
     }
 
     virtual bool getEnabled()
@@ -218,8 +224,8 @@ public:
         return true;
 
         LOGNS(Gui, gui, debug, "media renderer play button get enabled");
-        if (_pParent && _pParent->getModel()) {
-            std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
+        if (_pRendererView && _pRendererView->getModel()) {
+            std::string transportState = static_cast<MediaRendererDevice*>(_pRendererView->getModel())->getTransportState();
             LOGNS(Gui, gui, debug, "media renderer play button get enabled, transport state: " + transportState);
             return (transportState == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
         }
@@ -228,14 +234,15 @@ public:
         }
     }
 
-    Gui::Image _image;
+    MediaRendererView*      _pRendererView;
+    Gui::Image              _image;
 };
 
 
 class StopButton : public Gui::Button
 {
 public:
-    StopButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    StopButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
     {
         _image.setData(MediaImages::instance()->getResource("media-stop.png"));
         setImage(&_image);
@@ -245,8 +252,10 @@ public:
 
     virtual void pushed()
     {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->stopPressed();
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pRendererView->getModel());
+        if (pRenderer) {
+            pRenderer->stopPressed();
+        }
     }
 
     virtual bool getEnabled()
@@ -254,24 +263,26 @@ public:
         return true;
 
         LOGNS(Gui, gui, debug, "media renderer stop button get enabled");
-        if (_pParent && _pParent->getModel()) {
-            std::string transportState = static_cast<MediaRendererDevice*>(_pParent->getModel())->getTransportState();
+        if (_pRendererView && _pRendererView->getModel()) {
+            std::string transportState = static_cast<MediaRendererDevice*>(_pRendererView->getModel())->getTransportState();
             LOGNS(Gui, gui, debug, "media renderer stop button get enabled, transport state: " + transportState);
             return (transportState != Av::AvTransportArgument::TRANSPORT_STATE_STOPPED);
         }
         else {
             return Button::getEnabled();
         }
+        return false;
     }
 
-    Gui::Image _image;
+    MediaRendererView*      _pRendererView;
+    Gui::Image              _image;
 };
 
 
 class ForwButton : public Gui::Button
 {
 public:
-    ForwButton(Gui::View* pParent = 0) : Gui::Button(pParent)
+    ForwButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
     {
         _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
         setImage(&_image);
@@ -281,39 +292,58 @@ public:
 
     virtual void pushed()
     {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->forwardPressed();
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pRendererView->getModel());
+        if (pRenderer) {
+            pRenderer->forwardPressed();
+        }
     }
 
-    Gui::Image _image;
+    MediaRendererView*      _pRendererView;
+    Gui::Image              _image;
 };
 
 
-class RendererButton : public Gui::Button
+class VolSeekButton : public Gui::Button
 {
 public:
-    RendererButton(Gui::View* pParent = 0) : Gui::Button(pParent) {}
+    VolSeekButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
+    {
+//        _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
+//        setImage(&_image);
+        setLabel("00%\n0:00:00");
+        setSizeConstraint(75, height(Gui::View::Pref), Gui::View::Pref);
+//        setEnabled(true);
+    }
 
     virtual void pushed()
     {
-        MediaRendererView* pRenderer = static_cast<MediaRendererView*>(_pParent);
-        pRenderer->selectedRenderer();
+        _pRendererView->switchVolSeekSlider();
     }
+
+    MediaRendererView*      _pRendererView;
 };
 
 
-class VolSlider : public Gui::Slider
+class VolSeekSlider : public Gui::Slider
 {
 public:
-    VolSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
+    VolSeekSlider(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Slider(pParent), _pRendererView(pRendererView)
     {
 //        setEnabled(false);
     }
 
     virtual void valueChanged(int value)
     {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->volumeChanged(value);
+        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pRendererView->getModel());
+        if (pRenderer) {
+            if (_pRendererView->_modeVolume) {
+                pRenderer->volumeChanged(value);
+            }
+            else {
+                pRenderer->positionMoved(value / 100.0 * pRenderer->_duration);
+//        // TODO: seek position value should be multiplied with lenght of track
+            }
+        }
     }
 
     virtual bool getEnabled()
@@ -325,88 +355,97 @@ public:
             return false;
         }
     }
+
+    MediaRendererView*      _pRendererView;
 };
 
 
-class SeekSlider : public Gui::Slider
+class MediaRendererLayout : public Gui::Layout
 {
-public:
-    SeekSlider(Gui::View* pParent = 0) : Gui::Slider(pParent)
+    virtual void layoutView()
     {
-//        setEnabled(false);
+        MediaRendererView* pRendererView = static_cast<MediaRendererView*>(_pView);
+
+        int margin = 2;
+        int width = pRendererView->width() - 2 * margin;
+        int height = pRendererView->height() - 2 * margin;
+        if (pRendererView->_lineBreak) {
+            pRendererView->_pButtonPanel->resize(width, height / 3);
+            pRendererView->_pButtonPanel->move(margin, margin);
+            pRendererView->_pSliderPanel->resize(width, height / 3);
+            pRendererView->_pSliderPanel->move(margin, margin + height / 3);
+            pRendererView->_pLabelPanel->resize(width, height / 3);
+            pRendererView->_pLabelPanel->move(margin, margin + 2 * height / 3);
+        }
+        else {
+            pRendererView->_pButtonPanel->resize(width / 3, height);
+            pRendererView->_pButtonPanel->move(margin, margin);
+            pRendererView->_pSliderPanel->resize(width / 3, height);
+            pRendererView->_pSliderPanel->move(margin + width / 3, margin);
+            pRendererView->_pLabelPanel->resize(width / 3, height);
+            pRendererView->_pLabelPanel->move(margin + 2 * width / 3, margin);
+        }
     }
 
-    virtual void valueChanged(int value)
-    {
-        MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pParent->getModel());
-        pRenderer->positionMoved(value / 100.0 * pRenderer->_duration);
-        // TODO: seek position value should be multiplied with lenght of track
-    }
 };
 
 
-MediaRendererView::MediaRendererView()
+class MediaRendererController : public Gui::Controller
+{
+    friend class MediaRendererView;
+
+    MediaRendererController(MediaRendererView* pRendererView) : _pRendererView(pRendererView) {}
+
+    virtual void selected()
+    {
+        _pRendererView->selectedRenderer();
+    }
+
+    MediaRendererView*  _pRendererView;
+};
+
+
+MediaRendererView::MediaRendererView(bool lineBreak) :
+_lineBreak(lineBreak),
+_modeVolume(true)
 {
     setName("media renderer view");
 
-//    setBackgroundColor(Gui::Color("blue"));
+    _pButtonPanel = new Gui::View(this);
+    _pButtonPanel->setLayout(new Gui::HorizontalLayout);
+    _pButtonPanel->attachController(new MediaRendererController(this));
 
-    _pBackButton = new BackButton(this);
-    _pPlayButton = new PlayButton(this);
-    _pStopButton = new StopButton(this);
-    _pForwButton = new ForwButton(this);
-    _pVolSlider = new VolSlider(this);
-    _pSeekSlider = new SeekSlider(this);
-    _pRendererName = new Gui::LabelView(this);
+    _pRendererName = new Gui::LabelView(_pButtonPanel);
 //    _pRendererName = new RendererName(this);
 //    _pRendererName->setAlignment(Gui::View::AlignCenter);
     _pRendererName->setAlignment(Gui::View::AlignLeft);
-    _pTrackName = new Gui::LabelView(this);
+    _pBackButton = new BackButton(this, _pButtonPanel);
+    _pPlayButton = new PlayButton(this, _pButtonPanel);
+    _pStopButton = new StopButton(this, _pButtonPanel);
+    _pForwButton = new ForwButton(this, _pButtonPanel);
+
+    _pSliderPanel = new Gui::View(this);
+    _pSliderPanel->setLayout(new Gui::HorizontalLayout);
+    _pSliderPanel->attachController(new MediaRendererController(this));
+
+    _pVolSeekButton = new VolSeekButton(this, _pSliderPanel);
+    _pVolSeekButton->attachController(new MediaRendererController(this));
+    _pVolSeekSlider = new VolSeekSlider(this, _pSliderPanel);
+
+    _pLabelPanel = new Gui::View(this);
+    _pLabelPanel->setLayout(new Gui::HorizontalLayout);
+    _pLabelPanel->attachController(new MediaRendererController(this));
+
+    _pTrackName = new Gui::LabelView(_pLabelPanel);
     _pTrackName->setAlignment(Gui::View::AlignCenter);
 //    _pTrackName->setAlignment(Gui::View::AlignLeft);
 
+    setLayout(new MediaRendererLayout);
+
 #ifdef __IPHONE__
-    _pBackButton->resize(40, 40);
-    _pBackButton->move(0, 2);
-    _pPlayButton->resize(40, 40);
-    _pPlayButton->move(40, 2);
-    _pStopButton->resize(40, 40);
-    _pStopButton->move(80, 2);
-    _pForwButton->resize(40, 40);
-    _pForwButton->move(120, 2);
-
-    _pVolSlider->resize(70, 40);
-    _pVolSlider->move(160, 2);
-    _pSeekSlider->resize(70, 40);
-    _pSeekSlider->move(230, 2);
-
-    _pRendererName->resize(120, 40);
-    _pRendererName->move(0, 44);
-    _pTrackName->resize(120, 40);
-    _pTrackName->move(122, 44);
-
-    resize(300, 88);
+    resize(300, 60);
 #else
-    _pBackButton->resize(45, 40);
-    _pBackButton->move(0, 2);
-    _pPlayButton->resize(45, 40);
-    _pPlayButton->move(45, 2);
-    _pStopButton->resize(45, 40);
-    _pStopButton->move(90, 2);
-    _pForwButton->resize(45, 40);
-    _pForwButton->move(135, 2);
-
-    _pVolSlider->resize(100, 40);
-    _pVolSlider->move(180, 2);
-    _pSeekSlider->resize(100, 40);
-    _pSeekSlider->move(280, 2);
-
-    _pRendererName->resize(120, 40);
-    _pRendererName->move(384, 2);
-    _pTrackName->resize(120, 40);
-    _pTrackName->move(508, 2);
-
-    resize(620, 44);
+    resize(620, 30);
 #endif
 
 //    setSizeConstraint(400, 40, Gui::View::Pref);
@@ -420,8 +459,12 @@ MediaRendererView::setModel(Gui::Model* pModel)
 {
     _pRendererName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_rendererName);
     _pTrackName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_trackName);
-    _pSeekSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_position);
-    _pVolSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_volume);
+    if (_modeVolume) {
+        _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_volume);
+    }
+    else {
+        _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_position);
+    }
     Gui::View::setModel(pModel);
 }
 
@@ -441,9 +484,21 @@ MediaRendererView::syncViewImpl()
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();
-    _pSeekSlider->syncViewImpl();
-    _pVolSlider->syncViewImpl();
+    _pVolSeekSlider->syncViewImpl();
     _pTrackName->syncViewImpl();
+}
+
+
+void
+MediaRendererView::switchVolSeekSlider()
+{
+    _modeVolume = !_modeVolume;
+    if (_modeVolume) {
+        _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(getModel())->_volume);
+    }
+    else {
+        _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(getModel())->_position);
+    }
 }
 
 
