@@ -32,6 +32,7 @@
 #include "../Gui/Label.h"
 #include "../Gui/Slider.h"
 #include "../Gui/HorizontalLayout.h"
+#include "../Gui/VerticalLayout.h"
 
 #include "DeviceGroup.h"
 
@@ -49,6 +50,8 @@ class MediaObjectView;
 class PlaylistEditor;
 class PlaylistEditorObjectView;
 class ActivityIndicator;
+class VolLabel;
+class SeekLabel;
 
 
 class TransportStateNotification : public Poco::Notification
@@ -115,7 +118,9 @@ private:
     int                 _duration;
     Gui::LabelModel     _rendererName;
     Gui::LabelModel     _trackName;
+    Gui::LabelModel     _positionLabel;
     Gui::SliderModel    _position;
+    Gui::LabelModel     _volumeLabel;
     Gui::SliderModel    _volume;
     ControllerWidget*   _pControllerWidget;
 };
@@ -124,7 +129,9 @@ private:
 class MediaRendererView : public Gui::View
 {
     friend class MediaRendererLayout;
-    friend class VolSeekButton;
+    friend class VolSeekView;
+    friend class VolLabel;
+    friend class SeekLabel;
     friend class VolSeekSlider;
 
 public:
@@ -148,7 +155,8 @@ private:
     Gui::Button*            _pPlayButton;
     Gui::Button*            _pStopButton;
     Gui::Button*            _pForwButton;
-    Gui::Button*            _pVolSeekButton;
+    VolLabel*               _pVolLabel;
+    SeekLabel*              _pSeekLabel;
     Gui::Slider*            _pVolSeekSlider;
     Gui::LabelView*         _pRendererName;
     Gui::LabelView*         _pTrackName;

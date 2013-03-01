@@ -89,6 +89,8 @@ MediaRendererDevice::initController()
 {
     _rendererName.setLabel(getFriendlyName());
     _trackName.setLabel("- no track -");
+    _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");
+    _positionLabel.setLabel("00:00:00");
     _volume.setValue(getVolume());
     _position.setValue(0);
 }
@@ -136,6 +138,7 @@ MediaRendererDevice::newPosition(int duration, int position)
         _position.setValue(0);
     }
     else {
+        _positionLabel.setLabel(Av::AvTypeConverter::writeDuration(position));
         _position.setValue(((float)position / duration) * 100);
     }
     syncViews();
@@ -146,7 +149,7 @@ void
 MediaRendererDevice::newVolume(const int volume)
 {
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new volume: " + Poco::NumberFormatter::format(volume));
-//    _volume = volume;
+    _volumeLabel.setLabel(Poco::NumberFormatter::format(volume) + "%");
     _volume.setValue(volume);
     syncViews();
 }
@@ -303,22 +306,78 @@ public:
 };
 
 
-class VolSeekButton : public Gui::Button
+class VolSeekView : public Gui::View, public Gui::Controller
+{
+    friend class MediaRendererView;
+
+    VolSeekView(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::View(pParent), _pRendererView(pRendererView)
+    {
+    }
+
+    virtual void selected()
+    {
+        _pRendererView->switchVolSeekSlider();
+    }
+
+    MediaRendererView*      _pRendererView;
+};
+
+
+class VolLabel : public Gui::LabelView
 {
 public:
-    VolSeekButton(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Button(pParent), _pRendererView(pRendererView)
+    VolLabel(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::LabelView(pParent), _pRendererView(pRendererView)
     {
 //        _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
 //        setImage(&_image);
-        setLabel("00%\n0:00:00");
+//        setLabel("00%");
         setSizeConstraint(75, height(Gui::View::Pref), Gui::View::Pref);
 //        setEnabled(true);
     }
 
-    virtual void pushed()
+    void select(bool select)
     {
-        _pRendererView->switchVolSeekSlider();
+        if (select) {
+            setBackgroundColor(Gui::Color(200, 200, 200));
+        }
+        else {
+            setBackgroundColor(Gui::Color("white"));
+        }
     }
+//    virtual void selected()
+//    {
+//        _pRendererView->switchVolSeekSlider();
+//    }
+
+    MediaRendererView*      _pRendererView;
+};
+
+
+class SeekLabel : public Gui::LabelView
+{
+public:
+    SeekLabel(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::LabelView(pParent), _pRendererView(pRendererView)
+    {
+//        _image.setData(MediaImages::instance()->getResource("media-skip-forward.png"));
+//        setImage(&_image);
+//        setLabel("00:00:00");
+        setSizeConstraint(75, height(Gui::View::Pref), Gui::View::Pref);
+//        setEnabled(true);
+    }
+
+    void select(bool select)
+    {
+        if (select) {
+            setBackgroundColor(Gui::Color(200, 200, 200));
+        }
+        else {
+            setBackgroundColor(Gui::Color("white"));
+        }
+    }
+//    virtual void selected()
+//    {
+//        _pRendererView->switchVolSeekSlider();
+//    }
 
     MediaRendererView*      _pRendererView;
 };
@@ -329,6 +388,7 @@ class VolSeekSlider : public Gui::Slider
 public:
     VolSeekSlider(MediaRendererView* pRendererView, Gui::View* pParent = 0) : Gui::Slider(pParent), _pRendererView(pRendererView)
     {
+        setBackgroundColor(Gui::Color(200, 200, 200));
 //        setEnabled(false);
     }
 
@@ -428,8 +488,17 @@ _modeVolume(true)
     _pSliderPanel->setLayout(new Gui::HorizontalLayout);
     _pSliderPanel->attachController(new MediaRendererController(this));
 
-    _pVolSeekButton = new VolSeekButton(this, _pSliderPanel);
-    _pVolSeekButton->attachController(new MediaRendererController(this));
+    VolSeekView* pVolSeekView = new VolSeekView(this, _pSliderPanel);
+    pVolSeekView->setLayout(new Gui::VerticalLayout);
+    pVolSeekView->setName("VolSeekView");
+    pVolSeekView->attachController(pVolSeekView);
+    _pVolLabel = new VolLabel(this, pVolSeekView);
+    _pVolLabel->setName("VolLabel");
+    _pVolLabel->select(true);
+    _pVolLabel->attachController(new MediaRendererController(this));
+    _pSeekLabel = new SeekLabel(this, pVolSeekView);
+    _pSeekLabel->setName("SeekLabel");
+    _pSeekLabel->attachController(new MediaRendererController(this));
     _pVolSeekSlider = new VolSeekSlider(this, _pSliderPanel);
 
     _pLabelPanel = new Gui::View(this);
@@ -459,6 +528,8 @@ MediaRendererView::setModel(Gui::Model* pModel)
 {
     _pRendererName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_rendererName);
     _pTrackName->setModel(&static_cast<MediaRendererDevice*>(pModel)->_trackName);
+    _pVolLabel->setModel(&static_cast<MediaRendererDevice*>(pModel)->_volumeLabel);
+    _pSeekLabel->setModel(&static_cast<MediaRendererDevice*>(pModel)->_positionLabel);
     if (_modeVolume) {
         _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(pModel)->_volume);
     }
@@ -484,6 +555,8 @@ MediaRendererView::syncViewImpl()
     _pRendererName->syncViewImpl();
     _pPlayButton->syncViewImpl();
     _pStopButton->syncViewImpl();
+    _pVolLabel->syncViewImpl();
+    _pSeekLabel->syncViewImpl();
     _pVolSeekSlider->syncViewImpl();
     _pTrackName->syncViewImpl();
 }
@@ -495,9 +568,13 @@ MediaRendererView::switchVolSeekSlider()
     _modeVolume = !_modeVolume;
     if (_modeVolume) {
         _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(getModel())->_volume);
+        _pVolLabel->select(true);
+        _pSeekLabel->select(false);
     }
     else {
         _pVolSeekSlider->setModel(&static_cast<MediaRendererDevice*>(getModel())->_position);
+        _pVolLabel->select(false);
+        _pSeekLabel->select(true);
     }
 }
 
