@@ -273,13 +273,13 @@ XineEngine::getPositionPercentage()
 }
 
 
-float
+Omm::r8
 XineEngine::getPositionSecond()
 {
 }
 
 
-float
+Omm::r8
 XineEngine::getLengthSeconds()
 {
 }
@@ -293,7 +293,7 @@ XineEngine::getTransportState()
 
 
 void
-XineEngine::seekSecond(float second)
+XineEngine::seekSecond(Omm::r8 second)
 {
     xine_play(_xineStream, second, 0);
 }

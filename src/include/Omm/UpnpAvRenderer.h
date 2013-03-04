@@ -26,6 +26,7 @@
 
 #include "Sys/Visual.h"
 #include "Upnp.h"
+#include "UpnpTypes.h"
 #include "UpnpAvObject.h"
 
 namespace Omm {
@@ -53,7 +54,7 @@ public:
     Engine();
 
     std::string getEngineId();
-    void setInstancedId(Omm::ui4 instanceId);
+    void setInstancedId(ui4 instanceId);
     virtual void setVisual(Sys::Visual* pVisual);
 
 //    virtual void setOption(const std::string& key, const std::string& value);
@@ -77,17 +78,23 @@ public:
     virtual void pause() = 0;
     virtual void stop() = 0;
 
+    void setDuration(r8 seconds);
+    r8 getDuration();
+    void setSize(Poco::UInt64 bytes);
+    Poco::UInt64 getSize();
+
     void seekTrack(ui4 trackNumber);
     void nextTrack();
     void previousTrack();
+    void seekTime(r8 second);
     virtual void seekByte(Poco::UInt64 byte) = 0;
     virtual void seekPercentage(float percentage) = 0;
-    virtual void seekSecond(float second) = 0;
+    virtual void seekSecond(r8 second) = 0;
 
     virtual Poco::UInt64 getPositionByte() = 0;
     virtual float getPositionPercentage() = 0;
-    virtual float getPositionSecond() = 0;
-    virtual float getLengthSeconds() = 0;
+    virtual r8 getPositionSecond() = 0;
+    virtual r8 getLengthSeconds() = 0;
     virtual std::string getStreamType() { return StreamTypeOther; }
     const std::string transportState();
 
@@ -114,22 +121,24 @@ protected:
 
 //    MediaRenderer*                      _pRenderer;
     std::string                         _engineId;
-    Omm::ui4                            _instanceId;
+    ui4                                 _instanceId;
     Sys::Visual*                        _pVisual;
     DevAVTransportRendererImpl*         _pAVTransportImpl;
     DevRenderingControlRendererImpl*    _pRenderingControlImpl;
     std::vector<std::string>            _playlist;
     int                                 _trackNumberInPlaylist;
     Poco::Timer*                        _pEndOfStreamTimer;
+    Omm::r8                             _duration;  // length of media in seconds
+    Poco::UInt64                        _size;      // length of media in bytes
 };
 
 
 class StreamTypeNotification : public Poco::Notification
 {
 public:
-    StreamTypeNotification(Omm::ui4 instanceId, const std::string& transportState, const std::string& streamType) : _instanceId(instanceId), _transportState(transportState), _streamType(streamType) {}
+    StreamTypeNotification(ui4 instanceId, const std::string& transportState, const std::string& streamType) : _instanceId(instanceId), _transportState(transportState), _streamType(streamType) {}
 
-    Omm::ui4            _instanceId;
+    ui4                 _instanceId;
     std::string         _transportState;
     std::string         _streamType;
 };
@@ -142,7 +151,7 @@ public:
     ~MediaRenderer();
 
     void addEngine(Engine* pEngine);
-    Engine* getEngine(Omm::ui4 instanceId = 0);
+    Engine* getEngine(ui4 instanceId = 0);
 
 private:
     // these pointers to service implementations are only temporarily needed when setting them in the engine.

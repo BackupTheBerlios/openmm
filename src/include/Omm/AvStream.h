@@ -267,7 +267,8 @@ public:
         TK_ARTIST,
         TK_AUTHOR,
         TK_GENRE,
-        TK_TRACK
+        TK_TRACK,
+        TK_DURATION  /// duration in millisec
     };
 
     enum ColorCoding {

@@ -231,7 +231,9 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 
     ServerObjectResource* pResource;
     ServerObjectProperty* pProperty;
+//    Poco::UInt64 resSize = 0;
     std::streamsize resSize = 0;
+    LOG(upnpav, debug, "size of streamsize: " + Poco::NumberFormatter::format(sizeof(std::streamsize)));
     if (uri[1] == "i") {
         // object icon requested by controller
         LOG(upnpav, debug, "icon request: server creates icon property");
@@ -309,7 +311,9 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
             else {
                 len = resSize - start;
             }
-            response.setContentLength(len);
+            // setContentLength(int) argument type int is too small for big files
+//            response.setContentLength(len);
+            response.set("Content-Length", Poco::NumberFormatter::format(len));
         }
         std::ostringstream responseHeader;
         response.write(responseHeader);
@@ -360,8 +364,11 @@ ItemRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::N
 std::streamsize
 ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::streamoff start, std::streamoff end)
 {
+    LOG(upnpav, debug, "copy stream, start: " + Poco::NumberFormatter::format(start) + ", end: " + Poco::NumberFormatter::format(end));
+
     if (start > 0) {
         istr.seekg(start);
+        LOG(upnpav, debug, "copy stream jumped to position: " + Poco::NumberFormatter::format(istr.tellg()));
     }
 
     char buffer[_bufferSize];
@@ -381,6 +388,7 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
        LOG(upnpav, error, "reading resource stream failed");
     }
     std::streamsize n = istr.gcount();
+    LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
     while (n > 0)
     {
         len += n;
@@ -401,8 +409,13 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
             }
             n = istr.gcount();
         }
-        else n = 0;
+        else {
+            n = 0;
+            LOG(upnpav, error, "copy stream " + std::string(!istr ? "input" : "output") + " stream not ready");
+        }
+        LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
     }
+    LOG(upnpav, debug, "copy stream copied bytes: " + Poco::NumberFormatter::format(len));
     return len;
 }
 
@@ -410,15 +423,15 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
 void
 ItemRequestHandler::parseRange(const std::string& rangeValue, std::streamoff& start, std::streamoff& end)
 {
-   std::string range = rangeValue.substr(rangeValue.find('=') + 1);
+    std::string range = rangeValue.substr(rangeValue.find('=') + 1);
 
     std::string::size_type delim = range.find('-');
-    start = Poco::NumberParser::parse(range.substr(0, delim));
+    start = Poco::NumberParser::parse64(range.substr(0, delim));
     try {
-        end = Poco::NumberParser::parse(range.substr(delim + 1));
+        end = Poco::NumberParser::parse64(range.substr(delim + 1));
     }
     catch (Poco::Exception& e) {
-        LOG(upnpav, warning, "range end parsing: " + e.displayText());
+//        LOG(upnpav, warning, "range end parsing: " + e.displayText());
     }
     LOG(upnpav, debug, "range: " + range + " (start: " + Poco::NumberFormatter::format((long)start)\
               + ", end: " + (end == -1 ? "not defined" : Poco::NumberFormatter::format((long)end)) + ")");

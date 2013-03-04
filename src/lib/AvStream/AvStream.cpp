@@ -1244,6 +1244,9 @@ Meta::getTag(TagKey key)
         case TK_TRACK:
             res = getTag("TRCK", "TRK", "track", "TRACKNUMBER", "PART_NUMBER");
             break;
+        case TK_DURATION:
+            res = getTag("SONGLEN", "TLEN", "duration");
+            break;
     }
     return res;
 }

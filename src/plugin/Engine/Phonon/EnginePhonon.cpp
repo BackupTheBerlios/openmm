@@ -112,7 +112,7 @@ PhononEngine::seekPercentage(float percentage)
 
 
 void
-PhononEngine::seekSecond(float second)
+PhononEngine::seekSecond(Omm::r8 second)
 {
 }
 
@@ -129,13 +129,13 @@ PhononEngine::getPositionPercentage()
 }
 
 
-float
+Omm::r8
 PhononEngine::getPositionSecond()
 {
 }
 
 
-float
+Omm::r8
 PhononEngine::getLengthSeconds()
 {
 }

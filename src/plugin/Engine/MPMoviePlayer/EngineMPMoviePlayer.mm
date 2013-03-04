@@ -278,7 +278,7 @@ MPMoviePlayerEngine::seekPercentage(float percentage)
 
 
 void
-MPMoviePlayerEngine::seekSecond(float second)
+MPMoviePlayerEngine::seekSecond(Omm::r8 second)
 {
 
 }
@@ -298,14 +298,14 @@ MPMoviePlayerEngine::getPositionPercentage()
 }
 
 
-float
+Omm::r8
 MPMoviePlayerEngine::getPositionSecond()
 {
 
 }
 
 
-float
+Omm::r8
 MPMoviePlayerEngine::getLengthSeconds()
 {
 

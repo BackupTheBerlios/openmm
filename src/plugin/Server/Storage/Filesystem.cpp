@@ -26,6 +26,7 @@
 #include <Omm/UpnpAvObject.h>
 #include <Omm/AvStream.h>
 #include <Omm/Util.h>
+#include <Poco/NumberParser.h>
 
 #include "Filesystem.h"
 
@@ -130,6 +131,13 @@ FileModel::getMediaObject(const std::string& path)
 
         Omm::Av::ServerObjectResource* pResource = pItem->createResource();
         pResource->setSize(getSize(path));
+        try {
+            Omm::r8 duration = Poco::NumberParser::parse64(pMeta->getTag(Omm::AvStream::Meta::TK_DURATION)) / 1000.0;
+            pResource->setAttribute(Omm::Av::AvProperty::DURATION, Omm::Av::AvTypeConverter::writeDuration(duration));
+        }
+        catch (Poco::Exception& e) {
+            LOGNS(Omm::Av, upnpav, warning, "file data model could not get duration: " + e.displayText());
+        }
         // FIXME: add some parts of protinfo in server container / media server.
         pResource->setProtInfo("http-get:*:" + pMeta->getMime() + ":*");
         pItem->addResource(pResource);

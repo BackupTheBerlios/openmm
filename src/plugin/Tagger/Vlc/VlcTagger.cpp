@@ -36,6 +36,7 @@
 #include <Omm/AvStream.h>
 #include "Omm/UpnpAvObject.h"
 #include <Omm/Log.h>
+#include <Poco/NumberFormatter.h>
 
 #include "VlcTagger.h"
 
@@ -144,6 +145,16 @@ VlcTagger::tag(const std::string& uri)
     handleException();
     if (pTrack) {
         pMeta->setTag("track", std::string(pTrack));
+    }
+
+#if LIBVLC_VERSION_INT < 0x110
+    libvlc_time_t duration = libvlc_media_get_duration(_pVlcMedia, _pException);
+#else
+    libvlc_time_t duration = libvlc_media_get_duration(_pVlcMedia);
+#endif
+    handleException();
+    if (duration) {
+        pMeta->setTag("duration", Poco::NumberFormatter::format(duration));
     }
 
     libvlc_media_release(_pVlcMedia);

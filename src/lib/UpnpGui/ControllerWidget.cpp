@@ -158,7 +158,7 @@ ControllerWidget::setState(State newState)
         for (int r = 0; r < _pMediaRendererGroupWidget->getDeviceCount(); r++) {
             MediaRendererDevice* pRenderer = static_cast<MediaRendererDevice*>(_pMediaRendererGroupWidget->getDevice(r));
             // TODO: deactivated position timer for now, should fix it.
-//            pRenderer->startPositionTimer(false);
+            pRenderer->startPositionTimer(false);
         }
         // clear device views and remove controller's device containers
         _pMediaServerGroupWidget->popToRoot();

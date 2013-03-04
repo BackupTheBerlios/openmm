@@ -31,6 +31,8 @@ class View;
 
 class GraphicImpl
 {
+    friend class Graphic;
+
 private:
     GraphicImpl();
     ~GraphicImpl();

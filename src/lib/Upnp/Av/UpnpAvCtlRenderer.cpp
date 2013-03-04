@@ -181,12 +181,11 @@ CtlMediaRenderer::backPressed()
 
 
 void
-CtlMediaRenderer::positionMoved(int position)
+CtlMediaRenderer::positionMoved(r8 position)
 {
     LOG(upnpav, debug, "position moved to: " + Poco::NumberFormatter::format(position));
     try {
-        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position * 1000000));
-//        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeTime(position));
+        _pCtlMediaRendererCode->AVTransport()->Seek(0, AvTransportArgument::SEEK_MODE_ABS_TIME, AvTypeConverter::writeDuration(position));
     }
     catch (Poco::Exception& e){
 //        error(e.message());
@@ -283,37 +282,46 @@ CtlMediaRenderer::pollPositionInfo(Poco::Timer& timer)
     std::string TrackURI;
     std::string RelTime;
     std::string AbsTime;
-    i4 RelCount;
-    i4 AbsCount;
+    i4 RelCount = 0;
+    i4 AbsCount = 0;
     _pCtlMediaRendererCode->AVTransport()->GetPositionInfo(0, Track, TrackDuration, TrackMetaData, TrackURI, RelTime, AbsTime, RelCount, AbsCount);
 //    LOG(upnpav, debug, "TrackDuration: " + TrackDuration + ", TrackMetaData: " + TrackMetaData + ", TrackURI: " + TrackURI + ", RelTime: " + RelTime + ", AbsTime: " + AbsTime + ", RelCount: " + Poco::NumberFormatter::format(RelCount) + ", AbsCount: " + Poco::NumberFormatter::format(AbsCount));
 
+    r8 duration = 0.0;
     try {
-        r8 trackDuration = AvTypeConverter::readDuration(TrackDuration);
-        r8 absTime = AvTypeConverter::readDuration(AbsTime);
-        newPosition(trackDuration, absTime);
+        duration = AvTypeConverter::readDuration(TrackDuration);
     }
     catch (Poco::Exception& e) {
-        LOG(upnpav, warning, "could not parse current track duration: " + TrackDuration + ", " + e.displayText());
+        LOG(upnpav, warning, "poll position info, could not parse current track duration: " + TrackDuration + ", " + e.displayText());
     }
 
-//    if (TrackMetaData == "") {
-//        newTrack("", "", "");
-//    }
-//    else {
-//        CtlMediaObject object;
-//        try {
-//            object.readMetaData(TrackMetaData);
-////            LOG(upnpav, debug, "new track title: " + object.getTitle());
-////            LOG(upnpav, debug, "new track artist: " + object.getProperty(AvProperty::ARTIST));
-////            LOG(upnpav, debug, "new track album: " + object.getProperty(AvProperty::ALBUM));
-//            newTrack(object.getTitle(), object.getProperty(AvProperty::ARTIST), object.getProperty(AvProperty::ALBUM));
-//        }
-//        catch (Poco::Exception& e) {
-//            newTrack("", "", "");
-//            LOG(upnpav, error, "could not read current track meta data: " + e.displayText());
-//        }
-//    }
+    r8 position = 0.0;
+    try {
+        position = AvTypeConverter::readDuration(AbsTime);
+    }
+    catch (Poco::Exception& e) {
+        LOG(upnpav, warning, "poll position info, could not parse current track position: " + AbsTime + ", " + e.displayText());
+    }
+
+    if (duration == 0.0 && TrackMetaData.size()) {
+        try {
+            CtlMediaObject object;
+            MediaObjectReader reader;
+            reader.read(&object, TrackMetaData);
+            if (object.getResource()) {
+                std::string durationString = object.getResource()->getAttributeValue(AvProperty::DURATION);
+                if (durationString.size()) {
+                    LOG(upnpav, debug, "poll position info, current track meta data, duration: " + durationString);
+                    duration = AvTypeConverter::readDuration(durationString);
+                }
+            }
+        }
+        catch (Poco::Exception& e) {
+            LOG(upnpav, error, "poll position info, could not read current track meta data: " + e.displayText());
+        }
+    }
+
+    newPosition(duration, position);
 }
 
 

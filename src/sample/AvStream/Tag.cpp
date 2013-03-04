@@ -36,15 +36,23 @@ main(int argc, char** argv)
     std::clog << "tagging uri: " << argv[1] << std::endl;
 
     Omm::AvStream::Tagger* pTagger;
+
     std::string taggerPlugin("tagger-ffmpeg");
     Omm::Util::PluginLoader<Omm::AvStream::Tagger> taggerPluginLoader;
     try {
         pTagger = taggerPluginLoader.load(taggerPlugin, "Tagger", "FFmpeg");
     }
     catch(Poco::NotFoundException) {
-        LOGNS(Omm::AvStream, avstream, error, "could not find avstream tagger plugin: " + taggerPlugin);
-        return 1;
+        LOGNS(Omm::AvStream, avstream, warning, "could not find avstream tagger plugin: " + taggerPlugin + " loading vlc tagger ...");
+        try {
+            pTagger = taggerPluginLoader.load("tagger-vlc");
+        }
+        catch(Poco::NotFoundException) {
+            LOGNS(Omm::AvStream, avstream, warning, "could not find avstream tagger plugin: tagger-vlc loading simple tagger ...");
+            pTagger = taggerPluginLoader.load("tagger-simple");
+        }
     }
+
     Omm::AvStream::Meta* pMeta = pTagger->tag(std::string(argv[1]));
     if (pMeta) {
         pMeta->print();
@@ -67,6 +75,7 @@ main(int argc, char** argv)
     std::clog << "Album: " << pMeta->getTag(Omm::AvStream::Meta::TK_ALBUM) << std::endl;
     std::clog << "Title: " << pMeta->getTag(Omm::AvStream::Meta::TK_TITLE) << std::endl;
     std::clog << "Track: " << pMeta->getTag(Omm::AvStream::Meta::TK_TRACK) << std::endl;
+    std::clog << "Duration: " << pMeta->getTag(Omm::AvStream::Meta::TK_DURATION) << std::endl;
     std::clog << "Genre: " << pMeta->getTag(Omm::AvStream::Meta::TK_GENRE) << std::endl;
     std::clog << std::endl;
 

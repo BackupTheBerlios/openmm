@@ -46,9 +46,9 @@ void
 VlcEngine::setVisual(Omm::Sys::Visual* pVisual)
 {
     Engine::setVisual(pVisual);
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: set visual ...");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, set visual ...");
 #ifdef __LINUX__
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: set X11 visual ...");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, set X11 visual ...");
 #if LIBVLC_VERSION_INT < 0x100
     libvlc_media_player_set_drawable(_pVlcPlayer, pVisual->getWindowId(), _pException);
 #elif LIBVLC_VERSION_INT < 0x110
@@ -58,7 +58,7 @@ VlcEngine::setVisual(Omm::Sys::Visual* pVisual)
 #endif
 #endif
 #ifdef __DARWIN__
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: set OSX visual ...");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, set OSX visual ...");
 #if LIBVLC_VERSION_INT < 0x110
 //    libvlc_media_player_set_nsobject(_pVlcPlayer, pVisual->getWindow(), _pException);
     libvlc_media_player_set_agl(_pVlcPlayer, pVisual->getWindowId(), _pException);
@@ -68,7 +68,7 @@ VlcEngine::setVisual(Omm::Sys::Visual* pVisual)
 #endif
 #endif
 #ifdef __WINDOWS__
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: set Windows visual ...");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, set Windows visual ...");
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_set_hwnd(_pVlcPlayer, pVisual->getWindowId(), _pException);
 #else
@@ -161,9 +161,9 @@ VlcEngine::play()
         _pVisual->renderImage(image.getBuffer());
     }
     else {
-        LOGNS(Omm::Av, upnpav, debug, "vlc engine: play ...");
+        LOGNS(Omm::Av, upnpav, debug, "vlc engine, play ...");
 
-        LOGNS(Omm::Av, upnpav, debug, "vlc engine: create new media with uri: " + _uri + " ...");
+        LOGNS(Omm::Av, upnpav, debug, "vlc engine, create new media with uri: " + _uri + " ...");
 #if LIBVLC_VERSION_INT < 0x110
         _pVlcMedia = libvlc_media_new(_pVlcInstance, _uri.c_str(), _pException);
 #else
@@ -171,7 +171,7 @@ VlcEngine::play()
 #endif
         handleException();
 
-        LOGNS(Omm::Av, upnpav, debug, "vlc engine: player set media ...");
+        LOGNS(Omm::Av, upnpav, debug, "vlc engine, player set media ...");
 #if LIBVLC_VERSION_INT < 0x110
         libvlc_media_player_set_media(_pVlcPlayer, _pVlcMedia, _pException);
 #else
@@ -182,10 +182,10 @@ VlcEngine::play()
 //        libvlc_media_add_option_flag(_pVlcMedia, "sout=#description:dummy", 0);
 //        handleException();
 
-        LOGNS(Omm::Av, upnpav, debug, "vlc engine: release media ...");
+        LOGNS(Omm::Av, upnpav, debug, "vlc engine, release media ...");
         libvlc_media_release(_pVlcMedia);
 
-        LOGNS(Omm::Av, upnpav, debug, "vlc engine: play media ...");
+        LOGNS(Omm::Av, upnpav, debug, "vlc engine, play media ...");
 #if LIBVLC_VERSION_INT < 0x110
         libvlc_media_player_play(_pVlcPlayer, _pException);
 #else
@@ -194,7 +194,7 @@ VlcEngine::play()
         handleException();
     }
 
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: play media finished.");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, play media finished.");
 }
 
 
@@ -226,7 +226,7 @@ VlcEngine::pause()
 void
 VlcEngine::stop()
 {
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine: stop ...");
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, stop ...");
 
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_stop(_pVlcPlayer, _pException);
@@ -247,6 +247,18 @@ VlcEngine::seekByte(Poco::UInt64 byte)
     // try libvlc_vlm API (present in all versions of vlc)
     //
     // use size in bytes from meta data or http get request answer
+
+    if (_size == 0.0) {
+        return;
+    }
+
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, set position to: " + Poco::NumberFormatter::format((float)byte / _size));
+#if LIBVLC_VERSION_INT < 0x110
+    libvlc_media_player_set_position(_pVlcPlayer, (float)byte / _size, _pException);
+#else
+    libvlc_media_player_set_position(_pVlcPlayer, (float)byte / _size);
+#endif
+    handleException();
 }
 
 
@@ -263,7 +275,7 @@ VlcEngine::seekPercentage(float percentage)
 
 
 void
-VlcEngine::seekSecond(float second)
+VlcEngine::seekSecond(Omm::r8 second)
 {
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_set_time(_pVlcPlayer, second * 1000, _pException);
@@ -300,7 +312,7 @@ VlcEngine::getPositionPercentage()
 #if LIBVLC_VERSION_INT < 0x110
     res = _length * libvlc_media_player_get_position(_pVlcPlayer, _pException);
 #else
-    res = _length * libvlc_media_player_get_position(_pVlcPlayer);
+    res = _duration * libvlc_media_player_get_position(_pVlcPlayer);
 #endif
     handleException();
     LOGNS(Omm::Av, upnpav, debug, "vlc engine position [%]: " + Poco::NumberFormatter::format(res, 2));
@@ -308,10 +320,10 @@ VlcEngine::getPositionPercentage()
 }
 
 
-float
+Omm::r8
 VlcEngine::getPositionSecond()
 {
-    float res = 0.0;
+    Omm::r8 res = 0.0;
 
 #if LIBVLC_VERSION_INT < 0x110
     res = libvlc_media_player_get_time(_pVlcPlayer, _pException) / 1000.0;
@@ -324,24 +336,20 @@ VlcEngine::getPositionSecond()
 }
 
 
-float
+Omm::r8
 VlcEngine::getLengthSeconds()
 {
     // libvlc_media_player_get_length() sometimes fetches the last position of the stream, and not the length
 #if LIBVLC_VERSION_INT < 0x110
-    _length = libvlc_media_player_get_length(_pVlcPlayer, _pException) / 1000.0;
+//    libvlc_time_t duration = libvlc_media_player_get_length(_pVlcPlayer, _pException);
+    libvlc_time_t duration = libvlc_media_get_duration(_pVlcMedia, _pException);
 #else
-    _length = libvlc_media_player_get_length(_pVlcPlayer) / 1000.0;
+//    libvlc_time_t duration = libvlc_media_player_get_length(_pVlcPlayer);
+    libvlc_time_t duration = libvlc_media_get_duration(_pVlcMedia);
 #endif
     handleException();
-    LOGNS(Omm::Av, upnpav, debug, "vlc engine length [s]: " + Poco::NumberFormatter::format(_length, 2));
-    return _length;
-
-    /* use instead?:
-    libvlc_time_t
-    libvlc_media_get_duration( libvlc_media_t * p_md,
-                               libvlc_exception_t * p_e )
-    */
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine length [s]: " + Poco::NumberFormatter::format(duration / 1000.0, 2));
+    return duration / 1000.0;
 }
 
 
@@ -482,13 +490,13 @@ VlcEngine::handleException()
     // throw exception to signal renderer engine code that engine failed.
 #if LIBVLC_VERSION_INT < 0x110
     if (libvlc_exception_raised(_pException)) {
-        LOGNS(Omm::Av, upnpav, error, "vlc engine: " + std::string(libvlc_exception_get_message(_pException)));
+        LOGNS(Omm::Av, upnpav, error, "vlc engine, " + std::string(libvlc_exception_get_message(_pException)));
     }
     libvlc_exception_init(_pException);
 #else
     const char* errMsg = libvlc_errmsg();
     if (errMsg) {
-        LOGNS(Omm::Av, upnpav, error, "vlc engine: " + std::string(errMsg));
+        LOGNS(Omm::Av, upnpav, error, "vlc engine, " + std::string(errMsg));
     }
 #endif
 }

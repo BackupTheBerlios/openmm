@@ -1231,6 +1231,7 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                 std::string protInfo = "";
                 std::streamsize size = 0;
                 std::string importUri = "";
+                AbstractResource* pResource = pObject->createResource();
                 if (childNode->hasAttributes()) {
                     attr = childNode->attributes();
                     Poco::XML::Node* attrNode = attr->getNamedItem(AvProperty::PROTOCOL_INFO);
@@ -1250,8 +1251,11 @@ MediaObjectReader::readNode(AbstractMediaObject* pObject, Poco::XML::Node* pNode
                     if (attrNode) {
                         importUri = attrNode->nodeValue();
                     }
+                    attrNode = attr->getNamedItem(AvProperty::DURATION);
+                    if (attrNode) {
+                        pResource->setAttribute(AvProperty::DURATION, attrNode->nodeValue());
+                    }
                 }
-                AbstractResource* pResource = pObject->createResource();
                 pResource->setUri(childNode->innerText());
                 pResource->setProtInfo(protInfo);
                 pResource->setSize(size);
@@ -1280,14 +1284,14 @@ _pDoc(0),
 _pDidl(0),
 _full(full)
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::MediaObjectWriter2()");
+    LOG(upnpav, debug, "MediaObjectWriter::MediaObjectWriter()");
 }
 
 
 void
 MediaObjectWriter::write(std::string& meta, AbstractMediaObject* pObject, const std::string& filter)
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::write()");
+    LOG(upnpav, debug, "MediaObjectWriter::write()");
     writeMetaDataHeader();
     writeMetaData(_pDidl, pObject);
     writeMetaDataClose(meta);
@@ -1297,7 +1301,7 @@ MediaObjectWriter::write(std::string& meta, AbstractMediaObject* pObject, const 
 void
 MediaObjectWriter::writeChildren(std::string& meta, const std::vector<AbstractMediaObject*>& children, const std::string& filter)
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::writeChildren()");
+    LOG(upnpav, debug, "MediaObjectWriter::writeChildren()");
     writeMetaDataHeader();
     for (std::vector<AbstractMediaObject*>::const_iterator it = children.begin(); it != children.end(); ++it) {
         MediaObjectWriter writer;
@@ -1317,7 +1321,7 @@ MediaObjectWriter::getXmlProlog()
 void
 MediaObjectWriter::writeMetaDataHeader()
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaDataHeader()");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaDataHeader()");
     _pDoc = new Poco::XML::Document;
 
     _pDidl = _pDoc->createElement("DIDL-Lite");
@@ -1335,7 +1339,7 @@ MediaObjectWriter::writeMetaDataHeader()
 void
 MediaObjectWriter::writeMetaDataClose(std::string& metaData)
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaDataClose() ...");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaDataClose() ...");
     Poco::XML::DOMWriter writer;
     writer.setNewLine("\r\n");
     std::stringstream ss;
@@ -1343,18 +1347,18 @@ MediaObjectWriter::writeMetaDataClose(std::string& metaData)
         writer.writeNode(ss, _pDoc);
     }
     catch (Poco::Exception& e) {
-        LOG(upnpav, error, "MediaObjectWriter2::writeMetaDataClose() could not write meta data xml: " + e.displayText());
+        LOG(upnpav, error, "MediaObjectWriter::writeMetaDataClose() could not write meta data xml: " + e.displayText());
         return;
     }
     metaData = ss.str();
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaDataClose() returns: \n" + metaData);
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaDataClose() returns: \n" + metaData);
 }
 
 
 void
 MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject* pObject)
 {
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaData()");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaData()");
 
     Poco::XML::Document* pDoc = pDidl->ownerDocument();
     Poco::AutoPtr<Poco::XML::Element> pXmlObject;
@@ -1370,7 +1374,7 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject*
         pXmlObject = pDoc->createElement(AvClass::ITEM);
     }
 
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaData() writing attributes ...");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaData() writing attributes ...");
     // write attributes:
     // id (String, required)
     if (_full) {
@@ -1390,14 +1394,14 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject*
     // refID (String)
 
     // properties
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaData() writing properties ...");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaData() writing properties ...");
     // write properties
     int propCount = pObject->getPropertyCount();
     for (int propNum = 0; propNum < propCount; ++propNum) {
         AbstractProperty* pProp = pObject->getProperty(propNum);
         std::string name = pProp->getName();
         std::string value = pProp->getValue();
-        LOG(upnpav, debug, "MediaObjectWriter2::writeMetaData() property: " + name + ", " + value);
+        LOG(upnpav, debug, "MediaObjectWriter::writeMetaData() property: " + name + ", " + value);
         Poco::AutoPtr<Poco::XML::Element> pProperty = pDoc->createElement(name);
         Poco::AutoPtr<Poco::XML::Text> pPropertyValue = pDoc->createTextNode(value);
         pProperty->appendChild(pPropertyValue);
@@ -1418,7 +1422,7 @@ MediaObjectWriter::writeMetaData(Poco::XML::Element* pDidl, AbstractMediaObject*
     // title (String, dc)
     // class (String, upnp)
 
-    LOG(upnpav, debug, "MediaObjectWriter2::writeMetaData() finished.");
+    LOG(upnpav, debug, "MediaObjectWriter::writeMetaData() finished.");
 }
 
 

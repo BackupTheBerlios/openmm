@@ -66,12 +66,12 @@ public:
 
     virtual void seekByte(Poco::UInt64 byte);
     virtual void seekPercentage(float percentage);
-    virtual void seekSecond(float second);
+    virtual void seekSecond(Omm::r8 second);
 
     virtual Poco::UInt64 getPositionByte();
     virtual float getPositionPercentage();
-    virtual float getPositionSecond();
-    virtual float getLengthSeconds();
+    virtual Omm::r8 getPositionSecond();
+    virtual Omm::r8 getLengthSeconds();
     virtual std::string getStreamType();
     virtual TransportState getTransportState();
 
@@ -99,7 +99,6 @@ private:
     std::string             _uri;
     Omm::Av::Mime           _mime;
 //     int                     _fd;
-    float                   _length; // length of media in seconds
     const int               _maxMediaConnect;
 };
 

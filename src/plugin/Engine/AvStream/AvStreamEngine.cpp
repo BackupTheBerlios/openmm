@@ -306,7 +306,7 @@ AvStreamEngine::seekPercentage(float percentage)
 
 
 void
-AvStreamEngine::seekSecond(float second)
+AvStreamEngine::seekSecond(Omm::r8 second)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
@@ -350,14 +350,14 @@ AvStreamEngine::getPositionPercentage()
 }
 
 
-float
+Omm::r8
 AvStreamEngine::getPositionSecond()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);
 }
 
 
-float
+Omm::r8
 AvStreamEngine::getLengthSeconds()
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_actionLock);

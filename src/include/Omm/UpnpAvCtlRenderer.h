@@ -58,7 +58,8 @@ public:
     void pausePressed();
     void forwardPressed();
     void backPressed();
-    void positionMoved(int position);
+    void positionMoved(r8 position);
+    /// positionMoved() seeks to position in secs
     void volumeChanged(int value);
     ui2 getVolume();
     void setMute(bool mute);
@@ -67,7 +68,7 @@ public:
     void startPositionTimer(bool start = true);
     ConnectionManager* getConnectionManager();
 
-    virtual void newPosition(int duration, int position) {}
+    virtual void newPosition(r8 duration, r8 position) {}
     virtual void newUri(const std::string& uri) {}
     virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass) {}
     virtual void newVolume(const int volume) {}
@@ -79,7 +80,7 @@ private:
 
     // for convenience only, to avoid multiple pointer cast from CtlDeviceCode* to CtlMediaRendererCode*;
     CtlMediaRendererCode*   _pCtlMediaRendererCode;
-    CtlMediaObject*        _pCurrentMediaObject;
+    CtlMediaObject*         _pCurrentMediaObject;
     bool                    _usePlaylistResource;
     Poco::Timer*            _pPositionTimer;
     long                    _positionTimerInterval;

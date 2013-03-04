@@ -39,7 +39,8 @@ _instanceId(0),
 _pAVTransportImpl(0),
 _pRenderingControlImpl(0),
 _pVisual(0),
-_trackNumberInPlaylist(0)
+_trackNumberInPlaylist(0),
+_duration(0.0)
 {
 }
 
@@ -52,7 +53,7 @@ Engine::getEngineId()
 
 
 void
-Engine::setInstancedId(Omm::ui4 instanceId)
+Engine::setInstancedId(ui4 instanceId)
 {
     _instanceId = instanceId;
 }
@@ -138,6 +139,38 @@ Engine::setAtomicUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 
 
 void
+Engine::setDuration(r8 seconds)
+{
+    _duration = seconds;
+}
+
+
+r8
+Engine::getDuration()
+{
+    r8 res = getLengthSeconds();
+    if (res == 0.0) {
+        res = _duration;
+    }
+    return res;
+}
+
+
+void
+Engine::setSize(Poco::UInt64 bytes)
+{
+    _size = bytes;
+}
+
+
+Poco::UInt64
+Engine::getSize()
+{
+    return _size;
+}
+
+
+void
 Engine::seekTrack(ui4 trackNumber)
 {
     LOG(upnpav, debug, "engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
@@ -179,6 +212,18 @@ Engine::previousTrack()
         else {
             LOG(upnpav, error, "track number " + Poco::NumberFormatter::format(_trackNumberInPlaylist) + " must be positive.");
         }
+    }
+}
+
+
+void
+Engine::seekTime(r8 second)
+{
+    if (getLengthSeconds() == 0.0 && _duration > 0.0 && _size > 0) {
+        seekByte(second / _duration * _size);
+    }
+    else {
+        seekSecond(second);
     }
 }
 
@@ -287,7 +332,7 @@ MediaRenderer::~MediaRenderer()
 void
 MediaRenderer::addEngine(Engine* pEngine)
 {
-    Omm::ui4 instanceId = _pAVTransportImpl->_engines.size();
+    ui4 instanceId = _pAVTransportImpl->_engines.size();
 //    pEngine->_pRenderer = this;
     pEngine->setInstancedId(instanceId);
     _pAVTransportImpl->addEngine(pEngine);
@@ -300,7 +345,7 @@ MediaRenderer::addEngine(Engine* pEngine)
 
 
 Engine*
-MediaRenderer::getEngine(Omm::ui4 instanceId)
+MediaRenderer::getEngine(ui4 instanceId)
 {
     return _pAVTransportImpl->_engines[instanceId];
 }

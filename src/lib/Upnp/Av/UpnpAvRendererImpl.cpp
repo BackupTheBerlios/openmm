@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <sstream>
+#include <Poco/NumberParser.h>
 
 #include "UpnpAv.h"
 
@@ -109,9 +110,15 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
         if (obj.getResource()) {
             protInfoString = obj.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
             std::string duration = obj.getResource()->getAttributeValue(AvProperty::DURATION);
-            if (duration != "") {
+            std::string size = obj.getResource()->getAttributeValue(AvProperty::SIZE);
+            if (duration.size()) {
                 LOG(upnpav, debug, "set duration from CurrentURIMetaData to: " + duration);
+                _engines[InstanceID]->setDuration(AvTypeConverter::readDuration(duration));
                 _setCurrentTrackDuration(duration);
+            }
+            if (size.size()) {
+                LOG(upnpav, debug, "set size from CurrentURIMetaData to: " + size);
+                _engines[InstanceID]->setSize(Poco::NumberParser::parse64(size));
             }
         }
     }
@@ -164,7 +171,8 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 //    LOG(upnpav, debug, "GetPositionInfo() ...");
     Track = _getCurrentTrack();
 
-    float engineTrackDuration = _engines[InstanceID]->getLengthSeconds();
+//    r8 engineTrackDuration = _engines[InstanceID]->getLengthSeconds();
+    r8 engineTrackDuration = _engines[InstanceID]->getDuration();
 //    LOG(upnpav, debug, "engine track duration (sec): " + Poco::NumberFormatter::format(engineTrackDuration, 2));
     if (engineTrackDuration > 0.0) {
         _setCurrentTrackDuration(AvTypeConverter::writeDuration(engineTrackDuration));
@@ -177,9 +185,9 @@ DevAVTransportRendererImpl::GetPositionInfo(const ui4& InstanceID, ui4& Track, s
 
     Poco::UInt64 enginePositionByte = _engines[InstanceID]->getPositionByte();
 //    LOG(upnpav, debug, "engine position byte: " + Poco::NumberFormatter::format(enginePositionByte));
-    float enginePosition = _engines[InstanceID]->getPositionPercentage();
+    r8 enginePosition = _engines[InstanceID]->getPositionPercentage();
 //    LOG(upnpav, debug, "engine position percentage: " + Poco::NumberFormatter::format(enginePosition, 2));
-    float engineTimePosition = _engines[InstanceID]->getPositionSecond();
+    r8 engineTimePosition = _engines[InstanceID]->getPositionSecond();
 //    LOG(upnpav, debug, "engine position second: " + Poco::NumberFormatter::format(engineTimePosition, 2));
 
     std::string timePosition = AvTypeConverter::writeDuration(engineTimePosition);
@@ -340,8 +348,9 @@ DevAVTransportRendererImpl::Seek(const ui4& InstanceID, const std::string& Unit,
             }
         }
         else if (Unit == AvTransportArgument::SEEK_MODE_ABS_TIME) {
-            ui4 position = AvTypeConverter::readTime(Target).epochMicroseconds() / 1000000;
-            _engines[InstanceID]->seekSecond(position);
+            r8 position = AvTypeConverter::readDuration(Target);
+//            _engines[InstanceID]->seekSecond(position);
+            _engines[InstanceID]->seekTime(position);
             // TODO: according to the specs AVTransport 1.0, 2.4.12.3.Effect on State
             //       TransportState should be set to TRANSITIONING, but only while seeking.
             //       OnSeek() should return immediately! So we are not conform here.

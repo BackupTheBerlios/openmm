@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <Poco/NumberParser.h>
+
 #include "UpnpAv.h"
 #include "UpnpAvPrivate.h"
 #include "UpnpAvCtlImpl.h"
@@ -170,6 +172,31 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                     AbstractProperty* pAlbum = object.getProperty(AvProperty::ALBUM);
                     std::string objectClass = object.getClass();
                     _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "", objectClass);
+//                    if (object.getResource()) {
+//                        std::string protInfoString = object.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
+//                        std::string duration = object.getResource()->getAttributeValue(AvProperty::DURATION);
+//                        if (duration != "") {
+//                            LOG(upnpav, debug, "controller, current track meta data, duration: " + duration);
+//                            try {
+//                                r8 durationVal = AvTypeConverter::readDuration(duration);
+//                                _pMediaRenderer->newPosition(durationVal, 0);
+//                            }
+//                            catch (Poco::Exception& e) {
+//                                LOG(upnpav, error, "controller, could not parse track size: " + e.displayText());
+//                            }
+//                        }
+//                        std::string size = object.getResource()->getAttributeValue(AvProperty::SIZE);
+//                        if (size != "") {
+//                            LOG(upnpav, debug, "controller, current track meta data, size: " + size);
+//                            try {
+//                                ui4 sizeVal = Poco::NumberParser::parse(size);
+//                                _pMediaRenderer->newPosition(sizeVal, 0);
+//                            }
+//                            catch (Poco::Exception& e) {
+//                                LOG(upnpav, error, "controller, could not parse track size: " + e.displayText());
+//                            }
+//                        }
+//                    }
                 }
             }
         }

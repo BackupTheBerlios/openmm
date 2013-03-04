@@ -129,17 +129,17 @@ MediaRendererDevice::newTrack(const std::string& title, const std::string& artis
 
 
 void
-MediaRendererDevice::newPosition(int duration, int position)
+MediaRendererDevice::newPosition(r8 duration, r8 position)
 {
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
-    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((float)position / duration) * 100.0));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((r8)position / duration) * 100.0));
     _duration = duration;
     if (duration == 0) {
         _position.setValue(0);
     }
     else {
         _positionLabel.setLabel(Av::AvTypeConverter::writeDuration(position));
-        _position.setValue(((float)position / duration) * 100);
+        _position.setValue(((r8)position / duration) * 100);
     }
     syncViews();
 }
@@ -162,7 +162,7 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     _transportState = transportState;
     syncViews();
     // TODO: deactivated position timer for now, should fix it.
-//    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
+    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
     // FIXME: from "new transport state STOPPED" to UPNP.CONTROL action response sent (StopResponse) it takes nearly one
     // second, sometimes.
@@ -400,8 +400,8 @@ public:
                 pRenderer->volumeChanged(value);
             }
             else {
-                pRenderer->positionMoved(value / 100.0 * pRenderer->_duration);
-//        // TODO: seek position value should be multiplied with lenght of track
+                int sliderMaxVal = 100;
+                pRenderer->positionMoved((float)value / sliderMaxVal * pRenderer->_duration);
             }
         }
     }
@@ -516,10 +516,6 @@ _modeVolume(true)
 #else
     resize(620, 30);
 #endif
-
-//    setSizeConstraint(400, 40, Gui::View::Pref);
-//    resize(800, 20);
-//    setLayout(&_layout);
 }
 
 

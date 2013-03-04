@@ -601,7 +601,7 @@ _pApp(pApp)
     _pSetupView->setLayout(new Gui::VerticalLayout);
 
     Gui::Label* pControllerLabel = new Gui::Label(_pSetupView);
-    pControllerLabel->setLabel("Controller");
+    pControllerLabel->setLabel("Local Devices");
     pControllerLabel->setBackgroundColor(Gui::Color(220, 220, 220));
     pControllerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
@@ -609,7 +609,7 @@ _pApp(pApp)
     _pAppStateSelector->setSizeConstraint(10, 20, Gui::View::Pref);
 
     Gui::Label* pRendererLabel = new Gui::Label(_pSetupView);
-    pRendererLabel->setLabel("Local Renderer");
+    pRendererLabel->setLabel("Local Player");
     pRendererLabel->setBackgroundColor(Gui::Color(220, 220, 220));
     pRendererLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
@@ -625,7 +625,7 @@ _pApp(pApp)
     _pRendererConfig = new RendererConfView(this);
 
     Gui::Label* pServerLabel = new Gui::Label(_pSetupView);
-    pServerLabel->setLabel("Server");
+    pServerLabel->setLabel("Local Media");
     pServerLabel->setBackgroundColor(Gui::Color(220, 220, 220));
     pServerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
