@@ -388,7 +388,7 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
        LOG(upnpav, error, "reading resource stream failed");
     }
     std::streamsize n = istr.gcount();
-    LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
+//    LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
     while (n > 0)
     {
         len += n;
@@ -413,7 +413,7 @@ ItemRequestHandler::copyStream(std::istream& istr, std::ostream& ostr, std::stre
             n = 0;
             LOG(upnpav, error, "copy stream " + std::string(!istr ? "input" : "output") + " stream not ready");
         }
-        LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
+//        LOG(upnpav, debug, "copy stream read bytes: " + Poco::NumberFormatter::format(n));
     }
     LOG(upnpav, debug, "copy stream copied bytes: " + Poco::NumberFormatter::format(len));
     return len;

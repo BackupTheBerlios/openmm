@@ -77,6 +77,7 @@ Engine::setUriEngine(const std::string& uri, const ProtocolInfo& protInfo)
 {
     Poco::URI uriParsed(uri);
     _playlist.clear();
+    _duration = 0.0;
     if (protInfo.getMimeString() == Mime::PLAYLIST) {
         LOG(upnpav, debug, "renderer engine got playlist");
 
@@ -189,6 +190,7 @@ Engine::nextTrack()
 {
     if (_trackNumberInPlaylist < _playlist.size() - 1) {
         _trackNumberInPlaylist++;
+        _duration = 0.0;
         LOG(upnpav, debug, "engine skip to next track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         if (_trackNumberInPlaylist < _playlist.size()) {
             setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
@@ -205,6 +207,7 @@ Engine::previousTrack()
 {
     if (_trackNumberInPlaylist >= 1) {
         _trackNumberInPlaylist--;
+        _duration = 0.0;
         LOG(upnpav, debug, "engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
         if (_trackNumberInPlaylist) {
             setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);

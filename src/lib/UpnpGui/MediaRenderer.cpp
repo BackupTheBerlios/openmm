@@ -19,6 +19,8 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
+#include <cmath>
+
 #include "Util.h"
 #include "Gui/GuiLogger.h"
 
@@ -90,7 +92,7 @@ MediaRendererDevice::initController()
     _rendererName.setLabel(getFriendlyName());
     _trackName.setLabel("- no track -");
     _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");
-    _positionLabel.setLabel("00:00:00");
+    _positionLabel.setLabel("00:00:00/00:00:00");
     _volume.setValue(getVolume());
     _position.setValue(0);
 }
@@ -99,8 +101,9 @@ MediaRendererDevice::initController()
 void
 MediaRendererDevice::newUri(const std::string& uri)
 {
+    // set track name for tracks in a playlist (only uri of current track is known, nothing else)
+    // connection via connection manager must be available
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
-//    _trackName.setLabel(uri);
     Av::Connection* pConnection = getConnectionManager()->getConnection(0);
     if (pConnection) {
         std::string serverUuid = pConnection->getServer().getConnectionManagerId().getUuid();
@@ -110,37 +113,43 @@ MediaRendererDevice::newUri(const std::string& uri)
             Av::CtlMediaObject* pObject = pServer->getMediaObjectFromResource(uri);
             if (pObject) {
                 LOGNS(Gui, gui, debug, "media renderer device playing object with title: \"" + pObject->getTitle() + "\"");
-                _trackName.setLabel(pObject->getTitle());
+                Av::AbstractProperty* pArtist = pObject->getProperty(Av::AvProperty::ARTIST);
+                Av::AbstractProperty* pAlbum = pObject->getProperty(Av::AvProperty::ALBUM);
+                _trackName.setLabel(pServer->getFriendlyName() + ": " + (pArtist ? pArtist->getValue() + " - " + pObject->getTitle() : pObject->getTitle()));
+                syncViews();
             }
         }
     }
-    syncViews();
 }
 
 
 void
-MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass)
+MediaRendererDevice::newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass, const std::string& server, const std::string& uri)
 {
-    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album + ", " + objectClass);
-    _trackName.setLabel(artist == "" ? title : artist + " - " + title);
-    syncViews();
-    Poco::NotificationCenter::defaultCenter().postNotification(new TrackNotification(getUuid(), title, artist, album, objectClass));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album + ", " + objectClass + ", " + server + ", " + uri);
+
+    // set track name, when metadata of track is available for renderer
+    if (!Av::AvClass::matchClass(objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+        _trackName.setLabel((server.size() ? server + ": " : "") + (artist == "" ? title : artist + " - " + title));
+        syncViews();
+    //    Poco::NotificationCenter::defaultCenter().postNotification(new TrackNotification(getUuid(), title, artist, album, objectClass));
+    }
 }
 
 
 void
 MediaRendererDevice::newPosition(r8 duration, r8 position)
 {
-    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position) + ", duration: " + Poco::NumberFormatter::format(duration));
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position, 1) + ", duration: " + Poco::NumberFormatter::format(duration, 1));
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((r8)position / duration) * 100.0));
     _duration = duration;
     if (duration == 0) {
         _position.setValue(0);
     }
     else {
-        _positionLabel.setLabel(Av::AvTypeConverter::writeDuration(position));
         _position.setValue(((r8)position / duration) * 100);
     }
+    _positionLabel.setLabel(formatDuration(position) + "/" + formatDuration(duration));
     syncViews();
 }
 
@@ -166,6 +175,19 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
     // FIXME: from "new transport state STOPPED" to UPNP.CONTROL action response sent (StopResponse) it takes nearly one
     // second, sometimes.
+}
+
+
+std::string
+MediaRendererDevice::formatDuration(r8 duration)
+{
+    int hours = duration / 3600.0;
+    int minutes = (duration - hours * 3600) / 60.0;
+    int seconds = floor(duration - hours * 3600 - minutes * 60);
+    return
+        Poco::NumberFormatter::format0(hours, 2) + ":" +
+        Poco::NumberFormatter::format0(minutes, 2) + ":" +
+        Poco::NumberFormatter::format0(seconds, 2);
 }
 
 
@@ -426,7 +448,7 @@ class MediaRendererLayout : public Gui::Layout
     {
         MediaRendererView* pRendererView = static_cast<MediaRendererView*>(_pView);
 
-        int margin = 2;
+        int margin = 5;
         int width = pRendererView->width() - 2 * margin;
         int height = pRendererView->height() - 2 * margin;
         if (pRendererView->_lineBreak) {
@@ -506,8 +528,8 @@ _modeVolume(true)
     _pLabelPanel->attachController(new MediaRendererController(this));
 
     _pTrackName = new Gui::LabelView(_pLabelPanel);
-    _pTrackName->setAlignment(Gui::View::AlignCenter);
-//    _pTrackName->setAlignment(Gui::View::AlignLeft);
+//    _pTrackName->setAlignment(Gui::View::AlignCenter);
+    _pTrackName->setAlignment(Gui::View::AlignLeft);
 
     setLayout(new MediaRendererLayout);
 

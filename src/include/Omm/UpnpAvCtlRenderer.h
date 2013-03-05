@@ -70,7 +70,7 @@ public:
 
     virtual void newPosition(r8 duration, r8 position) {}
     virtual void newUri(const std::string& uri) {}
-    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass) {}
+    virtual void newTrack(const std::string& title, const std::string& artist, const std::string& album, const std::string& objectClass, const std::string& server, const std::string& uri) {}
     virtual void newVolume(const int volume) {}
     virtual void newTransportState(const std::string& transportState) {}
 

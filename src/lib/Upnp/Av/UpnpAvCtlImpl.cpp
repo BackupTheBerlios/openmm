@@ -155,6 +155,9 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 LOG(upnpav, debug, "controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTransportState(val);
+                    if (val == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED || val == Av::AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
+                        _pMediaRenderer->newPosition(0.0, 0.0);
+                    }
                 }
             }
             else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_URI) {
@@ -171,7 +174,10 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                     AbstractProperty* pArtist = object.getProperty(AvProperty::ARTIST);
                     AbstractProperty* pAlbum = object.getProperty(AvProperty::ALBUM);
                     std::string objectClass = object.getClass();
-                    _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "", objectClass);
+                    std::string uri = (object.getResource() ? object.getResource()->getUri() : "");
+                    // FIXME: getServer() doesn't work with track metadata
+                    std::string serverName = (object.getServer() ? object.getServer()->getFriendlyName() : "");
+                    _pMediaRenderer->newTrack(object.getTitle(), pArtist ? pArtist->getValue() : "", pAlbum ? pAlbum->getValue() : "", objectClass, serverName, uri);
 //                    if (object.getResource()) {
 //                        std::string protInfoString = object.getResource()->getAttributeValue(AvProperty::PROTOCOL_INFO);
 //                        std::string duration = object.getResource()->getAttributeValue(AvProperty::DURATION);
