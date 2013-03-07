@@ -47,6 +47,7 @@ _pServerGroup(0)
 #else
         setItemViewHeight(30);
 #endif
+        setDragMode(Omm::Gui::ListView::DragSource);
     }
 }
 
@@ -62,7 +63,8 @@ MediaContainerWidget::totalItemCount()
 Gui::View*
 MediaContainerWidget::createItemView()
 {
-    return new MediaObjectView;
+//    return new MediaObjectView;
+    return new MediaObjectView(0, !Av::AvClass::matchClass(_pObjectModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER));
 }
 
 
@@ -112,7 +114,8 @@ MediaContainerWidget::getItemModel(int row)
 
 
 void
-MediaContainerWidget::selectedItem(int row)
+//MediaContainerWidget::selectedItem(int row)
+MediaContainerWidget::activatedItem(int row)
 {
     LOGNS(Gui, gui, debug, "media container widget selected media object");
     MediaObjectModel* pChildObject = static_cast<MediaObjectModel*>(getItemModel(row));
@@ -262,26 +265,26 @@ MediaObjectViewPlaylistButtonController::pushed()
 }
 
 
-MediaObjectViewDestroyButtonController::MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView) :
-_pMediaObjectView(pMediaObjectView)
-{
-}
+//MediaObjectViewDestroyButtonController::MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView) :
+//_pMediaObjectView(pMediaObjectView)
+//{
+//}
+//
+//
+//void
+//MediaObjectViewDestroyButtonController::pushed()
+//{
+//    LOGNS(Gui, gui, debug, "media object destroy button pushed.");
+//    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
+//    pModel->destroyObject(pModel->getId());
+//}
 
 
-void
-MediaObjectViewDestroyButtonController::pushed()
-{
-    LOGNS(Gui, gui, debug, "media object destroy button pushed.");
-    MediaObjectModel* pModel = static_cast<MediaObjectModel*>(_pMediaObjectView->getModel());
-    pModel->destroyObject(pModel->getId());
-}
-
-
-MediaObjectView::MediaObjectView(View* pParent) :
+MediaObjectView::MediaObjectView(View* pParent, bool playlistButton) :
 ListItemView(pParent)
 {
     setName("media object view");
-    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+    if (playlistButton && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
 
         _pPlaylistButton = new Gui::Button(this);
         _pPlaylistButton->setLabel("P");
@@ -291,13 +294,13 @@ ListItemView(pParent)
         _pPlaylistButton->setSizeConstraint(20, 15, View::Pref);
         _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
 
-        _pDestroyButton = new Gui::Button(this);
-        _pDestroyButton->setLabel("D");
-    //    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
-        _pDestroyButton->setStretchFactor(-1.0);
-    //    _pDestroyButton->resize(20, 15);
-        _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
-        _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
+//        _pDestroyButton = new Gui::Button(this);
+//        _pDestroyButton->setLabel("D");
+//    //    _pDestroyButton->setBackgroundColor(Gui::Color("red"));
+//        _pDestroyButton->setStretchFactor(-1.0);
+//    //    _pDestroyButton->resize(20, 15);
+//        _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
+//        _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
     }
     else {
         setBackgroundColor(Gui::Color("black"));

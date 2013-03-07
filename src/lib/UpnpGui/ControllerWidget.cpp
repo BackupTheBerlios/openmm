@@ -53,6 +53,22 @@
 namespace Omm {
 
 
+class MediaServerGroupController : public Omm::Gui::NavigatorController
+{
+    friend class ControllerWidget;
+
+    MediaServerGroupController(ControllerWidget* pController) : _pController(pController) {}
+
+    virtual void poppedToRoot()
+    {
+        LOGNS(Gui, gui, debug, "media server group popped to root");
+        _pController->_pPlaylistEditorView->hide(false);
+    }
+
+    ControllerWidget* _pController;
+};
+
+
 class ControllerWidgetClusterController : public Omm::Gui::ClusterController
 {
     friend class ControllerWidget;
@@ -97,6 +113,7 @@ _pApplication(pApplication)
     Omm::Gui::SplitterView* pSplitterView = new Omm::Gui::SplitterView(0, Omm::Gui::View::Vertical);
     pSplitterView->setName("Media");
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
+    _pMediaServerGroupWidget->attachController(new MediaServerGroupController(this));
     registerDeviceGroup(_pMediaServerGroupWidget);
     pSplitterView->insertView(_pMediaServerGroupWidget, 0);
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {

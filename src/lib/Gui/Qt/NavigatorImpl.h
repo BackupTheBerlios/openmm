@@ -47,6 +47,7 @@ public:
     void popView(bool keepRootView);
     void popToRootView();
     View* getVisibleView();
+    int viewCount();
     void showNavigatorBar(bool show);
     void showSearchBox(bool show);
 
@@ -54,6 +55,7 @@ private:
     void removeView(View* pView);
     void exposeView(View* pView);
     void changedSearchText(const std::string& searchText);
+    void poppedToRoot();
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;

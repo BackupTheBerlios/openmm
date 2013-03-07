@@ -76,6 +76,13 @@ NavigatorView::getVisibleView()
 }
 
 
+int
+NavigatorView::viewCount()
+{
+    return static_cast<NavigatorViewImpl*>(_pImpl)->viewCount();
+}
+
+
 void
 NavigatorView::showNavigatorBar(bool show)
 {

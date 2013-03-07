@@ -55,11 +55,11 @@
     if (self = [super init]) {
         _pViewImpl = pImpl;
 
-//        UITapGestureRecognizer* pSingleFingerDTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
-//        pSingleFingerDTap.numberOfTapsRequired = 2;
-//        pSingleFingerDTap.cancelsTouchesInView = NO;
-//        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDTap];
-//        [pSingleFingerDTap release];
+        UITapGestureRecognizer* pSingleFingerDTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+        pSingleFingerDTap.numberOfTapsRequired = 2;
+        pSingleFingerDTap.cancelsTouchesInView = NO;
+        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDTap];
+        [pSingleFingerDTap release];
 
         UIPanGestureRecognizer* pSwipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
         pSwipeGesture.minimumNumberOfTouches = 2;
@@ -85,6 +85,7 @@
 - (void)handleDragGesture:(UIGestureRecognizer*)pGestureRecognizer
 {
     CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
+    bool accept;
 //    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture [" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + "]");
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         Omm::Gui::UIDrag::instance()->getPointerView()->show();
@@ -95,16 +96,16 @@
         _pViewImpl->mouseMoved(Omm::Gui::Position(position.x, position.y));
         if (pDropView != Omm::Gui::UIDrag::instance()->getDropView()) {
             Omm::Gui::UIDrag::instance()->setDropView(pDropView);
-            pDropView->getViewImpl()->dragEntered(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
+            pDropView->getViewImpl()->dragEntered(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag(), accept);
         }
         else {
-            pDropView->getViewImpl()->dragMoved(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
+            pDropView->getViewImpl()->dragMoved(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag(), accept) ;
         }
     }
     else if (pGestureRecognizer.state == UIGestureRecognizerStateEnded) {
         Omm::Gui::View* pDropView = [self getDropView:pGestureRecognizer];
         Omm::Gui::UIDrag::instance()->getPointerView()->hide();
-        pDropView->getViewImpl()->dropped(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag());
+        pDropView->getViewImpl()->dropped(Omm::Gui::Position(position.x, position.y), Omm::Gui::UIDrag::instance()->getDrag(), accept);
         Omm::Gui::UIDrag::instance()->setDrag(0);
     }
 }
@@ -540,18 +541,18 @@ ViewImpl::dragStarted()
 
 
 void
-ViewImpl::dragEntered(const Position& pos, Drag* pDrag)
+ViewImpl::dragEntered(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drag entered in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag, accept);
 }
 
 
 void
-ViewImpl::dragMoved(const Position& pos, Drag* pDrag)
+ViewImpl::dragMoved(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drag moved in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag, accept);
 }
 
 
@@ -564,10 +565,10 @@ ViewImpl::dragLeft()
 
 
 void
-ViewImpl::dropped(const Position& pos, Drag* pDrag)
+ViewImpl::dropped(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drop in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag, accept);
 }
 
 

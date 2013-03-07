@@ -44,18 +44,20 @@ class Application : public Omm::Gui::Application
 
         virtual void dragStarted()
         {
-            LOGNS(Omm::Gui, gui, debug, "drag event");
+            LOGNS(Omm::Gui, gui, debug, "drag started");
             Omm::Gui::Drag* pDrag = new Omm::Gui::Drag(_pSourceView, _pSourceView->getModel());
             pDrag->start();
         }
 
-        virtual void dragMoved(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag)
+        virtual void dragMoved(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag, bool& accept)
         {
+            accept = true;
             LOGNS(Omm::Gui, gui, debug, "drag move event [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
         }
 
-        virtual void dropped(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag)
+        virtual void dropped(const Omm::Gui::Position& pos, Omm::Gui::Drag* pDrag, bool& accept)
         {
+            accept = true;
             LOGNS(Omm::Gui, gui, debug, "drop event");
         }
 

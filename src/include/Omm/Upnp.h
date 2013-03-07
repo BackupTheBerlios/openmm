@@ -538,7 +538,7 @@ private:
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
     Poco::NotificationCenter            _notificationCenter;
-    bool                                _subscribeToEvents;
+    bool                                _featureSubscribeToEvents;
 };
 
 

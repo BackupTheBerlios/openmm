@@ -52,7 +52,8 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     // ListController interface
-    virtual void selectedItem(int row);
+//    virtual void selectedItem(int row);
+    virtual void activatedItem(int row);
 
     // NavigatorController delegate
     virtual void changedSearchText(const std::string& searchText);
@@ -65,7 +66,8 @@ private:
 class MediaServerDevice : public Av::CtlMediaServer, public Gui::ListItemModel
 {
 public:
-    MediaServerDevice(MediaServerGroupWidget* pServerGroupWidget) : _pServerGroupWidget(pServerGroupWidget) {}
+    MediaServerDevice(MediaServerGroupWidget* pServerGroupWidget) :
+    _pServerGroupWidget(pServerGroupWidget), _featureHandleUpdateIdChange(false) {}
 
     virtual void initController();
 
@@ -75,6 +77,7 @@ public:
 
 private:
     MediaServerGroupWidget*     _pServerGroupWidget;
+    bool                        _featureHandleUpdateIdChange;
 };
 
 

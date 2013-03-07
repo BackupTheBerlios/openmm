@@ -52,6 +52,7 @@ class PlaylistNotification;
 class ControllerWidget : public Controller, public Gui::ClusterView
 {
 friend class PlaylistEditor;
+friend class MediaServerGroupController;
 
 public:
     ControllerWidget(UpnpApplication* pApplication);
@@ -87,7 +88,7 @@ private:
     PlaylistEditor*             _pPlaylistEditor;
     PlaylistEditorView*         _pPlaylistEditorView;
     GuiVisual*                  _pVisual;
-    GuiSetup*                      _pSetup;
+    GuiSetup*                   _pSetup;
     MediaRendererView*          _pControlPanel;
     ActivityIndicator*          _pActivityIndicator;
     std::string                 _localRendererUuid;

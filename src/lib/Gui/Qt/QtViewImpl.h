@@ -128,8 +128,11 @@ public:
         // if dragging started not in an omm application, mime data is not of type QtMimeData and pDrag is set to 0.
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dragEntered(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag());
-            pDragEvent->acceptProposedAction();
+            bool accept = false;
+            _pViewImpl->dragEntered(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag(), accept);
+            if (accept) {
+                pDragEvent->acceptProposedAction();
+            }
         }
     }
 
@@ -138,8 +141,11 @@ public:
         LOG(gui, debug, "DRAG MOVE EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDragEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dragMoved(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag());
-            pDragEvent->acceptProposedAction();
+            bool accept = false;
+            _pViewImpl->dragMoved(Position(pDragEvent->pos().x(), pDragEvent->pos().y()), pMime->_pDragImpl->getDrag(), accept);
+            if (accept) {
+                pDragEvent->acceptProposedAction();
+            }
         }
     }
 
@@ -154,8 +160,11 @@ public:
         LOG(gui, debug, "DROP EVENT");
         const QtMimeData* pMime = dynamic_cast<const QtMimeData*>(pDropEvent->mimeData());
         if (pMime) {
-            _pViewImpl->dropped(Position(pDropEvent->pos().x(), pDropEvent->pos().y()), pMime->_pDragImpl->getDrag());
-            pDropEvent->acceptProposedAction();
+            bool accept = false;
+            _pViewImpl->dropped(Position(pDropEvent->pos().x(), pDropEvent->pos().y()), pMime->_pDragImpl->getDrag(), accept);
+            if (accept) {
+                pDropEvent->acceptProposedAction();
+            }
         }
     }
 

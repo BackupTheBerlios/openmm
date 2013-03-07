@@ -538,18 +538,18 @@ ViewImpl::dragStarted()
 
 
 void
-ViewImpl::dragEntered(const Position& pos, Drag* pDrag)
+ViewImpl::dragEntered(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drag entered in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragEntered, pos, pDrag, accept);
 }
 
 
 void
-ViewImpl::dragMoved(const Position& pos, Drag* pDrag)
+ViewImpl::dragMoved(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drag moved in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dragMoved, pos, pDrag, accept);
 }
 
 
@@ -562,10 +562,10 @@ ViewImpl::dragLeft()
 
 
 void
-ViewImpl::dropped(const Position& pos, Drag* pDrag)
+ViewImpl::dropped(const Position& pos, Drag* pDrag, bool& accept)
 {
     LOG(gui, debug, "view impl drop in view: " + _pView->getName());
-    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag);
+    IMPL_NOTIFY_CONTROLLER(Controller, dropped, pos, pDrag, accept);
 }
 
 

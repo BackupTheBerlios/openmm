@@ -75,6 +75,7 @@ private:
     ControllerWidget*                   _pControllerWidget;
     MediaObjectModel*                   _pPlaylistContainer;
     std::vector<MediaObjectModel*>      _playlistItems;
+    int                                 _dragStartedInRow;
 };
 
 

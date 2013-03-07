@@ -85,17 +85,22 @@ public:
         LOG(gui, debug, "column cluster controller drag started in source view: " + _pClusterView->getName());
     }
 
-    virtual void dragMoved(const Position& pos, Drag* pDrag)
+    virtual void dragMoved(const Position& pos, Drag* pDrag, bool& accept)
     {
         LOG(gui, debug, "column cluster controller drag moved in target view: " + _pClusterView->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+        accept = (_pColumnClusterViewImpl->getIndexFromView(pDrag->getSource()) >= 0);
     }
 
-    virtual void dropped(const Position& pos, Drag* pDrag)
+    virtual void dropped(const Position& pos, Drag* pDrag, bool& accept)
     {
         LOG(gui, debug, "column cluster controller dropped in target view: " + _pClusterView->getName()
                 + ", source view: " + pDrag->getSource()->getName() + ", source cluster: " + pDrag->getSource()->getParent()->getName()
                 + " [" + Poco::NumberFormatter::format(pos.x()) + ", " + Poco::NumberFormatter::format(pos.y()) + "]");
+        accept = (_pColumnClusterViewImpl->getIndexFromView(pDrag->getSource()) >= 0);
+        if (!accept) {
+            return;
+        }
         bool horizontal = pos.y() < _pClusterView->getHandleHeight() + _pClusterView->height() / 2;
 
         std::string label = pDrag->getSource()->getName();

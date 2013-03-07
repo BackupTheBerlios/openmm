@@ -40,6 +40,9 @@ public:
     virtual Omm::Gui::Model* getItemModel(int row);
     virtual Omm::Gui::View* createItemView();
 
+    void insertItemModel(Omm::Gui::ListItemModel* pItem, int row);
+    void removeItemModel(int row);
+
 private:
 //    std::vector<Omm::Gui::LabelModel*>    _itemModels;
     std::vector<Omm::Gui::ListItemModel*>    _itemModels;
@@ -84,6 +87,45 @@ DragListModel::getItemModel(int row)
 }
 
 
+void
+DragListModel::insertItemModel(Omm::Gui::ListItemModel* pItem, int row)
+{
+    _itemModels.insert(_itemModels.begin() + row, pItem);
+}
+
+
+void
+DragListModel::removeItemModel(int row)
+{
+    _itemModels.erase(_itemModels.begin() + row);
+}
+
+
+class DragListController : public Omm::Gui::ListController
+{
+public:
+    DragListController(DragListModel* pModel) : _pModel(pModel), _draggedStartedInRow(-1) {}
+
+    virtual void draggedItem(int row)
+    {
+//        _pModel->removeItemModel(row);
+        _draggedStartedInRow = row;
+    }
+
+    virtual void droppedItem(Omm::Gui::Model* pModel, int row)
+    {
+        if (_draggedStartedInRow != -1) {
+            _pModel->removeItemModel(_draggedStartedInRow);
+            _draggedStartedInRow = -1;
+        }
+        _pModel->insertItemModel(static_cast<Omm::Gui::ListItemModel*>(pModel), row);
+    }
+
+    DragListModel*      _pModel;
+    int                 _draggedStartedInRow;
+};
+
+
 class Application : public Omm::Gui::Application
 {
     virtual Omm::Gui::View* createMainView()
@@ -91,8 +133,9 @@ class Application : public Omm::Gui::Application
         DragListModel* pListModel = new DragListModel(20);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setName("list view");
-        pList->setModel(pListModel);
         pList->setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
+        pList->setModel(pListModel);
+        pList->attachController(new DragListController(pListModel));
         resizeMainView(800, 480);
         return pList;
     }

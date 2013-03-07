@@ -46,6 +46,7 @@ public:
 
 private:
     virtual void selected();
+    virtual void activated();
 //    virtual void dragStarted();
 
     ListView*     _pListView;
@@ -58,6 +59,14 @@ ListItemController::selected()
 {
     LOG(gui, debug, "list item controller selected row: " + Poco::NumberFormatter::format(_row));
     _pListView->selectedItem(_row, false);
+}
+
+
+void
+ListItemController::activated()
+{
+    LOG(gui, debug, "list item controller activated row: " + Poco::NumberFormatter::format(_row));
+    _pListView->activatedItem(_row, false);
 }
 
 
@@ -89,12 +98,18 @@ public:
         pDrag->start();
     }
 
-    virtual void dragEntered(const Position& pos, Drag* pDrag)
+    virtual void dragEntered(const Position& pos, Drag* pDrag, bool& accept)
     {
-        _pListView->shiftViews(_pItemView);
+//        accept = (_pListView->rowFromView(pDrag->getSource()) >= 0);
+//        accept = (typeid(*pDrag->getSource()) == typeid(*_pItemView));
+        accept = (typeid(*pDrag->getSource()->getModel()) == typeid(*_pItemView->getModel()));
+        if (accept) {
+//            _pListView->shiftViews(_pItemView);
+            _pListView->showDropLine(_pItemView);
+        }
     }
 
-    virtual void dragMoved(const Position& pos, Drag* pDrag)
+    virtual void dragMoved(const Position& pos, Drag* pDrag, bool& accept)
     {
     }
 
@@ -102,10 +117,16 @@ public:
     {
     }
 
-    virtual void dropped(const Position& pos, Drag* pDrag)
+    virtual void dropped(const Position& pos, Drag* pDrag, bool& accept)
     {
-        _pListView->dropView(pDrag->getModel(), _pItemView);
-        _pListView->syncViewImpl();
+//        accept = (_pListView->rowFromView(pDrag->getSource()) >= 0);
+//        accept = (typeid(*pDrag->getSource()) == typeid(*_pItemView));
+        accept = (typeid(*pDrag->getSource()->getModel()) == typeid(*_pItemView->getModel()));
+        if (accept) {
+            _pListView->hideDropLine();
+            _pListView->dropView(pDrag->getModel(), _pItemView);
+            _pListView->syncViewImpl();
+        }
     }
 
 
@@ -187,7 +208,8 @@ _pSelectedModel(0),
 _highlightedRow(-1),
 _pTopView(0),
 _dragMode(DragNone),
-_selectionType(selectionType)
+_selectionType(selectionType),
+_pDropLine(0)
 {
     attachController(new ListScrollAreaController(this));
 //    setBackgroundColor(Color("white"));
@@ -212,6 +234,13 @@ void
 ListView::selectRow(int row)
 {
     selectedItem(row, true);
+}
+
+
+void
+ListView::activateRow(int row)
+{
+    activatedItem(row, true);
 }
 
 
@@ -522,6 +551,14 @@ ListView::extendViewPool()
     else {
         _pSelectionView->raise(false);
     }
+    if (!_pDropLine) {
+        _pDropLine = new View(getAreaView());
+        _pDropLine->setBackgroundColor(Color(100, 100, 100, 150));
+        _pDropLine->hide(false);
+    }
+    else {
+        _pDropLine->raise(false);
+    }
 }
 
 
@@ -679,6 +716,9 @@ ListView::setItemViewWidth(int width)
     if (_pSelectionView) {
         _pSelectionView->resize(width, getItemViewHeight());
     }
+    if (_pDropLine) {
+        _pDropLine->resize(width, 1);
+    }
     for (std::vector<View*>::iterator it = _viewPool.begin(); it != _viewPool.end(); ++it) {
         (*it)->setWidth(width);
     }
@@ -696,6 +736,20 @@ ListView::selectedItem(int row, bool async)
 
     highlightItem(row, async);
     NOTIFY_CONTROLLER(ListController, selectedItem, row);
+}
+
+
+void
+ListView::activatedItem(int row, bool async)
+{
+    LOG(gui, debug, "list view activated item: " + Poco::NumberFormatter::format(row));
+
+//    if (row < _rowOffset || row > lastVisibleRow()) {
+//        return;
+//    }
+
+    highlightItem(row, async);
+    NOTIFY_CONTROLLER(ListController, activatedItem, row);
 }
 
 
@@ -786,6 +840,25 @@ ListView::shiftViews(View* pFirstView, int pixel)
     else if (index >= _visibleViews.size() - _bottomRows - 1) {
         scrollOneRow(1);
         scrollContentsTo(0, (_rowOffset + 1) * _itemViewHeight);
+    }
+}
+
+
+void
+ListView::showDropLine(View* pView)
+{
+    if (_pDropLine) {
+        _pDropLine->move(0, pView->posY() + _itemViewHeight);
+        _pDropLine->show(false);
+    }
+}
+
+
+void
+ListView::hideDropLine()
+{
+    if (_pDropLine) {
+        _pDropLine->hide(false);
     }
 }
 

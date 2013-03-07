@@ -62,7 +62,8 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     // ListController interface
-    virtual void selectedItem(int row);
+//    virtual void selectedItem(int row);
+    virtual void activatedItem(int row);
 
     void createPlaylist(const std::string& playlistName);
 
@@ -127,27 +128,27 @@ private:
 };
 
 
-class MediaObjectViewDestroyButtonController : public Gui::ButtonController
-{
-public:
-    MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView);
-
-private:
-    // ButtonController interface
-    virtual void pushed();
-
-    MediaObjectView*    _pMediaObjectView;
-};
+//class MediaObjectViewDestroyButtonController : public Gui::ButtonController
+//{
+//public:
+//    MediaObjectViewDestroyButtonController(MediaObjectView* pMediaObjectView);
+//
+//private:
+//    // ButtonController interface
+//    virtual void pushed();
+//
+//    MediaObjectView*    _pMediaObjectView;
+//};
 
 
 class MediaObjectView : public Gui::ListItemView
 {
 public:
-    MediaObjectView(View* pParent = 0);
+    MediaObjectView(View* pParent = 0, bool playlistButton = true);
 
 private:
     Gui::Button*         _pPlaylistButton;
-    Gui::Button*         _pDestroyButton;
+//    Gui::Button*         _pDestroyButton;
 };
 
 

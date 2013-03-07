@@ -83,7 +83,8 @@ MediaServerGroupWidget::getItemModel(int row)
 
 
 void
-MediaServerGroupWidget::selectedItem(int row)
+//MediaServerGroupWidget::selectedItem(int row)
+MediaServerGroupWidget::activatedItem(int row)
 {
     LOGNS(Gui, gui, debug, "media server group widget selected device");
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));
@@ -180,6 +181,9 @@ MediaServerDevice::newSystemUpdateId(ui4 id)
 {
     LOGNS(Gui, gui, debug, "media server device \"" + getFriendlyName() + "\" new system update id: " + Poco::NumberFormatter::format(id));
 
+    if (!_featureHandleUpdateIdChange) {
+        return;
+    }
     // FIXME: crashes / timeouts when updating system id on device discovery in controller
     // FIXME: avoid handling system update id when device is discovered
 

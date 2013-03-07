@@ -101,7 +101,8 @@ class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
     friend class VolSeekSlider;
 
 public:
-    MediaRendererDevice(ControllerWidget* pControllerWidget) : _transportState(""), _duration(0), _pControllerWidget(pControllerWidget) {}
+    MediaRendererDevice(ControllerWidget* pControllerWidget) :
+    _transportState(""), _featurePollPosition(false), _featureTrackInfoFromConnection(false), _duration(0), _pControllerWidget(pControllerWidget) {}
 
     std::string getTransportState();
 
@@ -117,7 +118,9 @@ private:
     std::string formatDuration(r8 duration);
 
     std::string         _transportState;
-    int                 _duration;
+    bool                _featurePollPosition;
+    bool                _featureTrackInfoFromConnection;
+    r8                  _duration;
     Gui::LabelModel     _rendererName;
     Gui::LabelModel     _trackName;
     Gui::LabelModel     _positionLabel;

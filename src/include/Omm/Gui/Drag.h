@@ -44,9 +44,9 @@ public:
     Model* getModel();
 
 private:
-    DragImpl*  _pImpl;
-    View*      _pSource;
-    Model*     _pModel;
+    DragImpl*   _pImpl;
+    View*       _pSource;
+    Model*      _pModel;
 };
 
 

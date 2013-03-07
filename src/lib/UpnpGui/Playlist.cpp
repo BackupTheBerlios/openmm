@@ -38,7 +38,8 @@ namespace Omm {
 
 PlaylistEditor::PlaylistEditor(ControllerWidget* pControllerWidget) :
 _pControllerWidget(pControllerWidget),
-_pPlaylistContainer(0)
+_pPlaylistContainer(0),
+_dragStartedInRow(-1)
 {
     Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<PlaylistEditor,
             PlaylistNotification>(*this, &PlaylistEditor::playlistNotification));
@@ -82,14 +83,17 @@ PlaylistEditor::getItemModel(int row)
 void
 PlaylistEditor::draggedItem(int row)
 {
-    _playlistItems.erase(_playlistItems.begin() + row);
-    writePlaylistResource();
+    _dragStartedInRow = row;
 }
 
 
 void
 PlaylistEditor::droppedItem(Gui::Model* pModel, int row)
 {
+    if (_dragStartedInRow != -1) {
+        _playlistItems.erase(_playlistItems.begin() + _dragStartedInRow);
+        _dragStartedInRow = -1;
+    }
     _playlistItems.insert(_playlistItems.begin() + row, static_cast<MediaObjectModel*>(pModel));
     writePlaylistResource();
 }
@@ -249,7 +253,7 @@ PlaylistEditorObjectView::PlaylistEditorObjectView(PlaylistEditor* pPlaylistEdit
 _pPlaylistEditor(pPlaylistEditor)
 {
     _pDeleteButton = new Gui::Button(this);
-    _pDeleteButton->setLabel("D");
+    _pDeleteButton->setLabel("X");
     _pDeleteButton->setBackgroundColor(Gui::Color("blue"));
     _pDeleteButton->setStretchFactor(-1.0);
     _pDeleteButton->resize(20, 15);

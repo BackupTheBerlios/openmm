@@ -71,10 +71,10 @@ public:
     void activated();
     void mouseMoved(const Position& pos);
     void dragStarted();
-    void dragEntered(const Position& pos, Drag* pDrag);
-    void dragMoved(const Position& pos, Drag* pDrag);
+    void dragEntered(const Position& pos, Drag* pDrag, bool& accept);
+    void dragMoved(const Position& pos, Drag* pDrag, bool& accept);
     void dragLeft();
-    void dropped(const Position& pos, Drag* pDrag);
+    void dropped(const Position& pos, Drag* pDrag, bool& accept);
 
     View*                       _pView;
 protected:

@@ -68,13 +68,13 @@ Log::Log()
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -3461,8 +3461,8 @@ _pDeviceContainer(0),
 _pDeviceData(0),
 _pDevDeviceCode(0),
 _pCtlDeviceCode(0),
-_subscribeToEvents(true)
-//_subscribeToEvents(false)
+//_featureSubscribeToEvents(true)
+_featureSubscribeToEvents(false)
 {
 }
 
@@ -3515,7 +3515,7 @@ Device::initStateVars()
 void
 Device::controllerSubscribeEventing()
 {
-    if (!_subscribeToEvents) {
+    if (!_featureSubscribeToEvents) {
         return;
     }
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
@@ -3537,7 +3537,7 @@ Device::controllerSubscribeEventing()
 void
 Device::controllerUnsubscribeEventing()
 {
-    if (!_subscribeToEvents) {
+    if (!_featureSubscribeToEvents) {
         return;
     }
     for(ServiceIterator s = beginService(); s != endService(); ++s) {

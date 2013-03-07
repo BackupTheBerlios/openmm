@@ -103,6 +103,9 @@ MediaRendererDevice::newUri(const std::string& uri)
 {
     // set track name for tracks in a playlist (only uri of current track is known, nothing else)
     // connection via connection manager must be available
+    if (!_featureTrackInfoFromConnection) {
+        return;
+    }
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
     Av::Connection* pConnection = getConnectionManager()->getConnection(0);
     if (pConnection) {
@@ -129,7 +132,7 @@ MediaRendererDevice::newTrack(const std::string& title, const std::string& artis
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new track: " + title + ", " + artist + ", " + album + ", " + objectClass + ", " + server + ", " + uri);
 
     // set track name, when metadata of track is available for renderer
-    if (!Av::AvClass::matchClass(objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+    if (!_featureTrackInfoFromConnection || !Av::AvClass::matchClass(objectClass, Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
         _trackName.setLabel((server.size() ? server + ": " : "") + (artist == "" ? title : artist + " - " + title));
         syncViews();
     //    Poco::NotificationCenter::defaultCenter().postNotification(new TrackNotification(getUuid(), title, artist, album, objectClass));
@@ -143,7 +146,7 @@ MediaRendererDevice::newPosition(r8 duration, r8 position)
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new position: " + Poco::NumberFormatter::format(position, 1) + ", duration: " + Poco::NumberFormatter::format(duration, 1));
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" position slider: " + Poco::NumberFormatter::format(((r8)position / duration) * 100.0));
     _duration = duration;
-    if (duration == 0) {
+    if (duration == 0.0) {
         _position.setValue(0);
     }
     else {
@@ -170,8 +173,9 @@ MediaRendererDevice::newTransportState(const std::string& transportState)
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new transport state: " + transportState);
     _transportState = transportState;
     syncViews();
-    // TODO: deactivated position timer for now, should fix it.
-    startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
+    if (_featurePollPosition) {
+        startPositionTimer(transportState == Av::AvTransportArgument::TRANSPORT_STATE_PLAYING);
+    }
     Poco::NotificationCenter::defaultCenter().postNotification(new TransportStateNotification(getUuid(), transportState));
     // FIXME: from "new transport state STOPPED" to UPNP.CONTROL action response sent (StopResponse) it takes nearly one
     // second, sometimes.

@@ -109,6 +109,9 @@ QtNavigatorPanel::pop(View* pView)
     if (!_buttonStack.empty()) {
         _pNavigatorView->exposeView(pView);
     }
+    if (_buttonStack.size() <= 1) {
+        _pNavigatorView->poppedToRoot();
+    }
 }
 
 
@@ -127,6 +130,9 @@ QtNavigatorPanel::popSlot()
     if (!_buttonStack.empty()) {
         _pNavigatorView->exposeView(_buttonStack.top()->_pView);
     }
+    if (_buttonStack.size() <= 1) {
+        _pNavigatorView->poppedToRoot();
+    }
 }
 
 
@@ -136,6 +142,7 @@ QtNavigatorPanel::popToRootSlot()
     while (_buttonStack.size() > 1) {
         popSlot();
     }
+    _pNavigatorView->poppedToRoot();
 }
 
 
@@ -231,6 +238,13 @@ NavigatorViewImpl::getVisibleView()
 }
 
 
+int
+NavigatorViewImpl::viewCount()
+{
+    return _pNavigatorPanel->buttonCount();
+}
+
+
 void
 NavigatorViewImpl::showNavigatorBar(bool show)
 {
@@ -268,6 +282,13 @@ NavigatorViewImpl::changedSearchText(const std::string& searchText)
     IMPL_NOTIFY_CONTROLLER(NavigatorController, changedSearchText, searchText);
 }
 
+
+void
+NavigatorViewImpl::poppedToRoot()
+{
+    LOG(gui, debug, "navigator popped to root");
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, poppedToRoot);
+}
 
 } // namespace Gui
 } // namespace Omm

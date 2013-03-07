@@ -70,10 +70,10 @@ public:
     virtual void mouseHovered(const Position& pos) {}
     virtual void mouseMoved(const Position& pos) {}
     virtual void dragStarted() {}
-    virtual void dragEntered(const Position& pos, Drag* pDrag) {}
-    virtual void dragMoved(const Position& pos, Drag* pDrag) {}
+    virtual void dragEntered(const Position& pos, Drag* pDrag, bool& accept) {}
+    virtual void dragMoved(const Position& pos, Drag* pDrag, bool& accept) {}
     virtual void dragLeft() {}
-    virtual void dropped(const Position& pos, Drag* pDrag) {}
+    virtual void dropped(const Position& pos, Drag* pDrag, bool& accept) {}
     virtual void removedSubview(View* pView) {}
     virtual void addedSubview(View* pView) {}
 

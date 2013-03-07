@@ -31,10 +31,12 @@ namespace Gui {
 
 class NavigatorController : public Controller
 {
+    friend class NavigatorView;
     friend class NavigatorViewImpl;
 
 protected:
     virtual void changedSearchText(const std::string& searchText) {}
+    virtual void poppedToRoot() {}
 };
 
 
@@ -50,6 +52,7 @@ public:
     void pop(bool keepRootView = true);
     void popToRoot();
     View* getVisibleView();
+    int viewCount();
     void showNavigatorBar(bool show = true);
     void showSearchBox(bool show = true);
 };

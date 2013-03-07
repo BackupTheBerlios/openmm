@@ -44,6 +44,7 @@ class ListController : public Controller
 
 protected:
     virtual void selectedItem(int row) {}
+    virtual void activatedItem(int row) {}
     virtual void draggedItem(int row) {}
     virtual void droppedItem(Model* pModel, int row) {}
 };
@@ -67,6 +68,7 @@ public:
     void setItemViewWidth(int width);
     void setItemViewHeight(int height);
     void selectRow(int row);
+    void activateRow(int row);
 
     void resetListView();
     void addTopView(View* pView);
@@ -115,6 +117,7 @@ protected:
     SelectionView*                      _pSelectionView;
     Model*                              _pSelectedModel;
     int                                 _highlightedRow;
+    View*                               _pDropLine;
 
     View*                               _pTopView;
     int                                 _dragMode;
@@ -123,12 +126,15 @@ protected:
 private:
     // item selection
     void selectedItem(int row, bool async);
+    void activatedItem(int row, bool async);
     void highlightItem(int row, bool async);
     void selectHighlightedItem();
 
     // drag'n drop support
     void dragView(View* pView);
     void shiftViews(View* pFirstView, int pixel = 10);
+    void showDropLine(View* pView);
+    void hideDropLine();
     void dropView(Model* pSourceModel, View* pTarget);
 
     std::map<View*, ListItemController*>    _itemControllers;
