@@ -83,8 +83,11 @@ MediaServerGroupWidget::getItemModel(int row)
 
 
 void
-//MediaServerGroupWidget::selectedItem(int row)
+#ifdef __IPHONE__
+MediaServerGroupWidget::selectedItem(int row)
+#else
 MediaServerGroupWidget::activatedItem(int row)
+#endif
 {
     LOGNS(Gui, gui, debug, "media server group widget selected device");
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));

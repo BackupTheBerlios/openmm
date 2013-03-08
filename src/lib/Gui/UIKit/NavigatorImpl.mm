@@ -28,7 +28,7 @@
 #include "Gui/GuiLogger.h"
 
 
-@interface OmmNavigationController : UINavigationController<UISearchBarDelegate, UINavigationControllerDelegate>
+@interface OmmNavigationController : UINavigationController<UISearchBarDelegate, UINavigationControllerDelegate, UINavigationBarDelegate>
 {
     Omm::Gui::NavigatorViewImpl* _pNavigatorViewImpl;
 }
@@ -66,13 +66,26 @@
 - (void)popView
 {
     [self popViewControllerAnimated:YES];
+    if ([self.viewControllers count] <= 1) {
+        _pNavigatorViewImpl->poppedToRoot();
+    }
 }
 
 
 - (void)popToRootView
 {
     [self popToRootViewControllerAnimated:YES];
+    _pNavigatorViewImpl->poppedToRoot();
 }
+
+
+- (void)navigationBar:(UINavigationBar *)navigationBar didPopItem:(UINavigationItem*)item
+{
+    if ([self.viewControllers count] <= 1) {
+        _pNavigatorViewImpl->poppedToRoot();
+    }
+}
+
 
 @end
 
@@ -139,6 +152,13 @@ NavigatorViewImpl::getVisibleView()
 }
 
 
+int
+NavigatorViewImpl::viewCount()
+{
+    return _viewStack.size();
+}
+
+
 void
 NavigatorViewImpl::showNavigatorBar(bool show)
 {
@@ -196,6 +216,14 @@ NavigatorViewImpl::removeViewsUpto(void* pViewController)
         _viewStack.pop();
         LOG(gui, debug, "navigator impl view stack pop view, stack size: " + Poco::NumberFormatter::format(_viewStack.size()));
     }
+}
+
+
+void
+NavigatorViewImpl::poppedToRoot()
+{
+    LOG(gui, debug, "navigator popped to root");
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, poppedToRoot);
 }
 
 

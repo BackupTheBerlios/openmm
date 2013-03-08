@@ -94,8 +94,28 @@ PlaylistEditor::droppedItem(Gui::Model* pModel, int row)
         _playlistItems.erase(_playlistItems.begin() + _dragStartedInRow);
         _dragStartedInRow = -1;
     }
-    _playlistItems.insert(_playlistItems.begin() + row, static_cast<MediaObjectModel*>(pModel));
-    writePlaylistResource();
+    MediaObjectModel* pMediaObjectModel = dynamic_cast<MediaObjectModel*>(pModel);
+    if (pMediaObjectModel) {
+            if (pMediaObjectModel->isContainer()) {
+                if (Av::AvClass::matchClass(pMediaObjectModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
+                    if (pMediaObjectModel->getResource() && pMediaObjectModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
+                        LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pMediaObjectModel->getTitle());
+                        setPlaylistContainer(pMediaObjectModel);
+                        Av::AbstractMediaObject* pObject = pMediaObjectModel->getChildForRow(0);
+                        LOGNS(Gui, gui, debug, "media object playlist button pushed, container with count children: " + Poco::NumberFormatter::format(pMediaObjectModel->getChildCount()));
+                        _playlistItems.clear();
+                        for (int r = 0; r < pMediaObjectModel->getChildCount(); r++) {
+                            LOGNS(Gui, gui, debug, "title: " + pMediaObjectModel->getChildForRow(r)->getTitle());
+                            _playlistItems.push_back(new MediaObjectModel(*static_cast<MediaObjectModel*>(pMediaObjectModel->getChildForRow(r))));
+                        }
+                    }
+                }
+        }
+        else if (_pPlaylistContainer) {
+            _playlistItems.insert(_playlistItems.begin() + row, new MediaObjectModel(*pMediaObjectModel));
+            writePlaylistResource();
+        }
+    }
 }
 
 

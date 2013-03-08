@@ -114,8 +114,11 @@ MediaContainerWidget::getItemModel(int row)
 
 
 void
-//MediaContainerWidget::selectedItem(int row)
+#ifdef __IPHONE__
+MediaContainerWidget::selectedItem(int row)
+#else
 MediaContainerWidget::activatedItem(int row)
+#endif
 {
     LOGNS(Gui, gui, debug, "media container widget selected media object");
     MediaObjectModel* pChildObject = static_cast<MediaObjectModel*>(getItemModel(row));

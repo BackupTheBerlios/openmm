@@ -40,10 +40,12 @@ public:
     void popView(bool keepRootView);
     void popToRootView();
     View* getVisibleView();
+    int viewCount();
     void showNavigatorBar(bool show);
     void showSearchBox(bool show = true);
 
     void textEdited(const std::string& searchText);
+    void poppedToRoot();
     void removeViewsUpto(void* pViewController);
 
 private:

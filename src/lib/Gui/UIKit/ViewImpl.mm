@@ -55,11 +55,15 @@
     if (self = [super init]) {
         _pViewImpl = pImpl;
 
-        UITapGestureRecognizer* pSingleFingerDTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
-        pSingleFingerDTap.numberOfTapsRequired = 2;
-        pSingleFingerDTap.cancelsTouchesInView = NO;
-        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDTap];
-        [pSingleFingerDTap release];
+        UITapGestureRecognizer* pSingleFingerDoubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+        pSingleFingerDoubleTap.numberOfTapsRequired = 2;
+        pSingleFingerDoubleTap.cancelsTouchesInView = NO;
+        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pSingleFingerDoubleTap];
+        [pSingleFingerDoubleTap release];
+
+        UILongPressGestureRecognizer* pLongPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
+        [static_cast<UIView*>(_pViewImpl->getNativeView()) addGestureRecognizer:pLongPressGesture];
+        [pLongPressGesture release];
 
         UIPanGestureRecognizer* pSwipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
         pSwipeGesture.minimumNumberOfTouches = 2;
@@ -75,7 +79,7 @@
 {
     UIView* pMainView = static_cast<UIView*>(Omm::Gui::UIDrag::instance()->getMainView()->getNativeView());
     CGPoint position = [pGestureRecognizer locationInView:pMainView];
-//    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag in point: (" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + ")");
+    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag in point: (" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + ")");
     Omm::Gui::UIDrag::instance()->getPointerView()->move(position.x - 70, position.y - 25);
     UIView* pNativeDropView = [pMainView hitTest:position withEvent:nil];
     return Omm::Gui::ViewRegistry::instance()->getViewForNative(pNativeDropView);
@@ -86,7 +90,7 @@
 {
     CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
     bool accept;
-//    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture [" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + "]");
+    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture [" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + "]");
     if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         Omm::Gui::UIDrag::instance()->getPointerView()->show();
         _pViewImpl->dragStarted();

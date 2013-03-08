@@ -52,8 +52,11 @@ public:
     virtual Gui::Model* getItemModel(int row);
 
     // ListController interface
-//    virtual void selectedItem(int row);
+#ifdef __IPHONE__
+    virtual void selectedItem(int row);
+#else
     virtual void activatedItem(int row);
+#endif
 
     // NavigatorController delegate
     virtual void changedSearchText(const std::string& searchText);
