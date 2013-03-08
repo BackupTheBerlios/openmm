@@ -63,6 +63,7 @@ private slots:
     void popToRootSlot();
     void buttonPushed();
     void textEdited(const QString& text);
+    void editingFinished();
     long unsigned int buttonCount();
     View* topView();
 

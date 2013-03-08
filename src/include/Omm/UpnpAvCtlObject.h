@@ -61,7 +61,7 @@ public:
     virtual void setId(const std::string& id);
     void setSearch(const std::string& searchText);
 
-    int fetchChildren();
+    int fetchChildren(ui4 count = 25);
     bool fetchedAllChildren();
     AbstractMediaObject* getParent();
 

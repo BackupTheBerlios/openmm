@@ -62,10 +62,9 @@ CtlMediaObject::createChildObject()
 
 
 int
-CtlMediaObject::fetchChildren()
+CtlMediaObject::fetchChildren(ui4 count)
 {
     std::string objectId = getId();
-    ui4 count = 10;
     ui4 offset = getFetchedChildCount();
     LOG(upnpav, debug, "controller media object fetch children of object with id: " + objectId\
                                     + ", number of requested children: " + Poco::NumberFormatter::format(count)\

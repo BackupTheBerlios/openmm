@@ -523,7 +523,7 @@ public:
 class AbstractMediaObjectCache
 {
 public:
-    AbstractMediaObjectCache(ui4 maxCacheSize = 100);
+    AbstractMediaObjectCache(ui4 maxCacheSize = 500);
 
 //    virtual ui4 getTotalCount() { return 0; }
     virtual void clear() {}
@@ -546,7 +546,7 @@ class BlockCache : public AbstractMediaObjectCache
 /// cache, if they are all accessed via getMediaObject().
 {
 public:
-    BlockCache(ui4 blockSize = 10);
+    BlockCache(ui4 blockSize = 25);
 
     virtual AbstractMediaObject* getMediaObjectForRow(ui4 row);
     virtual void erase(std::vector<AbstractMediaObject*>::iterator begin, std::vector<AbstractMediaObject*>::iterator end);

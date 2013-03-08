@@ -64,11 +64,21 @@ QWidget(pNavigatorView->getNativeView()),
 _pNavigatorView(pNavigatorView)
 {
     _pPanelLayout = new QHBoxLayout(this);
+    _pPanelLayout->setAlignment(Qt::AlignLeft);
+    _pPanelLayout->setSpacing(0);
+    _pPanelLayout->setMargin(0);
+    _pPanelLayout->setContentsMargins(0, 0, 0, 0);
+
     _pButtonWidget = new QWidget(this);
     _pPanelLayout->addWidget(_pButtonWidget);
+
+    _pPanelLayout->addStretch();
+
     _pSearchWidget = new QLineEdit(this);
     _pPanelLayout->addWidget(_pSearchWidget);
     _pSearchWidget->setHidden(true);
+    _pSearchWidget->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+
     _pButtonLayout = new QHBoxLayout(_pButtonWidget);
     _pButtonLayout->setAlignment(Qt::AlignLeft);
     _pButtonLayout->setSpacing(0);
@@ -79,7 +89,8 @@ _pNavigatorView(pNavigatorView)
 
     connect(this, SIGNAL(popSignal()), this, SLOT(popSlot()));
     connect(this, SIGNAL(popToRootSignal()), this, SLOT(popToRootSlot()));
-    connect(_pSearchWidget, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
+//    connect(_pSearchWidget, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
+    connect(_pSearchWidget, SIGNAL(editingFinished()), this, SLOT(editingFinished()));
 }
 
 
@@ -162,6 +173,14 @@ QtNavigatorPanel::textEdited(const QString& text)
 }
 
 
+void
+QtNavigatorPanel::editingFinished()
+{
+    LOG(gui, debug, "search text changed: " + _pSearchWidget->text().toStdString());
+    _pNavigatorView->changedSearchText(_pSearchWidget->text().toStdString());
+}
+
+
 long unsigned int
 QtNavigatorPanel::buttonCount()
 {
@@ -190,6 +209,8 @@ NavigatorViewImpl::NavigatorViewImpl(View* pView)
     _pStackedWidget = new QStackedWidget(pNativeView);
     _pNavigatorLayout = new QVBoxLayout(pNativeView);
     _pNavigatorLayout->setContentsMargins(0, 0, 0, 0);
+    _pNavigatorLayout->setSpacing(0);
+    _pNavigatorLayout->setMargin(0);
     _pNavigatorLayout->addWidget(_pNavigatorPanel);
     _pNavigatorLayout->addWidget(_pStackedWidget);
 }
