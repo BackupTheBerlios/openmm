@@ -97,5 +97,12 @@ NavigatorView::showSearchBox(bool show)
 }
 
 
+void
+NavigatorView::clearSearchText()
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->clearSearchText();
+}
+
+
 } // namespace Gui
 } // namespace Omm

@@ -43,6 +43,7 @@ public:
     int viewCount();
     void showNavigatorBar(bool show);
     void showSearchBox(bool show = true);
+    void clearSearchText();
 
     void textEdited(const std::string& searchText);
     void poppedToRoot();

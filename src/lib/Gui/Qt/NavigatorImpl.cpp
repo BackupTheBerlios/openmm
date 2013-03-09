@@ -21,6 +21,7 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
+#include <qt4/QtGui/qlineedit.h>
 
 #include "NavigatorImpl.h"
 #include "QtNavigatorPanel.h"
@@ -277,6 +278,13 @@ void
 NavigatorViewImpl::showSearchBox(bool show)
 {
     _pNavigatorPanel->_pSearchWidget->setHidden(!show);
+}
+
+
+void
+NavigatorViewImpl::clearSearchText()
+{
+    _pNavigatorPanel->_pSearchWidget->setText("");
 }
 
 

@@ -50,6 +50,7 @@ public:
     int viewCount();
     void showNavigatorBar(bool show);
     void showSearchBox(bool show);
+    void clearSearchText();
 
 private:
     void removeView(View* pView);

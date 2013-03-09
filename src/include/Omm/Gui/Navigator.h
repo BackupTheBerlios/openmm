@@ -55,6 +55,7 @@ public:
     int viewCount();
     void showNavigatorBar(bool show = true);
     void showSearchBox(bool show = true);
+    void clearSearchText();
 };
 
 

@@ -67,6 +67,7 @@ class MediaServerGroupController : public Omm::Gui::NavigatorController
         }
         if (_pController->_pMediaServerGroupWidget) {
             _pController->_pMediaServerGroupWidget->showSearchBox(false);
+            _pController->_pMediaServerGroupWidget->clearSearchText();
         }
     }
 

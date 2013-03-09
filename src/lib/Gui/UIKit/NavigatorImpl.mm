@@ -202,6 +202,12 @@ NavigatorViewImpl::showSearchBox(bool show)
 
 
 void
+NavigatorViewImpl::clearSearchText()
+{
+}
+
+
+void
 NavigatorViewImpl::textEdited(const std::string& searchText)
 {
     LOG(gui, debug, "search text changed: " + searchText);
