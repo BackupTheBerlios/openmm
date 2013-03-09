@@ -62,7 +62,12 @@ class MediaServerGroupController : public Omm::Gui::NavigatorController
     virtual void poppedToRoot()
     {
         LOGNS(Gui, gui, debug, "media server group popped to root");
-        _pController->_pPlaylistEditorView->hide(false);
+        if (_pController->_pPlaylistEditorView) {
+            _pController->_pPlaylistEditorView->hide(false);
+        }
+        if (_pController->_pMediaServerGroupWidget) {
+            _pController->_pMediaServerGroupWidget->showSearchBox(false);
+        }
     }
 
     ControllerWidget* _pController;

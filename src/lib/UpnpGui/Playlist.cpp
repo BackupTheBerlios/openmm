@@ -274,7 +274,6 @@ _pPlaylistEditor(pPlaylistEditor)
 {
     _pDeleteButton = new Gui::Button(this);
     _pDeleteButton->setLabel("X");
-    _pDeleteButton->setBackgroundColor(Gui::Color("blue"));
     _pDeleteButton->setStretchFactor(-1.0);
     _pDeleteButton->resize(20, 15);
     _pDeleteButton->attachController(new PlaylistEditorDeleteObjectController(this));

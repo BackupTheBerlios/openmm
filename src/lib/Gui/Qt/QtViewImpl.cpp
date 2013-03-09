@@ -27,7 +27,6 @@ namespace Omm {
 namespace Gui {
 
 
-
 SignalProxy::SignalProxy(ViewImpl* pViewImpl):
  _pViewImpl(pViewImpl)
 {

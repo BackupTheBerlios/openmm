@@ -129,6 +129,7 @@ private:
     void activatedItem(int row, bool async);
     void highlightItem(int row, bool async);
     void selectHighlightedItem();
+    void activateHighlightedItem();
 
     // drag'n drop support
     void dragView(View* pView);

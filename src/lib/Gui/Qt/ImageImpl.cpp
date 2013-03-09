@@ -23,6 +23,7 @@
 #include <Poco/NumberFormatter.h>
 
 #include "ImageImpl.h"
+#include "QtImageImpl.h"
 #include "Gui/Image.h"
 #include "Gui/GuiLogger.h"
 
@@ -30,18 +31,57 @@ namespace Omm {
 namespace Gui {
 
 
+ImageModelSignalProxy::ImageModelSignalProxy(ImageModelImpl* pModelImpl) :
+_pModelImpl(pModelImpl)
+{
+    connect(this, SIGNAL(loadDataSignal()), this, SLOT(loadDataSlot()));
+}
+
+
+void
+ImageModelSignalProxy::loadData()
+{
+    emit loadDataSignal();
+}
+
+
+void
+ImageModelSignalProxy::loadDataSlot()
+{
+    LOG(gui, debug, "Image model load data slot");
+
+    QPixmap* pImage = new QPixmap;
+    pImage->loadFromData((const uchar*)_pModelImpl->_pData->data(), _pModelImpl->_pData->size(), 0);
+    _pModelImpl->_pNativeModel = pImage;
+}
+
+
 ImageModelImpl::ImageModelImpl(Model* pModel) :
 ModelImpl(pModel)
 {
+    _pSignalProxy = new ImageModelSignalProxy(this);
+    // move image data model signal proxy object to main thread
+    // in Qt, each object's slots are processed in the thread the object is created
+    // other signal proxies are created when the view is created (always the main thread), so no problem there
+    _pSignalProxy->moveToThread(QApplication::instance()->thread());
+}
+
+
+ImageModelImpl::~ImageModelImpl()
+{
+    delete _pSignalProxy;
 }
 
 
 void
 ImageModelImpl::setData(const std::string& data)
 {
-    QPixmap* pImage = new QPixmap;
-    pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
-    _pNativeModel = pImage;
+    _pData = &data;
+    _pSignalProxy->loadData();
+
+//    QPixmap* pImage = new QPixmap;
+//    pImage->loadFromData((const uchar*)data.data(), data.size(), 0);
+//    _pNativeModel = pImage;
 }
 
 

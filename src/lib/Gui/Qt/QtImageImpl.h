@@ -1,7 +1,7 @@
 /***************************************************************************|
 |  OMM - Open Multimedia                                                    |
 |                                                                           |
-|  Copyright (C) 2011                                                       |
+|  Copyright (C) 2013                                                       |
 |  Jörg Bakker (jb'at'open-multimedia.org)                                  |
 |                                                                           |
 |  This file is part of OMM.                                                |
@@ -19,48 +19,35 @@
 |  along with this program.  If not, see <http://www.gnu.org/licenses/>.    |
  ***************************************************************************/
 
-#ifndef ImageImpl_INCLUDED
-#define ImageImpl_INCLUDED
+#ifndef QtImageImpl_INCLUDED
+#define QtImageImpl_INCLUDED
 
-#include "ViewImpl.h"
-#include "ModelImpl.h"
-
+#include <QObject>
 
 namespace Omm {
 namespace Gui {
 
-class View;
-class ImageModelSignalProxy;
+class ImageModelImpl;
 
-
-class ImageModelImpl : public ModelImpl
+class ImageModelSignalProxy : public QObject
 {
-    friend class ImageModelSignalProxy;
+    Q_OBJECT
+
+    friend class ImageModelImpl;
 
 public:
-    ImageModelImpl(Model* pModel);
-    virtual ~ImageModelImpl();
+    ImageModelSignalProxy(ImageModelImpl* pModelImpl);
 
-    void setData(const std::string& data);
+    void loadData();
 
-private:
-    const std::string*      _pData;
-    ImageModelSignalProxy*  _pSignalProxy;
-};
+signals:
+    void loadDataSignal();
 
-
-class ImageViewImpl : public ViewImpl
-{
-    friend class ImageView;
-    friend class ButtonViewImpl;
+private slots:
+    void loadDataSlot();
 
 private:
-    ImageViewImpl(View* pView);
-    ~ImageViewImpl();
-
-    void syncViewImpl();
-    void setAlignment(View::Alignment alignment);
-    void scaleBestFit(int width, int height);
+    ImageModelImpl* _pModelImpl;
 };
 
 
@@ -68,4 +55,3 @@ private:
 }  // namespace Gui
 
 #endif
-

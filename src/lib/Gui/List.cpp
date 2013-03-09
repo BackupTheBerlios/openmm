@@ -187,7 +187,8 @@ ListScrollAreaController::keyPressed(KeyCode key)
             _pListView->highlightItem(_pListView->_highlightedRow + 1, false);
             break;
         case Controller::KeyReturn:
-            _pListView->selectHighlightedItem();
+//            _pListView->selectHighlightedItem();
+            _pListView->activateHighlightedItem();
             break;
     }
 }
@@ -798,6 +799,15 @@ ListView::selectHighlightedItem()
 {
     if (_highlightedRow >= 0) {
         NOTIFY_CONTROLLER(ListController, selectedItem, _highlightedRow);
+    }
+}
+
+
+void
+ListView::activateHighlightedItem()
+{
+    if (_highlightedRow >= 0) {
+        NOTIFY_CONTROLLER(ListController, activatedItem, _highlightedRow);
     }
 }
 

@@ -46,6 +46,7 @@ QtScrollAreaImpl.h
 QtNavigatorPanel.h
 QtSliderImpl.h
 QtTextLineImpl.h
+QtImageImpl.h
 QtSelectorImpl.h
 QtSwitchImpl.h
 )
