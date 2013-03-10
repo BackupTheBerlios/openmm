@@ -133,7 +133,7 @@ class Application : public Omm::Gui::Application
         DragListModel* pListModel = new DragListModel(20);
         Omm::Gui::ListView* pList = new Omm::Gui::ListView;
         pList->setName("list view");
-        pList->setDragMode(Omm::Gui::ListView::DragSource | Omm::Gui::ListView::DragTarget);
+        pList->setDragMode(Omm::Gui::View::DragSource | Omm::Gui::View::DragTarget);
         pList->setModel(pListModel);
         pList->attachController(new DragListController(pListModel));
         resizeMainView(800, 480);

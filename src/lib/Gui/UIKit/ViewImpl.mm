@@ -91,7 +91,7 @@
     CGPoint position = [pGestureRecognizer locationInView:static_cast<UIView*>(_pViewImpl->getNativeView())];
     bool accept;
     LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget drag gesture [" + Poco::NumberFormatter::format(position.x) + ", " + Poco::NumberFormatter::format(position.y) + "]");
-    if (pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
+    if ((_pViewImpl->getDragMode() & Omm::Gui::View::DragSource) && pGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         Omm::Gui::UIDrag::instance()->getPointerView()->show();
         _pViewImpl->dragStarted();
     }
@@ -476,6 +476,13 @@ void
 ViewImpl::setAcceptDrops(bool accept)
 {
 //    _pNativeView->setAcceptDrops(accept);
+}
+
+
+int
+ViewImpl::getDragMode()
+{
+    return _pView->_dragMode;
 }
 
 

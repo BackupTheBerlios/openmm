@@ -64,7 +64,7 @@ _maxHeight(140),
 _stretchFactor(1.0),
 _scaleFactor(1.0),
 _pImpl(0),
-_dragMode(DragNone)        
+_dragMode(DragNone)
 {
 //    LOG(gui, debug, "view ctor (parent, createPlainView).");
 
@@ -525,6 +525,13 @@ void
 View::triggerKeyEvent(Controller::KeyCode key)
 {
     NOTIFY_CONTROLLER(Controller, keyPressed, key);
+}
+
+
+void
+View::setDragMode(int dragMode)
+{
+    _dragMode = dragMode;
 }
 
 

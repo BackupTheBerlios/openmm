@@ -290,6 +290,13 @@ ViewImpl::setAcceptDrops(bool accept)
 }
 
 
+int
+ViewImpl::getDragMode()
+{
+    return _pView->_dragMode;
+}
+
+
 void
 ViewImpl::setEnableHover(bool enable)
 {

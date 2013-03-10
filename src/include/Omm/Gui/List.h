@@ -71,7 +71,6 @@ public:
 
     void resetListView();
     void addTopView(View* pView);
-    void setDragMode(int dragMode);
     void setSelectionType(SelectionType selectionType);
 
 protected:

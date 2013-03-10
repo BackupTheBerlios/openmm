@@ -273,13 +273,6 @@ ListView::addTopView(View* pView)
 
 
 void
-ListView::setDragMode(int dragMode)
-{
-    _dragMode = dragMode;
-}
-
-
-void
 ListView::setSelectionType(SelectionType selectionType)
 {
     _selectionType = selectionType;
@@ -548,6 +541,7 @@ ListView::extendViewPool()
         _itemControllers[pView] = pItemController;
         pView->attachController(pItemController);
         if (!(_dragMode & DragNone)) {
+            pView->setDragMode(_dragMode);
             pView->attachController(new ListDragController(this, pView));
         }
         if (_dragMode & DragTarget) {

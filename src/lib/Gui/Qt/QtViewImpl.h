@@ -118,7 +118,9 @@ public:
         if ((pMouseEvent->pos() - _dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
             return;
         }
-        _pViewImpl->dragStarted();
+        if (_pViewImpl->getDragMode() & View::DragSource) {
+            _pViewImpl->dragStarted();
+        }
 //        W::mouseMoveEvent(pMouseEvent);
     }
 

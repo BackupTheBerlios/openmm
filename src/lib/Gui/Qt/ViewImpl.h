@@ -73,6 +73,7 @@ public:
     bool getEnableRedraw();
     void setEnableRedraw(bool enable);
     void setAcceptDrops(bool accept);
+    int getDragMode();
     void setEnableHover(bool enable);
 
 protected:
