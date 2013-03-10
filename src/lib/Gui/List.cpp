@@ -208,7 +208,6 @@ _pSelectionView(0),
 _pSelectedModel(0),
 _highlightedRow(-1),
 _pTopView(0),
-_dragMode(DragNone),
 _selectionType(selectionType),
 _pDropLine(0)
 {
@@ -297,6 +296,19 @@ ListView::syncViewImpl()
         _pSelectionView->hide();
     }
 
+    // FIXME: updateScrollWidgetSize crashes omm when deleting local server:
+//17:13:19.298 tristan[12570,0] D GUI list view sync view impl of ""
+//17:13:19.299 tristan[12570,0] D GUI list scroll area scrolled xOffset: 0, yOffset: 169
+//17:13:19.299 tristan[12570,0] D GUI list scroll area scrolled row offset: 5
+//17:13:19.299 tristan[12570,0] D GUI list view scroll to row offset: 5
+//17:13:19.299 tristan[12570,0] D GUI list scroll view to row offset: 3, delta: -1
+//17:13:19.299 tristan[12570,0] D GUI list view scroll direction: -1, offset: 4
+//17:13:19.299 tristan[12570,0] D GUI item count: 10, last visible row: 4
+//
+//Program received signal SIGSEGV, Segmentation fault.
+//0x00007ffff5f69837 in Omm::Gui::ListView::scrollOneRow (this=0x7fc090, direction=-1)
+//    at /home/jb/devel/omm/src/lib/Gui/List.cpp:387
+//387	        pView->hide(false);
     updateScrollWidgetSize(totalItemCount());
     int visibleItemCount = std::min(totalItemCount(), _rowOffset + viewPortHeightInRows()) - _rowOffset;
 
@@ -832,26 +844,26 @@ ListView::dropView(Model* pSourceModel, View* pTarget)
 }
 
 
-void
-ListView::shiftViews(View* pFirstView, int pixel)
-{
-    // shift pFirstView and all visible views below number of pixel
-    int index = rowFromView(pFirstView) - _rowOffset;
-    for (int i = 0; i < index; i++) {
-        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight);
-    }
-    for (int i = index; i < _visibleViews.size(); i++) {
-        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight + pixel);
-    }
-    if (index == 0) {
-        scrollOneRow(-1);
-        scrollContentsTo(0, (_rowOffset - 1) * _itemViewHeight);
-    }
-    else if (index >= _visibleViews.size() - _bottomRows - 1) {
-        scrollOneRow(1);
-        scrollContentsTo(0, (_rowOffset + 1) * _itemViewHeight);
-    }
-}
+//void
+//ListView::shiftViews(View* pFirstView, int pixel)
+//{
+//    // shift pFirstView and all visible views below number of pixel
+//    int index = rowFromView(pFirstView) - _rowOffset;
+//    for (int i = 0; i < index; i++) {
+//        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight);
+//    }
+//    for (int i = index; i < _visibleViews.size(); i++) {
+//        _visibleViews[i]->move(0, (_rowOffset + i) * _itemViewHeight + pixel);
+//    }
+//    if (index == 0) {
+//        scrollOneRow(-1);
+//        scrollContentsTo(0, (_rowOffset - 1) * _itemViewHeight);
+//    }
+//    else if (index >= _visibleViews.size() - _bottomRows - 1) {
+//        scrollOneRow(1);
+//        scrollContentsTo(0, (_rowOffset + 1) * _itemViewHeight);
+//    }
+//}
 
 
 void

@@ -60,6 +60,7 @@ public:
     typedef enum {None, Current, Min, Pref, Max} SizeConstraint;
     typedef enum {AlignLeft, AlignCenter, AlignRight} Alignment;
     typedef enum {Horizontal, Vertical} Orientation;
+    typedef enum  {DragNone = 1, DragSource = 2, DragTarget = 4} DragMode;
 
     View(View* pParent = 0);
     virtual ~View();
@@ -159,6 +160,7 @@ protected:
     int                         _maxHeight;
     float                       _stretchFactor;
     float                       _scaleFactor;
+    int                         _dragMode;
 };
 
 

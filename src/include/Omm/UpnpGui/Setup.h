@@ -42,7 +42,10 @@ class GuiSetup : public Gui::NavigatorView
     friend class RendererDoneButton;
     friend class RendererConfView;
     friend class ServerItemController;
+    friend class ServerListController;
+    friend class ServerListModel;
     friend class ServerDoneButton;
+    friend class ServerNewButton;
     friend class ServerConfView;
     friend class ServerConfModel;
 

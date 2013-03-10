@@ -27,6 +27,7 @@
 #include <Poco/Util/Application.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 
+#include "Gui/GuiLogger.h"
 #include "Gui/HorizontalLayout.h"
 #include "Gui/VerticalLayout.h"
 #include "Gui/ListItem.h"
@@ -224,48 +225,78 @@ RendererConfView::writeConf()
 }
 
 
+class ServerListItemModel : public Gui::ListItemModel
+{
+    friend class ServerListModel;
+    friend class ServerDeleteButton;
+
+    ServerListItemModel(const std::string& id) : _id(id) {}
+
+    std::string _id;
+};
+
+
 class ServerListModel : public Gui::ListModel
 {
     friend class GuiSetup;
+    friend class ServerListController;
     friend class ServerDoneButton;
+    friend class ServerNewButton;
+    friend class ServerDeleteButton;
 
     ServerListModel(GuiSetup* pGuiSetup) :
-    _pGuiSetup(pGuiSetup),
-    _config(Poco::Util::Application::instance().config())
+    _pGuiSetup(pGuiSetup)
     {
     }
 
 
     void clearConfigItems();
     void readConfig();
-    void appendConfigItem(const std::string& label);
+    void writeConfig();
+    void appendConfigItem(const std::string& id, const std::string& label);
+    void removeConfigItem(const std::string& id);
+    std::string getId(int row);
 
-    virtual int totalItemCount()
+    virtual int totalItemCount();
+    virtual Gui::Model* getItemModel(int row);
+    virtual Gui::View* createItemView();
+
+    std::map<std::string, ServerListItemModel*> _configServerItems;
+    std::vector<std::string>                    _configServerIds;
+    GuiSetup*                                   _pGuiSetup;
+};
+
+
+class ServerDeleteButton : public Gui::Button
+{
+    friend class ServerListModel;
+
+    ServerDeleteButton(Gui::ListView* pServerListView, View* pParent = 0) : Button(pParent), _pServerListView(pServerListView)
     {
-        return _configServerItems.size();
+        setLabel("X");
     }
 
-
-    virtual Gui::Model* getItemModel(int row)
+    virtual void pushed()
     {
-        return _configServerItems[row];
+        ServerListItemModel* pItemModel = dynamic_cast<ServerListItemModel*>(getParent()->getModel());
+        ServerListModel* pServerListModel = dynamic_cast<ServerListModel*>(_pServerListView->getModel());
+        if (pItemModel && pServerListModel) {
+            std::string serverId = pItemModel->_id;
+            LOGNS(Gui, gui, debug, "server config delete id: " + serverId);
+            pServerListModel->removeConfigItem(serverId);
+            pServerListModel->writeConfig();
+            _pServerListView->syncView();
+        }
     }
 
-
-    virtual Gui::View* createItemView()
-    {
-        return new Gui::ListItemView;
-    }
-
-    std::vector<Gui::ListItemModel*>    _configServerItems;
-    Poco::Util::LayeredConfiguration&   _config;
-    GuiSetup*                           _pGuiSetup;
+    Gui::ListView* _pServerListView;
 };
 
 
 class ServerEnableSwitch : Gui::Switch
 {
     friend class ServerConfView;
+    friend class ServerConfModel;
 
     ServerEnableSwitch(UpnpApplication* pApp, View* pParent = 0) :
     Switch(pParent),
@@ -284,6 +315,7 @@ class ServerEnableSwitch : Gui::Switch
 class ServerLayoutSelector : Gui::Selector
 {
     friend class ServerConfView;
+    friend class ServerConfModel;
 
     ServerLayoutSelector(View* pParent = 0) : Selector(pParent)
     {
@@ -312,16 +344,17 @@ class ServerLayoutSelector : Gui::Selector
 class ServerConfView : public Gui::View
 {
     friend class GuiSetup;
+    friend class ServerConfModel;
     friend class ServerItemController;
     friend class ServerListController;
     friend class ServerDoneButton;
+    friend class ServerNewButton;
 
-    ServerConfView(GuiSetup* pGuiSetup, int index, View* pParent = 0);
+    ServerConfView(GuiSetup* pGuiSetup, View* pParent = 0);
     virtual void syncViewImpl();
-    void writeConf();
+//    void writeConf();
 
     GuiSetup*               _pGuiSetup;
-    int                     _index;
 
     ServerEnableSwitch*     _pServerEnableSwitch;
     Gui::TextLine*          _pServerFriendlyNameText;
@@ -329,6 +362,76 @@ class ServerConfView : public Gui::View
     Gui::TextLine*          _pServerBasePathText;
     Gui::TextLine*          _pServerPollText;
     ServerLayoutSelector*   _pServerLayoutSelector;
+};
+
+
+class ServerConfModel : public Gui::Model
+{
+    friend class ServerListController;
+    friend class ServerDoneButton;
+    friend class ServerNewButton;
+    friend class ServerConfView;
+
+    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id)
+    {
+        _uuid = _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".uuid", Poco::UUIDGenerator().createRandom().toString());
+    }
+
+    bool getEnabled()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getBool("server." + _id + ".enable", false);
+    }
+
+    std::string getFriendlyName()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".friendlyName", "");
+    }
+
+    std::string getPlugin()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".plugin", "");
+    }
+
+    std::string getBasePath()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".basePath", "");
+    }
+
+    std::string getPollTime()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".pollUpdateId", "");
+    }
+
+    std::string getLayout()
+    {
+        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".layout", "");
+    }
+
+    void writeConf()
+    {
+        _pGuiSetup->_pApp->getFileConfiguration()->setBool("server." + _id + ".enable", _pConfView->_pServerEnableSwitch->getStateOn());
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".friendlyName", _pConfView->_pServerFriendlyNameText->getTextLine());
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".uuid", _uuid);
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".plugin", _pConfView->_pServerPluginText->getTextLine());
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".basePath", _pConfView->_pServerBasePathText->getTextLine());
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".pollUpdateId", _pConfView->_pServerPollText->getTextLine());
+        switch(_pConfView->_pServerLayoutSelector->getCurrentIndex()) {
+            case 0:
+                _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".layout", Av::ServerContainer::LAYOUT_FLAT);
+                break;
+            case 1:
+                _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".layout", Av::ServerContainer::LAYOUT_DIR_STRUCT);
+                break;
+            case 2:
+                _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".layout", Av::ServerContainer::LAYOUT_PROPERTY_GROUPS);
+                break;
+        }
+    }
+
+    std::string     _id;
+    std::string     _uuid;
+    GuiSetup*       _pGuiSetup;
+    ServerConfView* _pConfView;
 };
 
 
@@ -346,9 +449,22 @@ class ServerDoneButton : Gui::Button
 
     virtual void pushed()
     {
-        _pServerConfView->writeConf();
-        _pGuiSetup->_pServerListModel->readConfig();
+        ServerConfModel* pServerConfModel = static_cast<ServerConfModel*>(_pServerConfView->getModel());
+        pServerConfModel->writeConf();
+
+        ServerListModel* pServerListModel = _pGuiSetup->_pServerListModel;
+        pServerListModel->readConfig();
+        // add id of server, if this server is newly created
+        std::vector<std::string>& serverIds = pServerListModel->_configServerIds;
+        std::string thisServerId = pServerConfModel->_id;
+        LOGNS(Gui, gui, debug, "server config done, id: " + thisServerId);
+        if (std::find(serverIds.begin(), serverIds.end(), thisServerId) == serverIds.end()) {
+            LOGNS(Gui, gui, debug, "server config new id: " + thisServerId);
+            pServerListModel->appendConfigItem(thisServerId, pServerConfModel->getFriendlyName());
+        }
+        pServerListModel->writeConfig();
         _pGuiSetup->_pServerList->syncView();
+
         _pGuiSetup->pop();
         _pGuiSetup->_pApp->restartLocalDeviceContainer();
     }
@@ -378,52 +494,39 @@ class ServerCancelButton : Gui::Button
 };
 
 
-class ServerConfModel : public Gui::Model
+class ServerNewButton : public Gui::Button
 {
-    friend class ServerListController;
-    friend class ServerConfView;
+    friend class GuiSetup;
 
-    ServerConfModel(GuiSetup* pGuiSetup, int index) : _pGuiSetup(pGuiSetup), _index(index) {}
-
-    bool getEnabled()
+    ServerNewButton(GuiSetup* pGuiSetup) : _pGuiSetup(pGuiSetup)
     {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getBool("server." + Poco::NumberFormatter::format(_index) + ".enable", false);
+        setLabel("New Media");
     }
 
-    std::string getFriendlyName()
+    virtual void pushed()
     {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + Poco::NumberFormatter::format(_index) + ".friendlyName", "");
+        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup);
+        // find new or deleted config file id for local server.
+        int id = 0;
+        std::string newId = "0";
+        std::vector<std::string>& serverIds = _pGuiSetup->_pServerListModel->_configServerIds;
+        while (std::find(serverIds.begin(), serverIds.end(), newId) != serverIds.end()) {
+            id++;
+            newId = Poco::NumberFormatter::format(id);
+        }
+        ServerConfModel* pServerConfModel = new ServerConfModel(_pGuiSetup, pServerConfView, newId);
+        pServerConfView->setModel(pServerConfModel);
+
+        _pGuiSetup->push(pServerConfView);
     }
 
-    std::string getPlugin()
-    {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + Poco::NumberFormatter::format(_index) + ".plugin", "");
-    }
-
-    std::string getBasePath()
-    {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + Poco::NumberFormatter::format(_index) + ".basePath", "");
-    }
-
-    std::string getPollTime()
-    {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + Poco::NumberFormatter::format(_index) + ".pollUpdateId", "");
-    }
-
-    std::string getLayout()
-    {
-        return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + Poco::NumberFormatter::format(_index) + ".layout", "");
-    }
-
-    int             _index;
-    GuiSetup*       _pGuiSetup;
+    GuiSetup*   _pGuiSetup;
 };
 
 
-ServerConfView::ServerConfView(GuiSetup* pGuiSetup, int index, View* pParent) :
+ServerConfView::ServerConfView(GuiSetup* pGuiSetup, View* pParent) :
 View(pParent),
-_pGuiSetup(pGuiSetup),
-_index(index)
+_pGuiSetup(pGuiSetup)
 {
     setLayout(new Gui::VerticalLayout);
 
@@ -497,27 +600,6 @@ void ServerConfView::syncViewImpl()
 }
 
 
-void ServerConfView::writeConf()
-{
-    _pGuiSetup->_pApp->getFileConfiguration()->setBool("server." + Poco::NumberFormatter::format(_index) + ".enable", _pServerEnableSwitch->getStateOn());
-    _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".friendlyName", _pServerFriendlyNameText->getTextLine());
-    _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".plugin", _pServerPluginText->getTextLine());
-    _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".basePath", _pServerBasePathText->getTextLine());
-    _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".pollUpdateId", _pServerPollText->getTextLine());
-    switch(_pServerLayoutSelector->getCurrentIndex()) {
-        case 0:
-            _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".layout", Av::ServerContainer::LAYOUT_FLAT);
-            break;
-        case 1:
-            _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".layout", Av::ServerContainer::LAYOUT_DIR_STRUCT);
-            break;
-        case 2:
-            _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + Poco::NumberFormatter::format(_index) + ".layout", Av::ServerContainer::LAYOUT_PROPERTY_GROUPS);
-            break;
-    }
-}
-
-
 //class ServerItemController : public Gui::Controller
 //{
 //    friend class GuiSetup;
@@ -544,8 +626,8 @@ class ServerListController : public Gui::ListController
 
     virtual void selectedItem(int row)
     {
-        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup, row);
-        pServerConfView->setModel(new ServerConfModel(_pGuiSetup, row));
+        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup);
+        pServerConfView->setModel(new ServerConfModel(_pGuiSetup, pServerConfView, _pGuiSetup->_pServerListModel->getId(row)));
         _pGuiSetup->push(pServerConfView);
     }
 
@@ -556,10 +638,11 @@ class ServerListController : public Gui::ListController
 void
 ServerListModel::clearConfigItems()
 {
-    for (std::vector<Gui::ListItemModel*>::iterator it = _configServerItems.begin(); it != _configServerItems.end(); ++it) {
-        delete *it;
+    for (std::map<std::string, ServerListItemModel*>::iterator it = _configServerItems.begin(); it != _configServerItems.end(); ++it) {
+        delete it->second;
     }
     _configServerItems.clear();
+    _configServerIds.clear();
 }
 
 
@@ -568,27 +651,79 @@ ServerListModel::readConfig()
 {
     clearConfigItems();
 
-    std::vector<std::string> serverKeys;
-    _config.keys("server", serverKeys);
-    for (std::vector<std::string>::iterator it = serverKeys.begin(); it != serverKeys.end(); ++it) {
-        std::vector<std::string> serverConfigKeys;
-        _config.keys("server." + *it, serverConfigKeys);
-        if (*it != "new") {
-            appendConfigItem(_config.getString("server." + *it + ".friendlyName", ""));
-        }
-
-//        for (std::vector<std::string>::iterator cit = serverConfigKeys.begin(); cit != serverConfigKeys.end(); ++cit) {
-//        }
+    std::string serversString = _pGuiSetup->_pApp->getFileConfiguration()->getString("servers", "");
+    Poco::StringTokenizer servers(serversString, ",");
+    for (Poco::StringTokenizer::Iterator it = servers.begin(); it != servers.end(); ++it) {
+        appendConfigItem(*it, _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + *it + ".friendlyName", ""));
     }
 }
 
 
 void
-ServerListModel::appendConfigItem(const std::string& label)
+ServerListModel::writeConfig()
 {
-    Gui::ListItemModel* pConfigItemModel = new Gui::ListItemModel;
+    std::string servers = "";
+    for (std::vector<std::string>::iterator it = _configServerIds.begin(); it != _configServerIds.end(); ++it) {
+        servers += *it;
+        if (it != --_configServerIds.end()) {
+            servers.append(",");
+        }
+    }
+    LOGNS(Gui, gui, debug, "server config ids: " + servers);
+    _pGuiSetup->_pApp->getFileConfiguration()->setString("servers", servers);
+}
+
+
+void
+ServerListModel::appendConfigItem(const std::string& id, const std::string& label)
+{
+    ServerListItemModel* pConfigItemModel = new ServerListItemModel(id);
     pConfigItemModel->setLabelModel(new Gui::LabelModel(label));
-    _configServerItems.push_back(pConfigItemModel);
+    _configServerItems[id] = pConfigItemModel;
+    _configServerIds.push_back(id);
+}
+
+
+void
+ServerListModel::removeConfigItem(const std::string& id)
+{
+    std::vector<std::string>::iterator it = std::find(_configServerIds.begin(), _configServerIds.end(), id);
+    if (it != _configServerIds.end()) {
+        _configServerIds.erase(it);
+        delete _configServerItems[id];
+        _configServerItems.erase(id);
+        LOGNS(Gui, gui, debug, "server config removed id: " + id);
+    }
+}
+
+
+std::string
+ServerListModel::getId(int row)
+{
+    return *(_configServerIds.begin() + row);
+}
+
+
+int
+ServerListModel::totalItemCount()
+{
+    return _configServerItems.size();
+}
+
+
+Gui::Model*
+ServerListModel::getItemModel(int row)
+{
+    return _configServerItems[_configServerIds[row]];
+}
+
+
+Gui::View*
+ServerListModel::createItemView()
+{
+    Gui::ListItemView* pListItemView = new Gui::ListItemView;
+    ServerDeleteButton* pDeleteButton = new ServerDeleteButton(_pGuiSetup->_pServerList, pListItemView);
+    return pListItemView;
 }
 
 
@@ -632,6 +767,7 @@ _pApp(pApp)
     _pServerListModel = new ServerListModel(this);
     _pServerListModel->readConfig();
     _pServerList = new Gui::ListView(_pSetupView);
+    _pServerList->addTopView(new ServerNewButton(this));
     _pServerList->setModel(_pServerListModel);
     _pServerList->attachController(new ServerListController(this));
 

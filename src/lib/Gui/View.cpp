@@ -44,7 +44,8 @@ _prefHeight(70),
 _maxWidth(200),
 _maxHeight(140),
 _stretchFactor(1.0),
-_scaleFactor(1.0)
+_scaleFactor(1.0),
+_dragMode(DragNone)
 {
 //    LOG(gui, debug, "view ctor (parent).");
 
@@ -62,7 +63,8 @@ _maxWidth(200),
 _maxHeight(140),
 _stretchFactor(1.0),
 _scaleFactor(1.0),
-_pImpl(0)
+_pImpl(0),
+_dragMode(DragNone)        
 {
 //    LOG(gui, debug, "view ctor (parent, createPlainView).");
 

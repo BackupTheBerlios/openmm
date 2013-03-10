@@ -59,7 +59,6 @@ class ListView : public ScrollAreaView
     friend class ListScrollAreaController;
 
 public:
-    enum DragMode { DragNone = 1, DragSource = 2, DragTarget = 4 };
     enum SelectionType { Frame, Filled };
 
     ListView(View* pParent = 0, SelectionType selectionType = Filled);
@@ -120,7 +119,7 @@ protected:
     View*                               _pDropLine;
 
     View*                               _pTopView;
-    int                                 _dragMode;
+//    int                                 _dragMode;
     SelectionType                       _selectionType;
 
 private:
@@ -133,7 +132,7 @@ private:
 
     // drag'n drop support
     void dragView(View* pView);
-    void shiftViews(View* pFirstView, int pixel = 10);
+//    void shiftViews(View* pFirstView, int pixel = 10);
     void showDropLine(View* pView);
     void hideDropLine();
     void dropView(Model* pSourceModel, View* pTarget);
