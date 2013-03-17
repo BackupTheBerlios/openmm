@@ -37,10 +37,14 @@
 #include <Poco/Net/HTTPStreamFactory.h>
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/SocketReactor.h>
+#include <Poco/SharedMemory.h>
+#include <Poco/NamedEvent.h>
+#include <Poco/NamedMutex.h>
 
 
 #include <Poco/DateTime.h>
 
+#include "Util.h"
 #include "Upnp.h"
 #include "UpnpInternal.h"
 
@@ -65,7 +69,9 @@ class SsdpSocket
     friend class Socket;
 
 public:
-    enum SocketMode {NotConfigured, Broadcast, Multicast};
+    enum SocketMode {NotConfigured = 0x0000, Multicast = 0x0001, LocalProcess = 0x0010, Broadcast = 0x0100, SharedMemory = 0x1000};
+    /// socket modes Broadcast, SharedMemory, and Process are non-standard transport modes for ssdp
+    /// just for the purpose of local delivery of ssdp messages
 
     SsdpSocket();
     ~SsdpSocket();
@@ -75,7 +81,7 @@ public:
     void addObserver(const Poco::AbstractObserver& observer);
     void startListen();
     void stopListen();
-    void setMode(SocketMode mode = NotConfigured);
+    void setMode(unsigned int mode = NotConfigured);
 
     void sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& receiver = Poco::Net::SocketAddress(SSDP_FULL_ADDRESS));
 
@@ -86,23 +92,33 @@ private:
     void setupSockets();
 //    void resetSockets();
 
-    void onReadable(Poco::Net::ReadableNotification* pNotification);
+    void onMulticastSsdpMessage(Poco::Net::ReadableNotification* pNotification);
+    void onLocalSsdpMessage(SsdpMessage* pMessage);
+//    void readSharedMemoryThread();
 
-    SocketMode                      _mode;
-    Poco::Net::MulticastSocket*     _pSsdpListenerSocket;
-    Poco::Net::MulticastSocket*     _pSsdpSenderSocket;
-    Poco::Net::DatagramSocket*      _pSsdpLocalListenerSocket;
-    Poco::Net::DatagramSocket*      _pSsdpLocalSenderSocket;
-    char*                           _pBuffer;
+    unsigned int                        _mode;
+    Poco::Net::MulticastSocket*         _pSsdpListenerSocket;
+    Poco::Net::MulticastSocket*         _pSsdpSenderSocket;
+    char*                               _pBuffer;
 
     static const int BUFFER_SIZE = 65536; // Max UDP Packet size is 64 Kbyte.
                  // Note that each SSDP message must fit into one UDP Packet.
 
-    Poco::Net::SocketReactor*       _pMulticastReactor;
-    Poco::Net::SocketReactor*       _pBroadcastReactor;
-    Poco::Thread*                   _pMulticastListenerThread;
-    Poco::Thread*                   _pBroadcastListenerThread;
-    Poco::NotificationCenter        _notificationCenter;
+    Poco::Net::SocketReactor*           _pMulticastReactor;
+    Poco::Thread*                       _pMulticastListenerThread;
+
+//    Poco::Net::DatagramSocket*          _pSsdpLocalListenerSocket;
+//    Poco::Net::DatagramSocket*          _pSsdpLocalSenderSocket;
+//    Poco::Net::SocketReactor*           _pBroadcastReactor;
+//    Poco::Thread*                       _pBroadcastListenerThread;
+
+//    Poco::Thread*                       _pSharedMemoryListenerThread;
+//    static Poco::NamedEvent             _sharedMemoryMessageReady;
+//    static Poco::NamedMutex             _sharedMemoryLock;
+//    Poco::SharedMemory                  _sharedMemoryBuffer;
+//    Poco::RunnableAdapter<SsdpSocket>   _readThreadRunnable;
+
+    Poco::NotificationCenter            _ssdpSocketNotificationCenter;
 };
 
 
@@ -134,6 +150,7 @@ public:
     static const std::string Null;
     static const std::string Local;
     static const std::string Public;
+    static const std::string PublicLocal;
 
     Socket();
     virtual ~Socket();
@@ -141,7 +158,7 @@ public:
     void initSockets();
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     void registerSsdpMessageHandler(const Poco::AbstractObserver& observer);
-    void setMode(Mode mode);
+    void setMode(const Mode& mode);
 
     void startSsdp();
     void stopSsdp();

@@ -134,7 +134,7 @@ main(int argc, char** argv) {
     StressAvUserInterface userInterface;
 
     controller.setUserInterface(&userInterface);
-    controller.setState(Omm::DeviceManager::Started);
+    controller.setState(Omm::DeviceManager::Public);
 
     LOGNS(Omm::Av, upnpav, debug, "Upnp-AV stress test: starting event loop");
     return userInterface.eventLoop();

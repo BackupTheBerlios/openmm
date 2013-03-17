@@ -142,7 +142,7 @@ protected:
 //             unsigned short port = (unsigned short) config().getInt("EchoServer.port", 9977);
 
             MyController controller;
-            controller.setState(Omm::DeviceManager::Started);
+            controller.setState(Omm::DeviceManager::Public);
 
             std::cerr << "ControllerTest::main() waiting for termination request" << std::endl;
             waitForTerminationRequest();

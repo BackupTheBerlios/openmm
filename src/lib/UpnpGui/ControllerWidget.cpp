@@ -169,7 +169,9 @@ ControllerWidget::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
+
     Controller::setState(newState);
+
     if (newState == Stopped) {
 
         // don't stop selected renderer, it should continue playing though the controller is stopped

@@ -238,11 +238,12 @@ UpnpApplication::main(const std::vector<std::string>& args)
     else
     {
         Poco::Util::Application::init(_argc, _argv);
-        if (instanceAlreadyRunning()) {
-            LOG(upnp, information, "omm application instance running, starting in controller mode");
-            setLockInstance(false);
-            setIgnoreConfig(true);
-        }
+    // TODO: reenable _feature instance checking (segfaults with mutex)
+//        if (instanceAlreadyRunning()) {
+//            LOG(upnp, information, "omm application instance running, starting in controller mode");
+//            setLockInstance(false);
+//            setIgnoreConfig(true);
+//        }
         loadConfig();
         initConfig();
         Gui::Application::runEventLoop(_argc, _argv);
@@ -284,12 +285,18 @@ UpnpApplication::presentedMainView()
 void
 UpnpApplication::start()
 {
+    LOGNS(Av, upnpav, debug, "omm application starting ...");
     startAppHttpServer();
     initLocalDevices();
     if (_enableController) {
-        _pControllerWidget->setState(config().getString("application.state", DeviceManager::Started));
+        LOGNS(Av, upnpav, debug, "omm application starting controller ...");
+//        _pControllerWidget->setState(config().getString("application.devices", DeviceManager::Started));
+//        _pControllerWidget->setState(DeviceManager::Public);
+        _pControllerWidget->setState(DeviceManager::PublicLocal);
     }
-    _pLocalDeviceServer->setState(config().getString("application.state", DeviceManager::Started));
+    LOGNS(Av, upnpav, debug, "omm application starting local device server ...");
+    _pLocalDeviceServer->setState(config().getString("application.devices", DeviceManager::Public));
+    LOGNS(Av, upnpav, debug, "omm application started.");
 }
 
 
@@ -591,18 +598,33 @@ UpnpApplication::restartLocalDeviceContainer()
     _pLocalDeviceContainer = new DeviceContainer;
     initConfig();
     initLocalDevices();
-    _pLocalDeviceServer->setState(DeviceManager::Started);
+    _pLocalDeviceServer->setState(DeviceManager::Public);
+//    _pLocalDeviceServer->setState(DeviceManager::Local);
 }
 
 
 void
-UpnpApplication::setState(const std::string& state)
+UpnpApplication::setLocalDeviceContainerState(const std::string& state)
 {
-    if (_enableController) {
-        _pControllerWidget->setState(state);
-    }
     _pLocalDeviceServer->setState(state);
 }
+
+
+//void
+//UpnpApplication::setControllerState(const std::string& state)
+//{
+//    _pControllerWidget->setState(state);
+//}
+
+
+//void
+//UpnpApplication::setState(const std::string& state)
+//{
+//    _pLocalDeviceServer->setState(state);
+//    if (_enableController) {
+//        _pControllerWidget->setState(state);
+//    }
+//}
 
 
 void
@@ -665,7 +687,8 @@ UpnpApplication::startAppHttpServer()
 {
     int port = config().getInt("application.configPort", _appStandardPort);
     bool useRandomPort = true;
-    if (!instanceAlreadyRunning()) {
+// TODO: reenable _feature instance checking (segfaults with mutex)
+//    if (!instanceAlreadyRunning()) {
         try {
             _socket = Poco::Net::ServerSocket(port);
             useRandomPort = false;
@@ -673,7 +696,7 @@ UpnpApplication::startAppHttpServer()
         catch (Poco::Exception& e) {
             LOG(upnp, error, "failed to start application http server on port " + Poco::NumberFormatter::format(port) + "(" + e.displayText() + ") , using random port.");
         }
-    }
+//    }
     if (useRandomPort) {
         try {
             _socket = Poco::Net::ServerSocket(0);

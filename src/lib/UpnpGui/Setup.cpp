@@ -51,8 +51,8 @@ class AppStateSelector : public Gui::Selector
     _pApp(pApp)
     {
         syncView();
-        std::string state = _pApp->getFileConfiguration()->getString("application.state", "Started");
-        if (state == DeviceManager::Started) {
+        std::string state = _pApp->getFileConfiguration()->getString("application.devices", "Public");
+        if (state == DeviceManager::Public) {
             setCurrentIndex(0);
         }
         else if (state == DeviceManager::Local) {
@@ -74,7 +74,7 @@ class AppStateSelector : public Gui::Selector
     {
         switch(index) {
             case 0:
-                return DeviceManager::Started;
+                return DeviceManager::Public;
                 break;
             case 1:
                 return DeviceManager::Local;
@@ -90,16 +90,16 @@ class AppStateSelector : public Gui::Selector
     {
         switch(index) {
             case 0:
-                _pApp->setState(DeviceManager::Started);
-                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Started);
+                _pApp->setLocalDeviceContainerState(DeviceManager::Public);
+                _pApp->getFileConfiguration()->setString("application.devices", DeviceManager::Public);
                 break;
             case 1:
-                _pApp->setState(DeviceManager::Local);
-                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Local);
+                _pApp->setLocalDeviceContainerState(DeviceManager::Local);
+                _pApp->getFileConfiguration()->setString("application.devices", DeviceManager::Local);
                 break;
             case 2:
-                _pApp->setState(DeviceManager::Stopped);
-                _pApp->getFileConfiguration()->setString("application.state", DeviceManager::Stopped);
+                _pApp->setLocalDeviceContainerState(DeviceManager::Stopped);
+                _pApp->getFileConfiguration()->setString("application.devices", DeviceManager::Stopped);
                 break;
         }
     }
@@ -191,15 +191,20 @@ _pGuiSetup(pGuiSetup)
 
     Gui::View* pRendererEnableView = new Gui::View(this);
     pRendererEnableView->setLayout(new Gui::HorizontalLayout);
+    pRendererEnableView->setStretchFactor(-1.0);
     Gui::Label* pRendererEnableLabel = new Gui::Label(pRendererEnableView);
     pRendererEnableLabel->setLabel("enable");
+    pRendererEnableLabel->setStretchFactor(-1.0);
     _pRendererEnableSwitch = new Gui::Switch(pRendererEnableView);
+    _pRendererEnableSwitch->setStretchFactor(-1.0);
     _pRendererEnableSwitch->setState(_pGuiSetup->_pApp->getFileConfiguration()->getBool("renderer.enable", false));
 
     Gui::View* pRendererFriendlyNameView = new Gui::View(this);
     pRendererFriendlyNameView->setLayout(new Gui::HorizontalLayout);
+    pRendererFriendlyNameView->setStretchFactor(-1.0);
     Gui::Label* pRendererFriendlyNameLabel = new Gui::Label(pRendererFriendlyNameView);
     pRendererFriendlyNameLabel->setLabel("friendly name");
+    pRendererFriendlyNameLabel->setStretchFactor(-1.0);
     _pRendererFriendlyNameText = new Gui::TextLine(pRendererFriendlyNameView);
     _pRendererFriendlyNameText->setTextLine(_pGuiSetup->_pApp->getFileConfiguration()->getString("renderer.friendlyName", ""));
 
@@ -212,6 +217,7 @@ _pGuiSetup(pGuiSetup)
 
     View* pDoneCancelView = new View(this);
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
+    pDoneCancelView->setStretchFactor(-1.0);
     new RendererDoneButton(pGuiSetup, this, pDoneCancelView);
     new RendererCancelButton(pGuiSetup, pDoneCancelView);
 }
@@ -532,14 +538,18 @@ _pGuiSetup(pGuiSetup)
 
     Gui::View* pServerEnableView = new Gui::View(this);
     pServerEnableView->setLayout(new Gui::HorizontalLayout);
+//    pServerEnableView->setStretchFactor(-1.0);
     Gui::Label* pServerEnableLabel = new Gui::Label(pServerEnableView);
     pServerEnableLabel->setLabel("enable");
+    pServerEnableLabel->setStretchFactor(-1.0);
     _pServerEnableSwitch = new ServerEnableSwitch(_pGuiSetup->_pApp, pServerEnableView);
 
     Gui::View* pServerFriendlyNameView = new Gui::View(this);
     pServerFriendlyNameView->setLayout(new Gui::HorizontalLayout);
+//    pServerFriendlyNameView->setStretchFactor(-1.0);
     Gui::Label* pServerFriendlyNameLabel = new Gui::Label(pServerFriendlyNameView);
     pServerFriendlyNameLabel->setLabel("friendly name");
+    pServerFriendlyNameLabel->setStretchFactor(-1.0);
     _pServerFriendlyNameText = new Gui::TextLine(pServerFriendlyNameView);
 
 //        Gui::View* pServerUuidView = new Gui::View(this);
@@ -551,30 +561,39 @@ _pGuiSetup(pGuiSetup)
 
     Gui::View* pServerPluginView = new Gui::View(this);
     pServerPluginView->setLayout(new Gui::HorizontalLayout);
+//    pServerPluginView->setStretchFactor(-1.0);
     Gui::Label* pServerPluginLabel = new Gui::Label(pServerPluginView);
     pServerPluginLabel->setLabel("plugin");
+    pServerPluginLabel->setStretchFactor(-1.0);
     _pServerPluginText = new Gui::TextLine(pServerPluginView);
 
     Gui::View* pServerBasePathView = new Gui::View(this);
     pServerBasePathView->setLayout(new Gui::HorizontalLayout);
+//    pServerBasePathView->setStretchFactor(-1.0);
     Gui::Label* pServerBasePathLabel = new Gui::Label(pServerBasePathView);
     pServerBasePathLabel->setLabel("base path");
+    pServerBasePathLabel->setStretchFactor(-1.0);
     _pServerBasePathText = new Gui::TextLine(pServerBasePathView);
 
     Gui::View* pServerPollView = new Gui::View(this);
     pServerPollView->setLayout(new Gui::HorizontalLayout);
+//    pServerPollView->setStretchFactor(-1.0);
     Gui::Label* pServerPollLabel = new Gui::Label(pServerPollView);
     pServerPollLabel->setLabel("poll time");
+    pServerPollLabel->setStretchFactor(-1.0);
     _pServerPollText = new Gui::TextLine(pServerPollView);
 
     Gui::View* pServerLayoutView = new Gui::View(this);
     pServerLayoutView->setLayout(new Gui::HorizontalLayout);
+//    pServerLayoutView->setStretchFactor(-1.0);
     Gui::Label* pServerLayoutLabel = new Gui::Label(pServerLayoutView);
     pServerLayoutLabel->setLabel("layout");
+    pServerLayoutLabel->setStretchFactor(-1.0);
     _pServerLayoutSelector = new ServerLayoutSelector(pServerLayoutView);
 
     View* pDoneCancelView = new View(this);
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
+//    pDoneCancelView->setStretchFactor(-1.0);
     new ServerDoneButton(_pGuiSetup, this, pDoneCancelView);
     new ServerCancelButton(_pGuiSetup, pDoneCancelView);
 }
@@ -817,9 +836,9 @@ WebSetup::generateConfigPage()
 
     *pOutStream << "<form method=\"POST\" action=\"" + UpnpApplication::CONFIG_URI + "?" + UpnpApplication::CONFIG_APP_QUERY + "\"><br>\n";
 
-    std::string appState = _pConf->getString("application.state", "Started");
-    *pOutStream << std::string("state<select name=\"application.state\" size=\"1\">") +
-                "<option " + (appState == DeviceManager::Started ? "selected" : "") + ">" + DeviceManager::Started + "</option>" +
+    std::string appState = _pConf->getString("application.devices", "Public");
+    *pOutStream << std::string("state<select name=\"application.devices\" size=\"1\">") +
+                "<option " + (appState == DeviceManager::Public ? "selected" : "") + ">" + DeviceManager::Public + "</option>" +
                 "<option " + (appState == DeviceManager::Local ? "selected" : "") + ">" + DeviceManager::Local + "</option>" +
                 "<option " + (appState == DeviceManager::Stopped ? "selected" : "") + ">" + DeviceManager::Stopped + "</option>" +
                 "</select><br>\n";
@@ -910,8 +929,8 @@ WebSetup::handleAppConfigRequest(const Poco::Net::HTMLForm& form)
 //        printForm(form);
         for (Poco::Net::NameValueCollection::ConstIterator it = form.begin(); it != form.end(); ++it) {
             _pConf->setString(it->first, it->second);
-            if (it->first == "application.state") {
-                _pApp->setState(it->second);
+            if (it->first == "application.devices") {
+                _pApp->setLocalDeviceContainerState(it->second);
             }
         }
     }

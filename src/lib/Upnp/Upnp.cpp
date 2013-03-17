@@ -63,14 +63,16 @@ Log* Log::_pInstance = 0;
 Log::Log()
 {
     Poco::Channel* pChannel = Util::Log::instance()->channel();
+
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
@@ -273,16 +275,21 @@ _urn(urn)
 }
 
 
+//Poco::NamedEvent SsdpSocket::_sharedMemoryMessageReady("SsdpSharedMemoryEvent");
+//Poco::NamedMutex SsdpSocket::_sharedMemoryLock("SsdpSharedMemoryLock");
+
 SsdpSocket::SsdpSocket() :
 _mode(NotConfigured),
 _pSsdpListenerSocket(0),
 _pSsdpSenderSocket(0),
-_pSsdpLocalListenerSocket(0),
-_pSsdpLocalSenderSocket(0),
 _pMulticastReactor(0),
-_pBroadcastReactor(0),
-_pMulticastListenerThread(0),
-_pBroadcastListenerThread(0)
+_pMulticastListenerThread(0)
+//_pSsdpLocalListenerSocket(0),
+//_pSsdpLocalSenderSocket(0),
+//_pBroadcastReactor(0),
+//_pBroadcastListenerThread(0),
+//_sharedMemoryBuffer("SsdpSharedMemoryBuffer", BUFFER_SIZE, Poco::SharedMemory::AM_WRITE),
+//_readThreadRunnable(*this, &SsdpSocket::readSharedMemoryThread)
 {
 }
 
@@ -298,17 +305,17 @@ SsdpSocket::init()
     _mode = NotConfigured;
     _pBuffer = new char[BUFFER_SIZE];
     // listen to UDP unicast and send out to multicast
-    LOG(ssdp, debug, "create broadcast socket");
+    LOG(ssdp, debug, "create multicast socket");
     _pSsdpSenderSocket = new Poco::Net::MulticastSocket;
-    _pSsdpLocalSenderSocket = new Poco::Net::DatagramSocket;
+//    _pSsdpLocalSenderSocket = new Poco::Net::DatagramSocket;
 
     // listen to UDP multicast
     LOG(ssdp, debug, "create listener socket ...");
     _pSsdpListenerSocket = new Poco::Net::MulticastSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
-    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true);
-//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true);
-//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("192.168.178.31", SSDP_PORT), true);
-//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
+//    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.1", SSDP_PORT), true);
+////    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("127.0.0.0", SSDP_PORT), true);
+////    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("192.168.178.31", SSDP_PORT), true);
+////    _pSsdpLocalListenerSocket = new Poco::Net::DatagramSocket(Poco::Net::SocketAddress("0.0.0.0", SSDP_PORT), true);
 }
 
 
@@ -345,7 +352,8 @@ SsdpSocket::init()
 void
 SsdpSocket::addObserver(const Poco::AbstractObserver& observer)
 {
-    _notificationCenter.addObserver(observer);
+    _ssdpSocketNotificationCenter.addObserver(observer);
+//    Poco::NotificationCenter::defaultCenter().addObserver(observer);
 }
 
 
@@ -356,22 +364,34 @@ SsdpSocket::startListen()
         LOG(ssdp, error, "failed to start SSDP socket, not configured.");
         return;
     }
-    else if (_mode == Multicast && !_pMulticastListenerThread) {
+
+    if ((_mode & Multicast) && !_pMulticastListenerThread) {
         LOG(ssdp, information, "starting SSDP multicast listener ...");
         _pMulticastListenerThread = new Poco::Thread;
         _pMulticastReactor = new Poco::Net::SocketReactor;
-        _pMulticastReactor->addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-        _pMulticastReactor->addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+        _pMulticastReactor->addEventHandler(*_pSsdpSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onMulticastSsdpMessage));
+        _pMulticastReactor->addEventHandler(*_pSsdpListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onMulticastSsdpMessage));
         _pMulticastListenerThread->start(*_pMulticastReactor);
     }
-    else if (_mode == Broadcast && !_pBroadcastListenerThread) {
-        LOG(ssdp, information, "starting SSDP broadcast listener ...");
-        _pBroadcastListenerThread = new Poco::Thread;
-        _pBroadcastReactor = new Poco::Net::SocketReactor;
-        _pBroadcastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-        _pBroadcastReactor->addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
-        _pBroadcastListenerThread->start(*_pBroadcastReactor);
+
+    if (_mode & LocalProcess) {
+        LOG(ssdp, information, "starting SSDP local listener ...");
+        Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<SsdpSocket, SsdpMessage>(*this, &SsdpSocket::onLocalSsdpMessage));
     }
+
+//    else if (_mode == Broadcast && !_pBroadcastListenerThread) {
+//        LOG(ssdp, information, "starting SSDP broadcast listener ...");
+//        _pBroadcastListenerThread = new Poco::Thread;
+//        _pBroadcastReactor = new Poco::Net::SocketReactor;
+//        _pBroadcastReactor->addEventHandler(*_pSsdpLocalSenderSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+//        _pBroadcastReactor->addEventHandler(*_pSsdpLocalListenerSocket, Poco::Observer<SsdpSocket, Poco::Net::ReadableNotification>(*this, &SsdpSocket::onReadable));
+//        _pBroadcastListenerThread->start(*_pBroadcastReactor);
+//    }
+//    else if (_mode == SharedMemory && !_pSharedMemoryListenerThread) {
+//        LOG(ssdp, information, "starting SSDP shared memory listener ...");
+//        _pSharedMemoryListenerThread = new Poco::Thread;
+//        _pSharedMemoryListenerThread->start(_readThreadRunnable);
+//    }
     LOG(ssdp, information, "SSDP listener started.");
 }
 
@@ -383,6 +403,7 @@ SsdpSocket::stopListen()
         LOG(ssdp, error, "failed to stop SSDP socket, not configured.");
         return;
     }
+
     if (_pMulticastListenerThread) {
         LOG(ssdp, information, "stopping SSDP multicast listener ...");
         _pMulticastReactor->stop();
@@ -392,15 +413,27 @@ SsdpSocket::stopListen()
         delete _pMulticastListenerThread;
         _pMulticastListenerThread = 0;
     }
-    if (_pBroadcastListenerThread) {
-        LOG(ssdp, information, "stopping SSDP broadcast listener ...");
-        _pBroadcastReactor->stop();
-        _pBroadcastListenerThread->join();
-        delete _pBroadcastReactor;
-        _pBroadcastReactor = 0;
-        delete _pBroadcastListenerThread;
-        _pBroadcastListenerThread = 0;
+
+    if (_mode & LocalProcess) {
+        LOG(ssdp, information, "stopping SSDP local listener ...");
+        Poco::NotificationCenter::defaultCenter().removeObserver(Poco::Observer<SsdpSocket, SsdpMessage>(*this, &SsdpSocket::onLocalSsdpMessage));
     }
+
+//    if (_pBroadcastListenerThread) {
+//        LOG(ssdp, information, "stopping SSDP broadcast listener ...");
+//        _pBroadcastReactor->stop();
+//        _pBroadcastListenerThread->join();
+//        delete _pBroadcastReactor;
+//        _pBroadcastReactor = 0;
+//        delete _pBroadcastListenerThread;
+//        _pBroadcastListenerThread = 0;
+//    }
+//    if (_pSharedMemoryListenerThread) {
+//        LOG(ssdp, information, "stopping SSDP shared memory listener ...");
+//        _pSharedMemoryListenerThread->join();
+//        delete _pSharedMemoryListenerThread;
+//        _pSharedMemoryListenerThread = 0;
+//    }
     LOG(ssdp, information, "SSDP listener stopped.");
 }
 
@@ -411,23 +444,39 @@ SsdpSocket::sendMessage(SsdpMessage& message, const Poco::Net::SocketAddress& re
     std::string m = message.toString();
 
     int bytesSent = 0;
-    Poco::Net::SocketAddress loopReceiver;
-    if (_mode == Broadcast && receiver.toString() == SSDP_FULL_ADDRESS) {
-        loopReceiver = Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT);
-    }
-    else {
-        loopReceiver = receiver;
-    }
-    LOG(ssdp, debug, "sending SSDP message to address: " + loopReceiver.toString() + " ...");
+//    Poco::Net::SocketAddress loopReceiver;
+//    if (_mode == Broadcast && receiver.toString() == SSDP_FULL_ADDRESS) {
+//        loopReceiver = Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS, SSDP_PORT);
+//    }
+//    else {
+//        loopReceiver = receiver;
+//    }
+//    LOG(ssdp, debug, "sending SSDP message to address: " + loopReceiver.toString() + " ...");
+    LOG(ssdp, debug, "sending SSDP message to address: " + receiver.toString() + " ...");
     try {
-        if (_mode == Multicast) {
+        if (_mode & Multicast) {
             LOG(ssdp, debug, "sending SSDP message through multicast socket ...");
-            bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+//            bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+            bytesSent = _pSsdpSenderSocket->sendTo(m.c_str(), m.length(), receiver);
         }
-        else if (_mode == Broadcast) {
-            LOG(ssdp, debug, "sending SSDP message through broadcast socket ...");
-            bytesSent = _pSsdpLocalSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+        if (_mode & LocalProcess) {
+            LOG(ssdp, debug, "sending SSDP message through default notification center ...");
+//            Poco::NotificationCenter::defaultCenter().postNotification(new SsdpMessage(m, Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS)));
+            Poco::NotificationCenter::defaultCenter().postNotification(&message);
         }
+//        else if (_mode == Broadcast) {
+//            LOG(ssdp, debug, "sending SSDP message through broadcast socket ...");
+//            bytesSent = _pSsdpLocalSenderSocket->sendTo(m.c_str(), m.length(), loopReceiver);
+//        }
+//        else if (_mode == SharedMemory) {
+//            LOG(ssdp, debug, "sending SSDP message through shared memory ...");
+//
+//            _sharedMemoryLock.lock();
+//            *(Poco::UInt16*)_sharedMemoryBuffer.begin() = m.length();
+//            memcpy(_sharedMemoryBuffer.begin() + 2, m.c_str(), m.length());
+//            _sharedMemoryLock.unlock();
+//            _sharedMemoryMessageReady.set();
+//        }
     }
     catch(Poco::Net::NetException& e) {
         LOG(ssdp, error, "sending SSDP message failed: " + e.message());
@@ -441,14 +490,17 @@ SsdpSocket::setupSockets()
 {
     LOG(ssdp, debug, "setting up SSDP sockets ...");
     setMode(NotConfigured);
-    // start with broadcast mode and set broadcast flag.
-    try {
-        _pSsdpLocalSenderSocket->setBroadcast(true);
-    }
-    catch(Poco::Exception& e) {
-        LOG(ssdp, error, "failed to set local SSDP socket to broadcast : " + e.message());
-    }
-    setMode(Broadcast);
+//    // start with broadcast mode and set broadcast flag.
+//    try {
+//        _pSsdpLocalSenderSocket->setBroadcast(true);
+//    }
+//    catch(Poco::Exception& e) {
+//        LOG(ssdp, error, "failed to set local SSDP socket to broadcast : " + e.message());
+//    }
+//    setMode(Broadcast);
+
+    // start with local mode
+    setMode(LocalProcess);
     try {
         _pSsdpListenerSocket->joinGroup(Poco::Net::IPAddress(SSDP_ADDRESS));
     }
@@ -456,7 +508,7 @@ SsdpSocket::setupSockets()
         LOG(ssdp, error, "failed to join multicast group: " + e.message());
         LOG(ssdp, warning, "MULTICAST socket option and route to multicast address on loopback interface probably need to be set.");
         LOG(ssdp, warning, "as superuser do something like \"ifconfig lo multicast; route add 239.255.255.250 lo\".");
-        LOG(ssdp, warning, "switching to non-standard compliant broadcast mode for loopback interface.");
+        LOG(ssdp, warning, "switching to non-standard compliant local mode (non-network, non-ipc).");
         return;
     }
     // set TTL on windows raises Poco::InvalidArgumentException.
@@ -515,16 +567,29 @@ SsdpSocket::setupSockets()
 
 
 void
-SsdpSocket::setMode(SocketMode mode)
+SsdpSocket::setMode(unsigned int mode)
 {
     if (mode == NotConfigured) {
-        LOG(ssdp, debug, "set SSDP socket to not configured");
+        LOG(ssdp, debug, "set SSDP socket mode to not configured");
     }
-    else if (mode == Broadcast) {
-        LOG(ssdp, debug, "set SSDP socket to broadcast");
+//    else if (mode == Broadcast) {
+//        LOG(ssdp, debug, "set SSDP socket mode to broadcast");
+//    }
+//    else if (mode == SharedMemory) {
+//        LOG(ssdp, debug, "set SSDP socket mode to shared memory");
+//    }
+    else if (mode == LocalProcess) {
+        LOG(ssdp, debug, "set SSDP socket mode to local process");
+    }
+    else if (mode == Multicast) {
+        LOG(ssdp, debug, "set SSDP socket mode to multicast");
+    }
+    else if (mode & (LocalProcess | Multicast)) {
+        LOG(ssdp, debug, "set SSDP socket mode to local process and multicast");
     }
     else {
-        LOG(ssdp, debug, "set SSDP socket to multicast");
+        LOG(ssdp, error, "set SSDP socket mode to unkown mode, ignoring");
+        return;
     }
     _mode = mode;
 
@@ -540,7 +605,7 @@ SsdpSocket::setMode(SocketMode mode)
 
 
 void
-SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
+SsdpSocket::onMulticastSsdpMessage(Poco::Net::ReadableNotification* pNotification)
 {
     Poco::Net::SocketAddress sender;
     Poco::Net::Socket* pSocket = &(pNotification->socket());
@@ -549,11 +614,37 @@ SsdpSocket::onReadable(Poco::Net::ReadableNotification* pNotification)
     if (n > 0) {
         LOG(ssdp, debug, "received message from: " + sender.toString() + "" + Poco::LineEnding::NEWLINE_DEFAULT + std::string(_pBuffer, n));
 
-        _notificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), sender));
+        _ssdpSocketNotificationCenter.postNotification(new SsdpMessage(std::string(_pBuffer, n), sender));
+//        Poco::NotificationCenter::defaultCenter().postNotification(new SsdpMessage(std::string(_pBuffer, n), sender));
     }
     // FIXME: this results in a segfault
 //     delete pNotification;
 }
+
+
+void
+SsdpSocket::onLocalSsdpMessage(SsdpMessage* pMessage)
+{
+    LOG(ssdp, debug, "received message through default notification center ");
+    _ssdpSocketNotificationCenter.postNotification(pMessage);
+}
+
+
+//void
+//SsdpSocket::readSharedMemoryThread()
+//{
+//    do {
+//        LOG(ssdp, debug, "waiting for message in shared memory ...");
+//        _sharedMemoryMessageReady.wait();
+//        _sharedMemoryLock.lock();
+//        Poco::UInt16 n = *(Poco::UInt16*)_sharedMemoryBuffer.begin();
+//        std::string message = std::string(_sharedMemoryBuffer.begin() + 2, n);
+//        _sharedMemoryLock.unlock();
+//        LOG(ssdp, debug, "received message in shared memory" + Poco::LineEnding::NEWLINE_DEFAULT + message);
+////        _notificationCenter.postNotification(new SsdpMessage(message, Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS)));
+//        Poco::NotificationCenter::defaultCenter().postNotification(new SsdpMessage(message, Poco::Net::SocketAddress(SSDP_LOOP_ADDRESS)));
+//    } while(true);
+//}
 
 
 DescriptionReader::DescriptionReader()
@@ -2730,6 +2821,7 @@ HttpSocket::getServerUri()
 const std::string Socket::Null = "null";
 const std::string Socket::Local = "local";
 const std::string Socket::Public = "public";
+const std::string Socket::PublicLocal = "publicLocal";
 
 Socket::Socket()
 {
@@ -2768,16 +2860,21 @@ Socket::registerSsdpMessageHandler(const Poco::AbstractObserver& observer)
 
 
 void
-Socket::setMode(Mode mode)
+Socket::setMode(const Mode& mode)
 {
     if (mode == Null) {
         _ssdpSocket.setMode(SsdpSocket::NotConfigured);
     }
     else if (mode == Local) {
-        _ssdpSocket.setMode(SsdpSocket::Broadcast);
+//        _ssdpSocket.setMode(SsdpSocket::Broadcast);
+//        _ssdpSocket.setMode(SsdpSocket::SharedMemory);
+        _ssdpSocket.setMode(SsdpSocket::LocalProcess);
     }
     else if (mode == Public) {
         _ssdpSocket.setMode(SsdpSocket::Multicast);
+    }
+    else if (mode == PublicLocal) {
+        _ssdpSocket.setMode(SsdpSocket::LocalProcess | SsdpSocket::Multicast);
     }
 }
 
@@ -2890,7 +2987,8 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 
 const std::string DeviceManager::Stopped = "stopped";
 const std::string DeviceManager::Local = "local";
-const std::string DeviceManager::Started = "started";
+const std::string DeviceManager::Public = "public";
+const std::string DeviceManager::PublicLocal = "publicLocal";
 
 DeviceManager::DeviceManager(Socket* pSocket) :
 _pSocket(pSocket),
@@ -3012,26 +3110,26 @@ DeviceManager::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
-    if (newState == Started) {
-        if (_state != Stopped) {
-            stopSsdp();
-            stopHttp();
-        }
-        _pSocket->setMode(Socket::Public);
-        startHttp();
-        startSsdp();
-    }
-    else if (newState == Stopped) {
+
+    if (newState == Stopped) {
         stopSsdp();
         stopHttp();
         _pSocket->setMode(Socket::Null);
     }
-    else if (newState == Local) {
+    else {
         if (_state != Stopped) {
             stopSsdp();
             stopHttp();
         }
-        _pSocket->setMode(Socket::Local);
+        if (newState == Public) {
+            _pSocket->setMode(Socket::Public);
+        }
+        else if (newState == Local) {
+            _pSocket->setMode(Socket::Local);
+        }
+        else if (newState == PublicLocal) {
+            _pSocket->setMode(Socket::PublicLocal);
+        }
         startHttp();
         startSsdp();
     }
@@ -3947,9 +4045,9 @@ Controller::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
-    if (newState == Started || newState == Local) {
+
+    if (newState == Public || newState == Local || newState == PublicLocal) {
         DeviceManager::setState(newState);
-//        sendMSearch();
     }
     else if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
@@ -3990,6 +4088,7 @@ Controller::getDeviceGroup(const std::string& deviceType)
 void
 Controller::startSsdp()
 {
+    LOG(upnp, debug, "controller start sending ssdp messages");
     DeviceManager::startSsdp();
     sendMSearch();
 }
@@ -4013,7 +4112,7 @@ Controller::sendMSearch()
 
 
 void
-Controller::discoverDevice(const std::string& location)
+Controller::discoverDeviceContainer(const std::string& location)
 {
     LOG(upnp, debug, "controller discovers device location: " + location);
 
@@ -4038,16 +4137,18 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
 
     switch(pMessage->getRequestMethod()) {
     case SsdpMessage::REQUEST_NOTIFY:
+        LOG(ssdp, debug, "identified notification request");
         switch(pMessage->getNotificationSubtype()) {
         case SsdpMessage::SUBTYPE_ALIVE:
-//             LOG(ssdp, debug, "identified alive message");
+            LOG(ssdp, debug, "identified alive message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && !_deviceContainers.contains(uuid)) {
-                discoverDevice(pMessage->getLocation());
+                LOG(ssdp, debug, "identified alive message, attempting to add device container");
+                discoverDeviceContainer(pMessage->getLocation());
             }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
-             LOG(ssdp, debug, "identified byebye message");
+            LOG(ssdp, debug, "identified byebye message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && _deviceContainers.contains(uuid)) {
                 LOG(ssdp, debug, "identified byebye message, attempting to remove device container");
@@ -4057,9 +4158,9 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         }
     break;
     case SsdpMessage::REQUEST_RESPONSE:
-//         LOG(ssdp, debug, "identified m-search response");
+        LOG(ssdp, debug, "identified m-search response");
         if (!_deviceContainers.contains(uuid)) {
-            discoverDevice(pMessage->getLocation());
+            discoverDeviceContainer(pMessage->getLocation());
         }
         break;
     }
@@ -4165,15 +4266,8 @@ DeviceServer::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
-    if (newState == Started) {
-        DeviceManager::setState(Started);
-        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-                (*d)->start();
-            }
-        }
-    }
-    else if (newState == Stopped) {
+
+    if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
                 (*d)->stop();
@@ -4181,7 +4275,7 @@ DeviceServer::setState(State newState)
         }
         DeviceManager::setState(Stopped);
     }
-    else if (newState == Local) {
+    else {
         if (_state != Stopped) {
             for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
                 for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
@@ -4189,7 +4283,12 @@ DeviceServer::setState(State newState)
                 }
             }
         }
-        DeviceManager::setState(Local);
+        if (newState == Public) {
+            DeviceManager::setState(Public);
+        }
+        else if (newState == Local) {
+            DeviceManager::setState(Local);
+        }
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
                 (*d)->start();
@@ -4203,6 +4302,7 @@ DeviceServer::setState(State newState)
 void
 DeviceServer::startSsdp()
 {
+    LOG(ssdp, debug, "device server start sending ssdp messages");
     DeviceManager::startSsdp();
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
         // send advertisements once delayed for up to 100ms and continuously in random intervals
@@ -4215,6 +4315,7 @@ DeviceServer::startSsdp()
 void
 DeviceServer::stopSsdp()
 {
+    LOG(ssdp, debug, "device server stop sending ssdp messages");
     for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
         _pSocket->stopSendSsdpMessageSet(*(*it)->_pSsdpNotifyAliveMessages);
         // send device unavailable messages once with no delay
@@ -4228,6 +4329,7 @@ void
 DeviceServer::handleSsdpMessage(SsdpMessage* pMessage)
 {
     if (pMessage->getRequestMethod() == SsdpMessage::REQUEST_SEARCH) {
+        LOG(ssdp, debug, "device server reply to m-search");
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             SsdpMessage m;
             // TODO: use a skeleton to create response message
@@ -4369,12 +4471,7 @@ SsdpMessage::SsdpMessage(TRequestMethod requestMethod)
 
 SsdpMessage::SsdpMessage(const std::string& buf, const Poco::Net::SocketAddress& sender)
 {
-    // FIXME: this shouldn't be executed on every SsdpMessage ctor
     initMessageMap();
-
-    for (std::map<TRequestMethod,std::string>::iterator i = _messageMap.begin(); i != _messageMap.end(); i++) {
-        _messageConstMap[(*i).second] = (*i).first;
-    }
 
     // FIXME: what about Poco::Message header for retrieving the request method?
     std::istringstream is(buf);
@@ -4425,6 +4522,10 @@ SsdpMessage::initMessageMap()
     _messageMap[SUBTYPE_BYEBYE]            = "ssdp:byebye";
     _messageMap[SSDP_ALL]                  = "ssdp:all";
     _messageMap[UPNP_ROOT_DEVICES]         = "upnp:rootdevice";
+
+    for (std::map<TRequestMethod,std::string>::iterator i = _messageMap.begin(); i != _messageMap.end(); i++) {
+        _messageConstMap[(*i).second] = (*i).first;
+    }
 }
 
 
@@ -4518,7 +4619,10 @@ SsdpMessage::setNotificationSubtype(TRequestMethod notificationSubtype)
 SsdpMessage::TRequestMethod
 SsdpMessage::getNotificationSubtype()
 {
-    _notificationSubtype = _messageConstMap[_messageHeader["NTS"]];
+    std::string notificationSubtype = Poco::trim(_messageHeader["NTS"]);
+    LOG(ssdp, debug, "identified notification subtype: " + notificationSubtype + ", size of subtype map: " + Poco::NumberFormatter::format(_messageConstMap.size()));
+    _notificationSubtype = _messageConstMap[notificationSubtype];
+    LOG(ssdp, debug, "identified notification subtype id: " + Poco::NumberFormatter::format(_notificationSubtype));
     return _notificationSubtype;
 }
 

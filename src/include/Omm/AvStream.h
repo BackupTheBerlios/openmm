@@ -635,9 +635,9 @@ protected:
 
     void reset();
 
-    Queue<Poco::Int64>      _timeQueue;
-    bool                    _firstDecodeSuccess;
-    Poco::Int64             _startTime;
+    Queue<Poco::Int64>          _timeQueue;
+    bool                        _firstDecodeSuccess;
+    Poco::Int64                 _startTime;
 
 private:
     virtual bool init();

@@ -59,7 +59,7 @@ QtApplication::initApplication(int argc, char** argv)
     _pMainWindow->show();
 
     _pController->init();
-    _pController->setState(Omm::Controller::Started);
+    _pController->setState(Omm::Controller::Public);
 
     LOGNS(Omm, upnp, debug, "finished init qt application.");
 }

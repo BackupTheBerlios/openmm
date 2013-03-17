@@ -380,7 +380,8 @@ public:
     typedef std::string State;
     static const std::string Stopped;
     static const std::string Local;
-    static const std::string Started;
+    static const std::string Public;
+    static const std::string PublicLocal;
 
     DeviceManager(Socket* pNetworkListener);
     virtual ~DeviceManager();
@@ -455,7 +456,7 @@ private:
     void sendMSearch();
     void handleSsdpMessage(SsdpMessage* pMessage);
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
-    void discoverDevice(const std::string& location);
+    void discoverDeviceContainer(const std::string& location);
 //    void update();
 
     std::map<std::string, DeviceGroup*>        _deviceGroups;
