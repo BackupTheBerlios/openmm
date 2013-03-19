@@ -20,19 +20,19 @@
  ***************************************************************************/
 
 
-#ifndef defined_ENGINE_MEDIA_PLAYER
-#define defined_ENGINE_MEDIA_PLAYER
+#ifndef EnginAVFoundation_INCLUDED
+#define EnginAVFoundation_INCLUDED
 
 #include <Omm/Upnp.h>
 #include <Omm/UpnpAvObject.h>
 #include <Omm/UpnpAvRenderer.h>
 
 
-class MPMoviePlayerEngine : public Omm::Av::Engine
+class AVFoundationEngine : public Omm::Av::Engine
 {
 public:
-    MPMoviePlayerEngine();
-    ~MPMoviePlayerEngine();
+    AVFoundationEngine();
+    ~AVFoundationEngine();
 
     virtual void createPlayer();
     virtual void setFullscreen(bool on = true);
@@ -82,7 +82,7 @@ private:
 //    void downloadImage();
 //    void showImage();
 
-    void*                       _player;
+    void*                       _pPlayer;
     std::string                 _imageBuffer;
     std::streamsize             _imageLength;
 //    UIImageView*                _lastImageView;

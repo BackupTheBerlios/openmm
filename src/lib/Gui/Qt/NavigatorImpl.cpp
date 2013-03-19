@@ -21,7 +21,6 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
-#include <qt4/QtGui/qlineedit.h>
 
 #include "NavigatorImpl.h"
 #include "QtNavigatorPanel.h"

@@ -119,7 +119,7 @@ MPMoviePlayerEngine::createPlayer()
 void
 MPMoviePlayerEngine::setUri(const std::string& uri, const Omm::Av::ProtocolInfo& protInfo)
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+//    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     LOGNS(Omm::Av, upnpav, debug, "media player engine, set uri");
 
@@ -138,7 +138,7 @@ MPMoviePlayerEngine::setFullscreen(bool on)
 void
 MPMoviePlayerEngine::play()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+//    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     LOGNS(Omm::Av, upnpav, debug, "media player engine, play");
 
@@ -159,24 +159,28 @@ MPMoviePlayerEngine::play()
        _startTime = 0;
        _length = 0.0;
 
-       LOGNS(Omm::Av, upnpav, debug, "ENGINE alloc media player ...");
-       MediaPlayerController* pPlayer = [MediaPlayerController alloc];
-       _player = pPlayer;
-       [pPlayer setEngine:this];
+       if (!_player) {
+           LOGNS(Omm::Av, upnpav, debug, "ENGINE alloc media player ...");
+           MediaPlayerController* pPlayer = [MediaPlayerController alloc];
+           _player = pPlayer;
+           [pPlayer setEngine:this];
+       }
 
        LOGNS(Omm::Av, upnpav, debug, "ENGINE init media player ...");
-       [pPlayer performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:YES];
+//       [pPlayer performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:YES];
+       [_player performSelectorOnMainThread:@selector(initWithContentURL:) withObject:url waitUntilDone:NO];
 
-       if (pPlayer) {
-           LOGNS(Omm::Av, upnpav, debug, "ENGINE playing URL: " + _urlString);
-           [pPlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
-       }
+       LOGNS(Omm::Av, upnpav, debug, "ENGINE playing URL: " + _urlString);
+//           [pPlayer performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:YES];
+       [_player performSelectorOnMainThread:@selector(play) withObject:nil waitUntilDone:NO];
+       LOGNS(Omm::Av, upnpav, debug, "ENGINE playing started.");
+
        if (_mime.isVideo()) {
            LOGNS(Omm::Av, upnpav, debug, "ENGINE adding media player view ...");
-//           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
-           [static_cast<UIView*>(_pVisual->getWindow()) performSelectorOnMainThread:@selector(addSubview:) withObject:pPlayer.view waitUntilDone:YES];
-           pPlayer.view.frame = static_cast<UIView*>(_pVisual->getWindow()).frame;
-           LOGNS(Omm::Av, upnpav, debug, "ENGINE adding media player view finished.");
+////           [_parentView performSelectorOnMainThread:@selector(addSubview:) withObject:_player.view waitUntilDone:YES];
+//           [static_cast<UIView*>(_pVisual->getWindow()) performSelectorOnMainThread:@selector(addSubview:) withObject:pPlayer.view waitUntilDone:YES];
+//           pPlayer.view.frame = static_cast<UIView*>(_pVisual->getWindow()).frame;
+//           LOGNS(Omm::Av, upnpav, debug, "ENGINE adding media player view finished.");
        }
     }
 
@@ -218,7 +222,7 @@ MPMoviePlayerEngine::pause()
 void
 MPMoviePlayerEngine::stop()
 {
-    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
+//    Poco::ScopedLock<Poco::FastMutex> lock(_lock);
 
     if (!_player) {
         return;
@@ -239,12 +243,15 @@ MPMoviePlayerEngine::stop()
         LOGNS(Omm::Av, upnpav, debug, "ENGINE stopping media player engine ...");
         MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
-        [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
+//        [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:YES];
+        [pPlayer performSelectorOnMainThread:@selector(stop) withObject:nil waitUntilDone:NO];
 //        if (_mime.isVideo()) {
             //[_player.view removeFromSuperview];
 //            [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
 //        }
         [pPlayer release];
+        _player = 0;
+        LOGNS(Omm::Av, upnpav, debug, "ENGINE media player engine stopped.");
     }
 
     [pool release];
@@ -287,28 +294,28 @@ MPMoviePlayerEngine::seekSecond(Omm::r8 second)
 Poco::UInt64
 MPMoviePlayerEngine::getPositionByte()
 {
-
+    return 0;
 }
 
 
 float
 MPMoviePlayerEngine::getPositionPercentage()
 {
-
+    return 0.0;
 }
 
 
 Omm::r8
 MPMoviePlayerEngine::getPositionSecond()
 {
-
+    return 0.0;
 }
 
 
 Omm::r8
 MPMoviePlayerEngine::getLengthSeconds()
 {
-
+    return 0.0;
 }
 
 
@@ -354,7 +361,7 @@ MPMoviePlayerEngine::transportStateChangedNotification()
 {
     MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
     if ([pPlayer playbackState] == MPMoviePlaybackStateStopped && _mime.isVideo()) {
-        [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+// //        [pPlayer.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
     }
     transportStateChanged();
 }
@@ -364,6 +371,20 @@ void
 MPMoviePlayerEngine::volumeChangedNotification(float volume)
 {
     LOGNS(Omm::Av, upnpav, debug, "ENGINE volume changed on media player engine");
+}
+
+
+void
+MPMoviePlayerEngine::setMute(const std::string& channel, bool mute)
+{
+
+}
+
+
+bool
+MPMoviePlayerEngine::getMute(const std::string& channel)
+{
+    return false;
 }
 
 

@@ -37,6 +37,7 @@ ${OMM_RESOURCES}
 if(IPHONE)
 set(DEFAULT_ENGINE
 ommx-engine-mpmovieplayer
+#ommx-engine-avfoundation
 )
 elseif(IPHONE)
 set(DEFAULT_ENGINE

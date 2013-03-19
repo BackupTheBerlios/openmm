@@ -69,9 +69,8 @@ class SsdpSocket
     friend class Socket;
 
 public:
-    enum SocketMode {NotConfigured = 0x0000, Multicast = 0x0001, LocalProcess = 0x0010, Broadcast = 0x0100, SharedMemory = 0x1000};
-    /// socket modes Broadcast, SharedMemory, and Process are non-standard transport modes for ssdp
-    /// just for the purpose of local delivery of ssdp messages
+    enum SocketMode {NotConfigured = 0x0000, Multicast = 0x0001, LocalProcess = 0x0010};
+    /// socket mode LocalProcess broadcasts ssdp messages only within process
 
     SsdpSocket();
     ~SsdpSocket();
@@ -94,7 +93,6 @@ private:
 
     void onMulticastSsdpMessage(Poco::Net::ReadableNotification* pNotification);
     void onLocalSsdpMessage(SsdpMessage* pMessage);
-//    void readSharedMemoryThread();
 
     unsigned int                        _mode;
     Poco::Net::MulticastSocket*         _pSsdpListenerSocket;
@@ -106,17 +104,6 @@ private:
 
     Poco::Net::SocketReactor*           _pMulticastReactor;
     Poco::Thread*                       _pMulticastListenerThread;
-
-//    Poco::Net::DatagramSocket*          _pSsdpLocalListenerSocket;
-//    Poco::Net::DatagramSocket*          _pSsdpLocalSenderSocket;
-//    Poco::Net::SocketReactor*           _pBroadcastReactor;
-//    Poco::Thread*                       _pBroadcastListenerThread;
-
-//    Poco::Thread*                       _pSharedMemoryListenerThread;
-//    static Poco::NamedEvent             _sharedMemoryMessageReady;
-//    static Poco::NamedMutex             _sharedMemoryLock;
-//    Poco::SharedMemory                  _sharedMemoryBuffer;
-//    Poco::RunnableAdapter<SsdpSocket>   _readThreadRunnable;
 
     Poco::NotificationCenter            _ssdpSocketNotificationCenter;
 };

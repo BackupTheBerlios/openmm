@@ -44,6 +44,7 @@
 //        doesn't need to link against an engine.
 #ifdef __IPHONE__
 #include <Omm/X/EngineMPMoviePlayer.h>
+#include <Omm/X/EngineAVFoundation.h>
 #else
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
@@ -290,8 +291,6 @@ UpnpApplication::start()
     initLocalDevices();
     if (_enableController) {
         LOGNS(Av, upnpav, debug, "omm application starting controller ...");
-//        _pControllerWidget->setState(config().getString("application.devices", DeviceManager::Started));
-//        _pControllerWidget->setState(DeviceManager::Public);
         _pControllerWidget->setState(DeviceManager::PublicLocal);
     }
     LOGNS(Av, upnpav, debug, "omm application starting local device server ...");
@@ -544,7 +543,8 @@ UpnpApplication::setLocalRenderer()
 
     Omm::Av::Engine* pEngine;
 #ifdef __IPHONE__
-//        pEngine = new MPMoviePlayerEngine;
+        pEngine = new MPMoviePlayerEngine;
+//        pEngine = new AVFoundationEngine;
 #else
     Omm::Util::PluginLoader<Omm::Av::Engine> pluginLoader;
     try {
@@ -608,23 +608,6 @@ UpnpApplication::setLocalDeviceContainerState(const std::string& state)
 {
     _pLocalDeviceServer->setState(state);
 }
-
-
-//void
-//UpnpApplication::setControllerState(const std::string& state)
-//{
-//    _pControllerWidget->setState(state);
-//}
-
-
-//void
-//UpnpApplication::setState(const std::string& state)
-//{
-//    _pLocalDeviceServer->setState(state);
-//    if (_enableController) {
-//        _pControllerWidget->setState(state);
-//    }
-//}
 
 
 void

@@ -21,7 +21,6 @@
 
 #include <QtGui>
 #include <Poco/NumberFormatter.h>
-#include <qt4/QtGui/qcombobox.h>
 
 #include "Gui/Image.h"
 #include "SelectorImpl.h"
