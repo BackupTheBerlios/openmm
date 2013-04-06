@@ -143,7 +143,7 @@ MPMoviePlayerEngine::play()
     LOGNS(Omm::Av, upnpav, debug, "media player engine, play");
 
     // NOTE: this is called from another thread, so we need a new memory pool.
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSURL* url = [NSURL URLWithString:[[NSString alloc] initWithUTF8String:_urlString.c_str()]];
 //    CFURLRef urlRef = CFURLCreateWithString(NULL, CFStringCreateWithCharacters(NULL, (UniChar*)_urlString.data(), _urlString.size()), NULL);
 
@@ -204,7 +204,7 @@ MPMoviePlayerEngine::pause()
     }
 
     // NOTE: this is called from another thread, so we need a new memory pool.
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     MediaPlayerController* pPlayer = static_cast<MediaPlayerController*>(_player);
 
     if (_mime.isImage()) {
@@ -229,7 +229,7 @@ MPMoviePlayerEngine::stop()
     }
 
     // NOTE: this is called from another thread, so we need a new memory pool.
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
     if (_mime.isImage()) {
 //        if (_lastImageView != nil) {
@@ -329,6 +329,7 @@ MPMoviePlayerEngine::setVolume(const std::string& channel, float vol)
 float
 MPMoviePlayerEngine::getVolume(const std::string& channel)
 {
+    return 0.0;
 //    AVAudioSession *session = [AVAudioSession sharedInstance];
 }
 

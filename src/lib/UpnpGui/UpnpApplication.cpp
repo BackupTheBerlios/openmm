@@ -45,6 +45,7 @@
 #ifdef __IPHONE__
 #include <Omm/X/EngineMPMoviePlayer.h>
 #include <Omm/X/EngineAVFoundation.h>
+#include <Omm/X/MPMedia.h>
 #else
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
@@ -617,6 +618,14 @@ UpnpApplication::addLocalServer(const std::string& id)
 
     std::string pluginName = config().getString("server." + id + ".plugin", "model-webradio");
     Omm::Av::AbstractDataModel* pDataModel;
+#ifdef __IPHONE__
+    if (pluginName == "model-mpmedia") {
+        pDataModel = new MPMediaModel;
+    }
+    else {
+        return;
+    }
+#else
     Omm::Util::PluginLoader<Omm::Av::AbstractDataModel> pluginLoader;
     try {
         pDataModel = pluginLoader.load(pluginName);
@@ -626,6 +635,7 @@ UpnpApplication::addLocalServer(const std::string& id)
         return;
     }
     LOGNS(Av, upnpav, information, "container plugin: " + pluginName + " loaded successfully");
+#endif
 
     pDataModel->setCacheDirPath(Util::Home::instance()->getCacheDirPath());
     pDataModel->setMetaDirPath(Util::Home::instance()->getMetaDirPath());
