@@ -66,15 +66,15 @@ Log::Log()
 
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_DEBUG);
     _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
+    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
+    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
     _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
 
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
-    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
-    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
+//    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
+//    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
 //    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 }
@@ -219,10 +219,11 @@ Icon::retrieve(const std::string& uri)
         }
         catch (Poco::Exception& e) {
             LOG(upnp, error, "download icon failed: " + e.displayText());
+            return;
         }
         if (size == 0) {
             LOG(upnp, error, "download icon failed, no bytes received.");
-            return;
+            throw Poco::NotFoundException();
         }
         else {
             LOG(upnp, debug, "download icon success, bytes: " + Poco::NumberFormatter::format(size));
@@ -1982,6 +1983,7 @@ Service::setServiceId(std::string serviceId)
 void
 Service::setDescriptionPath(std::string descriptionPath)
 {
+    LOG(upnp, debug, "service, set description path: " + descriptionPath);
     _descriptionPath = descriptionPath;
 }
 
@@ -2360,7 +2362,6 @@ Action::appendArgument(Argument* pArgument)
 UpnpRequestHandlerFactory::UpnpRequestHandlerFactory(HttpSocket* pHttpSocket):
 _pHttpSocket(pHttpSocket)
 {
-    registerRequestHandler(std::string(""), new RequestNotFoundRequestHandler());
 }
 
 
@@ -2370,13 +2371,12 @@ UpnpRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
     LOG(http, debug, "dispatching request: " + request.getURI());
     Poco::Path path(request.getURI());
     std::string absolutePath = path.absolute("/").toString();
-    Poco::Net::HTTPRequestHandler* res;
     std::map<std::string,UpnpRequestHandler*>::iterator i = _requestHandlerMap.find(absolutePath);
     if (i != _requestHandlerMap.end()) {
         return i->second->create();
     }
     else {
-        return _requestHandlerMap[""]->create();
+        return new RequestNotFoundRequestHandler();
     }
 }
 
@@ -3124,7 +3124,6 @@ DeviceContainer::getServiceType(const std::string& serviceType)
 void
 DeviceContainer::addDevice(Device* pDevice)
 {
-//    LOG(upnp, debug, "add device: " + pDevice->getUuid());
     _devices.append(pDevice->getUuid(), pDevice);
     pDevice->setDeviceContainer(this);
     for (Device::ServiceIterator it = pDevice->beginService(); it != pDevice->endService(); ++it) {
@@ -4062,6 +4061,7 @@ void
 Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 {
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
+    LOG(upnp, debug, "controller add device container with uuid: " + uuid);
     if (!_deviceContainers.contains(uuid)) {
         addDeviceContainer(pDeviceContainer, _deviceContainers.size(), true);
         DeviceManager::addDeviceContainer(pDeviceContainer);
@@ -4086,6 +4086,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         }
 
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
+    }
+    else {
+        LOG(upnp, debug, "controller already knows device (ignoring): " + uuid);
     }
 }
 

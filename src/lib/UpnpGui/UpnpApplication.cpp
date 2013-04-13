@@ -281,6 +281,7 @@ UpnpApplication::presentedMainView()
         _pControllerWidget->setRendererVisualVisible(false);
     }
     _pControllerWidget->init();
+    initLocalDevices();
 }
 
 
@@ -289,7 +290,6 @@ UpnpApplication::start()
 {
     LOGNS(Av, upnpav, debug, "omm application starting ...");
     startAppHttpServer();
-    initLocalDevices();
     if (_enableController) {
         LOGNS(Av, upnpav, debug, "omm application starting controller ...");
         _pControllerWidget->setState(DeviceManager::PublicLocal);
