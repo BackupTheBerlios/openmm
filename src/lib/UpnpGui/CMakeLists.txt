@@ -39,6 +39,7 @@ set(DEFAULT_ENGINE
 ommx-engine-mpmovieplayer
 ommx-engine-avfoundation
 ommx-model-mpmedia
+ommx-model-iphonecamera
 )
 elseif(IPHONE)
 set(DEFAULT_ENGINE

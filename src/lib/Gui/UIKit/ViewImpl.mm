@@ -50,7 +50,7 @@
 
 - (id)initWithImpl:(Omm::Gui::ViewImpl*)pImpl
 {
-    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget initWithImpl ...");
+//    LOGNS(Omm::Gui, gui, debug, "OmmGuiViewActionTarget initWithImpl ...");
 //    if (self = [super initWithTarget:self action:@selector(handleGesture)]) {
     if (self = [super init]) {
         _pViewImpl = pImpl;

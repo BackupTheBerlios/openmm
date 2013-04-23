@@ -46,6 +46,7 @@
 #include <Omm/X/EngineMPMoviePlayer.h>
 #include <Omm/X/EngineAVFoundation.h>
 #include <Omm/X/MPMedia.h>
+#include <Omm/X/iPhoneCamera.h>
 #else
 #include <Omm/X/EngineVlc.h>
 #include <Omm/X/EnginePhonon.h>
@@ -621,6 +622,9 @@ UpnpApplication::addLocalServer(const std::string& id)
 #ifdef __IPHONE__
     if (pluginName == "model-mpmedia") {
         pDataModel = new MPMediaModel;
+    }
+    else if (pluginName == "model-iphonecamera") {
+        pDataModel = new IPhoneCameraModel;
     }
     else {
         return;
