@@ -50,7 +50,7 @@ public:
 //protected:
     void browseRootObject(bool useBlockCache = true);
     void setSort(const std::string& sortText);
-    const std::string& getSort();
+    std::string getSort();
 
     ConnectionManager* getConnectionManager();
     CtlMediaObject* getMediaObjectFromResource(const std::string& resource);
@@ -61,6 +61,7 @@ private:
     CtlMediaServerCode*   _pCtlMediaServerCode;
     CtlMediaObject*       _pRoot;
     std::string           _sortText;
+    std::string           _sortCaps;
 };
 
 

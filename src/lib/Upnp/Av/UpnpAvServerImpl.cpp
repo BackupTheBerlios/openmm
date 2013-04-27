@@ -235,6 +235,9 @@ DevContentDirectoryServerImpl::GetSearchCapabilities(std::string& SearchCaps)
     if (!_pRoot->getSearchCaps()) {
         SearchCaps = "";
     }
+    else {
+        SearchCaps = _pRoot->getSearchCaps()->toString();
+    }
 }
 
 
@@ -243,6 +246,9 @@ DevContentDirectoryServerImpl::GetSortCapabilities(std::string& SortCaps)
 {
     if (!_pRoot->getSortCaps()) {
         SortCaps = "";
+    }
+    else {
+        SortCaps = _pRoot->getSortCaps()->toString();
     }
 }
 

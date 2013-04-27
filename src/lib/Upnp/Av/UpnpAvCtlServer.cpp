@@ -97,10 +97,19 @@ CtlMediaServer::setSort(const std::string& sortText)
 }
 
 
-const std::string&
+std::string
 CtlMediaServer::getSort()
 {
-    return _sortText;
+    if (_sortCaps == "") {
+        _pCtlMediaServerCode->ContentDirectory()->GetSortCapabilities(_sortCaps);
+    }
+    if (_sortCaps != "") {
+        // TODO: check for common properties in _sortCaps and _sortText.
+        return _sortText;
+    }
+    else {
+        return "";
+    }
 }
 
 
