@@ -1692,7 +1692,6 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
 {
     LOG(upnpav, debug, "database cache table " + _cacheTableName + " get block at offset: " + Poco::NumberFormatter::format(offset) + ", count: " + Poco::NumberFormatter::format(count) + ", sort: " + sort + ", search: " + search);
 
-
     ui4 parentIndex = AbstractDataModel::INVALID_INDEX;
     ServerObject::IndexNamespace parentIndexNamespace = ServerObject::Data;
     if (pParentContainer) {
@@ -1776,6 +1775,17 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     }
     if (whereClause != "") {
         statement += " WHERE " + whereClause;
+    }
+    if (sort != "") {
+        statement += " ORDER BY ";
+        CsvList sortList(sort);
+        for (CsvList::Iterator it = sortList.begin(); it != sortList.end(); ++it) {
+            bool asc = ((*it)[0] == '+');
+            statement += getColumnName((*it).substr(1)) + (asc ? " ASC" : " DESC");
+            if (it != --sortList.end()) {
+                statement.append(",");
+            }
+        }
     }
     LOG(upnpav, debug, "database cache execute query: " + statement);
     LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex));

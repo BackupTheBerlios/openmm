@@ -60,6 +60,7 @@ public:
     virtual std::string getId();
     virtual void setId(const std::string& id);
     void setSearch(const std::string& searchText);
+    void setSort(const std::string& sortText);
 
     int fetchChildren(ui4 count = 25);
     bool fetchedAllChildren();
@@ -82,6 +83,7 @@ private:
     CtlMediaServer*                  _pServer;
     CtlMediaServerCode*              _pServerCode;
     std::string                      _searchText;
+    std::string                      _sortText;
     AbstractMediaObject*             _pParent;
 };
 

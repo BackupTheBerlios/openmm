@@ -78,6 +78,7 @@ CtlMediaServer::browseRootObject(bool useBlockCache)
     _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
     if (_pRoot->isContainer()) {
+        _pRoot->setSort("+" + AvProperty::ARTIST + ",+" + AvProperty::TITLE);
         // don't rely on childCount attribute being present in root container, so we have to fetch some children to get total child count.
         LOG(upnpav, debug, "controller root object is container, fetching children ...");
         if (!useBlockCache) {

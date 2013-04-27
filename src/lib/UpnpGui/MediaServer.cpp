@@ -96,6 +96,7 @@ MediaServerGroupWidget::activatedItem(int row)
     MediaObjectModel* pRootObject = static_cast<MediaObjectModel*>(pServer->getRootObject());
     if (pRootObject->isContainer()) {
         LOGNS(Gui, gui, debug, "media server group widget selected device has container as root object");
+//        pRootObject->setSort("+" + Av::AvProperty::ARTIST + ",+" + Av::AvProperty::TITLE);
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->setName(pServer->getFriendlyName() + " root container");
         if (!pRootObject->isRestricted() && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
@@ -109,7 +110,6 @@ MediaServerGroupWidget::activatedItem(int row)
         pContainer->_pServerGroup = this;
         pContainer->attachController(pContainer);
         pContainer->setModel(pContainer);
-        // TODO: hide search box when view is popped
         push(pContainer, pServer->getFriendlyName());
         if (pRootObject->isSearchable()) {
             showSearchBox();

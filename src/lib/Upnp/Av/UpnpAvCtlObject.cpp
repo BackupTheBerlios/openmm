@@ -44,7 +44,8 @@ MemoryMediaObject(mediaObject),
 _id(mediaObject._id),
 _pServer(mediaObject._pServer),
 _pServerCode(mediaObject._pServerCode),
-_searchText(mediaObject._searchText)
+_searchText(mediaObject._searchText),
+_sortText(mediaObject._sortText)
 {
 
 }
@@ -192,7 +193,8 @@ CtlMediaObject::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, u
     std::string objectId = getId();
     LOG(upnpav, debug, "controller media object get block of children of object with id: " + objectId\
                                     + ", number of requested children: " + Poco::NumberFormatter::format(size)\
-                                    + ", child offset: " + Poco::NumberFormatter::format(offset));
+                                    + ", child offset: " + Poco::NumberFormatter::format(offset)
+                                    + ", sort: " + _sortText);
 
     Omm::ui4 numberReturned = 0;
     if (_pServerCode) {
@@ -201,10 +203,10 @@ CtlMediaObject::getBlock(std::vector<AbstractMediaObject*>& block, ui4 offset, u
         Omm::ui4 updateId;
         try {
             if (_searchText.size()) {
-                _pServerCode->ContentDirectory()->Search(objectId, _searchText, "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+                _pServerCode->ContentDirectory()->Search(objectId, _searchText, "*", offset, size, _sortText, result, numberReturned, totalMatches, updateId);
             }
             else {
-                _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, "", result, numberReturned, totalMatches, updateId);
+                _pServerCode->ContentDirectory()->Browse(objectId, "BrowseDirectChildren", "*", offset, size, _sortText, result, numberReturned, totalMatches, updateId);
             }
         }
         catch (Poco::Exception& e){
@@ -262,6 +264,14 @@ void
 CtlMediaObject::setSearch(const std::string& searchText)
 {
     _searchText = searchText;
+}
+
+
+void
+CtlMediaObject::setSort(const std::string& sortText)
+{
+    LOG(upnpav, debug, "controller media object set sort text of object with id: " + getId() + " to: " + sortText);
+    _sortText = sortText;
 }
 
 
