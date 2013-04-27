@@ -78,7 +78,6 @@ CtlMediaServer::browseRootObject(bool useBlockCache)
     _pRoot->setServer(this);
     _pRoot->setServerController(_pCtlMediaServerCode);
     if (_pRoot->isContainer()) {
-        _pRoot->setSort("+" + AvProperty::ARTIST + ",+" + AvProperty::TITLE);
         // don't rely on childCount attribute being present in root container, so we have to fetch some children to get total child count.
         LOG(upnpav, debug, "controller root object is container, fetching children ...");
         if (!useBlockCache) {
@@ -87,6 +86,21 @@ CtlMediaServer::browseRootObject(bool useBlockCache)
         _pRoot->getChildForRow(0, useBlockCache);
     }
     LOG(upnpav, debug, "browse root object finished.");
+}
+
+
+void
+CtlMediaServer::setSort(const std::string& sortText)
+{
+    LOG(upnpav, debug, "controller media server set sort text of server: " + getFriendlyName() + " to: " + sortText);
+    _sortText = sortText;
+}
+
+
+const std::string&
+CtlMediaServer::getSort()
+{
+    return _sortText;
 }
 
 

@@ -92,11 +92,11 @@ MediaServerGroupWidget::activatedItem(int row)
     LOGNS(Gui, gui, debug, "media server group widget selected device");
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));
     DeviceGroup::selectDevice(pServer);
+    pServer->setSort("+" + Av::AvProperty::ARTIST + ",+" + Av::AvProperty::TITLE);
     pServer->browseRootObject();
     MediaObjectModel* pRootObject = static_cast<MediaObjectModel*>(pServer->getRootObject());
     if (pRootObject->isContainer()) {
         LOGNS(Gui, gui, debug, "media server group widget selected device has container as root object");
-//        pRootObject->setSort("+" + Av::AvProperty::ARTIST + ",+" + Av::AvProperty::TITLE);
         MediaContainerWidget* pContainer = new MediaContainerWidget;
         pContainer->setName(pServer->getFriendlyName() + " root container");
         if (!pRootObject->isRestricted() && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
