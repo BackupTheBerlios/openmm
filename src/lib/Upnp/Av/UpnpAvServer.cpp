@@ -1783,12 +1783,22 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             bool asc = ((*it)[0] == '+');
             statement += getColumnName((*it).substr(1)) + (asc ? " ASC" : " DESC");
             if (it != --sortList.end()) {
-                statement.append(",");
+                statement.append(", ");
             }
         }
     }
-    LOG(upnpav, debug, "database cache execute query: " + statement);
+    if (count) {
+        statement += " LIMIT " + Poco::NumberFormatter::format(offset) + "," + Poco::NumberFormatter::format(count);
+    }
+
+    ui4 totalCount = 0;
+    std::string countStatement = "SELECT COUNT(idx) FROM " + _cacheTableName + " WHERE " + whereClause;
+    LOG(upnpav, debug, "database cache execute count query: " + countStatement);
+    *_pSession << countStatement, Poco::Data::into(totalCount), Poco::Data::now;
+    LOG(upnpav, debug, "database cache count query executed, total count: " + Poco::NumberFormatter::format(totalCount));
+
     LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
+    LOG(upnpav, debug, "database cache execute query: " + statement);
     if (useParentIndex) {
         select << statement, Poco::Data::use(parentIndex);
     }
@@ -1801,13 +1811,14 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         select.execute();
         // move to offset
         recordSet.moveFirst();
-        for (ui4 r = 0; r < offset; r++) {
-            recordSet.moveNext();
-        }
+//        for (ui4 r = 0; r < offset; r++) {
+//            recordSet.moveNext();
+//        }
     }
     catch (Poco::Exception& e) {
         LOG(upnpav, warning, "database cache get block executing query and moving to offset failed: " + e.displayText());
     }
+    LOG(upnpav, debug, "database cache query executed, creating " + Poco::NumberFormatter::format(recordSet.rowCount()) + " media objects");
     if (count == 0) {
         // UPnP AV CDS specs, count == 0 then request all children
         count = recordSet.rowCount();
@@ -1845,7 +1856,9 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             LOG(upnpav, warning, "database cache get block data for row " + Poco::NumberFormatter::format(r) + " failed: " + e.displayText());
         }
     }
-    return recordSet.rowCount();
+    LOG(upnpav, debug, "database cache block retrieved");
+    return totalCount;
+//    return recordSet.rowCount();
 }
 
 
