@@ -92,7 +92,7 @@ MediaServerGroupWidget::activatedItem(int row)
     LOGNS(Gui, gui, debug, "media server group widget selected device");
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getDevice(row));
     DeviceGroup::selectDevice(pServer);
-    pServer->setSort("+" + Av::AvProperty::ARTIST + ",+" + Av::AvProperty::TITLE);
+    pServer->setSort("+" + Av::AvProperty::ARTIST + ",+" + Av::AvProperty::ALBUM + ",+" + Av::AvProperty::ORIGINAL_TRACK_NUMBER + ",+" + Av::AvProperty::TITLE);
     pServer->browseRootObject();
     MediaObjectModel* pRootObject = static_cast<MediaObjectModel*>(pServer->getRootObject());
     if (pRootObject->isContainer()) {

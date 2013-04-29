@@ -1134,8 +1134,7 @@ ServerContainer::updateCache()
             }
         }
         // TODO: also update user objects.
-        // TODO: virtual object update does not sync but rewrites everything
-//        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
+        _pObjectCache->updateVirtualObjects(_pVirtualContainerCache);
     }
     else {
         LOG(upnpav, debug, "no object cache, no update.");
@@ -1627,29 +1626,21 @@ DatabaseCache::setCacheFilePath(const std::string& cacheFilePath)
     catch (Poco::Exception& e) {
         LOG(upnpav, warning, "database cache creating object cache table failed: " + e.displayText());
     }
-    try {
-        *_pSession << "CREATE UNIQUE INDEX " + _cacheTableName + "_idx ON " + _cacheTableName + " (idx)", Poco::Data::now;
-    }
-    catch (Poco::Exception& e) {
-        LOG(upnpav, warning, "database cache creating index on object cache table failed: " + e.displayText());
-    }
+    createDatabaseIndices();
 }
 
 
 ui4
 DatabaseCache::rowCount()
 {
-    Poco::Data::Statement select(*_pSession);
-    std::string statement = "SELECT idx FROM " + _cacheTableName;
-    select << statement;
-    Poco::Data::RecordSet recordSet(select);
+    ui4 totalCount = 0;
     try {
-        select.execute();
+        *_pSession << "SELECT COUNT(idx) FROM " + _cacheTableName, Poco::Data::into(totalCount), Poco::Data::now;
     }
     catch (Poco::Exception& e) {
         LOG(upnpav, warning, "database cache get row count failed: " + e.displayText());
     }
-    return recordSet.rowCount();
+    return totalCount;
 }
 
 
@@ -1701,6 +1692,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
 
     LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex) + ", parent class: " + pParentContainer->getClass());
 
+    // basic query statement
     Poco::Data::Statement select(*_pSession);
     std::string statement = "SELECT idx, class, xml FROM " + _cacheTableName;
     std::string whereClause = "";
@@ -1736,6 +1728,7 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         return pParentContainer->_childrenPlaylistIndices.size();
     }
 
+    // handle search clause
     if (search != "*") {
         DatabaseCacheSearchCriteria searchCrit(this);
         try {
@@ -1745,6 +1738,8 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             LOG(upnpav, error, "database cache search error parsing search criteria: " + e.displayText());
         }
     }
+
+    // handle layout of media container
     if (_pServerContainer->getLayout() == ServerContainer::Flat) {
         LOG(upnpav, debug, "database cache server container layout: Flat");
         whereClause += std::string(whereClause == "" ? "" : " AND") + " class <> \"" + AvClass::className(AvClass::CONTAINER) + "\"";
@@ -1776,6 +1771,8 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     if (whereClause != "") {
         statement += " WHERE " + whereClause;
     }
+
+    // handle sort clause
     if (sort != "") {
         statement += " ORDER BY ";
         CsvList sortList(sort);
@@ -1787,16 +1784,30 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
             }
         }
     }
-    if (count) {
-        statement += " LIMIT " + Poco::NumberFormatter::format(offset) + "," + Poco::NumberFormatter::format(count);
+
+    // get total count
+    ui4 totalCount = 0;
+    if (_totalCountQueryCache.find(whereClause) == _totalCountQueryCache.end()) {
+        LOG(upnpav, debug, "database cache execute total count query");
+        *_pSession << "SELECT COUNT(idx) FROM " + _cacheTableName + " WHERE " + whereClause, Poco::Data::into(totalCount), Poco::Data::now;
+        LOG(upnpav, debug, "database cache total count query executed, number of objects: " + Poco::NumberFormatter::format(totalCount));
+        _totalCountQueryCache[whereClause] = totalCount;
+    }
+    else {
+        totalCount = _totalCountQueryCache[whereClause];
     }
 
-    ui4 totalCount = 0;
-    std::string countStatement = "SELECT COUNT(idx) FROM " + _cacheTableName + " WHERE " + whereClause;
-    LOG(upnpav, debug, "database cache execute count query: " + countStatement);
-    *_pSession << countStatement, Poco::Data::into(totalCount), Poco::Data::now;
-    LOG(upnpav, debug, "database cache count query executed, total count: " + Poco::NumberFormatter::format(totalCount));
+    // UPnP AV CDS specs: if count == 0 then request all children, otherwise retrieve count media objects
+    if (count) {
+        statement += " LIMIT " + Poco::NumberFormatter::format(count);
+    }
+    else {
+        statement += " LIMIT " + Poco::NumberFormatter::format(totalCount - offset);
+    }
+    // jump to given offset
+    statement += " OFFSET " + Poco::NumberFormatter::format(offset);
 
+    // execute query and return result
     LOG(upnpav, debug, "database cache parent index: " + Poco::NumberFormatter::format(parentIndex));
     LOG(upnpav, debug, "database cache execute query: " + statement);
     if (useParentIndex) {
@@ -1811,19 +1822,12 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
         select.execute();
         // move to offset
         recordSet.moveFirst();
-//        for (ui4 r = 0; r < offset; r++) {
-//            recordSet.moveNext();
-//        }
     }
     catch (Poco::Exception& e) {
         LOG(upnpav, warning, "database cache get block executing query and moving to offset failed: " + e.displayText());
     }
     LOG(upnpav, debug, "database cache query executed, creating " + Poco::NumberFormatter::format(recordSet.rowCount()) + " media objects");
-    if (count == 0) {
-        // UPnP AV CDS specs, count == 0 then request all children
-        count = recordSet.rowCount();
-    }
-    for (ui4 r = 0; r < count; r++) {
+    for (ui4 r = 0; r < recordSet.rowCount(); r++) {
         // get block
         try {
             ui4 index;
@@ -1858,7 +1862,6 @@ DatabaseCache::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer*
     }
     LOG(upnpav, debug, "database cache block retrieved");
     return totalCount;
-//    return recordSet.rowCount();
 }
 
 
@@ -1989,6 +1992,11 @@ DatabaseCache::addPropertiesForQuery(CsvList propertyList)
 void
 DatabaseCache::updateVirtualObjects(ServerObjectCache* pVirtualObjectCache)
 {
+    clearQueryCache();
+
+    // FIXME: virtual object update does not sync but rewrites everything
+    return;
+
     ui4 index = 0;
     for (CsvList::Iterator it = _queryPropertyNames.begin(); it != _queryPropertyNames.end(); ++it) {
         if (*it == AvProperty::TITLE) {
@@ -2064,6 +2072,31 @@ DatabaseCache::getColumnType(const std::string& propertyName)
     else {
         return "VARCHAR";
     }
+}
+
+
+void
+DatabaseCache::createDatabaseIndices()
+{
+    std::string indexedProps = "";
+    for (int i = 0; i < _propertyColumnNames.size() - 2; ++i) {
+        indexedProps += "prop" + Poco::NumberFormatter::format(i) + ",";
+    }
+    indexedProps += "title";
+    try {
+        *_pSession << "CREATE UNIQUE INDEX idx ON " + _cacheTableName + "(idx)", Poco::Data::now;
+        *_pSession << "CREATE INDEX prop_idx ON " + _cacheTableName + "(" + indexedProps + ")", Poco::Data::now;
+    }
+    catch (Poco::Exception& e) {
+        LOG(upnpav, warning, "database cache creating index on object cache table failed: " + e.displayText());
+    }
+}
+
+
+void
+DatabaseCache::clearQueryCache()
+{
+    _totalCountQueryCache.clear();
 }
 
 

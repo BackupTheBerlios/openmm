@@ -373,6 +373,8 @@ public:
 private:
     std::string getColumnName(const std::string& propertyName);
     std::string getColumnType(const std::string& propertyName);
+    void createDatabaseIndices();
+    void clearQueryCache();
 
     Poco::Data::Session*                _pSession;
     std::string                         _cacheFilePath;
@@ -381,6 +383,7 @@ private:
     std::map<std::string, std::string>  _propertyColumnNames;
     std::map<std::string, std::string>  _propertyColumnTypes;
     ServerObject::IndexNamespace        _indexNamespace;
+    std::map<std::string, ui4>          _totalCountQueryCache;
 };
 
 
