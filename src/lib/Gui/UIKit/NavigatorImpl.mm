@@ -175,7 +175,7 @@ NavigatorViewImpl::showSearchBox(bool show)
     if (!show) {
         return;
     }
-    
+
     UINavigationController* pNativeViewController = static_cast<UINavigationController*>(getNativeViewController());
 
     UISearchBar* searchBar = [[UISearchBar alloc] init];

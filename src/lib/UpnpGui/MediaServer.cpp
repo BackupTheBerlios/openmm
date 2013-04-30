@@ -129,12 +129,20 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 
     MediaServerDevice* pServer = static_cast<MediaServerDevice*>(getSelectedDevice());
     if (pServer) {
-        // get (object id of) container, that is on top of navigator
-        MediaContainerWidget* pContainer = static_cast<MediaContainerWidget*>(getVisibleView());
+        // get container, that is on top of navigator
+        MediaContainerWidget* pContainer = dynamic_cast<MediaContainerWidget*>(getVisibleView());
+        if (!pContainer) {
+            LOGNS(Gui, gui, error, "visible view is no container");
+            return;
+        }
         Av::CtlMediaObject* pObject = pContainer->_pObjectModel;
 
         std::string searchExp = Poco::replace(_searchString, std::string("%s"), "\"" + searchText + "\"");
         LOGNS(Gui, gui, debug, "search expression: " + searchExp);
+        if (!pObject) {
+            LOGNS(Gui, gui, error, "search failed, null object");
+            return;
+        }
         pObject->setSearch(searchExp);
 
         // clear cache (reset data model)

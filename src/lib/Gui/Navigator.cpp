@@ -72,7 +72,7 @@ NavigatorView::popToRoot()
 View*
 NavigatorView::getVisibleView()
 {
-    static_cast<NavigatorViewImpl*>(_pImpl)->getVisibleView();
+    return static_cast<NavigatorViewImpl*>(_pImpl)->getVisibleView();
 }
 
 
