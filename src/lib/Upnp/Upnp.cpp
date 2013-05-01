@@ -3448,9 +3448,7 @@ Device::Device() :
 _pDeviceContainer(0),
 _pDeviceData(0),
 _pDevDeviceCode(0),
-_pCtlDeviceCode(0),
-//_featureSubscribeToEvents(true)
-_featureSubscribeToEvents(false)
+_pCtlDeviceCode(0)
 {
 }
 
@@ -3503,9 +3501,6 @@ Device::initStateVars()
 void
 Device::controllerSubscribeEventing()
 {
-    if (!_featureSubscribeToEvents) {
-        return;
-    }
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
         _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
@@ -3525,9 +3520,6 @@ Device::controllerSubscribeEventing()
 void
 Device::controllerUnsubscribeEventing()
 {
-    if (!_featureSubscribeToEvents) {
-        return;
-    }
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         try {
             (*s)->sendCancelSubscriptionRequest();
@@ -3917,7 +3909,9 @@ CtlDeviceCode::init()
 
 
 Controller::Controller() :
-DeviceManager(new Socket)
+DeviceManager(new Socket),
+_featureSubscribeToEvents(true)
+//_featureSubscribeToEvents(false)
 {
 }
 
@@ -3940,15 +3934,36 @@ Controller::setState(State newState)
         DeviceManager::setState(newState);
     }
     else if (newState == Stopped) {
-        for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-            for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-                (*d)->controllerUnsubscribeEventing();
-            }
-        }
+        unsubscribeAllDevices();
         DeviceManager::clear();
         DeviceManager::setState(Stopped);
     }
     LOG(upnp, debug, "controller state change finished");
+}
+
+
+void
+Controller::subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer)
+{
+    if (_featureSubscribeToEvents) {
+        for(DeviceContainer::DeviceIterator d = pDeviceContainer->beginDevice(); d != pDeviceContainer->endDevice(); ++d) {
+            (*d)->controllerSubscribeEventing();
+        }
+    }
+}
+
+
+void
+Controller::unsubscribeAllDevices()
+{
+    if (!_featureSubscribeToEvents) {
+        return;
+    }
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            (*d)->controllerUnsubscribeEventing();
+        }
+    }
 }
 
 
@@ -4077,7 +4092,9 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
 
                 LOG(upnp, information, "controller adds device, friendly name: " + pTypedDevice->getFriendlyName() + ", uuid: " + pTypedDevice->getUuid());
                 pTypedDevice->addCtlDeviceCode();
-                pTypedDevice->controllerSubscribeEventing();
+//                if (_featureSubscribeToEvents) {
+//                    pTypedDevice->controllerSubscribeEventing();
+//                }
                 pTypedDevice->initController();
 
                 pDeviceGroup->addDevice(pTypedDevice);
@@ -4086,6 +4103,7 @@ Controller::addDeviceContainer(DeviceContainer* pDeviceContainer)
         }
 
         addDeviceContainer(pDeviceContainer, _deviceContainers.size() - 1, false);
+        subscribeAllDevicesInContainer(pDeviceContainer);
     }
     else {
         LOG(upnp, debug, "controller already knows device (ignoring): " + uuid);

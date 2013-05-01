@@ -431,7 +431,8 @@ public:
     virtual ~Controller();
 
     void setState(State newState);
-
+    void subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer);
+    void unsubscribeAllDevices();
     void registerDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
@@ -460,6 +461,7 @@ private:
 //    void update();
 
     std::map<std::string, DeviceGroup*>        _deviceGroups;
+    bool                                       _featureSubscribeToEvents;
 };
 
 
@@ -539,7 +541,6 @@ private:
     DevDeviceCode*                      _pDevDeviceCode;
     CtlDeviceCode*                      _pCtlDeviceCode;
     Poco::NotificationCenter            _notificationCenter;
-    bool                                _featureSubscribeToEvents;
 };
 
 
