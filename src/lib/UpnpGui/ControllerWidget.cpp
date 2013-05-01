@@ -99,23 +99,29 @@ ControllerWidget::ControllerWidget(UpnpApplication* pApplication) :
 //ClusterView(0, Gui::ClusterView::Generic),
 _pApplication(pApplication)
 {
-    LOGNS(Gui, gui, debug, "controller widget register device groups ...");
+    LOGNS(Gui, gui, debug, "controller widget ctor ...");
 
-    if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+    if (!_pApplication->getIgnoreConfig() && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
+        LOGNS(Gui, gui, debug, "controller widget create setup view ...");
         _pSetup = new GuiSetup(_pApplication);
         _pSetup->setName("Setup");
         insertView(_pSetup, "Setup");
     }
 
-    _pVisual = new GuiVisual;
-    insertView(_pVisual, "Video");
+    if (!_pApplication->getIgnoreConfig()) {
+        LOGNS(Gui, gui, debug, "controller widget create visual ...");
+        _pVisual = new GuiVisual;
+        insertView(_pVisual, "Video");
+    }
 
+    LOGNS(Gui, gui, debug, "controller widget create renderer device group ...");
     _pMediaRendererGroupWidget = new MediaRendererGroupWidget(this);
     registerDeviceGroup(_pMediaRendererGroupWidget);
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         insertView(_pMediaRendererGroupWidget, "Player");
     }
 
+    LOGNS(Gui, gui, debug, "controller widget create server browser ...");
     Omm::Gui::SplitterView* pSplitterView = new Omm::Gui::SplitterView(0, Omm::Gui::View::Vertical);
     pSplitterView->setName("Media");
     _pMediaServerGroupWidget = new MediaServerGroupWidget;
@@ -146,7 +152,8 @@ _pApplication(pApplication)
 //    setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "[0,0] Media,Setup [0,1] Player [1,0] List [1,1] Video"));
     if (!Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
 //        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media,Player,Setup,Video {800;480} {1,00} {1,00}"));
-        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media [1,0] Player [1,1] Setup,Video {800;480} {0,5;0,5} {1,00} {0,34;0,65}"));
+//        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media [1,0] Player [1,1] Setup,Video {800;480} {0,5;0,5} {1,00} {0,34;0,65}"));
+        setConfiguration(Poco::Util::Application::instance().config().getString("application.cluster", "col [0,0] Media [1,0] Player {800;480} {0,5;0,5} {1,00} {1,00}"));
     }
     else {
         setConfiguration("[0,0] Media,Video {800;480} {1,00} {1,00}");
@@ -158,6 +165,8 @@ _pApplication(pApplication)
 //    Poco::NotificationCenter::defaultCenter().addObserver(Poco::Observer<ControllerWidget, PlaylistNotification>(*this, &ControllerWidget::newPlaylist));
     attachController(new KeyController(this));
     attachController(new ControllerWidgetClusterController(this));
+
+    LOGNS(Gui, gui, debug, "controller widget ctor finished.");
 }
 
 

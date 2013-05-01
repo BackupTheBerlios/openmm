@@ -69,6 +69,7 @@ public:
 
     void setLockInstance(bool lock = true);
     void setIgnoreConfig(bool ignore = true);
+    bool getIgnoreConfig();
     void enableController(bool enable = true);
     void showRendererVisualOnly(bool show = true);
     std::string getAppHttpUri();

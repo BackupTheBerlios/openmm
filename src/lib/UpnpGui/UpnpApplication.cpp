@@ -341,6 +341,13 @@ UpnpApplication::setIgnoreConfig(bool ignore)
 }
 
 
+bool
+UpnpApplication::getIgnoreConfig()
+{
+    return _ignoreConfig;
+}
+
+
 void
 UpnpApplication::printConfig()
 {
