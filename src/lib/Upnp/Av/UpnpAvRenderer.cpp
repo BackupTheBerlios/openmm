@@ -176,7 +176,7 @@ Engine::seekTrack(ui4 trackNumber)
 {
     LOG(upnpav, debug, "engine seek to track number: " + Poco::NumberFormatter::format(trackNumber));
     _trackNumberInPlaylist = trackNumber;
-    if (_trackNumberInPlaylist && _trackNumberInPlaylist < _playlist.size()) {
+    if (_trackNumberInPlaylist >= 0 && _trackNumberInPlaylist < _playlist.size()) {
         setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
     }
     else {
