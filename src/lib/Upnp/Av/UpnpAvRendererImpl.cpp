@@ -80,9 +80,11 @@ DevAVTransportRendererImpl::SetAVTransportURI(const ui4& InstanceID, const std::
     if (transportState == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
         _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
     }
-    if (_getCurrentTrackURI() == CurrentURI) {
-        return;
-    }
+    // NOTE: always have to set AVTransportURI, even if it didn't change since last call, as for example
+    // the order in a playlist can change while the playlist uri remains the same.
+//    if (_getCurrentTrackURI() == CurrentURI) {
+//        return;
+//    }
     _setCurrentTrackURI(CurrentURI);
 /*
     2.2.16.CurrentTrackMetaData

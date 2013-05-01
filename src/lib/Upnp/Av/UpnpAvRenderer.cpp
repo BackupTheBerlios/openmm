@@ -209,7 +209,7 @@ Engine::previousTrack()
         _trackNumberInPlaylist--;
         _duration = 0.0;
         LOG(upnpav, debug, "engine skip to previous track number: " + Poco::NumberFormatter::format(_trackNumberInPlaylist));
-        if (_trackNumberInPlaylist) {
+        if (_trackNumberInPlaylist >= 0) {
             setAtomicUriEngine(_playlist[_trackNumberInPlaylist]);
         }
         else {
