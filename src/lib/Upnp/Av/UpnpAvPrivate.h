@@ -86,10 +86,10 @@ public:
 
 protected:
     void notify();
-    void write();
+    void write(bool initial = false);
     void writeMessageHeader();
     void writeMessageClose();
-    void writeMessageData();
+    void writeMessageData(bool initial);
     void clear();
 
     virtual void writeSchemeAttribute() = 0;

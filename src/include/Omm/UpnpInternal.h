@@ -188,7 +188,8 @@ private:
 };
 
 
-class Service {
+class Service
+{
 public:
     Service();
     ~Service();

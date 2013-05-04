@@ -682,10 +682,10 @@ LastChange::notify()
 
 
 void
-LastChange::write()
+LastChange::write(bool initial)
 {
     writeMessageHeader();
-    writeMessageData();
+    writeMessageData(initial);
     writeMessageClose();
 }
 
@@ -721,7 +721,7 @@ LastChange::writeMessageClose()
 
 
 void
-LastChange::writeMessageData()
+LastChange::writeMessageData(bool initial)
 {
     LOG(upnpav, debug, "last change write message header data ...");
 
@@ -732,7 +732,12 @@ LastChange::writeMessageData()
         pInstanceId->setAttributeNode(pInstanceIdVal);
         _pMessage->appendChild(pInstanceId);
 
-        _changeSet[instanceId].writeStateVar(pInstanceId);
+        if (initial) {
+            _initialSet[instanceId].writeStateVar(pInstanceId);
+        }
+        else {
+            _changeSet[instanceId].writeStateVar(pInstanceId);
+        }
     }
 
     LOG(upnpav, debug, "last change write message header data finished.");
@@ -755,6 +760,13 @@ void
 LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, Variant& val)
 {
     _changeSet[InstanceID].setStateVarAttribute(name, attr, val);
+
+    // also save all state variable changes to _initialSet for the initial event message
+    _initialSet[InstanceID].setStateVarAttribute(name, attr, val);
+    write(true);
+    // need to set the value of state var, because when a controller subscribes eventing
+    // the initial event message must supply all current values of all non-evented state variables
+    _pServiceRef->setStateVar<std::string>("LastChange", _message);
 }
 
 
