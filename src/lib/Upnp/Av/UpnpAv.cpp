@@ -684,6 +684,7 @@ LastChange::notify()
 void
 LastChange::write(bool initial)
 {
+    LOG(upnpav, debug, "last change write message initial: " + std::string(initial ? "yes" : "no"));
     writeMessageHeader();
     writeMessageData(initial);
     writeMessageClose();
@@ -766,7 +767,8 @@ LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name,
     write(true);
     // need to set the value of state var, because when a controller subscribes eventing
     // the initial event message must supply all current values of all non-evented state variables
-    _pServiceRef->setStateVar<std::string>("LastChange", _message);
+    // Don't queue LastChange variable here, otherwise it appears twice in the event message
+    _pServiceRef->setStateVar<std::string>("LastChange", _message, false);
 }
 
 

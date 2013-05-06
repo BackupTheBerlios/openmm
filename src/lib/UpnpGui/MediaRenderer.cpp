@@ -93,7 +93,8 @@ MediaRendererDevice::initController()
     _trackName.setLabel("- no track -");
     _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");
     _positionLabel.setLabel("00:00:00/00:00:00");
-    _volume.setValue(getVolume());
+//    _volume.setValue(getVolume());
+    _volume.setValue(0);
     _position.setValue(0);
 }
 

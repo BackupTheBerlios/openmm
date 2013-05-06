@@ -235,7 +235,7 @@ public:
     void setControlPath(std::string controlPath);
     void setEventSubscriptionPath(std::string eventPath);
     void setDeviceData(DeviceData* pDeviceData);
-    template<typename T> void setStateVar(std::string key, const T& val);
+    template<typename T> void setStateVar(std::string key, const T& val, bool queue = true);
 
     void addAction(Action* pAction);
     void addStateVar(StateVar* pStateVar);
@@ -295,11 +295,14 @@ Service::getStateVar(const std::string& key)
 
 template<typename T>
 void
-Service::setStateVar(std::string key, const T& val)
+Service::setStateVar(std::string key, const T& val, bool queue)
 {
    Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
 
     _stateVars.setValue(key, val);
+    if (!queue) {
+        return;
+    }
     StateVar& stateVar = _stateVars.get(key);
 
     if (_eventingEnabled && stateVar.getSendEvents()) {
