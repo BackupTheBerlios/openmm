@@ -496,6 +496,16 @@ DevRenderingControlRendererImpl::initStateVars()
 {
     // FIXME: init all engine instances instead of the state vars in the service tree.
 
+    // get initial volume from engine
+    ui4 instanceID = 0;
+    std::string channel = AvChannel::MASTER;
+    ui2 initialVolume = _engines[instanceID]->getVolume(channel);
+    // and set LastChange variable to initial value
+    // FIXME: LastChange better should collect all non evented state var values for initial event message
+    Variant val;
+    val.setValue(initialVolume);
+    _pLastChange->setChannelStateVar(instanceID, channel, RenderingControlEventedStateVar::VOLUME, val);
+
 //    _setPresetNameList("");
 //    _setBrightness(0);
 //    _setContrast(0);
@@ -771,7 +781,7 @@ DevRenderingControlRendererImpl::SetMute(const ui4& InstanceID, const std::strin
 void
 DevRenderingControlRendererImpl::GetVolume(const ui4& InstanceID, const std::string& Channel, ui2& CurrentVolume)
 {
-    // we don't cache values in the state vars but retreive them directly from the enginge.
+    // we don't cache values in the state vars but retreive them directly from the engine.
     // reason: we would need instances of the Service tree for each instanceID and channel.
 //    CurrentVolume = _getVolume();
     LOG(upnpav, debug, "get volume of engine instance: " + Poco::NumberFormatter::format(InstanceID));

@@ -197,7 +197,7 @@ void
 CtlMediaRenderer::volumeChanged(int value)
 {
     try {
-        _pCtlMediaRendererCode->RenderingControl()->SetVolume(0, "Master", value);
+        _pCtlMediaRendererCode->RenderingControl()->SetVolume(0, AvChannel::MASTER, value);
     }
     catch (Poco::Exception e){
 //        error(e.message());
@@ -210,7 +210,7 @@ CtlMediaRenderer::getVolume()
 {
     ui2 value;
     try {
-        _pCtlMediaRendererCode->RenderingControl()->GetVolume(0, "Master", value);
+        _pCtlMediaRendererCode->RenderingControl()->GetVolume(0, AvChannel::MASTER, value);
     }
     catch (Poco::Exception e){
 //        error(e.message());
@@ -223,7 +223,7 @@ void
 CtlMediaRenderer::setMute(bool mute)
 {
     try {
-        _pCtlMediaRendererCode->RenderingControl()->SetMute(0, "Master", mute);
+        _pCtlMediaRendererCode->RenderingControl()->SetMute(0, AvChannel::MASTER, mute);
     }
     catch (Poco::Exception e){
 //        error(e.message());
@@ -236,7 +236,7 @@ CtlMediaRenderer::getMute()
 {
     bool value;
     try {
-        _pCtlMediaRendererCode->RenderingControl()->GetMute(0, "Master", value);
+        _pCtlMediaRendererCode->RenderingControl()->GetMute(0, AvChannel::MASTER, value);
     }
     catch (Poco::Exception e){
 //        error(e.message());
