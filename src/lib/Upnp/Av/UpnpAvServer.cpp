@@ -2298,6 +2298,15 @@ AbstractDataModel::getPath(ui4 index)
 }
 
 
+ui4
+AbstractDataModel::getIndexFromUri(const std::string& uri)
+{
+    Poco::URI resUri(uri);
+    std::string resPath = resUri.getPath();
+    return Poco::NumberParser::parse(Poco::StringTokenizer(resPath, "$")[0].substr(1));
+}
+
+
 AbstractDataModel::IndexMapIterator
 AbstractDataModel::beginIndex()
 {
@@ -2399,7 +2408,21 @@ AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ServerContai
 {
     // TODO: should be faster with a method getIndexBlock(), implemented with an additional std::vector<ui4> as a sorted index list
     // TODO: implement building sort indices and row filtering in memory without data base, currently sort and search are ignored
-    if (sort != "" || search != "*") {
+    LOG(upnpav, debug, "abstract data model search: " + search);
+    if (search != "*") {
+        Poco::StringTokenizer searchTokens(search, " ");
+        if (searchTokens.count() == 3 && searchTokens[0] == "res") {
+            ui4 index = getIndexFromUri(search);
+            ServerObject* pObject = getMediaObject(getPath(index));
+            pObject->setIndex(index);
+            block.push_back(pObject);
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    else if (sort != "") {
         return 0;
     }
     if (count == 0) {

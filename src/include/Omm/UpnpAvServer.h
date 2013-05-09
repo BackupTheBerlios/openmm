@@ -450,6 +450,7 @@ public:
     virtual bool hasIndex(ui4 index);
     virtual ui4 getIndex(const std::string& path);
     virtual std::string getPath(ui4 index);
+    static ui4 getIndexFromUri(const std::string& uri);
 
     typedef std::map<ui4, std::string>::const_iterator IndexMapIterator;
     IndexMapIterator beginIndex();
