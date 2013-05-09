@@ -293,7 +293,7 @@ class Connection
 {
 public:
 //    Connection(Device* pServer, Device* pRenderer);
-    Connection(const std::string& serverUuid, const std::string& rendererUuid);
+    Connection(const std::string& serverUuid, const std::string& rendererUuid, const std::string& serverServiceType = ServiceType::CD_1, const std::string& rendererServiceType = ServiceType::AVT_1);
 
     i4 getAvTransportId();
     ConnectionPeer& getRenderer();
@@ -320,13 +320,16 @@ public:
     ConnectionIterator endConnection();
 
     virtual void addConnection(Connection* pConnection, const std::string& protInfo);
-    void removeConnection(ui4 connectionId);
-    Connection* getConnection(ui4 connectionId);
-    int getConnectionCount();
+    virtual void removeConnection(ui4 connectionId);
+    virtual Connection* getConnection(ui4 connectionId);
+    virtual CsvList getConnectionIds();
+    virtual int getConnectionCount();
 
-private:
+protected:
     // device that owns this connection manager
     Device*                     _pDevice;
+
+private:
     std::map<ui4, Connection*>  _connections;
 };
 

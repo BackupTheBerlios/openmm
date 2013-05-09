@@ -61,6 +61,9 @@ public:
     CtlConnectionManagerImpl(Device* pLocalDevice) : ConnectionManager(pLocalDevice), _pThisDevice(pLocalDevice) {}
 
     virtual void addConnection(Connection* pConnection, const std::string& protInfo);
+    virtual Connection* getConnection(ui4 connectionId);
+    virtual CsvList getConnectionIds();
+    virtual int getConnectionCount();
 
 private:
     virtual void _ansGetProtocolInfo(const std::string& Source, const std::string& Sink);

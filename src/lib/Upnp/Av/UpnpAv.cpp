@@ -318,11 +318,11 @@ CsvList::toString()
 }
 
 
-Connection::Connection(const std::string& serverUuid, const std::string& rendererUuid) :
+Connection::Connection(const std::string& serverUuid, const std::string& rendererUuid, const std::string& serverServiceType, const std::string& rendererServiceType) :
 _pull(false)
 {
-    _server._managerId = ConnectionManagerId(serverUuid, "serviceId");
-    _renderer._managerId = ConnectionManagerId(rendererUuid, "serviceId");
+    _server._managerId = ConnectionManagerId(serverUuid, serverServiceType);
+    _renderer._managerId = ConnectionManagerId(rendererUuid, rendererServiceType);
 }
 
 
@@ -461,6 +461,11 @@ void
 ConnectionManager::addConnection(Connection* pConnection, const std::string& protInfo)
 {
     ui4 connectionId = pConnection->getThisPeer(_pDevice->getDeviceType()).getConnectionId();
+    LOG(upnpav, debug, "ConnectionManager add connection id: " + Poco::NumberFormatter::format(connectionId) + ", count connections: " + Poco::NumberFormatter::format(_connections.size()) + ", prot info: " + protInfo);
+    if (_connections.find(connectionId) != _connections.end()) {
+        // connectionId already present, replace connection (and delete old one)
+        delete _connections[connectionId];
+    }
     _connections[connectionId] = pConnection;
 }
 
@@ -477,6 +482,18 @@ Connection*
 ConnectionManager::getConnection(ui4 connectionId)
 {
     return _connections[connectionId];
+}
+
+
+CsvList
+ConnectionManager::getConnectionIds()
+{
+    CsvList connectionIds;
+
+    for (ConnectionIterator it = beginConnection(); it != endConnection(); ++it) {
+        connectionIds.append(Poco::NumberFormatter::format(it->first));
+    }
+    return connectionIds;
 }
 
 

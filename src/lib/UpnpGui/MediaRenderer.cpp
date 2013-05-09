@@ -109,8 +109,14 @@ MediaRendererDevice::newUri(const std::string& uri)
     }
     LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" new uri: " + uri);
     Av::Connection* pConnection = getConnectionManager()->getConnection(0);
+    LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" connection count: " + Poco::NumberFormatter::format(getConnectionManager()->getConnectionCount()));
+    for (Av::ConnectionManager::ConnectionIterator it = getConnectionManager()->beginConnection(); it != getConnectionManager()->endConnection(); ++it) {
+        LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" found connection id: " + Poco::NumberFormatter::format(it->first) + ", connection: " + Poco::NumberFormatter::format(it->second));
+    }
     if (pConnection) {
         std::string serverUuid = pConnection->getServer().getConnectionManagerId().getUuid();
+        delete pConnection;
+        LOGNS(Gui, gui, debug, "media renderer device \"" + getFriendlyName() + "\" connected to server with uuid: " + serverUuid);
         MediaServerDevice* pServer = _pControllerWidget->getServer(serverUuid);
         if (pServer) {
             LOGNS(Gui, gui, debug, "media renderer device connected to server: \"" + pServer->getFriendlyName() + "\"");
@@ -123,6 +129,9 @@ MediaRendererDevice::newUri(const std::string& uri)
                 syncViews();
             }
         }
+    }
+    else {
+        LOGNS(Gui, gui, error, "media renderer device \"" + getFriendlyName() + "\" connection not found");
     }
 }
 

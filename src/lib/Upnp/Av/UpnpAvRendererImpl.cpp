@@ -472,7 +472,8 @@ DevConnectionManagerRendererImpl::ConnectionComplete(const i4& ConnectionID)
 void
 DevConnectionManagerRendererImpl::GetCurrentConnectionIDs(std::string& ConnectionIDs)
 {
-    ConnectionIDs = "0";
+    ConnectionIDs = getConnectionIds().toString();
+//    ConnectionIDs = "0";
 }
 
 
@@ -502,6 +503,8 @@ DevRenderingControlRendererImpl::initStateVars()
     ui2 initialVolume = _engines[instanceID]->getVolume(channel);
     // and set LastChange variable to initial value
     // FIXME: LastChange better should collect all non evented state var values for initial event message
+    // because it needs to provide all state vars in the initial message (not only volume)
+    // also, the event message is queued here for each variable, triggering the sending of possibly multiple events.
     Variant val;
     val.setValue(initialVolume);
     _pLastChange->setChannelStateVar(instanceID, channel, RenderingControlEventedStateVar::VOLUME, val);

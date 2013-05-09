@@ -70,7 +70,7 @@ private:
     virtual void initStateVars();
 
     Device*                             _pThisDevice;
-    CsvList                             _connectionIds;
+//    CsvList                             _connectionIds;
 };
 
 

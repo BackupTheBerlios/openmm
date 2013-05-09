@@ -228,15 +228,31 @@ CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::stri
         LOG(upnpav, error, "action \"PrepareForConnection\" not available on device");
     }
 
-    thisPeer._connectionId = connectionId;
-    thisPeer._AVTId = avTransportId;
-    thisPeer._RCId = rcId;
+//    thisPeer._connectionId = connectionId;
+//    thisPeer._AVTId = avTransportId;
+//    thisPeer._RCId = rcId;
+//
+//    ConnectionManager::addConnection(pConnection, protInfo);
+//
+//    std::string connectionIds;
+//    GetCurrentConnectionIDs(connectionIds);
+//    LOG(upnpav, debug, "connection ids: " + connectionIds);
+//    i4 RcsID;
+//    i4 AVTransportID;
+//    std::string ProtocolInfo;
+//    std::string PeerConnectionManager;
+//    i4 PeerConnectionID;
+//    std::string Direction;
+//    std::string Status;
+//    GetCurrentConnectionInfo(connectionId, RcsID, AVTransportID, ProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, Status);
+}
 
-    ConnectionManager::addConnection(pConnection, protInfo);
 
-    std::string connectionIds;
-    GetCurrentConnectionIDs(connectionIds);
-    LOG(upnpav, debug, "connection ids: " + connectionIds);
+Connection*
+CtlConnectionManagerImpl::getConnection(ui4 connectionId)
+{
+    LOG(upnpav, debug, "controller, get connection with id: " + Poco::NumberFormatter::format(connectionId));
+
     i4 RcsID;
     i4 AVTransportID;
     std::string ProtocolInfo;
@@ -245,6 +261,37 @@ CtlConnectionManagerImpl::addConnection(Connection* pConnection, const std::stri
     std::string Direction;
     std::string Status;
     GetCurrentConnectionInfo(connectionId, RcsID, AVTransportID, ProtocolInfo, PeerConnectionManager, PeerConnectionID, Direction, Status);
+
+    ConnectionManagerId peerConnectionManager;
+    peerConnectionManager.parseManagerIdString(PeerConnectionManager);
+    Connection* pConnection = 0;
+    if (_pDevice->getDeviceType() == DeviceType::MEDIA_RENDERER_1) {
+//    if (peerConnectionManager.getServiceId() == ServiceType::CD_1) {
+        pConnection = new Connection(peerConnectionManager.getUuid(), _pDevice->getUuid());
+    }
+    else if (_pDevice->getDeviceType() == DeviceType::MEDIA_SERVER_1) {
+//    else if (peerConnectionManager.getServiceId() == ServiceType::AVT_1) {
+        pConnection = new Connection(_pDevice->getUuid(), peerConnectionManager.getUuid());
+    }
+    return pConnection;
+}
+
+
+CsvList
+CtlConnectionManagerImpl::getConnectionIds()
+{
+    std::string connectionIdString;
+    GetCurrentConnectionIDs(connectionIdString);
+    LOG(upnpav, debug, "controller connection ids: " + connectionIdString);
+
+    return CsvList(connectionIdString);
+}
+
+
+int
+CtlConnectionManagerImpl::getConnectionCount()
+{
+    return getConnectionIds().getSize();
 }
 
 

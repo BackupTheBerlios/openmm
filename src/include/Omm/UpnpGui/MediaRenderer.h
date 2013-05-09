@@ -102,7 +102,7 @@ class MediaRendererDevice : public Av::CtlMediaRenderer, public Gui::Model
 
 public:
     MediaRendererDevice(ControllerWidget* pControllerWidget) :
-    _transportState(""), _featurePollPosition(false), _featureTrackInfoFromConnection(false), _duration(0), _pControllerWidget(pControllerWidget) {}
+    _transportState(""), _featurePollPosition(false), _featureTrackInfoFromConnection(true), _duration(0), _pControllerWidget(pControllerWidget) {}
 
     std::string getTransportState();
 
