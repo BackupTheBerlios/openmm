@@ -1556,18 +1556,28 @@ EventMessageWriter::stateVar(StateVar& stateVar)
 
 Subscription::Subscription() :
 _pSession(0),
-_pSessionUri(0)
+_pSessionUri(0),
+_pQueueThread(0),
+_queueThreadRunnable(*this, &Subscription::queueThread),
+_queueThreadRunning(true)
 {
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom().toString();
     LOG(event, debug, "creating subscription with SID: " + _uuid);
     _eventKey = 0;
+    _pQueueThread = new Poco::Thread;
+    _pQueueThread->start(_queueThreadRunnable);
 }
 
 
 Subscription::~Subscription()
 {
     delete _pSession;
+    _queueThreadRunning = false;
+    sendEventMessage("");
+    if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(1000)) {
+        LOG(event, error, "failed to join subscription queue thread");
+    }
 }
 
 
@@ -1622,8 +1632,34 @@ Subscription::getEventKey()
 void
 Subscription::sendEventMessage(const std::string& eventMessage)
 {
+    LOG(event, debug, "subscription queue event message ...");
+    Poco::ScopedLock<Poco::FastMutex> queueLock(_queueLock);
+    _messageQueue.push(eventMessage);
+    _queueCondition.broadcast();
+    LOG(event, debug, "subscription queue event message done.");
+}
+
+
+void
+Subscription::renew(int seconds)
+{
+}
+
+
+void
+Subscription::expire(Poco::Timer& timer)
+{
+}
+
+
+void
+Subscription::deliverEventMessage(const std::string& eventMessage)
+{
     // TODO: queue the eventMessages for sending ...? (don't block device thread)
     // FIXME: timeout should be 30 sec for event notifications (see 4.2.1 Eventing: Event messages: NOTIFY)
+    if (!eventMessage.size()) {
+        return;
+    }
     Poco::Net::HTTPRequest request("NOTIFY", _pSessionUri->getPath(), "HTTP/1.1");
     request.set("HOST", _pSessionUri->getAuthority());
     request.setContentType("text/xml");
@@ -1651,14 +1687,19 @@ Subscription::sendEventMessage(const std::string& eventMessage)
 
 
 void
-Subscription::renew(int seconds)
+Subscription::queueThread()
 {
-}
-
-
-void
-Subscription::expire(Poco::Timer& timer)
-{
+    LOG(event, debug, "subscription queue thread running ...");
+    while (_queueThreadRunning) {
+        _queueLock.lock();
+        if (_messageQueue.size() == 0) {
+            _queueCondition.wait<Poco::FastMutex>(_queueLock);
+        }
+        deliverEventMessage(_messageQueue.front());
+        _messageQueue.pop();
+        _queueLock.unlock();
+    }
+    LOG(event, debug, "subscription queue thread finished.");
 }
 
 

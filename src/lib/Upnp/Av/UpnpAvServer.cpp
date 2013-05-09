@@ -2407,7 +2407,8 @@ ui4
 AbstractDataModel::getBlockAtRow(std::vector<ServerObject*>& block, ServerContainer* pParentContainer, ui4 offset, ui4 count, const std::string& sort, const std::string& search)
 {
     // TODO: should be faster with a method getIndexBlock(), implemented with an additional std::vector<ui4> as a sorted index list
-    // TODO: implement building sort indices and row filtering in memory without data base, currently sort and search are ignored
+    // TODO: implement building sort indices and row filtering in memory without data base, currently sort and search are ignored, except for ...
+    // search is enabled only for resources (need this to retrieve current track meta info from server)
     LOG(upnpav, debug, "abstract data model search: " + search);
     if (search != "*") {
         Poco::StringTokenizer searchTokens(search, " ");

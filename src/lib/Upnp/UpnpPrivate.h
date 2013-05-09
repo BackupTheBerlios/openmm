@@ -22,6 +22,7 @@
 #ifndef UpnpPrivate_INCLUDED
 #define UpnpPrivate_INCLUDED
 
+#include<queue>
 
 #include <Poco/Net/MulticastSocket.h>
 #include <Poco/Net/SocketNotification.h>
@@ -40,8 +41,7 @@
 #include <Poco/SharedMemory.h>
 #include <Poco/NamedEvent.h>
 #include <Poco/NamedMutex.h>
-
-
+#include <Poco/Condition.h>
 #include <Poco/DateTime.h>
 
 #include "Util.h"
@@ -546,16 +546,27 @@ public:
     void expire(Poco::Timer& timer);  // TODO: implement this
 
 private:
+    void deliverEventMessage(const std::string& eventMessage);
+    void queueThread();
+
 //     HTTPRequest* newRequest();
 
-    std::vector<Poco::URI>          _callbackUris;
-    Poco::URI*                      _pSessionUri;
-    Poco::Net::HTTPClientSession*   _pSession;
-    std::string                     _uuid;
-    Poco::UInt32                    _eventKey;
-    std::string                     _duration;
-    Poco::Timer                     _timer;
-    Service*                        _pService;
+    std::vector<Poco::URI>              _callbackUris;
+    Poco::URI*                          _pSessionUri;
+    Poco::Net::HTTPClientSession*       _pSession;
+    std::string                         _uuid;
+    Poco::UInt32                        _eventKey;
+
+    Poco::Thread*                       _pQueueThread;
+    Poco::RunnableAdapter<Subscription> _queueThreadRunnable;
+    bool                                _queueThreadRunning;
+    std::queue<std::string>             _messageQueue;
+    Poco::Condition                     _queueCondition;
+    Poco::FastMutex                     _queueLock;
+
+    std::string                         _duration;
+    Poco::Timer                         _timer;
+//    Service*                        _pService;
 };
 
 
