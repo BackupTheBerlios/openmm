@@ -41,6 +41,7 @@ class CtlMediaServer : public Device
 {
 public:
     virtual void addCtlDeviceCode();
+    virtual void initController();
 
     virtual CtlMediaObject* createMediaObject();
     CtlMediaObject* getRootObject() const;

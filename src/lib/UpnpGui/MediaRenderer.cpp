@@ -89,6 +89,8 @@ MediaRendererGroupWidget::selectedItem(int row)
 void
 MediaRendererDevice::initController()
 {
+    CtlMediaRenderer::initController();
+    
     _rendererName.setLabel(getFriendlyName());
     _trackName.setLabel("- no track -");
     _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");

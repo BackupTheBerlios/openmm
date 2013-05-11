@@ -1839,7 +1839,8 @@ StateVar::getIsArgType() const
 
 Service::Service() :
 _pControllerSubscriptionData(new Subscription),
-_eventingEnabled(false),
+_deviceEnableEventing(false),
+_controllerSubscribeEventing(false),
 _pEventMessageQueue(new EventMessageQueue(this)),
 _pDelegate(0)
 {
@@ -1972,6 +1973,13 @@ Service::getEventCallbackPath(int callbackPathIndex)
 }
 
 
+bool
+Service::getControllerSubscribeEventing()
+{
+    return _controllerSubscribeEventing;
+}
+
+
 DescriptionRequestHandler*
 Service::getDescriptionRequestHandler() const
 {
@@ -2059,6 +2067,13 @@ Service::setEventSubscriptionPath(std::string eventPath)
 
 
 void
+Service::setControllerSubscribeEventing(bool subscribe)
+{
+    _controllerSubscribeEventing = subscribe;
+}
+
+
+void
 Service::setDeviceData(DeviceData* pDeviceData)
 {
 //    LOG(upnp, debug, "service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
@@ -2105,7 +2120,6 @@ void
 Service::initController()
 {
     LOG(upnp, debug, "service, init controller ...");
-    _eventingEnabled = false;
     _baseUri = Poco::URI(getDevice()->getDeviceContainer()->getDescriptionUri());
     LOG(upnp, debug, "service, init controller finished.");
 }
@@ -2340,7 +2354,7 @@ Service::unregisterSubscription(Subscription* subscription)
 void
 Service::enableEventing(bool enable)
 {
-    _eventingEnabled = true;
+    _deviceEnableEventing = true;
 }
 
 
@@ -2371,7 +2385,7 @@ Service::sendInitialEventMessage(Subscription* pSubscription)
     if (_pDelegate) {
         _pDelegate->writeInitialEventMessage();
     }
-    
+
     std::string eventMessage;
     EventMessageWriter messageWriter;
     for (StateVarIterator i = beginEventedStateVar(); i != endEventedStateVar(); ++i) {
@@ -3561,16 +3575,18 @@ void
 Device::controllerSubscribeEventing()
 {
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
-        (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
-        _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
+        if ((*s)->getControllerSubscribeEventing()) {
+            (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
+            _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
-        // TODO: event notifications should go into Device, after it is accepted and added to the controller
-        // subscribe to event notifications
-        try {
-            (*s)->sendSubscriptionRequest(1800);
-        }
-        catch (...) {
-            LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
+            // TODO: event notifications should go into Device, after it is accepted and added to the controller
+            // subscribe to event notifications
+            try {
+                (*s)->sendSubscriptionRequest(1800);
+            }
+            catch (...) {
+                LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
+            }
         }
     }
 }

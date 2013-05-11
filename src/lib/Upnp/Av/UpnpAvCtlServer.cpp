@@ -41,6 +41,17 @@ CtlMediaServer::addCtlDeviceCode()
 }
 
 
+void
+CtlMediaServer::initController()
+{
+    for (ServiceIterator it = beginService(); it != endService(); ++it) {
+        if ((*it)->getServiceType() == Av::ServiceType::CD_1) {
+            (*it)->setControllerSubscribeEventing(true);
+        }
+    }
+}
+
+
 CtlMediaObject*
 CtlMediaServer::createMediaObject()
 {

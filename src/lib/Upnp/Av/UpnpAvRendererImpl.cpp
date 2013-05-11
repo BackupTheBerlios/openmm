@@ -514,7 +514,7 @@ DevRenderingControlRendererImpl::initStateVars()
     _setHorizontalKeystone(0);
     _setVerticalKeystone(0);
     _setMute(false);
-    _setVolume(_engines[instanceID]->getVolume(AvChannel::MASTER));
+    _setVolume(_engines[instanceID]->getVolume(channel));
     _setVolumeDB(0);
     _setLoudness(false);
 

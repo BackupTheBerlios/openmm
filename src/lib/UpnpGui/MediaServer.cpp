@@ -161,6 +161,8 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 void
 MediaServerDevice::initController()
 {
+    CtlMediaServer::initController();
+    
     Gui::LabelModel* pLabelModel = new Gui::LabelModel;
     pLabelModel->setLabel(getFriendlyName());
     setLabelModel(pLabelModel);

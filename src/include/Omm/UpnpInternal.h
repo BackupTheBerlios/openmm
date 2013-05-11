@@ -227,6 +227,7 @@ public:
     std::string getControlPath() const;
     std::string getEventSubscriptionPath() const;
     std::string getEventCallbackPath(int callbackPathIndex = 0);
+    bool getControllerSubscribeEventing();
     DescriptionRequestHandler* getDescriptionRequestHandler() const;
     ControlRequestHandler* getControlRequestHandler() const;
     Device* getDevice() const;
@@ -242,6 +243,7 @@ public:
     void setDescriptionRequestHandler();
     void setControlPath(std::string controlPath);
     void setEventSubscriptionPath(std::string eventPath);
+    void setControllerSubscribeEventing(bool subscribe = true);
     void setDeviceData(DeviceData* pDeviceData);
     template<typename T> void setStateVar(std::string key, const T& val, bool queue = true);
 
@@ -286,7 +288,8 @@ private:
     Container<StateVar>                     _eventedStateVars;
     Container<Subscription>                 _eventSubscriptions;
     Subscription*                           _pControllerSubscriptionData;
-    bool                                    _eventingEnabled;
+    bool                                    _deviceEnableEventing;
+    bool                                    _controllerSubscribeEventing;
     EventMessageQueue*                      _pEventMessageQueue;
 
     Poco::FastMutex                         _serviceLock;
@@ -317,7 +320,7 @@ Service::setStateVar(std::string key, const T& val, bool queue)
     }
     StateVar& stateVar = _stateVars.get(key);
 
-    if (_eventingEnabled && stateVar.getSendEvents()) {
+    if (_deviceEnableEventing && stateVar.getSendEvents()) {
         queueEventMessage(stateVar);
     }
 }

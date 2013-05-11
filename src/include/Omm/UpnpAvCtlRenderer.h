@@ -50,6 +50,7 @@ public:
     CtlMediaRenderer();
 
     virtual void addCtlDeviceCode();
+    virtual void initController();
 
     void setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row);
     CtlMediaObject* getObject();

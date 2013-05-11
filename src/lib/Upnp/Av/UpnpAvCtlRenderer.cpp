@@ -56,6 +56,17 @@ CtlMediaRenderer::addCtlDeviceCode()
 
 
 void
+CtlMediaRenderer::initController()
+{
+    for (ServiceIterator it = beginService(); it != endService(); ++it) {
+        if ((*it)->getServiceType() == Av::ServiceType::AVT_1 || (*it)->getServiceType() == Av::ServiceType::RC_1) {
+            (*it)->setControllerSubscribeEventing(true);
+        }
+    }
+}
+
+
+void
 CtlMediaRenderer::setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObject, ui4 row)
 {
     CtlMediaServer* pServer = pObject->getServer();
@@ -68,7 +79,7 @@ CtlMediaRenderer::setObject(CtlMediaObject* pObject, CtlMediaObject* pParentObje
 
     // when setting AVTransportUri, server and renderer are connected via ControlManager service
     Connection* pConnection = new Connection(pServer->getUuid(), getUuid());
-    
+
     // don't need to add connection to server, we only need the link from renderer to server (not vice versa)
     // also, there are issues with cleaning up the connection in server when there is no controller in the network
 //    pServer->getConnectionManager()->addConnection(pConnection, pRes->getProtInfo());
