@@ -73,13 +73,15 @@ private:
 };
 
 
-class LastChange : public StateVar
+class LastChange : public StateVar, public ServiceDelegate
 {
 public:
     LastChange(Service*& pServiceRef);
     virtual ~LastChange();
 
     void addInstance();
+    void initStateVars();
+    virtual void writeInitialEventMessage();
 
     virtual const std::string& getValue();
     void setStateVar(const ui4& InstanceID, const std::string& name, Variant& val);

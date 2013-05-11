@@ -614,7 +614,7 @@ private:
     void print();
 
     void initUuid();
-    void initStateVars();
+//    void initStateVars();
     void initDeviceDescriptionHandler();
     void initDevice();
 

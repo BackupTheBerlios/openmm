@@ -669,6 +669,27 @@ LastChange::addInstance()
 }
 
 
+void
+LastChange::initStateVars()
+{
+    for (Service::StateVarIterator it = _pServiceRef->beginStateVar(); it != _pServiceRef->endStateVar(); ++it) {
+        if (!(*it)->getSendEvents() && !(*it)->getIsArgType()) {
+            _initialSet[0].setStateVarAttribute((*it)->getName(), "val", **it);
+        }
+    }
+    _pServiceRef->setServiceDelegate(this);
+}
+
+
+void
+LastChange::writeInitialEventMessage()
+{
+    write(true);
+    LOG(upnpav, debug, "last change, write initial event message: " + _message);
+    _pServiceRef->setStateVar<std::string>("LastChange", _message);
+}
+
+
 const std::string&
 LastChange::getValue()
 {
@@ -690,10 +711,6 @@ LastChange::setStateVar(const ui4& InstanceID, const std::string& name, Variant&
 void
 LastChange::notify()
 {
-//    write();
-//    _pService->setStateVar<std::string>("LastChange", _message);
-//    clear();
-
     _pServiceRef->queueEventMessage(*this);
 }
 
@@ -778,14 +795,8 @@ void
 LastChange::setStateVarAttribute(const ui4& InstanceID, const std::string& name, const std::string& attr, Variant& val)
 {
     _changeSet[InstanceID].setStateVarAttribute(name, attr, val);
-
     // also save all state variable changes to _initialSet for the initial event message
     _initialSet[InstanceID].setStateVarAttribute(name, attr, val);
-    write(true);
-    // need to set the value of state var, because when a controller subscribes eventing
-    // the initial event message must supply all current values of all non-evented state variables
-    // Don't queue LastChange variable here, otherwise it appears twice in the event message
-    _pServiceRef->setStateVar<std::string>("LastChange", _message, false);
 }
 
 

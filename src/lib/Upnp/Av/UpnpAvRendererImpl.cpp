@@ -40,34 +40,35 @@ DevAVTransportRendererImpl::initStateVars()
     // 1. gapless play in engine and engine stores the URIs and transitions between them (e.g. in a playlist).
     // 2. keep track of each engine URIs in renderer implementation.
 
-//    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
-//    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
-//    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-//    _setRecordStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-//    _setPossiblePlaybackStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-//    _setPossibleRecordStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
-//    _setCurrentPlayMode(AvTransportArgument::CURRENT_PLAY_MODE_NORMAL);
-//    _setTransportPlaySpeed(AvTransportArgument::TRANSPORT_PLAY_SPEED_1);
-//    _setRecordMediumWriteStatus(AvTransportArgument::RECORD_MEDIUM_WRITE_STATUS_NOT_IMPLEMENTED);
-//    _setCurrentRecordQualityMode(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
-//    _setPossibleRecordQualityModes(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
-//    _setNumberOfTracks(0);
-//    _setCurrentTrack(0);
-//    _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-//    _setCurrentMediaDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
-//    _setCurrentTrackMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-//    _setCurrentTrackURI("");
-//    _setAVTransportURI("");
-//    _setAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-//    _setNextAVTransportURI("");
-//    _setNextAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
-//    _setRelativeTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
-//    _setAbsoluteTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
-//    _setRelativeCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
-//    _setAbsoluteCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
-//    _setCurrentTransportActions(AvTransportArgument::CURRENT_TRANSPORT_ACTIONS_NOT_IMPLEMENTED);
+    _setTransportState(AvTransportArgument::TRANSPORT_STATE_STOPPED);
+    _setTransportStatus(AvTransportArgument::TRANSPORT_STATUS_OK);
+    _setPlaybackStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+    _setRecordStorageMedium(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+    _setPossiblePlaybackStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+    _setPossibleRecordStorageMedia(AvTransportArgument::PLAYBACK_STORAGE_MEDIUM_NOT_IMPLEMENTED);
+    _setCurrentPlayMode(AvTransportArgument::CURRENT_PLAY_MODE_NORMAL);
+    _setTransportPlaySpeed(AvTransportArgument::TRANSPORT_PLAY_SPEED_1);
+    _setRecordMediumWriteStatus(AvTransportArgument::RECORD_MEDIUM_WRITE_STATUS_NOT_IMPLEMENTED);
+    _setCurrentRecordQualityMode(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
+    _setPossibleRecordQualityModes(AvTransportArgument::CURRENT_RECORD_QUALITY_MODE_NOT_IMPLEMENTED);
+    _setNumberOfTracks(0);
+    _setCurrentTrack(0);
+    _setCurrentTrackDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+    _setCurrentMediaDuration(AvTransportArgument::CURRENT_TRACK_DURATION_0);
+    _setCurrentTrackMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+    _setCurrentTrackURI("");
+    _setAVTransportURI("");
+    _setAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+    _setNextAVTransportURI("");
+    _setNextAVTransportURIMetaData(AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED);
+    _setRelativeTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
+    _setAbsoluteTimePosition(AvTransportArgument::RELATIVE_TIME_POSITION_NOT_IMPLEMENTED);
+    _setRelativeCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
+    _setAbsoluteCounterPosition(AvTransportArgument::RELATIVE_COUNTER_POSITION_UNDEFINED);
+    _setCurrentTransportActions(AvTransportArgument::CURRENT_TRANSPORT_ACTIONS_NOT_IMPLEMENTED);
 
     _pSession = 0;
+    _pLastChange->initStateVars();
 }
 
 
@@ -496,36 +497,28 @@ void
 DevRenderingControlRendererImpl::initStateVars()
 {
     // FIXME: init all engine instances instead of the state vars in the service tree.
-
-    // get initial volume from engine
     ui4 instanceID = 0;
     std::string channel = AvChannel::MASTER;
-    ui2 initialVolume = _engines[instanceID]->getVolume(channel);
-    // and set LastChange variable to initial value
-    // FIXME: LastChange better should collect all non evented state var values for initial event message
-    // because it needs to provide all state vars in the initial message (not only volume)
-    // also, the event message is queued here for each variable, triggering the sending of possibly multiple events.
-    Variant val;
-    val.setValue(initialVolume);
-    _pLastChange->setChannelStateVar(instanceID, channel, RenderingControlEventedStateVar::VOLUME, val);
 
-//    _setPresetNameList("");
-//    _setBrightness(0);
-//    _setContrast(0);
-//    _setSharpness(0);
-//    _setRedVideoGain(0);
-//    _setGreenVideoGain(0);
-//    _setBlueVideoGain(0);
-//    _setRedVideoBlackLevel(0);
-//    _setGreenVideoBlackLevel(0);
-//    _setBlueVideoBlackLevel(0);
-//    _setColorTemperature(0);
-//    _setHorizontalKeystone(0);
-//    _setVerticalKeystone(0);
-//    _setMute(false);
-//    _setVolume(_engines[InstanceID]->getVolume(0));
-//    _setVolumeDB(0);
-//    _setLoudness(false);
+    _setPresetNameList("");
+    _setBrightness(0);
+    _setContrast(0);
+    _setSharpness(0);
+    _setRedVideoGain(0);
+    _setGreenVideoGain(0);
+    _setBlueVideoGain(0);
+    _setRedVideoBlackLevel(0);
+    _setGreenVideoBlackLevel(0);
+    _setBlueVideoBlackLevel(0);
+    _setColorTemperature(0);
+    _setHorizontalKeystone(0);
+    _setVerticalKeystone(0);
+    _setMute(false);
+    _setVolume(_engines[instanceID]->getVolume(AvChannel::MASTER));
+    _setVolumeDB(0);
+    _setLoudness(false);
+
+    _pLastChange->initStateVars();
 }
 
 

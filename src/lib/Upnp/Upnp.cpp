@@ -1830,10 +1830,18 @@ StateVar::getSendEvents() const
 }
 
 
+bool
+StateVar::getIsArgType() const
+{
+    return _name.substr(0, 11) == "A_ARG_TYPE_";
+}
+
+
 Service::Service() :
 _pControllerSubscriptionData(new Subscription),
 _eventingEnabled(false),
-_pEventMessageQueue(new EventMessageQueue(this))
+_pEventMessageQueue(new EventMessageQueue(this)),
+_pDelegate(0)
 {
 }
 
@@ -2055,6 +2063,13 @@ Service::setDeviceData(DeviceData* pDeviceData)
 {
 //    LOG(upnp, debug, "service, set device data: " + Poco::NumberFormatter::format(pDeviceData));
     _pDeviceData = pDeviceData;
+}
+
+
+void
+Service::setServiceDelegate(ServiceDelegate* pDelegate)
+{
+    _pDelegate = pDelegate;
 }
 
 
@@ -2339,7 +2354,6 @@ Service::queueEventMessage(StateVar& stateVar)
 void
 Service::sendEventMessage(StateVar& stateVar)
 {
-    // TODO: send the messages asynchronous and don't block the Device main thread
     std::string eventMessage;
     EventMessageWriter messageWriter;
     messageWriter.stateVar(stateVar);
@@ -2354,14 +2368,18 @@ Service::sendEventMessage(StateVar& stateVar)
 void
 Service::sendInitialEventMessage(Subscription* pSubscription)
 {
+    if (_pDelegate) {
+        _pDelegate->writeInitialEventMessage();
+    }
+    
     std::string eventMessage;
     EventMessageWriter messageWriter;
     for (StateVarIterator i = beginEventedStateVar(); i != endEventedStateVar(); ++i) {
         messageWriter.stateVar(**i);
     }
     messageWriter.write(eventMessage);
-    pSubscription->sendEventMessage(eventMessage);
     LOG(event, debug, "sending initial event message:" + Poco::LineEnding::NEWLINE_DEFAULT + eventMessage);
+    pSubscription->sendEventMessage(eventMessage);
 }
 
 
@@ -3377,14 +3395,14 @@ DeviceContainer::initUuid()
 }
 
 
-void
-DeviceContainer::initStateVars()
-{
-    LOG(upnp, debug, "init device container: init state vars");
-    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
-        (*d)->initStateVars();
-    }
-}
+//void
+//DeviceContainer::initStateVars()
+//{
+//    LOG(upnp, debug, "init device container: init state vars");
+//    for(DeviceIterator d = beginDevice(); d != endDevice(); ++d) {
+//        (*d)->initStateVars();
+//    }
+//}
 
 
 void

@@ -178,6 +178,7 @@ public:
     void setDefaultValue(std::string defaultValue);
     void setSendEvents(std::string sendEvents);
     bool getSendEvents() const;
+    bool getIsArgType() const;
 
 private:
     Service*        _pService;
@@ -185,6 +186,13 @@ private:
     std::string     _type;
     std::string     _defaultValue;
     bool            _sendEvents;
+};
+
+
+class ServiceDelegate
+{
+public:
+    virtual void writeInitialEventMessage() {};
 };
 
 
@@ -237,6 +245,8 @@ public:
     void setDeviceData(DeviceData* pDeviceData);
     template<typename T> void setStateVar(std::string key, const T& val, bool queue = true);
 
+    void setServiceDelegate(ServiceDelegate* pDelegate);
+
     void addAction(Action* pAction);
     void addStateVar(StateVar* pStateVar);
     void addEventCallbackPath(const std::string path);
@@ -280,6 +290,8 @@ private:
     EventMessageQueue*                      _pEventMessageQueue;
 
     Poco::FastMutex                         _serviceLock;
+
+    ServiceDelegate*                        _pDelegate;
 };
 
 
