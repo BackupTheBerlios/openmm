@@ -256,7 +256,8 @@ public:
     void initController();
     void sendAction(Action* pAction);
 
-    void sendSubscriptionRequest(unsigned int duration = 0, bool renew = false);
+    void setSubscriptionDuration(unsigned int duration);
+    void sendSubscriptionRequest(bool renew = false);
     void sendCancelSubscriptionRequest();
     void registerSubscription(Subscription* subscription);
     void unregisterSubscription(Subscription* subscription);
@@ -291,6 +292,7 @@ private:
     bool                                    _deviceEnableEventing;
     bool                                    _controllerSubscribeEventing;
     EventMessageQueue*                      _pEventMessageQueue;
+    unsigned int                            _subscriptionDuration;
 
     Poco::FastMutex                         _serviceLock;
 

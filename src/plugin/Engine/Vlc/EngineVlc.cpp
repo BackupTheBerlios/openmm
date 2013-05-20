@@ -214,6 +214,8 @@ VlcEngine::setSpeed(int nom, int denom)
 void
 VlcEngine::pause()
 {
+    LOGNS(Omm::Av, upnpav, debug, "vlc engine, pause ...");
+
 #if LIBVLC_VERSION_INT < 0x110
     libvlc_media_player_pause(_pVlcPlayer, _pException);
 #else

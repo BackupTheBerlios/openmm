@@ -531,7 +531,7 @@ class VariableQuery : public Poco::Notification
 class Subscription
 {
 public:
-    Subscription();
+    Subscription(Service* pService);
     ~Subscription();
 
     std::string getUuid();
@@ -542,8 +542,10 @@ public:
 
     void addCallbackUri(const std::string& uri);
     void sendEventMessage(const std::string& eventMessage);
-    void renew(int seconds);  // TODO: implement this
-    void expire(Poco::Timer& timer);  // TODO: implement this
+    void renew(unsigned int seconds);
+    void expire(Poco::Timer& timer);
+    void renewController(unsigned int seconds);
+    void expireController(Poco::Timer& timer);
 
 private:
     void deliverEventMessage(const std::string& eventMessage);
@@ -551,6 +553,7 @@ private:
 
 //     HTTPRequest* newRequest();
 
+    Service*                            _pService;
     std::vector<Poco::URI>              _callbackUris;
     Poco::URI*                          _pSessionUri;
     Poco::Net::HTTPClientSession*       _pSession;
@@ -564,9 +567,9 @@ private:
     Poco::Condition                     _queueCondition;
     Poco::FastMutex                     _queueLock;
 
-    std::string                         _duration;
-    Poco::Timer                         _timer;
-//    Service*                        _pService;
+    Poco::Timer*                        _pTimer;
+    Poco::TimerCallback<Subscription>   _expireCallback;
+    Poco::TimerCallback<Subscription>   _expireControllerCallback;
 };
 
 

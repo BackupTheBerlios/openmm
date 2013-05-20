@@ -49,6 +49,8 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/MediaType.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/NumberParser.h>
+#include <Poco/Timer.h>
 
 #include "Upnp.h"
 #include "UpnpPrivate.h"
@@ -1554,12 +1556,16 @@ EventMessageWriter::stateVar(StateVar& stateVar)
 }
 
 
-Subscription::Subscription() :
+Subscription::Subscription(Service* pService) :
+_pService(pService),
 _pSession(0),
 _pSessionUri(0),
 _pQueueThread(0),
 _queueThreadRunnable(*this, &Subscription::queueThread),
-_queueThreadRunning(true)
+_queueThreadRunning(true),
+_expireCallback(*this, &Subscription::expire),
+_expireControllerCallback(*this, &Subscription::expireController),
+_pTimer(0)
 {
     // TODO: implement timer stuff
     _uuid = Poco::UUIDGenerator().createRandom().toString();
@@ -1577,6 +1583,9 @@ Subscription::~Subscription()
     sendEventMessage("");
     if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(1000)) {
         LOG(event, error, "failed to join subscription queue thread");
+    }
+    if (_pTimer) {
+        delete _pTimer;
     }
 }
 
@@ -1641,14 +1650,52 @@ Subscription::sendEventMessage(const std::string& eventMessage)
 
 
 void
-Subscription::renew(int seconds)
+Subscription::renew(unsigned int seconds)
 {
+    LOG(event, debug, "renew subscription timer milliseconds: " + Poco::NumberFormatter::format(seconds * 1000));
+    if (_pTimer) {
+        _pTimer->restart(seconds * 1000);
+    }
+    else {
+        _pTimer = new Poco::Timer;
+        _pTimer->setStartInterval(seconds * 1000);
+        _pTimer->start(_expireCallback);
+    }
 }
 
 
 void
 Subscription::expire(Poco::Timer& timer)
 {
+    // unregisterSubscription() deletes this ...
+    LOG(event, debug, "subscription expired.");
+    _pService->unregisterSubscription(this);
+}
+
+
+void
+Subscription::renewController(unsigned int seconds)
+{
+    // renew the subsciption 800 millisecs earlier than it expires.
+    long milliseconds = (seconds * 1000) - 800;
+    LOG(event, debug, "controller renew subscription timer milliseconds: " + Poco::NumberFormatter::format(milliseconds));
+
+    if (_pTimer) {
+        _pTimer->restart(milliseconds);
+    }
+    else {
+        _pTimer = new Poco::Timer;
+        _pTimer->setStartInterval(milliseconds);
+        _pTimer->start(_expireControllerCallback);
+    }
+}
+
+
+void
+Subscription::expireController(Poco::Timer& timer)
+{
+    LOG(event, debug, "controller subscription timer expired, renewing subscription.");
+    _pService->sendSubscriptionRequest(true);
 }
 
 
@@ -1838,10 +1885,11 @@ StateVar::getIsArgType() const
 
 
 Service::Service() :
-_pControllerSubscriptionData(new Subscription),
+_pControllerSubscriptionData(new Subscription(this)),
 _deviceEnableEventing(false),
 _controllerSubscribeEventing(false),
 _pEventMessageQueue(new EventMessageQueue(this)),
+_subscriptionDuration(1800),
 _pDelegate(0)
 {
 }
@@ -2202,7 +2250,14 @@ Service::sendAction(Action* pAction)
 
 
 void
-Service::sendSubscriptionRequest(unsigned int duration, bool renew)
+Service::setSubscriptionDuration(unsigned int duration)
+{
+    _subscriptionDuration = duration;
+}
+
+
+void
+Service::sendSubscriptionRequest(bool renew)
 {
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
@@ -2211,7 +2266,7 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
     Poco::Net::HTTPRequest request("SUBSCRIBE", eventSubscriptionUri.getPath(), "HTTP/1.1");
     request.set("HOST", baseUri.getAuthority());
     if (renew) {
-        request.set("SID", _pControllerSubscriptionData->getUuid());
+        request.set("SID", "uuid:" + _pControllerSubscriptionData->getUuid());
     }
     else {
         std::string callbackUris;
@@ -2221,11 +2276,11 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
         request.set("CALLBACK", callbackUris);
         request.set("NT", "upnp:event");
     }
-    if (duration == 0) {
+    if (_subscriptionDuration == 0) {
         request.set("TIMEOUT", "Second-infinite");
     }
     else {
-        request.set("TIMEOUT", "Second-" + Poco::NumberFormatter::format(duration));
+        request.set("TIMEOUT", "Second-" + Poco::NumberFormatter::format(_subscriptionDuration));
     }
     std::stringstream ss;
     request.write(ss);
@@ -2266,6 +2321,16 @@ Service::sendSubscriptionRequest(unsigned int duration, bool renew)
 
     if (!renew) {
         _pControllerSubscriptionData->setSid(response.get("SID"));
+    }
+    int timeout = 0;
+    try {
+        std::string timeoutString = response.get("TIMEOUT").substr(7);
+        timeout = Poco::NumberParser::parse(timeoutString);
+        setSubscriptionDuration(timeout);
+        _pControllerSubscriptionData->renewController(timeout);
+    }
+    catch(Poco::Exception& e) {
+        LOG(event, error, "cannot parse subscription timeout: " + e.displayText());
     }
 
     LOG(event, debug, "subscription request completed");
@@ -2609,10 +2674,20 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
 
     if (request.getMethod() == "SUBSCRIBE") {
         LOG(event, debug, "subscription request from: " + request.clientAddress().toString() + Poco::LineEnding::NEWLINE_DEFAULT + header.str());
+        unsigned int timeout = 0;
+        std::string timeoutString = request.get("TIMEOUT").substr(7);
+        if (timeoutString != "infinite") {
+            try {
+                timeout = Poco::NumberParser::parse(timeoutString);
+            }
+            catch(Poco::Exception& e) {
+                LOG(event, error, "cannot parse subscription timeout, assuming infinite");
+            }
+        }
         if (!request.has("SID")) {
             std::string callbackUriString = request.get("CALLBACK");
             Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
-            pSubscription = new Subscription;
+            pSubscription = new Subscription(_pService);
             sid = pSubscription->getUuid();
             for (Poco::StringTokenizer::Iterator it = callbackUris.begin(); it != callbackUris.end(); ++it) {
                 pSubscription->addCallbackUri(*it);
@@ -2623,7 +2698,12 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             sid = request.get("SID").substr(5);
             // renew subscription
             pSubscription = _pService->getSubscription(sid);
-            pSubscription->renew(1800);
+            if (!pSubscription) {
+                LOG(event, error, "cannot find subscription for renewal, id: " + sid);
+            }
+        }
+        if (timeout != 0) {
+            pSubscription->renew(timeout);
         }
 //         Poco::Timestamp t;
 //         response.set("DATE", Poco::DateTimeFormatter::format(t, Poco::DateTimeFormat::HTTP_FORMAT));
@@ -2634,7 +2714,12 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
                     + "UPnP/" + UPNP_VERSION + ", "
                     + "OMM/" + OMM_VERSION);
         response.set("SID", "uuid:" + sid);
-        response.set("TIMEOUT", "Second-1800");
+        if (timeout == 0) {
+            response.set("TIMEOUT", "Second-infinite");
+        }
+        else {
+            response.set("TIMEOUT", "Second-" + Poco::NumberFormatter::format(timeout));
+        }
         response.setContentLength(0);
         // TODO: choose timeout according to controller activity
         // TODO: provide TCP FIN flag or Content-Length=0 before initial event message (see specs p. 65)
@@ -3579,10 +3664,11 @@ Device::controllerSubscribeEventing()
             (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
+            (*s)->setSubscriptionDuration(0);
             // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
-                (*s)->sendSubscriptionRequest(1800);
+                (*s)->sendSubscriptionRequest();
             }
             catch (...) {
                 LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
@@ -3596,11 +3682,13 @@ void
 Device::controllerUnsubscribeEventing()
 {
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
-        try {
-            (*s)->sendCancelSubscriptionRequest();
-        }
-        catch (...) {
-            LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
+        if ((*s)->getControllerSubscribeEventing()) {
+            try {
+                (*s)->sendCancelSubscriptionRequest();
+            }
+            catch (...) {
+                LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
+            }
         }
     }
 }
@@ -3986,7 +4074,6 @@ CtlDeviceCode::init()
 Controller::Controller() :
 DeviceManager(new Socket),
 _featureSubscribeToEvents(true)
-//_featureSubscribeToEvents(false)
 {
 }
 
