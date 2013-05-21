@@ -90,10 +90,11 @@ void
 MediaRendererDevice::initController()
 {
     CtlMediaRenderer::initController();
-    
+
     _rendererName.setLabel(getFriendlyName());
     _trackName.setLabel("- no track -");
-    _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");
+//    _volumeLabel.setLabel(Poco::NumberFormatter::format(getVolume()) + "%");
+    _volumeLabel.setLabel(Poco::NumberFormatter::format(0) + "%");
     _positionLabel.setLabel("00:00:00/00:00:00");
 //    _volume.setValue(getVolume());
     _volume.setValue(0);

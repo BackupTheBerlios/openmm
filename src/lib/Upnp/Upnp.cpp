@@ -1657,9 +1657,16 @@ Subscription::renew(unsigned int seconds)
         _pTimer->restart(seconds * 1000);
     }
     else {
+        LOG(event, debug, "create timer for subscription");
+        Poco::ThreadPool::defaultPool().addCapacity(1);
         _pTimer = new Poco::Timer;
         _pTimer->setStartInterval(seconds * 1000);
-        _pTimer->start(_expireCallback);
+        try {
+            _pTimer->start(_expireCallback);
+        }
+        catch (Poco::Exception& e) {
+            LOG(event, error, "failed to start subscription timer: " + e.displayText());
+        }
     }
 }
 
@@ -1684,9 +1691,16 @@ Subscription::renewController(unsigned int seconds)
         _pTimer->restart(milliseconds);
     }
     else {
+        LOG(event, debug, "create timer for controller subscription");
+        Poco::ThreadPool::defaultPool().addCapacity(1);
         _pTimer = new Poco::Timer;
         _pTimer->setStartInterval(milliseconds);
-        _pTimer->start(_expireControllerCallback);
+        try {
+            _pTimer->start(_expireControllerCallback);
+        }
+        catch (Poco::Exception& e) {
+            LOG(event, error, "failed to start controller subscription timer: " + e.displayText());
+        }
     }
 }
 
@@ -1776,15 +1790,22 @@ EventMessageQueue::queueStateVar(StateVar& stateVar)
 
     _stateVars.insert(&stateVar);
     if (!_timerIsRunning) {
-        LOG(event, debug, "starting timer ...");
+//        LOG(event, debug, "set up moderation timer with event rate: " + Poco::NumberFormatter::format(_maxEventRate));
         _timerIsRunning = true;
         if (_pModeratorTimer) {
             delete _pModeratorTimer;
         }
         // need to create a new Poco::Timer, because same timer can't be reused (works perhaps twice, but not the third time).
+//        LOG(event, debug, "create timer for moderation");
         _pModeratorTimer = new Poco::Timer(_maxEventRate);
-        _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
-        LOG(event, debug, "timer started.");
+//        LOG(event, debug, "starting moderation timer ...");
+        try {
+            _pModeratorTimer->start(Poco::TimerCallback<EventMessageQueue> (*this, &EventMessageQueue::sendEventMessage));
+//            LOG(event, debug, "moderation timer started.");
+        }
+        catch(Poco::Exception& e) {
+            LOG(event, error, "failed to start moderation timer: " + e.displayText());
+        }
     }
     LOG(event, debug, "queue state var: " + stateVar.getName() + " finished.");
 }
@@ -3664,7 +3685,8 @@ Device::controllerSubscribeEventing()
             (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
-            (*s)->setSubscriptionDuration(0);
+            (*s)->setSubscriptionDuration(10);
+//            (*s)->setSubscriptionDuration(0);
             // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
