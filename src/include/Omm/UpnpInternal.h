@@ -257,10 +257,11 @@ public:
     void sendAction(Action* pAction);
 
     void setSubscriptionDuration(unsigned int duration);
+    void stopSubscriptionExpirationTimer();
     void sendSubscriptionRequest(bool renew = false);
     void sendCancelSubscriptionRequest();
-    void registerSubscription(Subscription* subscription);
-    void unregisterSubscription(Subscription* subscription);
+    void registerSubscription(Subscription* pSubscription);
+    void unregisterSubscription(Subscription* pSubscription);
 
     // TODO: honor maximumRate and minimumDelta (specs p. 72)
     void enableEventing(bool enable = true);

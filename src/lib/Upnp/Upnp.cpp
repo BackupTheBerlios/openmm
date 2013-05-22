@@ -1731,6 +1731,13 @@ Subscription::expireController(Poco::Timer& timer)
 
 
 void
+Subscription::stopExpirationTimer()
+{
+    _pTimer->restart(0);
+}
+
+
+void
 Subscription::deliverEventMessage(const std::string& eventMessage)
 {
     // TODO: queue the eventMessages for sending ...? (don't block device thread)
@@ -2295,6 +2302,13 @@ Service::setSubscriptionDuration(unsigned int duration)
 
 
 void
+Service::stopSubscriptionExpirationTimer()
+{
+    _pControllerSubscriptionData->stopExpirationTimer();
+}
+
+
+void
 Service::sendSubscriptionRequest(bool renew)
 {
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
@@ -2430,27 +2444,28 @@ Service::sendCancelSubscriptionRequest()
 
 
 void
-Service::registerSubscription(Subscription* subscription)
+Service::registerSubscription(Subscription* pSubscription)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
     // TODO: only register a Subscription once from one distinct Controller
     //       note that Subscription has a new SID
-    std::string sid = subscription->getUuid();
+    std::string sid = pSubscription->getUuid();
     LOG(event, debug, "register subscription with SID: " + sid);
-    _eventSubscriptions.append(sid, subscription);
+    _eventSubscriptions.append(sid, pSubscription);
 }
 
 
 void
-Service::unregisterSubscription(Subscription* subscription)
+Service::unregisterSubscription(Subscription* pSubscription)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
-    std::string sid = subscription->getUuid();
+    pSubscription->stopExpirationTimer();
+    std::string sid = pSubscription->getUuid();
     LOG(event, debug, "unregister subscription with SID: " + sid);
     _eventSubscriptions.remove(sid);
-    if (subscription) {
-        delete subscription;
-    }
+//    if (subscription) {
+    delete pSubscription;
+//    }
 }
 
 
@@ -3722,6 +3737,7 @@ Device::controllerUnsubscribeEventing()
 {
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         if ((*s)->getControllerSubscribeEventing()) {
+            (*s)->stopSubscriptionExpirationTimer();
             try {
                 (*s)->sendCancelSubscriptionRequest();
             }

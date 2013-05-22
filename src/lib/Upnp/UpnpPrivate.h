@@ -546,6 +546,7 @@ public:
     void expire(Poco::Timer& timer);
     void renewController(unsigned int seconds);
     void expireController(Poco::Timer& timer);
+    void stopExpirationTimer();
 
 private:
     void deliverEventMessage(const std::string& eventMessage);
