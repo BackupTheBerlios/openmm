@@ -570,6 +570,7 @@ private:
     Poco::Timer*                        _pTimer;
     Poco::TimerCallback<Subscription>   _expireCallback;
     Poco::TimerCallback<Subscription>   _expireControllerCallback;
+    static Poco::AtomicCounter          _timerReleaseCounter;
 };
 
 

@@ -1556,6 +1556,8 @@ EventMessageWriter::stateVar(StateVar& stateVar)
 }
 
 
+Poco::AtomicCounter Subscription::_timerReleaseCounter(0);
+
 Subscription::Subscription(Service* pService) :
 _pService(pService),
 _pSession(0),
@@ -1586,6 +1588,7 @@ Subscription::~Subscription()
     }
     if (_pTimer) {
         delete _pTimer;
+        _timerReleaseCounter++;
     }
 }
 
@@ -1658,7 +1661,14 @@ Subscription::renew(unsigned int seconds)
     }
     else {
         LOG(event, debug, "create timer for subscription");
-        Poco::ThreadPool::defaultPool().addCapacity(1);
+        // NOTE: thread pool gets too large when subscriptions appear over a long period of time, so we have to
+        // count released timers and don't allocate a new thread in the default thread pool, when there is a released one
+        if (_timerReleaseCounter <= 0) {
+            Poco::ThreadPool::defaultPool().addCapacity(1);
+        }
+        else {
+            _timerReleaseCounter--;
+        }
         _pTimer = new Poco::Timer;
         _pTimer->setStartInterval(seconds * 1000);
         try {
@@ -1692,7 +1702,14 @@ Subscription::renewController(unsigned int seconds)
     }
     else {
         LOG(event, debug, "create timer for controller subscription");
-        Poco::ThreadPool::defaultPool().addCapacity(1);
+        // NOTE: thread pool gets too large when subscriptions appear over a long period of time, so we have to
+        // count released timers and don't allocate a new thread in the default thread pool, when there is a released one
+        if (_timerReleaseCounter <= 0) {
+            Poco::ThreadPool::defaultPool().addCapacity(1);
+        }
+        else {
+            _timerReleaseCounter--;
+        }
         _pTimer = new Poco::Timer;
         _pTimer->setStartInterval(milliseconds);
         try {
