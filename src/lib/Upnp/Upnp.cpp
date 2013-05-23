@@ -1733,7 +1733,9 @@ Subscription::expireController(Poco::Timer& timer)
 void
 Subscription::stopExpirationTimer()
 {
-    _pTimer->restart(0);
+    if (_pTimer) {
+        _pTimer->stop();
+    }
 }
 
 
@@ -2459,13 +2461,10 @@ void
 Service::unregisterSubscription(Subscription* pSubscription)
 {
     Poco::ScopedLock<Poco::FastMutex> lock(_serviceLock);
-    pSubscription->stopExpirationTimer();
     std::string sid = pSubscription->getUuid();
     LOG(event, debug, "unregister subscription with SID: " + sid);
     _eventSubscriptions.remove(sid);
-//    if (subscription) {
     delete pSubscription;
-//    }
 }
 
 
@@ -3177,7 +3176,6 @@ DeviceManager::removeDeviceContainer(DeviceContainer* pDeviceContainer)
     std::string uuid = pDeviceContainer->getRootDevice()->getUuid();
     if (_deviceContainers.contains(uuid)) {
         LOG(upnp, debug, "device manager removes device container with root device uuid: " + uuid);
-        DeviceContainer* pDeviceContainer = &_deviceContainers.get(uuid);
         _deviceContainers.remove(uuid);
     }
 }
@@ -3666,6 +3664,10 @@ _pCtlDeviceCode(0)
 
 Device::~Device()
 {
+    for (ServiceIterator it = beginService(); it != endService(); ++it) {
+        (*it)->stopSubscriptionExpirationTimer();
+    }
+
     _pDeviceData = 0;
     _pDevDeviceCode = 0;
     _pCtlDeviceCode = 0;
@@ -3717,8 +3719,8 @@ Device::controllerSubscribeEventing()
             (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
-            (*s)->setSubscriptionDuration(10);
-//            (*s)->setSubscriptionDuration(0);
+//            (*s)->setSubscriptionDuration(10);
+            (*s)->setSubscriptionDuration(0);
             // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
@@ -5073,6 +5075,7 @@ DeviceGroup::removeDevice(Device* pDevice)
     removeDevice(pDevice, position, true);
     _devices.remove(pDevice->getUuid());
     removeDevice(pDevice, position, false);
+    delete pDevice;
 }
 
 
