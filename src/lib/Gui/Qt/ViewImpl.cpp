@@ -357,166 +357,163 @@ void
 ViewImpl::keyPressed(int key)
 {
     LOG(gui, debug, "view impl key pressed: " + Poco::NumberFormatter::format(key));
+    IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, keyTranslateNativeCode(key));
+}
+
+
+bool
+ViewImpl::keyPressedNonFullscreen(int key, int modifiers)
+{
+    LOG(gui, debug, "view impl key pressed non fullscreen: " + Poco::NumberFormatter::format(key) + ", modifiers: " + Poco::NumberFormatter::formatHex(modifiers));
+    bool propagate = true;
+    IMPL_NOTIFY_CONTROLLER(Controller, keyPressedNonFullscreen, keyTranslateNativeCode(key), keyTranslateNativeModifiers(modifiers), propagate);
+    return propagate;
+}
+
+
+Controller::KeyCode
+ViewImpl::keyTranslateNativeCode(int key)
+{
     switch (key) {
         case Qt::Key_Menu:
         case Qt::Key_HomePage:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyMenu);
-            break;
+            return Controller::KeyMenu;
         case Qt::Key_Backspace:
         case Qt::Key_Backtab:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBack);
-            break;
+            return Controller::KeyBack;
         case Qt::Key_Return:
         case Qt::Key_Enter:
         case Qt::Key_Select:
         case Qt::Key_Yes:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyReturn);
-            break;
+            return Controller::KeyReturn;
         case Qt::Key_Left:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyLeft);
-            break;
+            return Controller::KeyLeft;
         case Qt::Key_Right:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRight);
-            break;
+            return Controller::KeyRight;
         case Qt::Key_Up:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyUp);
-            break;
+            return Controller::KeyUp;
         case Qt::Key_Down:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyDown);
-            break;
+            return Controller::KeyDown;
         case Qt::Key_Back:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBack);
-            break;
+            return Controller::KeyBack;
         case Qt::Key_Forward:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyForward);
-            break;
+            return Controller::KeyForward;
         case Qt::Key_Stop:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyStop);
-            break;
+            return Controller::KeyStop;
         case Qt::Key_VolumeDown:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyVolDown);
-            break;
+            return Controller::KeyVolDown;
         case Qt::Key_VolumeMute:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyMute);
-            break;
+            return Controller::KeyMute;
         case Qt::Key_VolumeUp:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyVolUp);
-            break;
+            return Controller::KeyVolUp;
         case Qt::Key_MediaPlay:
         case Qt::Key_Play:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPlay);
-            break;
+            return Controller::KeyPlay;
         case Qt::Key_MediaStop:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyStop);
-            break;
+            return Controller::KeyStop;
         case Qt::Key_MediaPrevious:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyBackward);
-            break;
+            return Controller::KeyBackward;
         case Qt::Key_MediaNext:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyForward);
-            break;
+            return Controller::KeyForward;
         case Qt::Key_MediaRecord:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyRecord);
-            break;
+            return Controller::KeyRecord;
         case Qt::Key_A:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyA);
-            break;
+            return Controller::KeyA;
         case Qt::Key_B:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyB);
-            break;
+            return Controller::KeyB;
         case Qt::Key_C:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyC);
-            break;
+            return Controller::KeyC;
         case Qt::Key_D:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyD);
-            break;
+            return Controller::KeyD;
         case Qt::Key_E:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyE);
-            break;
+            return Controller::KeyE;
         case Qt::Key_F:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyF);
-            break;
+            return Controller::KeyF;
         case Qt::Key_G:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyG);
-            break;
+            return Controller::KeyG;
         case Qt::Key_H:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyH);
-            break;
+            return Controller::KeyH;
         case Qt::Key_I:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyI);
-            break;
+            return Controller::KeyI;
         case Qt::Key_J:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyJ);
-            break;
+            return Controller::KeyJ;
         case Qt::Key_K:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyK);
-            break;
+            return Controller::KeyK;
         case Qt::Key_L:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyL);
-            break;
+            return Controller::KeyL;
         case Qt::Key_M:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyM);
-            break;
+            return Controller::KeyM;
         case Qt::Key_N:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyN);
-            break;
+            return Controller::KeyN;
         case Qt::Key_O:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyO);
-            break;
+            return Controller::KeyO;
         case Qt::Key_P:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyP);
-            break;
+            return Controller::KeyP;
         case Qt::Key_Q:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyQ);
-            break;
+            return Controller::KeyQ;
         case Qt::Key_R:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyR);
-            break;
+            return Controller::KeyR;
         case Qt::Key_S:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyS);
-            break;
+            return Controller::KeyS;
         case Qt::Key_T:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyT);
-            break;
+            return Controller::KeyT;
         case Qt::Key_U:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyU);
-            break;
+            return Controller::KeyU;
         case Qt::Key_V:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyV);
-            break;
+            return Controller::KeyV;
         case Qt::Key_W:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyW);
-            break;
+            return Controller::KeyW;
         case Qt::Key_X:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyX);
-            break;
+            return Controller::KeyX;
         case Qt::Key_Y:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyY);
-            break;
+            return Controller::KeyY;
         case Qt::Key_Z:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyZ);
-            break;
+            return Controller::KeyZ;
 #if (QT_VERSION & 0xFFFFFFFF) >= 0x040700
         case Qt::Key_MediaPause:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPause);
-            break;
+            return Controller::KeyPause;
         case Qt::Key_MediaTogglePlayPause:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPlayPause);
-            break;
+            return Controller::KeyPlayPause;
         case Qt::Key_PowerOff:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyPowerOff);
-            break;
+            return Controller::KeyPowerOff;
         case Qt::Key_WakeUp:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyWakeUp);
-            break;
+            return Controller::KeyWakeUp;
         case Qt::Key_Eject:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyEject);
-            break;
+            return Controller::KeyEject;
         case Qt::Key_MediaLast:
-            IMPL_NOTIFY_CONTROLLER(Controller, keyPressed, Controller::KeyLast);
-            break;
+            return Controller::KeyLast;
 #endif
     }
+}
+
+
+Controller::Modifiers
+ViewImpl::keyTranslateNativeModifiers(int modifiers)
+{
+//    Controller::Modifiers res = Controller::NoModifier;
+    int res = Controller::NoModifier;
+
+    if (modifiers & Qt::ShiftModifier) {
+        res |= Controller::ShiftModifier;
+    }
+    else if (modifiers & Qt::ControlModifier) {
+        res |= Controller::ControlModifier;
+    }
+    else if (modifiers & Qt::AltModifier) {
+        res |= Controller::AltModifier;
+    }
+    else if (modifiers & Qt::MetaModifier) {
+        res |= Controller::MetaModifier;
+    }
+    else if (modifiers & Qt::KeypadModifier) {
+        res |= Controller::KeypadModifier;
+    }
+    else if (modifiers & Qt::GroupSwitchModifier) {
+        res |= Controller::GroupSwitchModifier;
+    }
+
+//    return res;
+    return (Controller::Modifiers)res;
 }
 
 

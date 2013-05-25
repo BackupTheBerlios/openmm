@@ -202,6 +202,32 @@ private:
             _pViewImpl->keyPressed(pKeyEvent->key());
             return true;
         }
+        else {
+            return false;
+        }
+    }
+
+    ViewImpl*      _pViewImpl;
+};
+
+
+class QtPermanentEventFilter : public QObject
+{
+public:
+    QtPermanentEventFilter(ViewImpl* pViewImpl) : _pViewImpl(pViewImpl)
+    {
+    }
+
+private:
+    virtual bool eventFilter(QObject* pObject, QEvent* pEvent)
+    {
+        if (pEvent->type() == QEvent::KeyPress) {
+            QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
+            return !_pViewImpl->keyPressedNonFullscreen(pKeyEvent->key(), pKeyEvent->modifiers());
+        }
+        else {
+            return false;
+        }
     }
 
     ViewImpl*      _pViewImpl;

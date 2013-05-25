@@ -396,6 +396,7 @@ public:
 
     void init();
     void setState(State newState);
+    State getState();
 
     std::string getHttpServerUri();
 

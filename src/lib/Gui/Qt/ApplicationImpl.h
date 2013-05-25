@@ -38,6 +38,7 @@ namespace Gui {
 
 class Application;
 class QtEventFilter;
+class QtPermanentEventFilter;
 
 
 class ApplicationImpl
@@ -63,6 +64,7 @@ public:
     QApplication*           _pQtApplication;
     std::set<QToolBar*>     _pToolBars;
     QtEventFilter*          _pEventFilter;
+    QtPermanentEventFilter* _pPermanentEventFilter;
     QString*                _pFullscreenStyleSheet;
     bool                    _visible;
     int                     _width;

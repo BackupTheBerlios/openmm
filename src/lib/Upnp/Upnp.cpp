@@ -3238,6 +3238,13 @@ DeviceManager::setState(State newState)
 }
 
 
+DeviceManager::State
+DeviceManager::getState()
+{
+    return _state;
+}
+
+
 std::string
 DeviceManager::getHttpServerUri()
 {

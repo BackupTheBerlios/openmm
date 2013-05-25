@@ -217,6 +217,8 @@ ApplicationImpl::run(int argc, char** argv)
         _pQtApplication->installEventFilter(_pEventFilter);
         showControlPanels(false);
     }
+    _pPermanentEventFilter = new QtPermanentEventFilter(_pApplication->_pMainView->getViewImpl());
+    _pQtApplication->installEventFilter(_pPermanentEventFilter);
 
     _pApplication->start();
     int ret = _pQtApplication->exec();

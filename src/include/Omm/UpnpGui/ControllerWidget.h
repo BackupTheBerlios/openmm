@@ -53,6 +53,7 @@ class ControllerWidget : public Controller, public Gui::ClusterView
 {
 friend class PlaylistEditor;
 friend class MediaServerGroupController;
+friend class KeyController;
 
 public:
     ControllerWidget(UpnpApplication* pApplication);
@@ -103,6 +104,7 @@ public:
 
 private:
     virtual void keyPressed(KeyCode key);
+    virtual void keyPressedNonFullscreen(KeyCode key, Modifiers mod, bool& propagate);
 
     ControllerWidget*   _pControllerWidget;
 };

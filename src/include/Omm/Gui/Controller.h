@@ -44,7 +44,7 @@ class Controller
     friend class ButtonViewImpl;
 
 public:
-    typedef enum {KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
+    typedef enum { KeyReturn, KeyBack, KeyLeft, KeyRight, KeyUp, KeyDown,
             KeyMenu, KeyVolUp, KeyVolDown, KeyChanUp, KeyChanDown,
             KeyForward, KeyBackward, KeyPlay, KeyStop, KeyPause,
             KeyPlayPause, KeyMute, KeyRecord,
@@ -53,6 +53,15 @@ public:
             KeyK, KeyL, KeyM, KeyN, KeyO, KeyP, KeyQ, KeyR, KeyS, KeyT,
             KeyU, KeyV, KeyW, KeyX, KeyY, KeyZ
     } KeyCode;
+
+    typedef enum { NoModifier = 0x00000000,
+            ShiftModifier = 0x02000000,
+            ControlModifier = 0x04000000,
+            AltModifier = 0x08000000,
+            MetaModifier = 0x10000000,
+            KeypadModifier = 0x20000000,
+            GroupSwitchModifier = 0x40000000
+    } Modifiers;
 
     void attachModel(Model* pModel);
     void detachModel(Model* pModel);
@@ -67,6 +76,7 @@ public:
     virtual void released() {}
     virtual void activated() {}
     virtual void keyPressed(KeyCode key) {}
+    virtual void keyPressedNonFullscreen(KeyCode key, Modifiers mod, bool& propagate) {}
     virtual void mouseHovered(const Position& pos) {}
     virtual void mouseMoved(const Position& pos) {}
     virtual void dragStarted() {}

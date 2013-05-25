@@ -67,6 +67,10 @@ public:
     UpnpApplication(int argc, char** argv);
     ~UpnpApplication();
 
+    // Omm::Gui::Application interface
+    virtual void start();
+    virtual void stop();
+
     void setLockInstance(bool lock = true);
     void setIgnoreConfig(bool ignore = true);
     bool getIgnoreConfig();
@@ -89,8 +93,6 @@ private:
     // Omm::Gui::Application interface
     virtual Omm::Gui::View* createMainView();
     virtual void presentedMainView();
-    virtual void start();
-    virtual void stop();
 
     // application configuration
     void displayHelp();

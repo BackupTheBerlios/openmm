@@ -479,4 +479,27 @@ KeyController::keyPressed(KeyCode key)
 }
 
 
+void
+KeyController::keyPressedNonFullscreen(KeyCode key, Modifiers mod, bool& propagate)
+{
+    LOGNS(Gui, gui, debug, "key controller, key pressed non fullscreen: " + Poco::NumberFormatter::format(key));
+    if (mod == Gui::Controller::ControlModifier) {
+        if (key == Gui::Controller::KeyQ) {
+            propagate = false;
+            _pControllerWidget->_pApplication->quit();
+        }
+        else if (key == Gui::Controller::KeyS) {
+            propagate = false;
+            if (_pControllerWidget->getState() == DeviceManager::Stopped) {
+                _pControllerWidget->_pApplication->start();
+            }
+            else {
+                _pControllerWidget->_pApplication->stop();
+            }
+        }
+    }
+
+}
+
+
 } // namespace Omm

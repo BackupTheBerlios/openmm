@@ -23,7 +23,7 @@
 #define ViewImpl_INCLUDED
 
 #include "Gui/View.h"
-
+#include "Gui/Controller.h"
 
 class QWidget;
 
@@ -39,6 +39,7 @@ class ViewImpl
     friend class View;
     friend class SignalProxy;
     friend class QtEventFilter;
+    friend class QtPermanentEventFilter;
 
     template <class W> friend class QtViewImpl;
 
@@ -92,6 +93,9 @@ private:
     void released();
     void activated();
     void keyPressed(int key);
+    bool keyPressedNonFullscreen(int key, int modifiers);
+    Controller::KeyCode keyTranslateNativeCode(int key);
+    Controller::Modifiers keyTranslateNativeModifiers(int modifiers);
     void mouseHovered(const Position& pos);
     void mouseMoved(const Position& pos);
     void dragStarted();
