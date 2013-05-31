@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include <cmath>
+#include <string>
 
 #include "Util.h"
 #include "Gui/GuiLogger.h"

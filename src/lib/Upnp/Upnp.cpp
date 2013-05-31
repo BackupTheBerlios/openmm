@@ -1569,26 +1569,43 @@ _expireCallback(*this, &Subscription::expire),
 _expireControllerCallback(*this, &Subscription::expireController),
 _pTimer(0)
 {
-    // TODO: implement timer stuff
-    _uuid = Poco::UUIDGenerator().createRandom().toString();
-    LOG(event, debug, "creating subscription with SID: " + _uuid);
-    _eventKey = 0;
-    _pQueueThread = new Poco::Thread;
-    _pQueueThread->start(_queueThreadRunnable);
 }
 
 
 Subscription::~Subscription()
 {
-    delete _pSession;
-    _queueThreadRunning = false;
-    sendEventMessage("");
-    if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(1000)) {
-        LOG(event, error, "failed to join subscription queue thread");
-    }
     if (_pTimer) {
         delete _pTimer;
         _timerReleaseCounter++;
+    }
+    if (_pSession) {
+        delete _pSession;
+    }
+}
+
+
+void
+Subscription::initDevice()
+{
+    _uuid = Poco::UUIDGenerator().createRandom().toString();
+    LOG(event, debug, "creating subscription with SID: " + _uuid);
+    _eventKey = 0;
+    _pQueueThread = new Poco::Thread;
+    LOG(event, debug, "starting subscription queue thread ...");
+    _pQueueThread->start(_queueThreadRunnable);
+}
+
+
+void
+Subscription::deInitDevice()
+{
+    _queueLock.lock();
+    _queueThreadRunning = false;
+    _messageQueue.push("");
+    _queueCondition.broadcast();
+    _queueLock.unlock();
+    if (_pQueueThread->isRunning() && !_pQueueThread->tryJoin(1000)) {
+        LOG(event, error, "failed to join subscription queue thread");
     }
 }
 
@@ -1726,7 +1743,12 @@ void
 Subscription::expireController(Poco::Timer& timer)
 {
     LOG(event, debug, "controller subscription timer expired, renewing subscription.");
-    _pService->sendSubscriptionRequest(true);
+    try {
+        _pService->sendSubscriptionRequest(true);
+    }
+    catch (Poco::Exception&e) {
+        LOG(event, error, "controller subscription renewing subscription failed: " + e.displayText());
+    }
 }
 
 
@@ -1734,7 +1756,9 @@ void
 Subscription::stopExpirationTimer()
 {
     if (_pTimer) {
+        LOG(event, debug, "controller subscription timer stopping ...");
         _pTimer->stop();
+        LOG(event, debug, "controller subscription timer stopped.");
     }
 }
 
@@ -1742,7 +1766,6 @@ Subscription::stopExpirationTimer()
 void
 Subscription::deliverEventMessage(const std::string& eventMessage)
 {
-    // TODO: queue the eventMessages for sending ...? (don't block device thread)
     // FIXME: timeout should be 30 sec for event notifications (see 4.2.1 Eventing: Event messages: NOTIFY)
     if (!eventMessage.size()) {
         return;
@@ -1776,8 +1799,8 @@ Subscription::deliverEventMessage(const std::string& eventMessage)
 void
 Subscription::queueThread()
 {
-    LOG(event, debug, "subscription queue thread running ...");
-    while (_queueThreadRunning) {
+    LOG(event, debug, "subscription queue thread running.");
+    while (queueThreadRunning()) {
         _queueLock.lock();
         if (_messageQueue.size() == 0) {
             _queueCondition.wait<Poco::FastMutex>(_queueLock);
@@ -1787,6 +1810,14 @@ Subscription::queueThread()
         _queueLock.unlock();
     }
     LOG(event, debug, "subscription queue thread finished.");
+}
+
+
+bool
+Subscription::queueThreadRunning()
+{
+    Poco::ScopedLock<Poco::FastMutex> lock(_queueLock);
+    return _queueThreadRunning;
 }
 
 
@@ -2263,12 +2294,12 @@ Service::sendAction(Action* pAction)
     catch(Poco::Net::ConnectionRefusedException) {
         actionNetworkActivity(false);
         LOG(ctrl, error, "sending of action request failed, connection refused");
-        throw Poco::Exception("");
+        throw Poco::Exception("sending of action request failed, connection refused");
     }
     catch (...) {
         actionNetworkActivity(false);
         LOG(ctrl, error, "sending of action request failed for some reason");
-        throw Poco::Exception("");
+        throw Poco::Exception("sending of action request failed for some reason");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
@@ -2285,12 +2316,12 @@ Service::sendAction(Action* pAction)
     catch (Poco::Net::NoMessageException) {
         actionNetworkActivity(false);
         LOG(ctrl, error, "no response to action request \"" + pAction->getName()+ "\"");
-        throw Poco::Exception("");
+        throw Poco::Exception("no response to action request \"" + pAction->getName()+ "\"");
     }
     catch (...) {
         actionNetworkActivity(false);
         LOG(ctrl, error, "no response to action request \"" + pAction->getName()+ "\" received for some reason");
-        throw Poco::Exception("");
+        throw Poco::Exception("no response to action request \"" + pAction->getName()+ "\" received for some reason");
     }
     LOG(ctrl, debug, "*** action \"" + pAction->getName() + "\" completed ***");
 }
@@ -2306,7 +2337,9 @@ Service::setSubscriptionDuration(unsigned int duration)
 void
 Service::stopSubscriptionExpirationTimer()
 {
-    _pControllerSubscriptionData->stopExpirationTimer();
+    if (_pControllerSubscriptionData) {
+        _pControllerSubscriptionData->stopExpirationTimer();
+    }
 }
 
 
@@ -2349,11 +2382,11 @@ Service::sendSubscriptionRequest(bool renew)
     }
     catch(Poco::Net::ConnectionRefusedException) {
         LOG(event, error, "sending of subscription request failed, connection refused");
-        throw Poco::Exception("");
+        throw Poco::Exception("connection to subscription publisher refused");
     }
     catch (...) {
         LOG(event, error, "sending of subscription request failed for some reason");
-        throw Poco::Exception("");
+        throw Poco::Exception("no connection to subscription publisher for some reason");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
@@ -2366,25 +2399,27 @@ Service::sendSubscriptionRequest(bool renew)
     }
     catch (Poco::Net::NoMessageException) {
         LOG(event, error, "no response to subscription request.");
-        throw Poco::Exception("");
+        throw Poco::Exception("no response from subscription publisher");
     }
     catch (...) {
         LOG(event, error, "no response to subscription received for some reason.");
-        throw Poco::Exception("");
+        throw Poco::Exception("no response from subscription publisher for some reason");
     }
 
     if (!renew) {
         _pControllerSubscriptionData->setSid(response.get("SID"));
     }
     int timeout = 0;
-    try {
-        std::string timeoutString = response.get("TIMEOUT").substr(7);
-        timeout = Poco::NumberParser::parse(timeoutString);
-        setSubscriptionDuration(timeout);
-        _pControllerSubscriptionData->renewController(timeout);
-    }
-    catch(Poco::Exception& e) {
-        LOG(event, error, "cannot parse subscription timeout: " + e.displayText());
+    std::string timeoutString = response.get("TIMEOUT").substr(7);
+    if (timeoutString != "infinite") {
+        try {
+            timeout = Poco::NumberParser::parse(timeoutString);
+            setSubscriptionDuration(timeout);
+            _pControllerSubscriptionData->renewController(timeout);
+        }
+        catch(Poco::Exception& e) {
+            LOG(event, error, "cannot parse subscription timeout: " + e.displayText());
+        }
     }
 
     LOG(event, debug, "subscription request completed");
@@ -2394,6 +2429,7 @@ Service::sendSubscriptionRequest(bool renew)
 void
 Service::sendCancelSubscriptionRequest()
 {
+    LOG(event, debug, "cancel subscription request");
     // FIXME: crash here, because wrong device pointer returned from getDevice() ?
     Poco::URI baseUri(getDevice()->getDeviceContainer()->getDescriptionUri());
     Poco::URI eventSubscriptionUri(baseUri);
@@ -2442,6 +2478,15 @@ Service::sendCancelSubscriptionRequest()
     }
 
     LOG(event, debug, "cancel subscription request completed");
+}
+
+
+void
+Service::deleteSubscription()
+{
+    if (_pControllerSubscriptionData) {
+        delete _pControllerSubscriptionData;
+    }
 }
 
 
@@ -2740,6 +2785,7 @@ EventSubscriptionRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req
             std::string callbackUriString = request.get("CALLBACK");
             Poco::StringTokenizer callbackUris(callbackUriString, "<>", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
             pSubscription = new Subscription(_pService);
+            pSubscription->initDevice();
             sid = pSubscription->getUuid();
             for (Poco::StringTokenizer::Iterator it = callbackUris.begin(); it != callbackUris.end(); ++it) {
                 pSubscription->addCallbackUri(*it);
@@ -3726,15 +3772,15 @@ Device::controllerSubscribeEventing()
             (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
-//            (*s)->setSubscriptionDuration(10);
-            (*s)->setSubscriptionDuration(0);
+            (*s)->setSubscriptionDuration(4);
+//            (*s)->setSubscriptionDuration(0);
             // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
                 (*s)->sendSubscriptionRequest();
             }
-            catch (...) {
-                LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring.");
+            catch (Poco::Exception& e) {
+                LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring: " + e.displayText());
             }
         }
     }
@@ -3744,6 +3790,7 @@ Device::controllerSubscribeEventing()
 void
 Device::controllerUnsubscribeEventing()
 {
+    LOG(upnp, debug, "controller unsubscribe eventing ...");
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         if ((*s)->getControllerSubscribeEventing()) {
             (*s)->stopSubscriptionExpirationTimer();
@@ -3753,8 +3800,10 @@ Device::controllerUnsubscribeEventing()
             catch (...) {
                 LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
             }
+            (*s)->deleteSubscription();
         }
     }
+    LOG(upnp, debug, "controller unsubscribe eventing finished.");
 }
 
 

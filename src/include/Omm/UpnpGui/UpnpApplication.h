@@ -112,6 +112,7 @@ private:
     void startAppHttpServer();
     void stopAppHttpServer();
     bool instanceAlreadyRunning();
+    void installGlobalErrorHandler();
 
     int                                         _argc;
     char**                                      _argv;

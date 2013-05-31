@@ -155,21 +155,27 @@ CtlAVTransportImpl::_changedLastChange(const std::string& val)
                 LOG(upnpav, debug, "controller, transport state changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newTransportState(val);
-                    if (val == Av::AvTransportArgument::TRANSPORT_STATE_STOPPED || val == Av::AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
+                    if (val == AvTransportArgument::TRANSPORT_STATE_STOPPED || val == AvTransportArgument::TRANSPORT_STATE_NO_MEDIA_PRESENT) {
                         _pMediaRenderer->newPosition(0.0, 0.0);
                     }
                 }
             }
-            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_URI) {
+            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_URI && val != "") {
                 LOG(upnpav, debug, "controller, current track uri changed to \"" + val + "\" on device: " + _pService->getDevice()->getUuid());
                 if (_pMediaRenderer) {
                     _pMediaRenderer->newUri(val);
                 }
             }
-            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA) {
+            else if (stateVarName == AvTransportEventedStateVar::CURRENT_TRACK_META_DATA && val != AvTransportArgument::CURRENT_TRACK_META_DATA_NOT_IMPLEMENTED) {
                 CtlMediaObject object;
                 MediaObjectReader reader;
-                reader.read(&object, val);
+                try {
+                    reader.read(&object, val);
+                }
+                catch (Poco::Exception& e) {
+                    LOG(upnpav, debug, "controller failed to parse current track meta data: " + e.displayText());
+                    continue;
+                }
                 if (_pMediaRenderer) {
                     AbstractProperty* pArtist = object.getProperty(AvProperty::ARTIST);
                     AbstractProperty* pAlbum = object.getProperty(AvProperty::ALBUM);

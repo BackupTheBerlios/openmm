@@ -26,6 +26,7 @@
 #include <Poco/UUIDGenerator.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/NamedMutex.h>
+#include "Poco/ErrorHandler.h"
 #include <Poco/Util/Application.h>
 
 #include "UpnpGui/ControllerWidget.h"
@@ -99,6 +100,28 @@ ConfigRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReq
 {
     return new ConfigRequestHandler(_pApp);
 }
+
+
+class GlobalErrorHandler : public Poco::ErrorHandler
+{
+public:
+    void exception(const Poco::Exception& exc)
+    {
+        LOG(upnp, error, "global error handler: " + exc.displayText());
+    }
+
+
+    void exception(const std::exception& exc)
+    {
+        LOG(upnp, error, "global error handler: " + std::string(exc.what()));
+    }
+
+
+    void exception()
+    {
+        LOG(upnp, error, "global error handler: unknown exception");
+    }
+};
 
 
 const std::string UpnpApplication::PLAYLIST_URI = "/Playlist";
@@ -240,6 +263,8 @@ UpnpApplication::main(const std::vector<std::string>& args)
     }
     else
     {
+        installGlobalErrorHandler();
+
         Poco::Util::Application::init(_argc, _argv);
     // TODO: reenable _feature instance checking (segfaults with mutex)
 //        if (instanceAlreadyRunning()) {
@@ -305,10 +330,10 @@ void
 UpnpApplication::stop()
 {
     LOGNS(Av, upnpav, debug, "omm application stopping ...");
-    _pLocalDeviceServer->setState(DeviceManager::Stopped);
     if (_enableController) {
         _pControllerWidget->setState(DeviceManager::Stopped);
     }
+    _pLocalDeviceServer->setState(DeviceManager::Stopped);
     stopAppHttpServer();
     saveConfig();
     Poco::Util::Application::uninitialize();
@@ -739,6 +764,14 @@ UpnpApplication::instanceAlreadyRunning()
     else {
         return false;
     }
+}
+
+
+void
+UpnpApplication::installGlobalErrorHandler()
+{
+    static GlobalErrorHandler errorHandler;
+    Poco::ErrorHandler* pOldErrorHandler = Poco::ErrorHandler::set(&errorHandler);
 }
 
 

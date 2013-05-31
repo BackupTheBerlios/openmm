@@ -534,6 +534,9 @@ public:
     Subscription(Service* pService);
     ~Subscription();
 
+    void initDevice();
+    void deInitDevice();
+
     std::string getUuid();
     void setSid(const std::string& uuid);
 
@@ -551,6 +554,7 @@ public:
 private:
     void deliverEventMessage(const std::string& eventMessage);
     void queueThread();
+    bool queueThreadRunning();
 
 //     HTTPRequest* newRequest();
 

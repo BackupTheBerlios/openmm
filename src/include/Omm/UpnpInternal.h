@@ -260,6 +260,7 @@ public:
     void stopSubscriptionExpirationTimer();
     void sendSubscriptionRequest(bool renew = false);
     void sendCancelSubscriptionRequest();
+    void deleteSubscription();
     void registerSubscription(Subscription* pSubscription);
     void unregisterSubscription(Subscription* pSubscription);
 
