@@ -67,18 +67,18 @@ Log::Log()
     Poco::Channel* pChannel = Util::Log::instance()->channel();
 
     _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
+    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_DEBUG);
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
 
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
-    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
+//    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -1703,6 +1703,7 @@ Subscription::expire(Poco::Timer& timer)
 {
     // unregisterSubscription() deletes this ...
     LOG(event, debug, "subscription expired.");
+    _pTimer->restart(0);
     _pService->unregisterSubscription(this);
 }
 
@@ -3339,6 +3340,9 @@ DeviceManager::clear()
 {
     // TODO: also delete device containers and devices. DeviceGroup only clears _devices vector (pointing to same devices)
     // other possibility: sync device containers with current network status (and for example preserve info in controller about them)
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->stopSsdpTimer();
+    }
     _deviceContainers.clear();
 }
 
@@ -3351,11 +3355,15 @@ DeviceManager::postDeviceNotification(Poco::Notification* pNotification)
 }
 
 
+Poco::AtomicCounter DeviceContainer::_ssdpTimerReleaseCounter(0);
+
 DeviceContainer::DeviceContainer() :
 _pDeviceManager(0),
 _pController(0),
 _pSsdpNotifyAliveMessages(new SsdpMessageSet),
-_pSsdpNotifyByebyeMessages(new SsdpMessageSet)
+_pSsdpNotifyByebyeMessages(new SsdpMessageSet),
+_expireSsdpCallback(*this, &DeviceContainer::expireSsdp),
+_pSsdpTimer(0)
 {
 }
 
@@ -3369,6 +3377,9 @@ DeviceContainer::~DeviceContainer()
 //     delete _descriptionRequestHandler;
     delete _pSsdpNotifyAliveMessages;
     delete _pSsdpNotifyByebyeMessages;
+    if (_pSsdpTimer) {
+        delete _pSsdpTimer;
+    }
 }
 
 
@@ -3706,6 +3717,61 @@ DeviceContainer::writeSsdpMessages()
 }
 
 
+void
+DeviceContainer::restartSsdpTimer(int maxAge)
+{
+    if (maxAge == 0) {
+        return;
+    }
+
+    int maxAgeMillisec = maxAge * 1000;
+    LOG(ssdp, debug, "device container restart ssdp expiration timer for max age milliseconds: " + Poco::NumberFormatter::format(maxAgeMillisec));
+
+    if (_pSsdpTimer) {
+        _pSsdpTimer->restart(maxAgeMillisec);
+    }
+    else {
+        LOG(ssdp, debug, "create timer for device ssdp expiration");
+        // NOTE: thread pool gets too large when subscriptions appear over a long period of time, so we have to
+        // count released timers and don't allocate a new thread in the default thread pool, when there is a released one
+        if (_ssdpTimerReleaseCounter <= 0) {
+            Poco::ThreadPool::defaultPool().addCapacity(1);
+        }
+        else {
+            _ssdpTimerReleaseCounter--;
+        }
+        _pSsdpTimer = new Poco::Timer;
+        _pSsdpTimer->setStartInterval(maxAgeMillisec);
+        try {
+            _pSsdpTimer->start(_expireSsdpCallback);
+        }
+        catch (Poco::Exception& e) {
+            LOG(ssdp, error, "failed to start ssdp expiration timer: " + e.displayText());
+        }
+    }
+}
+
+
+void
+DeviceContainer::stopSsdpTimer()
+{
+    if (_pSsdpTimer) {
+        LOG(ssdp, debug, "device container ssdp expiration timer stopping ...");
+        _pSsdpTimer->stop();
+        LOG(event, debug, "device container ssdp expiration timer stopped.");
+    }
+}
+
+
+void
+DeviceContainer::expireSsdp(Poco::Timer& timer)
+{
+    LOG(ssdp, debug, "device container ssdp expiration timer expired.");
+    _pSsdpTimer->restart(0);
+    _pController->removeDeviceContainer(this);
+}
+
+
 Device::Device() :
 _pDeviceContainer(0),
 _pDeviceData(0),
@@ -3772,8 +3838,7 @@ Device::controllerSubscribeEventing()
             (*s)->addEventCallbackPath(getUuid() + "/" + (*s)->getServiceType() + "/EventNotification");
             _pDeviceContainer->getDeviceManager()->registerHttpRequestHandler((*s)->getEventCallbackPath(), new EventNotificationRequestHandler((*s)));
 
-            (*s)->setSubscriptionDuration(4);
-//            (*s)->setSubscriptionDuration(0);
+            (*s)->setSubscriptionDuration(EVENT_SUBSCRIPTION_DURATION);
             // TODO: event notifications should go into Device, after it is accepted and added to the controller
             // subscribe to event notifications
             try {
@@ -4145,6 +4210,7 @@ SsdpMessageSet::send(SsdpSocket& socket, int repeat, long delay, Poco::UInt16 ca
 void
 SsdpMessageSet::startSendContinuous(SsdpSocket& socket, long delay, Poco::UInt16 cacheDuration)
 {
+    // ssdp messages are sent within the first half of cache duration: cacheDuration * 1000 / 2
     send(socket, 2, delay, cacheDuration * 1000 / 2, true);
 }
 
@@ -4169,7 +4235,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
             _pSsdpSocket->sendMessage(**i, _receiver);
         }
     }
-    if (_continuous) {
+    if (_continuous && _cacheDuration) {
         timer.restart(_randomTimeGenerator.next(_cacheDuration));
     }
 }
@@ -4326,12 +4392,16 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
                 LOG(ssdp, debug, "identified alive message, attempting to add device container");
                 discoverDeviceContainer(pMessage->getLocation());
             }
+            if (pMessage->getNotificationType() == "upnp:rootdevice") {
+                _deviceContainers.get(uuid).restartSsdpTimer(pMessage->getCacheControl());
+            }
             break;
         case SsdpMessage::SUBTYPE_BYEBYE:
             LOG(ssdp, debug, "identified byebye message");
             // TODO: handle other notification types than upnp:rootdevice
             if (pMessage->getNotificationType() == "upnp:rootdevice" && _deviceContainers.contains(uuid)) {
                 LOG(ssdp, debug, "identified byebye message, attempting to remove device container");
+                _deviceContainers.get(uuid).stopSsdpTimer();
                 removeDeviceContainer(&_deviceContainers.get(uuid));
             }
             break;
@@ -4342,6 +4412,7 @@ Controller::handleSsdpMessage(SsdpMessage* pMessage)
         if (!_deviceContainers.contains(uuid)) {
             discoverDeviceContainer(pMessage->getLocation());
         }
+        _deviceContainers.get(uuid).restartSsdpTimer(pMessage->getCacheControl());
         break;
     }
 }
@@ -4765,9 +4836,10 @@ SsdpMessage::setCacheControl(int duration)
 int
 SsdpMessage::getCacheControl()
 {
+    int res = SSDP_CACHE_DURATION; // if no valid number is given, return minimum required value
     try {
         std::string value = _messageHeader["CACHE-CONTROL"];
-        return Poco::NumberParser::parse(value.substr(value.find('=')+1));
+        res = Poco::NumberParser::parse(value.substr(value.find('=')+1));
     }
     catch (Poco::NotFoundException) {
         LOG(ssdp, error, "missing CACHE-CONTROL in ssdp header");
@@ -4775,7 +4847,7 @@ SsdpMessage::getCacheControl()
     catch (Poco::SyntaxException) {
         LOG(ssdp, error, "wrong number format of CACHE-CONTROL in ssdp header");
     }
-    return SSDP_CACHE_DURATION;  // if no valid number is given, return minimum required value
+    return res;
 }
 
 

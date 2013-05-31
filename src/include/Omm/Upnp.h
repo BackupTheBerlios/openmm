@@ -34,6 +34,7 @@
 #include <Poco/NumberParser.h>
 #include <Poco/URI.h>
 #include <Poco/Timestamp.h>
+#include <Poco/Timer.h>
 #include <Poco/Logger.h>
 #include <Poco/PatternFormatter.h>
 #include <Poco/FormattingChannel.h>
@@ -403,7 +404,6 @@ public:
     void postDeviceNotification(Poco::Notification* pNotification);
     void registerDeviceNotificationHandler(const Poco::AbstractObserver& observer);
 
-
 protected:
     void registerHttpRequestHandler(std::string path, UpnpRequestHandler* requestHandler);
     void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
@@ -427,6 +427,8 @@ protected:
 
 class Controller : public DeviceManager
 {
+    friend class DeviceContainer;
+    
 public:
     Controller();
     virtual ~Controller();
@@ -461,8 +463,8 @@ private:
     void discoverDeviceContainer(const std::string& location);
 //    void update();
 
-    std::map<std::string, DeviceGroup*>        _deviceGroups;
-    bool                                       _featureSubscribeToEvents;
+    std::map<std::string, DeviceGroup*>         _deviceGroups;
+    bool                                        _featureSubscribeToEvents;
 };
 
 
@@ -620,20 +622,26 @@ private:
     void initDevice();
 
     void writeSsdpMessages();
+    void restartSsdpTimer(int maxAge);
+    void stopSsdpTimer();
+    void expireSsdp(Poco::Timer& timer);
 
 //     Poco::URI                       _baseUri;              // base URI for control URI and event URI
-    std::string                     _stringDescriptionUri;            // for controller to download description
-    Poco::URI                       _descriptionUri;
-    std::string*                    _pDeviceDescription;
-    DeviceManager*                  _pDeviceManager;
-    Container<Device>               _devices;
-    Device*                         _pRootDevice;
-    std::map<std::string,Service*>  _serviceTypes;
-    SsdpMessageSet*                 _pSsdpNotifyAliveMessages;
-    SsdpMessageSet*                 _pSsdpNotifyByebyeMessages;
-    DescriptionRequestHandler*      _descriptionRequestHandler;
+    std::string                             _stringDescriptionUri;            // for controller to download description
+    Poco::URI                               _descriptionUri;
+    std::string*                            _pDeviceDescription;
+    DeviceManager*                          _pDeviceManager;
+    Container<Device>                       _devices;
+    Device*                                 _pRootDevice;
+    std::map<std::string,Service*>          _serviceTypes;
+    SsdpMessageSet*                         _pSsdpNotifyAliveMessages;
+    SsdpMessageSet*                         _pSsdpNotifyByebyeMessages;
+    Poco::Timer*                            _pSsdpTimer;
+    Poco::TimerCallback<DeviceContainer>    _expireSsdpCallback;
+    static Poco::AtomicCounter              _ssdpTimerReleaseCounter;
+    DescriptionRequestHandler*              _descriptionRequestHandler;
     // TODO: remove _pController, it should be a specialized _pDeviceManager
-    Controller*                     _pController;
+    Controller*                             _pController;
 };
 
 
