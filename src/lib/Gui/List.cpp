@@ -391,7 +391,7 @@ ListView::scrollOneRow(int direction)
         // detach model from last visible view
         View* pView = _visibleViews.back();
         pView->hide(false);
-        pModel->getItemModel(lastVisibleRow() - 1)->detachView(pView);
+        pModel->getItemModel(lastVisibleRow() - (_pTopView ? 1 : 0) - 1)->detachView(pView);
         if (_pTopView && _rowOffset == 1) {
             pView = _pTopView;
             putFreeView(_visibleViews.back());
@@ -421,11 +421,11 @@ ListView::scrollToRowOffset(int rowOffset)
         return;
     }
     ListModel* pModel = static_cast<ListModel*>(_pModel);
-    if (modelItemCount() < viewPortHeightInRows()) {
+    if (totalItemCount() < viewPortHeightInRows()) {
         return;
     }
-    if (rowOffset > pModel->totalItemCount() - viewPortHeightInRows()) {
-        rowOffset = pModel->totalItemCount() - viewPortHeightInRows();
+    if (rowOffset > totalItemCount() - viewPortHeightInRows()) {
+        rowOffset = totalItemCount() - viewPortHeightInRows();
     }
     int rowDelta = rowOffset - _rowOffset;
     if (rowDelta == 0) {
