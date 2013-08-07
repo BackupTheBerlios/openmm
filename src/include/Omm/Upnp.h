@@ -364,6 +364,14 @@ public:
         _keyVector.clear();
     }
 
+    void deepClear()
+    {
+        for (Iterator it = begin(); it != end(); ++it) {
+            delete *it;
+        }
+        clear();
+    }
+
 private:
     std::map<std::string, E*>   _elementMap;
     std::vector<E*>             _elementVector;
@@ -379,6 +387,7 @@ class DeviceManager //: public Util::Startable
 
 public:
     typedef std::string State;
+    static const std::string Transitioning;
     static const std::string Stopped;
     static const std::string Local;
     static const std::string Public;
@@ -416,26 +425,25 @@ protected:
     void startHttp();
     void stopHttp();
 
-    void clear();
+//    void clear();
 
     State                                      _state;
     Container<DeviceContainer>                 _deviceContainers;
     Poco::NotificationCenter                   _deviceNotificationCenter;
     Socket*                                    _pSocket;
+    Poco::FastMutex                            _stateLock;
 };
 
 
 class Controller : public DeviceManager
 {
     friend class DeviceContainer;
-    
+
 public:
     Controller();
     virtual ~Controller();
 
     void setState(State newState);
-    void subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer);
-    void unsubscribeAllDevices();
     void registerDeviceGroup(DeviceGroup* pDeviceGroup);
     DeviceGroup* getDeviceGroup(const std::string& deviceType);
 
@@ -462,6 +470,10 @@ private:
 //    void handleNetworkInterfaceChangedNotification(Net::NetworkInterfaceNotification* pNotification);
     void discoverDeviceContainer(const std::string& location);
 //    void update();
+    void subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer);
+    void unsubscribeAllDevices();
+    void stopDeviceContainerTimers();
+    void deleteDeviceContainers();
 
     std::map<std::string, DeviceGroup*>         _deviceGroups;
     bool                                        _featureSubscribeToEvents;
@@ -483,6 +495,8 @@ class Device
 public:
     Device();
     virtual ~Device();
+
+    void deepDelete();
 
     typedef Container<Service>::Iterator ServiceIterator;
     ServiceIterator beginService();
@@ -519,6 +533,8 @@ public:
     void initStateVars();
     void controllerSubscribeEventing();
     void controllerUnsubscribeEventing();
+
+    void stopSubscriptionTimer();
 
     // some devices (e.g. media servers) need some action to be started and stopped
     virtual void start() {}

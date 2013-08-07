@@ -55,12 +55,12 @@ static const std::string    SSDP_ADDRESS        = "239.255.255.250";
 static const std::string    SSDP_LOOP_ADDRESS   = "127.255.255.255";
 static const Poco::UInt16   SSDP_PORT           = 1900;
 //static const Poco::UInt16   SSDP_CACHE_DURATION = 1800;
-static const Poco::UInt16   SSDP_CACHE_DURATION = 8;
+static const Poco::UInt16   SSDP_CACHE_DURATION = 90;
 static const Poco::UInt16   SSDP_MIN_WAIT_TIME  = 1;
 static const Poco::UInt16   SSDP_MAX_WAIT_TIME  = 120;
 
 //static const Poco::UInt16   EVENT_SUBSCRIPTION_DURATION = 1800;
-static const Poco::UInt16   EVENT_SUBSCRIPTION_DURATION = 0;
+static const Poco::UInt16   EVENT_SUBSCRIPTION_DURATION = 90;
 
 class ControlRequestHandler;
 class HttpSocket;
@@ -279,7 +279,7 @@ private:
     SsdpSocket*                         _pSsdpSocket;
     std::vector<SsdpMessage*>           _ssdpMessages;
     int                                 _repeat;
-    long                                _delay;
+    Poco::UInt32                        _delay;
     Poco::UInt16                        _cacheDuration;
     bool                                _continuous;
     bool                                _sendTimerIsRunning;
@@ -609,6 +609,7 @@ class DeviceData
     friend class Device;
 public:
     DeviceData();
+    ~DeviceData();
 
     Device* getDevice();
 

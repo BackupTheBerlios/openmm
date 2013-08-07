@@ -71,14 +71,14 @@ Log::Log()
     _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_DEBUG);
 //    _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_DEBUG);
     _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_DEBUG);
-//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
+    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_DEBUG);
 
 //    _pUpnpLogger = &Poco::Logger::create("UPNP.GENERAL", pChannel, Poco::Message::PRIO_ERROR);
 //    _pSsdpLogger = &Poco::Logger::create("UPNP.SSDP", pChannel, Poco::Message::PRIO_ERROR);
 //    _pHttpLogger = &Poco::Logger::create("UPNP.HTTP", pChannel, Poco::Message::PRIO_ERROR);
     _pDescriptionLogger = &Poco::Logger::create("UPNP.DESC", pChannel, Poco::Message::PRIO_ERROR);
 //    _pControlLogger = &Poco::Logger::create("UPNP.CONTROL", pChannel, Poco::Message::PRIO_ERROR);
-    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
+//    _pEventLogger = &Poco::Logger::create("UPNP.EVENT", pChannel, Poco::Message::PRIO_ERROR);
 }
 
 
@@ -1711,8 +1711,8 @@ Subscription::expire(Poco::Timer& timer)
 void
 Subscription::renewController(unsigned int seconds)
 {
-    // renew the subsciption 800 millisecs earlier than it expires.
-    long milliseconds = (seconds * 1000) - 800;
+    // renew the subsciption at half of the time before it expires.
+    long milliseconds = seconds * 1000 / 2;
     LOG(event, debug, "controller renew subscription timer milliseconds: " + Poco::NumberFormatter::format(milliseconds));
 
     if (_pTimer) {
@@ -1761,6 +1761,9 @@ Subscription::stopExpirationTimer()
         _pTimer->stop();
         LOG(event, debug, "controller subscription timer stopped.");
     }
+    else {
+        LOG(event, debug, "controller subscription timer not active, no need to stop.");
+    }
 }
 
 
@@ -1785,15 +1788,26 @@ Subscription::deliverEventMessage(const std::string& eventMessage)
     request.write(ss);
 
     // set request body and send request
-    std::ostream& ostr = getSession()->sendRequest(request);
-    ostr << eventMessage;
+    try {
+        std::ostream& ostr = getSession()->sendRequest(request);
+        ostr << eventMessage;
+    }
+    catch (Poco::Exception& e) {
+        LOG(event, error, "delivering event message failed: " + e.displayText());
+        return;
+    }
 
     LOG(event, debug, "event notification request sent: " + Poco::LineEnding::NEWLINE_DEFAULT + ss.str() + eventMessage);
 
     // receive answer ...
     Poco::Net::HTTPResponse response;
-    getSession()->receiveResponse(response);
-    LOG(event, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    try {
+        getSession()->receiveResponse(response);
+        LOG(event, debug, "HTTP " + Poco::NumberFormatter::format(response.getStatus()) + " " + response.getReason());
+    }
+    catch (Poco::Exception& e) {
+        LOG(event, error, "no reponse while delivering event message: " + e.displayText());
+    }
 }
 
 
@@ -1976,8 +1990,12 @@ _pDelegate(0)
 
 Service::~Service()
 {
-    delete _pEventMessageQueue;
-    delete _pControllerSubscriptionData;
+    if (_pEventMessageQueue) {
+        delete _pEventMessageQueue;
+    }
+    if (_pControllerSubscriptionData) {
+        delete _pControllerSubscriptionData;
+    }
 }
 
 
@@ -2440,6 +2458,7 @@ Service::sendCancelSubscriptionRequest()
     // controller stores only one subscription in each service.
     request.set("SID", "uuid:" + _pControllerSubscriptionData->getUuid());
     Poco::Net::HTTPClientSession eventSubscriptionSession(Poco::Net::SocketAddress(baseUri.getAuthority()));
+    eventSubscriptionSession.setTimeout(Poco::Timespan(5, 0)); // set unsubscription request timeout to 5 secs, should be 30 secs according to specs.
 
     std::stringstream ss;
     request.write(ss);
@@ -2452,11 +2471,11 @@ Service::sendCancelSubscriptionRequest()
     }
     catch(Poco::Net::ConnectionRefusedException) {
         LOG(event, error, "sending of cancel subscription request failed, connection refused");
-        throw Poco::Exception("");
+        throw Poco::Exception("sending of cancel subscription request failed, connection refused");
     }
     catch (...) {
         LOG(event, error, "sending of cancel subscription request failed for some reason");
-        throw Poco::Exception("");
+        throw Poco::Exception("sending of cancel subscription request failed for some reason");
     }
     // receive response ...
     Poco::Net::HTTPResponse response;
@@ -2487,6 +2506,7 @@ Service::deleteSubscription()
 {
     if (_pControllerSubscriptionData) {
         delete _pControllerSubscriptionData;
+        _pControllerSubscriptionData = 0;
     }
 }
 
@@ -2510,6 +2530,7 @@ Service::unregisterSubscription(Subscription* pSubscription)
     std::string sid = pSubscription->getUuid();
     LOG(event, debug, "unregister subscription with SID: " + sid);
     _eventSubscriptions.remove(sid);
+    pSubscription->stopExpirationTimer();
     delete pSubscription;
 }
 
@@ -3133,6 +3154,7 @@ DescriptionProvider::getServiceDescription(const std::string& path)
 }
 
 
+const std::string DeviceManager::Transitioning = "transitioning";
 const std::string DeviceManager::Stopped = "stopped";
 const std::string DeviceManager::Local = "local";
 const std::string DeviceManager::Public = "public";
@@ -3147,9 +3169,10 @@ _state(Stopped)
 
 DeviceManager::~DeviceManager()
 {
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        delete *it;
-    }
+//    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+//        delete *it;
+//    }
+//    _deviceContainers.deepClear();
     delete _pSocket;
 }
 
@@ -3257,6 +3280,10 @@ DeviceManager::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
+    State oldState = _state;
+//    _stateLock.lock();
+//    _state == Transitioning;
+//    _stateLock.unlock();
 
     if (newState == Stopped) {
         stopSsdp();
@@ -3264,7 +3291,7 @@ DeviceManager::setState(State newState)
         _pSocket->setMode(Socket::Null);
     }
     else {
-        if (_state != Stopped) {
+        if (oldState != Stopped) {
             stopSsdp();
             stopHttp();
         }
@@ -3280,7 +3307,9 @@ DeviceManager::setState(State newState)
         startHttp();
         startSsdp();
     }
+    _stateLock.lock();
     _state = newState;
+    _stateLock.unlock();
     LOG(upnp, debug, "device manager state change finished");
 }
 
@@ -3288,6 +3317,8 @@ DeviceManager::setState(State newState)
 DeviceManager::State
 DeviceManager::getState()
 {
+    Poco::ScopedLock<Poco::FastMutex> _lock(_stateLock);
+
     return _state;
 }
 
@@ -3335,16 +3366,18 @@ DeviceManager::stopHttp()
 }
 
 
-void
-DeviceManager::clear()
-{
-    // TODO: also delete device containers and devices. DeviceGroup only clears _devices vector (pointing to same devices)
-    // other possibility: sync device containers with current network status (and for example preserve info in controller about them)
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        (*it)->stopSsdpTimer();
-    }
-    _deviceContainers.clear();
-}
+//void
+//DeviceManager::clear()
+//{
+//    LOG(upnp, debug, "device manager clear");
+//    // TODO: also delete device containers and devices. DeviceGroup only clears _devices vector (pointing to same devices)
+//    // other possibility: sync device containers with current network status (and for example preserve info in controller about them)
+////    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+////        (*it)->stopSsdpTimer();
+////    }
+////    _deviceContainers.clear();
+////    _deviceContainers.deepClear();
+//}
 
 
 void
@@ -3372,6 +3405,7 @@ DeviceContainer::~DeviceContainer()
 {
     // TODO: free all Devices, Services, Actions, ...
     for (DeviceIterator it = beginDevice(); it != endDevice(); ++it) {
+        (*it)->deepDelete();
         delete *it;
     }
 //     delete _descriptionRequestHandler;
@@ -3409,7 +3443,7 @@ void
 DeviceContainer::clear()
 {
     // TODO: this is incomplete and currently not usable
-    _devices.clear();
+//    _devices.clear();
     _serviceTypes.clear();
     _pRootDevice = 0;
     if (_pDeviceDescription) {
@@ -3767,8 +3801,10 @@ void
 DeviceContainer::expireSsdp(Poco::Timer& timer)
 {
     LOG(ssdp, debug, "device container ssdp expiration timer expired.");
-    _pSsdpTimer->restart(0);
-    _pController->removeDeviceContainer(this);
+    timer.restart(0);
+    if (_pController) {
+        _pController->removeDeviceContainer(this);
+    }
 }
 
 
@@ -3783,26 +3819,24 @@ _pCtlDeviceCode(0)
 
 Device::~Device()
 {
-    for (ServiceIterator it = beginService(); it != endService(); ++it) {
-        (*it)->stopSubscriptionExpirationTimer();
+}
+
+
+void
+Device::deepDelete()
+{
+    if (_pDeviceData) {
+        delete _pDeviceData;
+        _pDeviceData = 0;
     }
-
-    _pDeviceData = 0;
-    _pDevDeviceCode = 0;
-    _pCtlDeviceCode = 0;
-
-//    if (_pDeviceData) {
-//        delete _pDeviceData;
-//        _pDeviceData = 0;
-//    }
-//    if (_pDevDeviceCode) {
-//        delete _pDevDeviceCode;
-//        _pDevDeviceCode = 0;
-//    }
-//    if (_pCtlDeviceCode) {
-//        delete _pCtlDeviceCode;
-//        _pCtlDeviceCode = 0;
-//    }
+    if (_pDevDeviceCode) {
+        delete _pDevDeviceCode;
+        _pDevDeviceCode = 0;
+    }
+    if (_pCtlDeviceCode) {
+        delete _pCtlDeviceCode;
+        _pCtlDeviceCode = 0;
+    }
 }
 
 
@@ -3845,7 +3879,7 @@ Device::controllerSubscribeEventing()
                 (*s)->sendSubscriptionRequest();
             }
             catch (Poco::Exception& e) {
-                LOG(upnp, error, "controller failed to initialize device while subscribing to events, ignoring: " + e.displayText());
+                LOG(event, error, "controller failed to initialize device while subscribing to events, ignoring: " + e.displayText());
             }
         }
     }
@@ -3855,20 +3889,29 @@ Device::controllerSubscribeEventing()
 void
 Device::controllerUnsubscribeEventing()
 {
-    LOG(upnp, debug, "controller unsubscribe eventing ...");
+    LOG(event, debug, "controller unsubscribe eventing ...");
     for(ServiceIterator s = beginService(); s != endService(); ++s) {
         if ((*s)->getControllerSubscribeEventing()) {
             (*s)->stopSubscriptionExpirationTimer();
             try {
                 (*s)->sendCancelSubscriptionRequest();
             }
-            catch (...) {
-                LOG(upnp, error, "controller failed to cancel event subscriptions, ignoring.");
+            catch (Poco::Exception& e) {
+                LOG(event, error, "controller failed to unsubscribe service type: " + (*s)->getServiceType() + ", subscription path: " + (*s)->getEventSubscriptionPath() + ", error: " + e.displayText());
             }
             (*s)->deleteSubscription();
         }
     }
-    LOG(upnp, debug, "controller unsubscribe eventing finished.");
+    LOG(event, debug, "controller unsubscribe eventing finished.");
+}
+
+
+void
+Device::stopSubscriptionTimer()
+{
+    for (ServiceIterator it = beginService(); it != endService(); ++it) {
+        (*it)->stopSubscriptionExpirationTimer();
+    }
 }
 
 
@@ -4074,6 +4117,12 @@ _pDevice(0)
 }
 
 
+DeviceData::~DeviceData()
+{
+    _services.deepClear();
+}
+
+
 Device*
 DeviceData::getDevice()
 {
@@ -4236,7 +4285,7 @@ SsdpMessageSet::onTimer(Poco::Timer& timer)
         }
     }
     if (_continuous && _cacheDuration) {
-        timer.restart(_randomTimeGenerator.next(_cacheDuration));
+        timer.restart(std::max(_delay, _randomTimeGenerator.next(_cacheDuration)));
     }
 }
 
@@ -4270,41 +4319,21 @@ Controller::setState(State newState)
         LOG(upnp, debug, "new state equal to old state, ignoring");
         return;
     }
+    _stateLock.lock();
+    _state == Transitioning;
+    _stateLock.unlock();
 
     if (newState == Public || newState == Local || newState == PublicLocal) {
         DeviceManager::setState(newState);
     }
     else if (newState == Stopped) {
+        stopDeviceContainerTimers();
         unsubscribeAllDevices();
-        DeviceManager::clear();
         DeviceManager::setState(Stopped);
+        deleteDeviceContainers();
+//        DeviceManager::clear();
     }
     LOG(upnp, debug, "controller state change finished");
-}
-
-
-void
-Controller::subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer)
-{
-    if (_featureSubscribeToEvents) {
-        for(DeviceContainer::DeviceIterator d = pDeviceContainer->beginDevice(); d != pDeviceContainer->endDevice(); ++d) {
-            (*d)->controllerSubscribeEventing();
-        }
-    }
-}
-
-
-void
-Controller::unsubscribeAllDevices()
-{
-    if (!_featureSubscribeToEvents) {
-        return;
-    }
-    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
-        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
-            (*d)->controllerUnsubscribeEventing();
-        }
-    }
 }
 
 
@@ -4371,8 +4400,52 @@ Controller::discoverDeviceContainer(const std::string& location)
 
 
 void
+Controller::subscribeAllDevicesInContainer(DeviceContainer* pDeviceContainer)
+{
+    if (_featureSubscribeToEvents) {
+        for(DeviceContainer::DeviceIterator d = pDeviceContainer->beginDevice(); d != pDeviceContainer->endDevice(); ++d) {
+            (*d)->controllerSubscribeEventing();
+        }
+    }
+}
+
+
+void
+Controller::unsubscribeAllDevices()
+{
+    if (!_featureSubscribeToEvents) {
+        return;
+    }
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+            (*d)->controllerUnsubscribeEventing();
+        }
+    }
+}
+
+
+void
+Controller::stopDeviceContainerTimers()
+{
+    for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
+        (*it)->stopSsdpTimer();
+    }
+}
+
+
+void
+Controller::deleteDeviceContainers()
+{
+    _deviceContainers.deepClear();
+}
+
+
+void
 Controller::handleSsdpMessage(SsdpMessage* pMessage)
 {
+    if (getState() == Transitioning) {
+        return;
+    }
     // we load all device descriptions, regardless of service types contained in the device
 
     // get UUID from USN
@@ -4471,6 +4544,7 @@ Controller::removeDeviceContainer(DeviceContainer* pDeviceContainer)
 
         for (DeviceContainer::DeviceIterator it = pDeviceContainer->beginDevice(); it != pDeviceContainer->endDevice(); ++it) {
             Device* pDevice = *it;
+            pDevice->stopSubscriptionTimer();
             DeviceGroup* pDeviceGroup = getDeviceGroup(pDevice->getDeviceType());
             if (pDeviceGroup) {
                 LOG(upnp, information, "controller removes device, friendly name: " + pDevice->getFriendlyName() + ", uuid: " + pDevice->getUuid());
@@ -4528,6 +4602,7 @@ DeviceServer::setState(State newState)
     if (newState == Stopped) {
         for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
             for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                (*d)->stopSubscriptionTimer();
                 (*d)->stop();
             }
         }
@@ -4537,6 +4612,7 @@ DeviceServer::setState(State newState)
         if (_state != Stopped) {
             for (DeviceContainerIterator it = beginDeviceContainer(); it != endDeviceContainer(); ++it) {
                 for(DeviceContainer::DeviceIterator d = (*it)->beginDevice(); d != (*it)->endDevice(); ++d) {
+                    (*d)->stopSubscriptionTimer();
                     (*d)->stop();
                 }
             }
@@ -5199,11 +5275,14 @@ DeviceGroup::addDevice(Device* pDevice)
 void
 DeviceGroup::removeDevice(Device* pDevice)
 {
-    int position = _devices.position(pDevice->getUuid());
+    std::string uuid = pDevice->getUuid();
+    int position = _devices.position(uuid);
+    LOG(upnp, debug, "device group remove device: " + pDevice->getFriendlyName() + ", uuid: " + uuid + ", position: " + Poco::NumberFormatter::format(position) + " ...");
     removeDevice(pDevice, position, true);
-    _devices.remove(pDevice->getUuid());
+    _devices.remove(uuid);
     removeDevice(pDevice, position, false);
-    delete pDevice;
+    LOG(upnp, debug, "device group removed device: " + pDevice->getFriendlyName());
+//    delete pDevice;
 }
 
 
