@@ -64,10 +64,19 @@ class MediaServerGroupController : public Omm::Gui::NavigatorController
         LOGNS(Gui, gui, debug, "media server group popped to root");
         if (_pController->_pPlaylistEditorView) {
             _pController->_pPlaylistEditorView->hide(false);
+            _pController->_pMediaServerGroupWidget->finishEditPlaylist();
         }
         if (_pController->_pMediaServerGroupWidget) {
             _pController->_pMediaServerGroupWidget->showSearchBox(false);
             _pController->_pMediaServerGroupWidget->clearSearchText();
+        }
+    }
+
+    virtual void poppedToView(Gui::View* pView)
+    {
+        LOGNS(Gui, gui, debug, "media server group popped to view: " + (pView ? pView->getName() : ""));
+        if (!_pController->_pPlaylistEditorView->isVisible()) {
+            _pController->_pMediaServerGroupWidget->showStickyView(false);
         }
     }
 
@@ -124,7 +133,7 @@ _pApplication(pApplication)
     LOGNS(Gui, gui, debug, "controller widget create server browser ...");
     Omm::Gui::SplitterView* pSplitterView = new Omm::Gui::SplitterView(0, Omm::Gui::View::Vertical);
     pSplitterView->setName("Media");
-    _pMediaServerGroupWidget = new MediaServerGroupWidget;
+    _pMediaServerGroupWidget = new MediaServerGroupWidget(this);
     _pMediaServerGroupWidget->attachController(new MediaServerGroupController(this));
     registerDeviceGroup(_pMediaServerGroupWidget);
     pSplitterView->insertView(_pMediaServerGroupWidget, 0);
@@ -386,12 +395,25 @@ ControllerWidget::getSelectedRenderer()
 
 
 void
+ControllerWidget::showPlaylistEditor(bool show)
+{
+    if (show) {
+        _pPlaylistEditorView->show();
+    }
+    else {
+        _pPlaylistEditorView->hide();
+    }
+}
+
+
+void
 ControllerWidget::playlistNotification(PlaylistNotification* pNotification)
 {
     MediaObjectModel* pModel = pNotification->_pMediaObject;
     if (pModel->isContainer()) {
         if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
-            _pPlaylistEditorView->show();
+//            _pPlaylistEditorView->show();
+            _pMediaServerGroupWidget->showStickyView();
 //            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
 //                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
 //                setPlaylistContainer(pModel);

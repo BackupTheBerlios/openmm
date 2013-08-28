@@ -72,6 +72,9 @@ private:
     QHBoxLayout*                            _pPanelLayout;
     QWidget*                                _pButtonWidget;
     QHBoxLayout*                            _pButtonLayout;
+    QWidget*                                _pStickyWidget;
+    QHBoxLayout*                            _pStickyLayout;
+    View*                                   _pStickyView;
     QLineEdit*                              _pSearchWidget;
     QFileIconProvider*                      _pIconProvider;
     NavigatorViewImpl*                      _pNavigatorView;

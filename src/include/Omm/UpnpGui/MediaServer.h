@@ -31,18 +31,22 @@
 #include "../Gui/ListItem.h"
 
 #include "DeviceGroup.h"
+#include "ControllerWidget.h"
 
 
 namespace Omm {
 
 class MediaServerGroupWidget;
 class MediaServerDevice;
+class EditPlaylistButton;
 
 
 class MediaServerGroupWidget : public DeviceGroupWidget
 {
+    friend class EditPlaylistButton;
+
 public:
-    MediaServerGroupWidget();
+    MediaServerGroupWidget(ControllerWidget* pController);
 
     // Omm::DeviceGroup interface
     virtual Device* createDevice();
@@ -61,8 +65,12 @@ public:
     // NavigatorController delegate
     virtual void changedSearchText(const std::string& searchText);
 
+    void finishEditPlaylist();
+
 private:
-    std::string         _searchString;
+    ControllerWidget*       _pController;
+    std::string             _searchString;
+    EditPlaylistButton*     _pEditPlaylistButton;
 };
 
 

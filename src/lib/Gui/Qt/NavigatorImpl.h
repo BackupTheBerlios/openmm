@@ -51,12 +51,15 @@ public:
     void showNavigatorBar(bool show);
     void showSearchBox(bool show);
     void clearSearchText();
+    void setStickyView(View* pView);
+    void showStickyView(bool show);
 
 private:
     void removeView(View* pView);
     void exposeView(View* pView);
     void changedSearchText(const std::string& searchText);
     void poppedToRoot();
+    void poppedToView(View* pView);
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;

@@ -104,5 +104,19 @@ NavigatorView::clearSearchText()
 }
 
 
+void
+NavigatorView::setStickyView(View* pView)
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->setStickyView(pView);
+}
+
+
+void
+NavigatorView::showStickyView(bool show)
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->showStickyView(show);
+}
+
+
 } // namespace Gui
 } // namespace Omm

@@ -57,6 +57,9 @@ class Application : public Omm::Gui::Application
 
         NavButton* pButton = new NavButton(pNavigator);
         pNavigator->push(pButton, pButton->getLabel());
+        Omm::Gui::Button* pStickyButton = new Omm::Gui::Button;
+        pStickyButton->setLabel("sticky button");
+        pNavigator->setStickyView(pStickyButton);
         return pNavigator;
     }
 };

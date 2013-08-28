@@ -212,6 +212,19 @@ NavigatorViewImpl::clearSearchText()
 
 
 void
+NavigatorViewImpl::setStickyView(View* pView)
+{
+//    http://stackoverflow.com/questions/13341562/how-to-set-button-for-navigationitem-titleview
+}
+
+
+void
+NavigatorViewImpl::showStickyView(bool show)
+{
+}
+
+
+void
 NavigatorViewImpl::textEdited(const std::string& searchText)
 {
     LOG(gui, debug, "search text changed: " + searchText);

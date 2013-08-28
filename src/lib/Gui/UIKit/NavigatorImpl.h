@@ -44,6 +44,8 @@ public:
     void showNavigatorBar(bool show);
     void showSearchBox(bool show = true);
     void clearSearchText();
+    void setStickyView(View* pView);
+    void showStickyView(bool show);
 
     void textEdited(const std::string& searchText);
     void poppedToRoot();

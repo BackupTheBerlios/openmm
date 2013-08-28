@@ -61,7 +61,8 @@ _pView(pView)
 
 QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
 QWidget(pNavigatorView->getNativeView()),
-_pNavigatorView(pNavigatorView)
+_pNavigatorView(pNavigatorView),
+_pStickyView(0)
 {
     _pPanelLayout = new QHBoxLayout(this);
     _pPanelLayout->setAlignment(Qt::AlignLeft);
@@ -71,6 +72,10 @@ _pNavigatorView(pNavigatorView)
 
     _pButtonWidget = new QWidget(this);
     _pPanelLayout->addWidget(_pButtonWidget);
+
+    _pStickyWidget = new QWidget(this);
+    _pPanelLayout->addWidget(_pStickyWidget);
+    _pStickyLayout = new QHBoxLayout(_pStickyWidget);
 
     _pPanelLayout->addStretch();
 
@@ -123,6 +128,9 @@ QtNavigatorPanel::pop(View* pView)
     if (_buttonStack.size() <= 1) {
         _pNavigatorView->poppedToRoot();
     }
+    else {
+        _pNavigatorView->poppedToView(pView);
+    }
 }
 
 
@@ -143,6 +151,9 @@ QtNavigatorPanel::popSlot()
     }
     if (_buttonStack.size() <= 1) {
         _pNavigatorView->poppedToRoot();
+    }
+    else {
+        _pNavigatorView->poppedToView(_buttonStack.top()->_pView);
     }
 }
 
@@ -288,6 +299,31 @@ NavigatorViewImpl::clearSearchText()
 
 
 void
+NavigatorViewImpl::setStickyView(View* pView)
+{
+    if (_pNavigatorPanel->_pStickyView && pView != _pNavigatorPanel->_pStickyView) {
+        _pNavigatorPanel->_pStickyView->hide();
+    }
+    _pNavigatorPanel->_pStickyLayout->addWidget(static_cast<QWidget*>(pView->getNativeView()));
+    _pNavigatorPanel->_pStickyView = pView;
+}
+
+
+void
+NavigatorViewImpl::showStickyView(bool show)
+{
+    if (_pNavigatorPanel->_pStickyView) {
+        if (show) {
+            _pNavigatorPanel->_pStickyView->show();
+        }
+        else {
+            _pNavigatorPanel->_pStickyView->hide();
+        }
+    }
+}
+
+
+void
 NavigatorViewImpl::removeView(View* pView)
 {
     QWidget* pWidget = static_cast<QWidget*>(pView->getNativeView());
@@ -316,6 +352,14 @@ NavigatorViewImpl::poppedToRoot()
 {
     LOG(gui, debug, "navigator popped to root");
     IMPL_NOTIFY_CONTROLLER(NavigatorController, poppedToRoot);
+}
+
+
+void
+NavigatorViewImpl::poppedToView(View* pView)
+{
+    LOG(gui, debug, "navigator popped to view: " + (pView ? pView->getName() : ""));
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, poppedToView, pView);
 }
 
 } // namespace Gui

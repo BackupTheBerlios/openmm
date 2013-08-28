@@ -35,8 +35,41 @@
 
 namespace Omm {
 
-MediaServerGroupWidget::MediaServerGroupWidget() :
-DeviceGroupWidget(new Av::MediaServerGroupDelegate)
+class EditPlaylistButton : public Gui::Button
+{
+    friend class MediaServerGroupWidget;
+
+    EditPlaylistButton(MediaServerGroupWidget* pServerGroup, View* pParent = 0) :
+    Gui::Button(pParent),
+    _pServerGroup(pServerGroup),
+    _editorVisible(false)
+    {
+        setLabel("edit");
+    }
+
+    virtual void pushed()
+    {
+        if (!_editorVisible) {
+            _pServerGroup->_pController->showPlaylistEditor();
+            _pServerGroup->pop();
+            setLabel("done");
+        }
+        else {
+            _pServerGroup->_pController->showPlaylistEditor(false);
+            _pServerGroup->showStickyView(false);
+            setLabel("edit");
+        }
+        _editorVisible = !_editorVisible;
+    }
+
+    MediaServerGroupWidget* _pServerGroup;
+    bool                    _editorVisible;
+};
+
+
+MediaServerGroupWidget::MediaServerGroupWidget(ControllerWidget* pController) :
+DeviceGroupWidget(new Av::MediaServerGroupDelegate),
+_pController(pController)
 {
 //    LOGNS(Gui, gui, debug, "media server group widget ctor");
     View::setName("Media");
@@ -56,6 +89,10 @@ DeviceGroupWidget(new Av::MediaServerGroupDelegate)
 
     // TODO: get search capabilities
     _searchString = Poco::Util::Application::instance().config().getString("controller.searchString", "dc:title contains %s or upnp:artist contains %s");
+
+    _pEditPlaylistButton = new EditPlaylistButton(this);
+    setStickyView(_pEditPlaylistButton);
+    showStickyView(false);
 }
 
 
@@ -159,10 +196,19 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 
 
 void
+MediaServerGroupWidget::finishEditPlaylist()
+{
+    _pEditPlaylistButton->hide();
+    _pEditPlaylistButton->setLabel("edit");
+    _pEditPlaylistButton->_editorVisible = false;
+}
+
+
+void
 MediaServerDevice::initController()
 {
     CtlMediaServer::initController();
-    
+
     Gui::LabelModel* pLabelModel = new Gui::LabelModel;
     pLabelModel->setLabel(getFriendlyName());
     setLabelModel(pLabelModel);

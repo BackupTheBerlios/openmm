@@ -81,6 +81,8 @@ public:
     MediaServerDevice* getServer(const std::string& uuid);
     Av::CtlMediaRenderer* getSelectedRenderer();
 
+    void showPlaylistEditor(bool show = true);
+
 private:
     void playlistNotification(PlaylistNotification* pNotification);
 

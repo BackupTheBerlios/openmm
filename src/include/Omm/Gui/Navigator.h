@@ -37,6 +37,7 @@ class NavigatorController : public Controller
 protected:
     virtual void changedSearchText(const std::string& searchText) {}
     virtual void poppedToRoot() {}
+    virtual void poppedToView(View* pView) {}
 };
 
 
@@ -56,6 +57,8 @@ public:
     void showNavigatorBar(bool show = true);
     void showSearchBox(bool show = true);
     void clearSearchText();
+    void setStickyView(View* pView);
+    void showStickyView(bool show = true);
 };
 
 
