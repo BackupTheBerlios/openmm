@@ -61,6 +61,7 @@ signals:
 private slots:
     void popSlot();
     void popToRootSlot();
+    void rightButtonPushedSlot();
     void buttonPushed();
     void textEdited(const QString& text);
     void editingFinished();
@@ -72,9 +73,7 @@ private:
     QHBoxLayout*                            _pPanelLayout;
     QWidget*                                _pButtonWidget;
     QHBoxLayout*                            _pButtonLayout;
-    QWidget*                                _pStickyWidget;
-    QHBoxLayout*                            _pStickyLayout;
-    View*                                   _pStickyView;
+    QPushButton*                            _pRightButton;
     QLineEdit*                              _pSearchWidget;
     QFileIconProvider*                      _pIconProvider;
     NavigatorViewImpl*                      _pNavigatorView;

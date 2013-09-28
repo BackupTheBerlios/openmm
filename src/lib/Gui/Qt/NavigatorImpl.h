@@ -51,8 +51,9 @@ public:
     void showNavigatorBar(bool show);
     void showSearchBox(bool show);
     void clearSearchText();
-    void setStickyView(View* pView);
-    void showStickyView(bool show);
+    void showRightButton(bool show);
+    void setRightButtonLabel(const std::string& label);
+    void setRightButtonColor(const Color& color);
 
 private:
     void removeView(View* pView);
@@ -60,6 +61,7 @@ private:
     void changedSearchText(const std::string& searchText);
     void poppedToRoot();
     void poppedToView(View* pView);
+    void rightButtonPushed();
 
     QtNavigatorPanel*           _pNavigatorPanel;
     QStackedWidget*             _pStackedWidget;

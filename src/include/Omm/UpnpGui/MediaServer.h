@@ -64,6 +64,7 @@ public:
 
     // NavigatorController delegate
     virtual void changedSearchText(const std::string& searchText);
+    virtual void rightButtonPushed();
 
     void finishEditPlaylist();
 
@@ -71,6 +72,7 @@ private:
     ControllerWidget*       _pController;
     std::string             _searchString;
     EditPlaylistButton*     _pEditPlaylistButton;
+    bool                    _editorVisible;
 };
 
 

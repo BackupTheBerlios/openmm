@@ -44,12 +44,15 @@ public:
     void showNavigatorBar(bool show);
     void showSearchBox(bool show = true);
     void clearSearchText();
-    void setStickyView(View* pView);
-    void showStickyView(bool show);
+    void showRightButton(bool show);
+    void setRightButtonLabel(const std::string& label);
+    void setRightButtonColor(const Color& color);
 
     void textEdited(const std::string& searchText);
     void poppedToRoot();
+    void poppedToView();
     void removeViewsUpto(void* pViewController);
+    void rightButtonPushed();
 
 private:
     std::stack<View*>   _viewStack;

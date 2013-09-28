@@ -159,7 +159,8 @@
 @end
 
 
-@interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate> {
+@interface OmmGuiAppDelegate : NSObject <UIApplicationDelegate>
+{
     UIWindow*               _pWindow;
     Omm::Gui::View*         _pMainView;
     SlideView*              _pControlPanel;

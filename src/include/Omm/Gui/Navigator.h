@@ -35,9 +35,10 @@ class NavigatorController : public Controller
     friend class NavigatorViewImpl;
 
 protected:
-    virtual void changedSearchText(const std::string& searchText) {}
     virtual void poppedToRoot() {}
     virtual void poppedToView(View* pView) {}
+    virtual void changedSearchText(const std::string& searchText) {}
+    virtual void rightButtonPushed() {}
 };
 
 
@@ -57,8 +58,9 @@ public:
     void showNavigatorBar(bool show = true);
     void showSearchBox(bool show = true);
     void clearSearchText();
-    void setStickyView(View* pView);
-    void showStickyView(bool show = true);
+    void showRightButton(bool show = true);
+    void setRightButtonLabel(const std::string& label);
+    void setRightButtonColor(const Color& color);
 };
 
 

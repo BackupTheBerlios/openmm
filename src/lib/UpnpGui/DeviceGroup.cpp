@@ -123,4 +123,10 @@ DeviceGroupNavigatorController::changedSearchText(const std::string& searchText)
 }
 
 
+void
+DeviceGroupNavigatorController::rightButtonPushed()
+{
+    _pDeviceGroupWidget->rightButtonPushed();
+}
+
 } // namespace Omm

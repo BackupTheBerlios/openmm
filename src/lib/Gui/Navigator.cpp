@@ -105,16 +105,23 @@ NavigatorView::clearSearchText()
 
 
 void
-NavigatorView::setStickyView(View* pView)
+NavigatorView::showRightButton(bool show)
 {
-    static_cast<NavigatorViewImpl*>(_pImpl)->setStickyView(pView);
+    static_cast<NavigatorViewImpl*>(_pImpl)->showRightButton(show);
 }
 
 
 void
-NavigatorView::showStickyView(bool show)
+NavigatorView::setRightButtonLabel(const std::string& label)
 {
-    static_cast<NavigatorViewImpl*>(_pImpl)->showStickyView(show);
+    static_cast<NavigatorViewImpl*>(_pImpl)->setRightButtonLabel(label);
+}
+
+
+void
+NavigatorView::setRightButtonColor(const Color& color)
+{
+    static_cast<NavigatorViewImpl*>(_pImpl)->setRightButtonColor(color);
 }
 
 

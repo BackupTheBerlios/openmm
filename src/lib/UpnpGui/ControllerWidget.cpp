@@ -76,8 +76,9 @@ class MediaServerGroupController : public Omm::Gui::NavigatorController
     {
         LOGNS(Gui, gui, debug, "media server group popped to view: " + (pView ? pView->getName() : ""));
         if (!_pController->_pPlaylistEditorView->isVisible()) {
-            _pController->_pMediaServerGroupWidget->showStickyView(false);
+            _pController->_pMediaServerGroupWidget->showRightButton(false);
         }
+        _pController->_pMediaServerGroupWidget->showSearchBox(true);
     }
 
     ControllerWidget* _pController;
@@ -413,7 +414,8 @@ ControllerWidget::playlistNotification(PlaylistNotification* pNotification)
     if (pModel->isContainer()) {
         if (Av::AvClass::matchClass(pModel->getClass(), Av::AvClass::CONTAINER, Av::AvClass::PLAYLIST_CONTAINER)) {
 //            _pPlaylistEditorView->show();
-            _pMediaServerGroupWidget->showStickyView();
+            _pMediaServerGroupWidget->showRightButton();
+            _pMediaServerGroupWidget->showSearchBox(false);
 //            if (pModel->getResource() && pModel->getResource()->getAttributeValue(Av::AvProperty::IMPORT_URI) != "") {
 //                LOGNS(Gui, gui, debug, "playlist editor load playlist: " + pModel->getTitle());
 //                setPlaylistContainer(pModel);

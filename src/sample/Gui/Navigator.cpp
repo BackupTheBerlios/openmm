@@ -32,6 +32,7 @@ public:
     NavButton(Omm::Gui::Navigator* pNavigator) :
     _pNavigator(pNavigator)
     {
+        setName("Button " + Poco::NumberFormatter::format(_buttonCount));
         setLabel("Button " + Poco::NumberFormatter::format(_buttonCount++));
     }
 
@@ -49,19 +50,28 @@ private:
 int NavButton::_buttonCount = 0;
 
 
-class Application : public Omm::Gui::Application
+class Application : public Omm::Gui::Application, public Omm::Gui::NavigatorController
 {
+    virtual void rightButtonPushed()
+    {
+        _pNavigator->setRightButtonLabel("right button pushed");
+    }
+
+
     virtual Omm::Gui::View* createMainView()
     {
-        Omm::Gui::Navigator* pNavigator = new Omm::Gui::Navigator;
+        _pNavigator = new Omm::Gui::Navigator;
 
-        NavButton* pButton = new NavButton(pNavigator);
-        pNavigator->push(pButton, pButton->getLabel());
-        Omm::Gui::Button* pStickyButton = new Omm::Gui::Button;
-        pStickyButton->setLabel("sticky button");
-        pNavigator->setStickyView(pStickyButton);
-        return pNavigator;
+        NavButton* pButton = new NavButton(_pNavigator);
+        _pNavigator->push(pButton, pButton->getLabel());
+//        _pNavigator->showSearchBox();
+        _pNavigator->setRightButtonLabel("right button");
+        _pNavigator->showRightButton();
+        _pNavigator->attachController(this);
+        return _pNavigator;
     }
+
+    Omm::Gui::Navigator*    _pNavigator;
 };
 
 

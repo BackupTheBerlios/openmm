@@ -56,7 +56,7 @@ class EditPlaylistButton : public Gui::Button
         }
         else {
             _pServerGroup->_pController->showPlaylistEditor(false);
-            _pServerGroup->showStickyView(false);
+            _pServerGroup->showRightButton(false);
             setLabel("edit");
         }
         _editorVisible = !_editorVisible;
@@ -69,7 +69,8 @@ class EditPlaylistButton : public Gui::Button
 
 MediaServerGroupWidget::MediaServerGroupWidget(ControllerWidget* pController) :
 DeviceGroupWidget(new Av::MediaServerGroupDelegate),
-_pController(pController)
+_pController(pController),
+_editorVisible(false)
 {
 //    LOGNS(Gui, gui, debug, "media server group widget ctor");
     View::setName("Media");
@@ -90,9 +91,10 @@ _pController(pController)
     // TODO: get search capabilities
     _searchString = Poco::Util::Application::instance().config().getString("controller.searchString", "dc:title contains %s or upnp:artist contains %s");
 
-    _pEditPlaylistButton = new EditPlaylistButton(this);
-    setStickyView(_pEditPlaylistButton);
-    showStickyView(false);
+//    _pEditPlaylistButton = new EditPlaylistButton(this);
+//    setStickyView(_pEditPlaylistButton);
+//    showRightButton(false);
+    setRightButtonLabel("edit");
 }
 
 
@@ -196,11 +198,34 @@ MediaServerGroupWidget::changedSearchText(const std::string& searchText)
 
 
 void
+MediaServerGroupWidget::rightButtonPushed()
+{
+    LOGNS(Gui, gui, debug, "media server group widget playlist edit button pushed");
+
+    if (!_editorVisible) {
+        _pController->showPlaylistEditor();
+        pop();
+        setRightButtonLabel("done");
+    }
+    else {
+        _pController->showPlaylistEditor(false);
+        showRightButton(false);
+        setRightButtonLabel("edit");
+    }
+    _editorVisible = !_editorVisible;
+}
+
+
+void
 MediaServerGroupWidget::finishEditPlaylist()
 {
-    _pEditPlaylistButton->hide();
-    _pEditPlaylistButton->setLabel("edit");
-    _pEditPlaylistButton->_editorVisible = false;
+    showRightButton(false);
+    setRightButtonLabel("edit");
+    _editorVisible = false;
+
+//    _pEditPlaylistButton->hide();
+//    _pEditPlaylistButton->setLabel("edit");
+//    _pEditPlaylistButton->_editorVisible = false;
 }
 
 

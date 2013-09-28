@@ -54,6 +54,7 @@ public:
 
     // NavigatorController delegate interface
     virtual void changedSearchText(const std::string& searchText) {}
+    virtual void rightButtonPushed() {}
 
     void setDefaultDevice(Device* pDevice);
     Gui::ListView& getDeviceGroupView();
@@ -72,6 +73,7 @@ public:
     DeviceGroupNavigatorController(DeviceGroupWidget* pDeviceGroupWidget);
 
     virtual void changedSearchText(const std::string& searchText);
+    virtual void rightButtonPushed();
 
 private:
     DeviceGroupWidget*  _pDeviceGroupWidget;

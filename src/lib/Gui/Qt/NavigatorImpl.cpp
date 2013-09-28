@@ -61,8 +61,7 @@ _pView(pView)
 
 QtNavigatorPanel::QtNavigatorPanel(NavigatorViewImpl* pNavigatorView) :
 QWidget(pNavigatorView->getNativeView()),
-_pNavigatorView(pNavigatorView),
-_pStickyView(0)
+_pNavigatorView(pNavigatorView)
 {
     _pPanelLayout = new QHBoxLayout(this);
     _pPanelLayout->setAlignment(Qt::AlignLeft);
@@ -73,9 +72,9 @@ _pStickyView(0)
     _pButtonWidget = new QWidget(this);
     _pPanelLayout->addWidget(_pButtonWidget);
 
-    _pStickyWidget = new QWidget(this);
-    _pPanelLayout->addWidget(_pStickyWidget);
-    _pStickyLayout = new QHBoxLayout(_pStickyWidget);
+    _pRightButton = new QPushButton(this);
+    _pPanelLayout->addWidget(_pRightButton);
+    _pRightButton->hide();
 
     _pPanelLayout->addStretch();
 
@@ -94,6 +93,7 @@ _pStickyView(0)
 
     connect(this, SIGNAL(popSignal()), this, SLOT(popSlot()));
     connect(this, SIGNAL(popToRootSignal()), this, SLOT(popToRootSlot()));
+    connect(_pRightButton, SIGNAL(pressed()), this, SLOT(rightButtonPushedSlot()));
 //    connect(_pSearchWidget, SIGNAL(textEdited(const QString&)), this, SLOT(textEdited(const QString&)));
     connect(_pSearchWidget, SIGNAL(editingFinished()), this, SLOT(editingFinished()));
 }
@@ -165,6 +165,13 @@ QtNavigatorPanel::popToRootSlot()
         popSlot();
     }
     _pNavigatorView->poppedToRoot();
+}
+
+
+void
+QtNavigatorPanel::rightButtonPushedSlot()
+{
+    _pNavigatorView->rightButtonPushed();
 }
 
 
@@ -299,27 +306,23 @@ NavigatorViewImpl::clearSearchText()
 
 
 void
-NavigatorViewImpl::setStickyView(View* pView)
+NavigatorViewImpl::showRightButton(bool show)
 {
-    if (_pNavigatorPanel->_pStickyView && pView != _pNavigatorPanel->_pStickyView) {
-        _pNavigatorPanel->_pStickyView->hide();
-    }
-    _pNavigatorPanel->_pStickyLayout->addWidget(static_cast<QWidget*>(pView->getNativeView()));
-    _pNavigatorPanel->_pStickyView = pView;
+    _pNavigatorPanel->_pRightButton->setVisible(show);
 }
 
 
 void
-NavigatorViewImpl::showStickyView(bool show)
+NavigatorViewImpl::setRightButtonLabel(const std::string& label)
 {
-    if (_pNavigatorPanel->_pStickyView) {
-        if (show) {
-            _pNavigatorPanel->_pStickyView->show();
-        }
-        else {
-            _pNavigatorPanel->_pStickyView->hide();
-        }
-    }
+    _pNavigatorPanel->_pRightButton->setText(QString::fromUtf8(label.data(), label.size()));
+}
+
+
+void
+NavigatorViewImpl::setRightButtonColor(const Color& color)
+{
+
 }
 
 
@@ -360,6 +363,14 @@ NavigatorViewImpl::poppedToView(View* pView)
 {
     LOG(gui, debug, "navigator popped to view: " + (pView ? pView->getName() : ""));
     IMPL_NOTIFY_CONTROLLER(NavigatorController, poppedToView, pView);
+}
+
+
+void
+NavigatorViewImpl::rightButtonPushed()
+{
+    LOG(gui, debug, "navigator right button pushed");
+    IMPL_NOTIFY_CONTROLLER(NavigatorController, rightButtonPushed);
 }
 
 } // namespace Gui
