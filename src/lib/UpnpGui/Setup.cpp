@@ -42,6 +42,9 @@
 
 namespace Omm {
 
+class ServerPluginSelector;
+
+
 class AppStateSelector : public Gui::Selector
 {
     friend class GuiSetup;
@@ -355,19 +358,88 @@ class ServerConfView : public Gui::View
     friend class ServerListController;
     friend class ServerDoneButton;
     friend class ServerNewButton;
+    friend class ServerPluginSelector;
 
-    ServerConfView(GuiSetup* pGuiSetup, View* pParent = 0);
+    ServerConfView(GuiSetup* pGuiSetup, bool newServer, View* pParent = 0);
     virtual void syncViewImpl();
 //    void writeConf();
 
     GuiSetup*               _pGuiSetup;
 
+    Gui::Label*             _pServerPluginText;
+    ServerPluginSelector*   _pServerPluginSelector;
+    bool                    _newServer;
     ServerEnableSwitch*     _pServerEnableSwitch;
     Gui::TextLine*          _pServerFriendlyNameText;
-    Gui::TextLine*          _pServerPluginText;
     Gui::TextLine*          _pServerBasePathText;
-    Gui::TextLine*          _pServerPollText;
+    Gui::Label*             _pServerBasePathLabel;
+//    Gui::TextLine*          _pServerPollText;
     ServerLayoutSelector*   _pServerLayoutSelector;
+};
+
+
+class ServerPluginSelector : Gui::Selector
+{
+    friend class ServerConfView;
+    friend class ServerConfModel;
+
+    ServerPluginSelector(ServerConfView* pConfView, View* pParent = 0) : Selector(pParent), _pConfView(pConfView)
+    {
+        syncView();
+    }
+
+    virtual int totalItemCount()
+    {
+        return 3;
+    }
+
+
+    virtual std::string getItemLabel(int index)
+    {
+        switch(index) {
+            case 0:
+                return "File";
+            case 1:
+                return "Webradio";
+            case 2:
+                return "Digital TV";
+        }
+    }
+
+
+    std::string getTextLine()
+    {
+        switch(getCurrentIndex()) {
+            case 0:
+                return "model-file";
+            case 1:
+                return "model-webradio";
+            case 2:
+                return "model-dvb";
+        }
+    }
+
+
+    void setTextLine(const std::string& model)
+    {
+        if (model == "model-file") {
+            setCurrentIndex(0);
+        }
+        else if (model == "model-webradio") {
+            setCurrentIndex(1);
+        }
+        else if (model == "model-dvb") {
+            setCurrentIndex(2);
+        }
+    }
+
+
+    virtual void selected(int index)
+    {
+        _pConfView->syncViewImpl();
+    }
+
+    ServerConfView* _pConfView;
 };
 
 
@@ -398,6 +470,20 @@ class ServerConfModel : public Gui::Model
         return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".plugin", "");
     }
 
+    std::string getPluginText()
+    {
+        std::string plugin = getPlugin();
+        if(plugin == "model-file") {
+            return "File";
+        }
+        else if (plugin == "model-webradio") {
+            return "Webradio";
+        }
+        else if (plugin == "model-dvb") {
+            return "Digital TV";
+        }
+    }
+
     std::string getBasePath()
     {
         return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".basePath", "");
@@ -418,9 +504,9 @@ class ServerConfModel : public Gui::Model
         _pGuiSetup->_pApp->getFileConfiguration()->setBool("server." + _id + ".enable", _pConfView->_pServerEnableSwitch->getStateOn());
         _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".friendlyName", _pConfView->_pServerFriendlyNameText->getTextLine());
         _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".uuid", _uuid);
-        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".plugin", _pConfView->_pServerPluginText->getTextLine());
+        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".plugin", _pConfView->_pServerPluginSelector->getTextLine());
         _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".basePath", _pConfView->_pServerBasePathText->getTextLine());
-        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".pollUpdateId", _pConfView->_pServerPollText->getTextLine());
+//        _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".pollUpdateId", _pConfView->_pServerPollText->getTextLine());
         switch(_pConfView->_pServerLayoutSelector->getCurrentIndex()) {
             case 0:
                 _pGuiSetup->_pApp->getFileConfiguration()->setString("server." + _id + ".layout", Av::ServerContainer::LAYOUT_FLAT);
@@ -511,7 +597,7 @@ class ServerNewButton : public Gui::Button
 
     virtual void pushed()
     {
-        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup);
+        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup, true);
         // find new or deleted config file id for local server.
         int id = 0;
         std::string newId = "0";
@@ -530,11 +616,27 @@ class ServerNewButton : public Gui::Button
 };
 
 
-ServerConfView::ServerConfView(GuiSetup* pGuiSetup, View* pParent) :
+ServerConfView::ServerConfView(GuiSetup* pGuiSetup, bool newServer, View* pParent) :
 View(pParent),
-_pGuiSetup(pGuiSetup)
+_pGuiSetup(pGuiSetup),
+_pServerPluginSelector(0),
+_pServerPluginText(0),
+_newServer(newServer)
 {
     setLayout(new Gui::VerticalLayout);
+
+    Gui::View* pServerPluginView = new Gui::View(this);
+    pServerPluginView->setLayout(new Gui::HorizontalLayout);
+//    pServerPluginView->setStretchFactor(-1.0);
+    Gui::Label* pServerPluginLabel = new Gui::Label(pServerPluginView);
+    pServerPluginLabel->setLabel("type");
+    pServerPluginLabel->setStretchFactor(-1.0);
+    if (newServer) {
+        _pServerPluginSelector = new ServerPluginSelector(this, pServerPluginView);
+    }
+    else {
+        _pServerPluginText = new Gui::Label(pServerPluginView);
+    }
 
     Gui::View* pServerEnableView = new Gui::View(this);
     pServerEnableView->setLayout(new Gui::HorizontalLayout);
@@ -548,7 +650,7 @@ _pGuiSetup(pGuiSetup)
     pServerFriendlyNameView->setLayout(new Gui::HorizontalLayout);
 //    pServerFriendlyNameView->setStretchFactor(-1.0);
     Gui::Label* pServerFriendlyNameLabel = new Gui::Label(pServerFriendlyNameView);
-    pServerFriendlyNameLabel->setLabel("friendly name");
+    pServerFriendlyNameLabel->setLabel("name");
     pServerFriendlyNameLabel->setStretchFactor(-1.0);
     _pServerFriendlyNameText = new Gui::TextLine(pServerFriendlyNameView);
 
@@ -559,30 +661,6 @@ _pGuiSetup(pGuiSetup)
 //        Gui::TextLine* pServerUuidText = new Gui::TextLine(pServerUuidView);
 //        pServerUuidText->setTextLine(_pGuiSetup->_pApp->getFileConfiguration()->getString("renderer.uuid", ""));
 
-    Gui::View* pServerPluginView = new Gui::View(this);
-    pServerPluginView->setLayout(new Gui::HorizontalLayout);
-//    pServerPluginView->setStretchFactor(-1.0);
-    Gui::Label* pServerPluginLabel = new Gui::Label(pServerPluginView);
-    pServerPluginLabel->setLabel("plugin");
-    pServerPluginLabel->setStretchFactor(-1.0);
-    _pServerPluginText = new Gui::TextLine(pServerPluginView);
-
-    Gui::View* pServerBasePathView = new Gui::View(this);
-    pServerBasePathView->setLayout(new Gui::HorizontalLayout);
-//    pServerBasePathView->setStretchFactor(-1.0);
-    Gui::Label* pServerBasePathLabel = new Gui::Label(pServerBasePathView);
-    pServerBasePathLabel->setLabel("base path");
-    pServerBasePathLabel->setStretchFactor(-1.0);
-    _pServerBasePathText = new Gui::TextLine(pServerBasePathView);
-
-    Gui::View* pServerPollView = new Gui::View(this);
-    pServerPollView->setLayout(new Gui::HorizontalLayout);
-//    pServerPollView->setStretchFactor(-1.0);
-    Gui::Label* pServerPollLabel = new Gui::Label(pServerPollView);
-    pServerPollLabel->setLabel("poll time");
-    pServerPollLabel->setStretchFactor(-1.0);
-    _pServerPollText = new Gui::TextLine(pServerPollView);
-
     Gui::View* pServerLayoutView = new Gui::View(this);
     pServerLayoutView->setLayout(new Gui::HorizontalLayout);
 //    pServerLayoutView->setStretchFactor(-1.0);
@@ -590,6 +668,22 @@ _pGuiSetup(pGuiSetup)
     pServerLayoutLabel->setLabel("layout");
     pServerLayoutLabel->setStretchFactor(-1.0);
     _pServerLayoutSelector = new ServerLayoutSelector(pServerLayoutView);
+
+    Gui::View* pServerBasePathView = new Gui::View(this);
+    pServerBasePathView->setLayout(new Gui::HorizontalLayout);
+//    pServerBasePathView->setStretchFactor(-1.0);
+    _pServerBasePathLabel = new Gui::Label(pServerBasePathView);
+    _pServerBasePathLabel->setLabel("path");
+    _pServerBasePathLabel->setStretchFactor(-1.0);
+    _pServerBasePathText = new Gui::TextLine(pServerBasePathView);
+
+//    Gui::View* pServerPollView = new Gui::View(this);
+//    pServerPollView->setLayout(new Gui::HorizontalLayout);
+////    pServerPollView->setStretchFactor(-1.0);
+//    Gui::Label* pServerPollLabel = new Gui::Label(pServerPollView);
+//    pServerPollLabel->setLabel("poll time");
+//    pServerPollLabel->setStretchFactor(-1.0);
+//    _pServerPollText = new Gui::TextLine(pServerPollView);
 
     View* pDoneCancelView = new View(this);
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
@@ -601,11 +695,24 @@ _pGuiSetup(pGuiSetup)
 
 void ServerConfView::syncViewImpl()
 {
+    if (_newServer) {
+        _pServerPluginSelector->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPlugin());
+    }
+    else {
+        _pServerPluginText->setLabel(static_cast<ServerConfModel*>(_pModel)->getPluginText());
+    }
     _pServerEnableSwitch->setState(static_cast<ServerConfModel*>(_pModel)->getEnabled());
     _pServerFriendlyNameText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getFriendlyName());
-    _pServerPluginText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPlugin());
-    _pServerBasePathText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getBasePath());
-    _pServerPollText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPollTime());
+    if (_newServer && _pServerPluginSelector->getCurrentIndex() || !_newServer && static_cast<ServerConfModel*>(_pModel)->getPlugin() != "model-file") {
+        _pServerBasePathText->hide();
+        _pServerBasePathLabel->hide();
+    }
+    else {
+        _pServerBasePathText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getBasePath());
+        _pServerBasePathText->show();
+        _pServerBasePathLabel->show();
+    }
+//    _pServerPollText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPollTime());
     std::string layout = static_cast<ServerConfModel*>(_pModel)->getLayout();
     if (layout == Av::ServerContainer::LAYOUT_FLAT) {
         _pServerLayoutSelector->setCurrentIndex(0);
@@ -645,7 +752,7 @@ class ServerListController : public Gui::ListController
 
     virtual void selectedItem(int row)
     {
-        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup);
+        ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup, false);
         pServerConfView->setModel(new ServerConfModel(_pGuiSetup, pServerConfView, _pGuiSetup->_pServerListModel->getId(row)));
         _pGuiSetup->push(pServerConfView);
     }
@@ -754,21 +861,27 @@ _pApp(pApp)
     _pSetupView->setName("Setup");
     _pSetupView->setLayout(new Gui::VerticalLayout);
 
-    Gui::Label* pControllerLabel = new Gui::Label(_pSetupView);
-    pControllerLabel->setLabel("Local Devices");
+    Gui::View* pVisibilityView = new Gui::View(_pSetupView);
+    pVisibilityView->setLayout(new Gui::HorizontalLayout);
+    pVisibilityView->setSizeConstraint(10, 15, Gui::View::Pref);
+    Gui::Label* pControllerLabel = new Gui::Label(pVisibilityView);
+    pControllerLabel->setLabel("Device Visibility");
     pControllerLabel->setBackgroundColor(Gui::Color(220, 220, 220));
     pControllerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
-    _pAppStateSelector = new AppStateSelector(pApp, _pSetupView);
-    _pAppStateSelector->setSizeConstraint(10, 20, Gui::View::Pref);
+    _pAppStateSelector = new AppStateSelector(pApp, pVisibilityView);
+    _pAppStateSelector->setSizeConstraint(20, 15, Gui::View::Pref);
 
-    Gui::Label* pRendererLabel = new Gui::Label(_pSetupView);
-    pRendererLabel->setLabel("Local Player");
+    Gui::View* pRendererView = new Gui::View(_pSetupView);
+    pRendererView->setLayout(new Gui::HorizontalLayout);
+    pRendererView->setSizeConstraint(10, 15, Gui::View::Pref);
+    Gui::Label* pRendererLabel = new Gui::Label(pRendererView);
+    pRendererLabel->setLabel("Media Player");
     pRendererLabel->setBackgroundColor(Gui::Color(220, 220, 220));
     pRendererLabel->setSizeConstraint(10, 15, Gui::View::Pref);
 
-    _pRendererItem = new Gui::ListItemView(_pSetupView);
-    _pRendererItem->setSizeConstraint(10, 20, Gui::View::Pref);
+    _pRendererItem = new Gui::ListItemView(pRendererView);
+    _pRendererItem->setSizeConstraint(20, 15, Gui::View::Pref);
     _pRendererItemModel = new Gui::ListItemModel;
     Gui::LabelModel* pRendererItemLabel = new Gui::LabelModel;
     pRendererItemLabel->setLabel(_pApp->getFileConfiguration()->getString("renderer.friendlyName", "Local Renderer"));
