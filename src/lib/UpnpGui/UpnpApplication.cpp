@@ -644,6 +644,13 @@ UpnpApplication::setLocalDeviceContainerState(const std::string& state)
 }
 
 
+Av::MediaServer*
+UpnpApplication::getLocalMediaServer(const std::string& uuid)
+{
+    return dynamic_cast<Av::MediaServer*>(_pLocalDeviceContainer->getDevice(uuid));
+}
+
+
 void
 UpnpApplication::addLocalServer(const std::string& id)
 {

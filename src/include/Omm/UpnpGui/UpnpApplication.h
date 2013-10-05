@@ -83,6 +83,7 @@ public:
     Av::MediaRenderer* getLocalRenderer();
     void restartLocalDeviceContainer();
     void setLocalDeviceContainerState(const std::string& state);
+    Av::MediaServer* getLocalMediaServer(const std::string& uuid);
 
 private:
     // Poco::Util::Application interface

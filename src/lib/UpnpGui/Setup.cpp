@@ -195,19 +195,24 @@ _pGuiSetup(pGuiSetup)
     Gui::View* pRendererEnableView = new Gui::View(this);
     pRendererEnableView->setLayout(new Gui::HorizontalLayout);
     pRendererEnableView->setStretchFactor(-1.0);
+    pRendererEnableView->setSizeConstraint(10, 20, Gui::View::Pref);
     Gui::Label* pRendererEnableLabel = new Gui::Label(pRendererEnableView);
-    pRendererEnableLabel->setLabel("enable");
-    pRendererEnableLabel->setStretchFactor(-1.0);
+    pRendererEnableLabel->setLabel("Enable");
+//    pRendererEnableLabel->setStretchFactor(-1.0);
+    pRendererEnableLabel->setSizeConstraint(20, 20, Gui::View::Pref);
     _pRendererEnableSwitch = new Gui::Switch(pRendererEnableView);
-    _pRendererEnableSwitch->setStretchFactor(-1.0);
+//    _pRendererEnableSwitch->setStretchFactor(-1.0);
+    _pRendererEnableSwitch->setSizeConstraint(20, 20, Gui::View::Pref);
     _pRendererEnableSwitch->setState(_pGuiSetup->_pApp->getFileConfiguration()->getBool("renderer.enable", false));
 
     Gui::View* pRendererFriendlyNameView = new Gui::View(this);
     pRendererFriendlyNameView->setLayout(new Gui::HorizontalLayout);
     pRendererFriendlyNameView->setStretchFactor(-1.0);
+    pRendererFriendlyNameView->setSizeConstraint(10, 20, Gui::View::Pref);
     Gui::Label* pRendererFriendlyNameLabel = new Gui::Label(pRendererFriendlyNameView);
-    pRendererFriendlyNameLabel->setLabel("friendly name");
-    pRendererFriendlyNameLabel->setStretchFactor(-1.0);
+    pRendererFriendlyNameLabel->setLabel("Name");
+//    pRendererFriendlyNameLabel->setStretchFactor(-1.0);
+    pRendererFriendlyNameLabel->setSizeConstraint(20, 20, Gui::View::Pref);
     _pRendererFriendlyNameText = new Gui::TextLine(pRendererFriendlyNameView);
     _pRendererFriendlyNameText->setTextLine(_pGuiSetup->_pApp->getFileConfiguration()->getString("renderer.friendlyName", ""));
 
@@ -221,6 +226,7 @@ _pGuiSetup(pGuiSetup)
     View* pDoneCancelView = new View(this);
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
     pDoneCancelView->setStretchFactor(-1.0);
+    pDoneCancelView->setSizeConstraint(10, 20, Gui::View::Pref);
     new RendererDoneButton(pGuiSetup, this, pDoneCancelView);
     new RendererCancelButton(pGuiSetup, pDoneCancelView);
 }
@@ -375,6 +381,7 @@ class ServerConfView : public Gui::View
     Gui::Label*             _pServerBasePathLabel;
 //    Gui::TextLine*          _pServerPollText;
     ServerLayoutSelector*   _pServerLayoutSelector;
+    Gui::Button*            _pServerScanButton;
 };
 
 
@@ -398,7 +405,7 @@ class ServerPluginSelector : Gui::Selector
     {
         switch(index) {
             case 0:
-                return "File";
+                return "Fileserver";
             case 1:
                 return "Webradio";
             case 2:
@@ -448,6 +455,7 @@ class ServerConfModel : public Gui::Model
     friend class ServerListController;
     friend class ServerDoneButton;
     friend class ServerNewButton;
+    friend class ServerScanButton;
     friend class ServerConfView;
 
     ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id)
@@ -474,7 +482,7 @@ class ServerConfModel : public Gui::Model
     {
         std::string plugin = getPlugin();
         if(plugin == "model-file") {
-            return "File";
+            return "Fileserver";
         }
         else if (plugin == "model-webradio") {
             return "Webradio";
@@ -524,6 +532,35 @@ class ServerConfModel : public Gui::Model
     std::string     _uuid;
     GuiSetup*       _pGuiSetup;
     ServerConfView* _pConfView;
+};
+
+
+class ServerScanButton : Gui::Button
+{
+    friend class ServerConfView;
+
+    ServerScanButton(UpnpApplication* pApp, ServerConfView* pServerConfView, View* pParent = 0) :
+    Button(pParent),
+    _pApp(pApp),
+    _pServerConfView(pServerConfView)
+    {
+        setLabel("Start");
+    }
+
+    virtual void pushed()
+    {
+        ServerConfModel* pServerConfModel = static_cast<ServerConfModel*>(_pServerConfView->getModel());
+        Av::MediaServer* pServer = _pApp->getLocalMediaServer(pServerConfModel->_uuid);
+        if (pServer) {
+            Av::AbstractDataModel* pDataModel = pServer->getRoot()->getDataModel();
+            if (pDataModel) {
+                pDataModel->checkSystemUpdateId();
+            }
+        }
+    }
+
+    UpnpApplication* _pApp;
+    ServerConfView*  _pServerConfView;
 };
 
 
@@ -627,30 +664,24 @@ _newServer(newServer)
 
     Gui::View* pServerPluginView = new Gui::View(this);
     pServerPluginView->setLayout(new Gui::HorizontalLayout);
-//    pServerPluginView->setStretchFactor(-1.0);
-    Gui::Label* pServerPluginLabel = new Gui::Label(pServerPluginView);
-    pServerPluginLabel->setLabel("type");
-    pServerPluginLabel->setStretchFactor(-1.0);
+    pServerPluginView->setStretchFactor(-1.0);
+    pServerPluginView->setSizeConstraint(10, 20, Gui::View::Pref);
     if (newServer) {
+        Gui::Label* pServerPluginLabel = new Gui::Label(pServerPluginView);
+        pServerPluginLabel->setLabel("Type");
+        pServerPluginLabel->setStretchFactor(-1.0);
         _pServerPluginSelector = new ServerPluginSelector(this, pServerPluginView);
     }
     else {
         _pServerPluginText = new Gui::Label(pServerPluginView);
     }
 
-    Gui::View* pServerEnableView = new Gui::View(this);
-    pServerEnableView->setLayout(new Gui::HorizontalLayout);
-//    pServerEnableView->setStretchFactor(-1.0);
-    Gui::Label* pServerEnableLabel = new Gui::Label(pServerEnableView);
-    pServerEnableLabel->setLabel("enable");
-    pServerEnableLabel->setStretchFactor(-1.0);
-    _pServerEnableSwitch = new ServerEnableSwitch(_pGuiSetup->_pApp, pServerEnableView);
-
     Gui::View* pServerFriendlyNameView = new Gui::View(this);
     pServerFriendlyNameView->setLayout(new Gui::HorizontalLayout);
-//    pServerFriendlyNameView->setStretchFactor(-1.0);
+    pServerFriendlyNameView->setStretchFactor(-1.0);
+    pServerFriendlyNameView->setSizeConstraint(10, 20, Gui::View::Pref);
     Gui::Label* pServerFriendlyNameLabel = new Gui::Label(pServerFriendlyNameView);
-    pServerFriendlyNameLabel->setLabel("name");
+    pServerFriendlyNameLabel->setLabel("Name");
     pServerFriendlyNameLabel->setStretchFactor(-1.0);
     _pServerFriendlyNameText = new Gui::TextLine(pServerFriendlyNameView);
 
@@ -663,17 +694,37 @@ _newServer(newServer)
 
     Gui::View* pServerLayoutView = new Gui::View(this);
     pServerLayoutView->setLayout(new Gui::HorizontalLayout);
-//    pServerLayoutView->setStretchFactor(-1.0);
+    pServerLayoutView->setStretchFactor(-1.0);
+    pServerLayoutView->setSizeConstraint(10, 20, Gui::View::Pref);
     Gui::Label* pServerLayoutLabel = new Gui::Label(pServerLayoutView);
-    pServerLayoutLabel->setLabel("layout");
+    pServerLayoutLabel->setLabel("Layout");
     pServerLayoutLabel->setStretchFactor(-1.0);
     _pServerLayoutSelector = new ServerLayoutSelector(pServerLayoutView);
 
+    Gui::View* pServerEnableView = new Gui::View(this);
+    pServerEnableView->setLayout(new Gui::HorizontalLayout);
+    pServerEnableView->setStretchFactor(-1.0);
+    pServerEnableView->setSizeConstraint(10, 20, Gui::View::Pref);
+    Gui::Label* pServerEnableLabel = new Gui::Label(pServerEnableView);
+    pServerEnableLabel->setLabel("Enable");
+    pServerEnableLabel->setStretchFactor(-1.0);
+    _pServerEnableSwitch = new ServerEnableSwitch(_pGuiSetup->_pApp, pServerEnableView);
+
+    Gui::View* pServerScanView = new Gui::View(this);
+    pServerScanView->setLayout(new Gui::HorizontalLayout);
+    pServerScanView->setStretchFactor(-1.0);
+    pServerScanView->setSizeConstraint(10, 20, Gui::View::Pref);
+    Gui::Label* pServerScanLabel = new Gui::Label(pServerScanView);
+    pServerScanLabel->setLabel("Scan");
+    pServerScanLabel->setStretchFactor(-1.0);
+    _pServerScanButton = new ServerScanButton(_pGuiSetup->_pApp, this, pServerScanView);
+
     Gui::View* pServerBasePathView = new Gui::View(this);
     pServerBasePathView->setLayout(new Gui::HorizontalLayout);
-//    pServerBasePathView->setStretchFactor(-1.0);
+    pServerBasePathView->setStretchFactor(-1.0);
+    pServerBasePathView->setSizeConstraint(10, 20, Gui::View::Pref);
     _pServerBasePathLabel = new Gui::Label(pServerBasePathView);
-    _pServerBasePathLabel->setLabel("path");
+    _pServerBasePathLabel->setLabel("Path");
     _pServerBasePathLabel->setStretchFactor(-1.0);
     _pServerBasePathText = new Gui::TextLine(pServerBasePathView);
 
@@ -687,7 +738,8 @@ _newServer(newServer)
 
     View* pDoneCancelView = new View(this);
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
-//    pDoneCancelView->setStretchFactor(-1.0);
+    pDoneCancelView->setStretchFactor(-1.0);
+    pDoneCancelView->setSizeConstraint(10, 20, Gui::View::Pref);
     new ServerDoneButton(_pGuiSetup, this, pDoneCancelView);
     new ServerCancelButton(_pGuiSetup, pDoneCancelView);
 }

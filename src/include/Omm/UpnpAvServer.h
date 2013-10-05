@@ -66,6 +66,7 @@ public:
     virtual ~MediaServer();
 
     void setRoot(ServerContainer* pRoot);
+    ServerContainer* getRoot();
 
     virtual void start();
     virtual void stop();

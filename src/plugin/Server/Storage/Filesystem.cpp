@@ -82,8 +82,10 @@ FileModel::getQueryProperties()
 void
 FileModel::scan()
 {
+    LOGNS(Omm::Av, upnpav, debug, "scanning " + getBasePath() + " ...");
     Poco::File baseDir(getBasePath());
     scanDirectory(baseDir);
+    LOGNS(Omm::Av, upnpav, debug, "scanning " + getBasePath() + " finished.");
 }
 
 

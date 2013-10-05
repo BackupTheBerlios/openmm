@@ -97,6 +97,13 @@ MediaServer::setRoot(ServerContainer* pRoot)
 }
 
 
+ServerContainer*
+MediaServer::getRoot()
+{
+    return _pDevContentDirectoryServerImpl->_pRoot;
+}
+
+
 void
 MediaServer::start()
 {
