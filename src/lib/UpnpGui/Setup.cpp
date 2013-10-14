@@ -382,6 +382,7 @@ class ServerConfView : public Gui::View
 //    Gui::TextLine*          _pServerPollText;
     ServerLayoutSelector*   _pServerLayoutSelector;
     Gui::Button*            _pServerScanButton;
+    Gui::Label*            _pServerScanProgressLabel;
 };
 
 
@@ -450,6 +451,20 @@ class ServerPluginSelector : Gui::Selector
 };
 
 
+class ServerConfModel;
+
+class ServerScanNotification : public Av::DataModelScanNotification
+{
+    friend class ServerConfModel;
+
+    ServerScanNotification(ServerConfModel* pServerConfModel) : _pServerConfModel(pServerConfModel) {}
+
+    virtual void itemScanned(const std::string& path);
+
+    ServerConfModel*    _pServerConfModel;
+};
+
+
 class ServerConfModel : public Gui::Model
 {
     friend class ServerListController;
@@ -457,10 +472,12 @@ class ServerConfModel : public Gui::Model
     friend class ServerNewButton;
     friend class ServerScanButton;
     friend class ServerConfView;
+    friend class ServerScanNotification;
 
-    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id)
+    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id), _serverScanitemCount(0)
     {
         _uuid = _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".uuid", Poco::UUIDGenerator().createRandom().toString());
+        _pServerScanNotification = new ServerScanNotification(this);
     }
 
     bool getEnabled()
@@ -528,11 +545,21 @@ class ServerConfModel : public Gui::Model
         }
     }
 
-    std::string     _id;
-    std::string     _uuid;
-    GuiSetup*       _pGuiSetup;
-    ServerConfView* _pConfView;
+    std::string             _id;
+    std::string             _uuid;
+    GuiSetup*               _pGuiSetup;
+    ServerConfView*         _pConfView;
+    ServerScanNotification* _pServerScanNotification;
+    ui4                     _serverScanitemCount;
 };
+
+
+void
+ServerScanNotification::itemScanned(const std::string& path)
+{
+    _pServerConfModel->_serverScanitemCount++;
+    _pServerConfModel->syncViews();
+}
 
 
 class ServerScanButton : Gui::Button
@@ -718,6 +745,9 @@ _newServer(newServer)
     pServerScanLabel->setLabel("Scan");
     pServerScanLabel->setStretchFactor(-1.0);
     _pServerScanButton = new ServerScanButton(_pGuiSetup->_pApp, this, pServerScanView);
+    _pServerScanProgressLabel = new Gui::Label(pServerScanView);
+    _pServerScanProgressLabel->setLabel("0");
+    _pServerScanProgressLabel->setStretchFactor(-1.0);
 
     Gui::View* pServerBasePathView = new Gui::View(this);
     pServerBasePathView->setLayout(new Gui::HorizontalLayout);
@@ -774,6 +804,17 @@ void ServerConfView::syncViewImpl()
     }
     else if (layout == Av::ServerContainer::LAYOUT_PROPERTY_GROUPS) {
         _pServerLayoutSelector->setCurrentIndex(2);
+    }
+    LOGNS(Gui, gui, debug, "scan notification server uuid: " + static_cast<ServerConfModel*>(_pModel)->_uuid);
+    try {
+        Av::MediaServer* pMediaServer = _pGuiSetup->_pApp->getLocalMediaServer(static_cast<ServerConfModel*>(_pModel)->_uuid);
+        if (pMediaServer) {
+            pMediaServer->getRoot()->getDataModel()->setScanNotification(static_cast<ServerConfModel*>(_pModel)->_pServerScanNotification);
+            _pServerScanProgressLabel->setLabel(Poco::NumberFormatter::format(static_cast<ServerConfModel*>(_pModel)->_serverScanitemCount));
+        }
+    }
+    catch (Poco::Exception& e) {
+        LOGNS(Gui, gui, debug, "scan notification server not found: " + e.displayText());
     }
 }
 

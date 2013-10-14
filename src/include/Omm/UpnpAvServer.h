@@ -402,6 +402,14 @@ private:
 };
 
 
+class DataModelScanNotification
+{
+    // Don't use a Poco::Notification here to avoid creation of Notification objects for each item scanned
+public:
+    virtual void itemScanned(const std::string& path) = 0;
+};
+
+
 class AbstractDataModel
 {
 public:
@@ -430,6 +438,7 @@ public:
     /// if not implemented by data model, one single update id for the whole model is assumed
     void setCheckObjectModifications(bool check = true);
     void checkSystemUpdateId();
+    void setScanNotification(DataModelScanNotification* pScanNotification);
 
     // data model cares only about one media object at a time
     // buffering / caching / optimized access is done internally at next layers
@@ -519,6 +528,7 @@ private:
     ui4                                         _cacheSystemUpdateId;
     ui4                                         _cacheSystemModId;
     bool                                        _checkMod;
+    DataModelScanNotification*                  _pScanNotification;
 
     std::vector<ui4>                            _lastIndices;
     std::vector<ui4>                            _commonIndices;

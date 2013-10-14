@@ -2153,7 +2153,8 @@ _pTextConverter(0),
 _publicSystemUpdateId(0),
 _cacheSystemUpdateId(0),
 _cacheSystemModId(0),
-_checkMod(false)
+_checkMod(false),
+_pScanNotification(0)
 {
 }
 
@@ -2259,6 +2260,13 @@ AbstractDataModel::checkSystemUpdateId()
         setCacheSystemUpdateId(id, _checkMod);
         _updateThread.start(_updateThreadRunnable);
     }
+}
+
+
+void
+AbstractDataModel::setScanNotification(DataModelScanNotification* pScanNotification)
+{
+    _pScanNotification = pScanNotification;
 }
 
 
@@ -2390,6 +2398,9 @@ AbstractDataModel::addPath(const std::string& path, const std::string& resourceP
     }
     else {
         _commonIndices.push_back((*it).second);
+    }
+    if (_pScanNotification) {
+        _pScanNotification->itemScanned(path);
     }
 }
 
