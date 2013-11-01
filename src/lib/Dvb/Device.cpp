@@ -85,6 +85,20 @@ Adapter::~Adapter()
 }
 
 
+Adapter::FrontendIterator
+Adapter::frontendBegin()
+{
+    return _frontends.begin();
+}
+
+
+Adapter::FrontendIterator
+Adapter::frontendEnd()
+{
+    return _frontends.end();
+}
+
+
 void
 Adapter::addFrontend(Frontend* pFrontend)
 {
@@ -220,6 +234,20 @@ Device::serviceEnd()
 }
 
 
+Device::AdapterIterator
+Device::adapterBegin()
+{
+    return _adapters.begin();
+}
+
+
+Device::AdapterIterator
+Device::adapterEnd()
+{
+    return _adapters.end();
+}
+
+
 void
 Device::addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders)
 {
@@ -252,8 +280,6 @@ Device::close()
 void
 Device::scan()
 {
-    detectAdapters();
-
     for (std::map<std::string, Adapter*>::iterator ait = _adapters.begin(); ait != _adapters.end(); ++ait) {
         LOG(dvb, debug, "scan adapter " + ait->second->_deviceName);
         for (std::vector<Frontend*>::iterator fit = ait->second->_frontends.begin(); fit != ait->second->_frontends.end(); ++fit) {
@@ -262,8 +288,8 @@ Device::scan()
             LOG(dvb, debug, "number of initial transponder lists: " + Poco::NumberFormatter::format(tsit->second.size()));
             if (tsit != _initialTransponders.end()) {
                 for (std::set<std::string>::iterator tit = tsit->second.begin(); tit != tsit->second.end(); ++tit) {
-                    std::string initialTransponders = (*fit)->getType() + "/" + *tit;
-                    LOG(dvb, debug, "scan initial transponders " + initialTransponders);
+                    std::string initialTransponders = *tit;
+                    LOG(dvb, debug, "scan initial transponders " + (*fit)->getType() + "/" + initialTransponders);
                     (*fit)->scan(initialTransponders);
                 }
             }
@@ -302,9 +328,6 @@ Device::readXml(std::istream& istream)
         return;
     }
     if (pDvbDevice->hasChildNodes()) {
-
-        detectAdapters();
-
         Poco::XML::Node* pXmlAdapter = pDvbDevice->firstChild();
         while (pXmlAdapter && pXmlAdapter->nodeName() == "adapter") {
             std::string adapterId = static_cast<Poco::XML::Element*>(pXmlAdapter)->getAttribute("id");

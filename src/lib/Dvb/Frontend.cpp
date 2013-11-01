@@ -25,7 +25,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-//#include <Poco/String.h>
 #include <Poco/NumberParser.h>
 #include <Poco/DOM/AbstractContainerNode.h>
 #include <Poco/DOM/DOMException.h>
@@ -44,6 +43,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/Zip/ZipArchive.h>
 #include <Poco/Zip/ZipStream.h>
+#include <Poco/StringTokenizer.h>
 
 #include "DvbLogger.h"
 #include "Descriptor.h"
@@ -203,6 +203,7 @@ Frontend::openFrontend()
 
     if ((_fileDescFrontend = open(_deviceName.c_str(), O_RDWR | O_NONBLOCK)) < 0) {
         LOG(dvb, error, "open frontend failed: " + std::string(strerror(errno)));
+        return;
     }
 
     int result = ioctl(_fileDescFrontend, FE_GET_INFO, &_feInfo);
@@ -263,7 +264,6 @@ Frontend::scan(const std::string& initialTransponderData)
     // TODO: clear transponder lists?
     getInitialTransponderData(initialTransponderData);
     LOG(dvb, debug, "number of initial transponders in " + initialTransponderData + ": " + Poco::NumberFormatter::format(_initialTransponders.size()));
-    openFrontend();
     for (std::vector<Transponder*>::iterator it = _initialTransponders.begin(); it != _initialTransponders.end(); ++it) {
         LOG(dvb, trace, "initial transponder (freq: " + Poco::NumberFormatter::format((*it)->_frequency) + ", tsid: " + Poco::NumberFormatter::format((*it)->_transportStreamId) + ")");
         if (tune(*it)) {
@@ -412,9 +412,17 @@ Frontend::listInitialTransponderData()
 
 
 void
-Frontend::getInitialTransponderKeys(const std::string& countryCode, std::vector<std::string>& keys)
+Frontend::getInitialTransponderKeys(std::vector<std::string>& keys)
 {
+    std::istringstream ss(TransponderData::instance()->getResource("transponder.zip"), std::ios::binary);
+    Poco::Zip::ZipArchive arch(ss);
 
+    for (Poco::Zip::ZipArchive::FileHeaders::const_iterator it = arch.headerBegin(); it != arch.headerEnd(); ++it) {
+        Poco::StringTokenizer frontendKey(it->first, "/");
+        if (frontendKey[0] == getType() && frontendKey.count() > 1) {
+            keys.push_back(frontendKey[1]);
+        }
+    }
 }
 
 
@@ -423,9 +431,9 @@ Frontend::getInitialTransponderData(const std::string& key)
 {
     std::istringstream ss(TransponderData::instance()->getResource("transponder.zip"), std::ios::binary);
     Poco::Zip::ZipArchive arch(ss);
-    Poco::Zip::ZipArchive::FileHeaders::const_iterator it = arch.findHeader(key);
+    Poco::Zip::ZipArchive::FileHeaders::const_iterator it = arch.findHeader(getType() + "/" + key);
     if (it == arch.headerEnd()) {
-        LOG(dvb, error, "transponder data not found for: " + key);
+        LOG(dvb, error, "transponder data not found for: " + getType() + "/" + key);
         return;
     }
     Poco::Zip::ZipInputStream zipin(ss, it->second);
@@ -643,6 +651,7 @@ Frontend::scanSdt(Transponder* pTransponder)
                             LOG(dvb, trace, "service name: " + pService->_name);
                         }
                     }
+                    Poco::NotificationCenter::defaultCenter().postNotification(new ScanNotification(pService));
                 }
             }
         }

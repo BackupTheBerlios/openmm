@@ -43,6 +43,8 @@ main(int argc, char** argv)
         pDevice->addInitialTransponders(initialTransponders[0], initialTransponders[1]);
     }
 
+    pDevice->detectAdapters();
+    pDevice->open();
     pDevice->scan();
     pDevice->writeXml(std::cout);
 

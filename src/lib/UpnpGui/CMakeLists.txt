@@ -53,6 +53,7 @@ ommutil
 ommupnp
 ommupnpav
 ommgui
+ommdvb
 ${DEFAULT_ENGINE}
 )
 

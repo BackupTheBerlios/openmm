@@ -437,7 +437,7 @@ public:
     /// get update id of particular object in data model, identified by path
     /// if not implemented by data model, one single update id for the whole model is assumed
     void setCheckObjectModifications(bool check = true);
-    void checkSystemUpdateId();
+    void checkSystemUpdateId(bool forceUpdate = false);
     void setScanNotification(DataModelScanNotification* pScanNotification);
 
     // data model cares only about one media object at a time

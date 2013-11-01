@@ -36,6 +36,7 @@
 #include <Poco/Format.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/DOM/Document.h>
+#include "Poco/Notification.h"
 
 #include "../AvStream.h"
 
@@ -58,6 +59,19 @@ class Dvr;
 class Adapter;
 
 
+class ScanNotification : public Poco::Notification
+{
+    friend class Frontend;
+public:
+    Service* getService() { return _pService; }
+    
+private:
+    ScanNotification(Service* pService) : _pService(pService) {}
+
+    Service*    _pService;
+};
+
+
 class Adapter
 {
     friend class Device;
@@ -68,6 +82,10 @@ class Adapter
 public:
     Adapter(int num);
     ~Adapter();
+
+    typedef std::vector<Frontend*>::iterator FrontendIterator;
+    FrontendIterator frontendBegin();
+    FrontendIterator frontendEnd();
 
     void addFrontend(Frontend* pFrontend);
     void openAdapter();
@@ -101,7 +119,12 @@ public:
     ServiceIterator serviceBegin();
     ServiceIterator serviceEnd();
 
+    typedef std::map<std::string, Adapter*>::iterator AdapterIterator;
+    AdapterIterator adapterBegin();
+    AdapterIterator adapterEnd();
+
     void addInitialTransponders(const std::string& frontendType, const std::string& initialTransponders);
+    void detectAdapters();
     void open();
     void close();
     void scan();
@@ -118,7 +141,6 @@ private:
     Device();
     ~Device();
 
-    void detectAdapters();
     Adapter* addAdapter(const std::string& id, int adapterNum);
     void initServiceMap();
     void clearServiceMap();

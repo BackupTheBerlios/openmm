@@ -39,6 +39,9 @@
 #include "UpnpGui/ControllerWidget.h"
 #include "UpnpGui/Setup.h"
 
+#include "Omm/Dvb/Device.h"
+#include "Omm/Dvb/Frontend.h"
+
 
 namespace Omm {
 
@@ -382,7 +385,8 @@ class ServerConfView : public Gui::View
 //    Gui::TextLine*          _pServerPollText;
     ServerLayoutSelector*   _pServerLayoutSelector;
     Gui::Button*            _pServerScanButton;
-    Gui::Label*            _pServerScanProgressLabel;
+    Gui::Label*             _pServerScanProgressLabel;
+    Gui::View*              _pServerBasePathView;
 };
 
 
@@ -465,6 +469,32 @@ class ServerScanNotification : public Av::DataModelScanNotification
 };
 
 
+class DvbFrontendKeySelectorModel : public Gui::SelectorModel
+{
+//    friend class ServerConfModel;
+//    friend class ServerConfView;
+public:
+    DvbFrontendKeySelectorModel() {}
+
+    DvbFrontendKeySelectorModel(Omm::Dvb::Frontend* pFrontend)
+    {
+        pFrontend->getInitialTransponderKeys(_frontendKeys);
+    }
+
+    virtual int totalItemCount()
+    {
+        return _frontendKeys.size();
+    }
+
+    virtual std::string getItemLabel(int index)
+    {
+        return _frontendKeys[index];
+    }
+
+    std::vector<std::string>    _frontendKeys;
+};
+
+
 class ServerConfModel : public Gui::Model
 {
     friend class ServerListController;
@@ -473,11 +503,23 @@ class ServerConfModel : public Gui::Model
     friend class ServerScanButton;
     friend class ServerConfView;
     friend class ServerScanNotification;
+    friend class DvbFrontendKeySelectorController;
 
-    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id), _serverScanitemCount(0)
+    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id), _serverScanitemCount(0), _pDvbDevice(0)
     {
         _uuid = _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".uuid", Poco::UUIDGenerator().createRandom().toString());
         _pServerScanNotification = new ServerScanNotification(this);
+        if (getPlugin() == "model-dvb") {
+            _pDvbDevice = Omm::Dvb::Device::instance();
+            for (Omm::Dvb::Device::AdapterIterator it = _pDvbDevice->adapterBegin(); it != _pDvbDevice->adapterEnd(); ++it) {
+                for (Omm::Dvb::Adapter::FrontendIterator fit = it->second->frontendBegin(); fit != it->second->frontendEnd(); ++fit) {
+                    LOGNS(Gui, gui, debug, "server conf model-dvb, frontend type: " + (*fit)->getType());
+//                    (*fit)->getInitialTransponderKeys(_dvbFrontendKeys[(*fit)->getType()]);
+//                    _dvbFrontendKeys[(*fit)->getType()] = DvbFrontendKeySelectorModel(*fit);
+                    _dvbFrontendKeys.insert(std::make_pair((*fit)->getType(), DvbFrontendKeySelectorModel(*fit)));
+                }
+            }
+        }
     }
 
     bool getEnabled()
@@ -524,6 +566,13 @@ class ServerConfModel : public Gui::Model
         return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".layout", "");
     }
 
+    void setDvbFrontendKey(const std::string& frontendType, int index)
+    {
+        std::string key = _dvbFrontendKeys[frontendType].getItemLabel(index);
+        _dvbSelectedKeys[frontendType] = key;
+        Omm::Dvb::Device::instance()->addInitialTransponders(frontendType, key);
+    }
+
     void writeConf()
     {
         _pGuiSetup->_pApp->getFileConfiguration()->setBool("server." + _id + ".enable", _pConfView->_pServerEnableSwitch->getStateOn());
@@ -545,12 +594,31 @@ class ServerConfModel : public Gui::Model
         }
     }
 
-    std::string             _id;
-    std::string             _uuid;
-    GuiSetup*               _pGuiSetup;
-    ServerConfView*         _pConfView;
-    ServerScanNotification* _pServerScanNotification;
-    ui4                     _serverScanitemCount;
+    std::string                                         _id;
+    std::string                                         _uuid;
+    GuiSetup*                                           _pGuiSetup;
+    ServerConfView*                                     _pConfView;
+    ServerScanNotification*                             _pServerScanNotification;
+    ui4                                                 _serverScanitemCount;
+    Omm::Dvb::Device*                                   _pDvbDevice;
+    std::map<std::string, DvbFrontendKeySelectorModel>  _dvbFrontendKeys;
+    std::map<std::string, std::string>                  _dvbSelectedKeys;
+};
+
+
+class DvbFrontendKeySelectorController : public Gui::SelectorController
+{
+    friend class ServerConfView;
+
+    DvbFrontendKeySelectorController(const std::string& frontendType, ServerConfModel* pConfModel) : _frontendType(frontendType), _pConfModel(pConfModel) {}
+
+    virtual void selected(int index)
+    {
+        _pConfModel->setDvbFrontendKey(_frontendType, index);
+    }
+
+    std::string         _frontendType;
+    ServerConfModel*    _pConfModel;
 };
 
 
@@ -581,7 +649,7 @@ class ServerScanButton : Gui::Button
         if (pServer) {
             Av::AbstractDataModel* pDataModel = pServer->getRoot()->getDataModel();
             if (pDataModel) {
-                pDataModel->checkSystemUpdateId();
+                pDataModel->checkSystemUpdateId(true);
             }
         }
     }
@@ -749,14 +817,15 @@ _newServer(newServer)
     _pServerScanProgressLabel->setLabel("0");
     _pServerScanProgressLabel->setStretchFactor(-1.0);
 
-    Gui::View* pServerBasePathView = new Gui::View(this);
-    pServerBasePathView->setLayout(new Gui::HorizontalLayout);
-    pServerBasePathView->setStretchFactor(-1.0);
-    pServerBasePathView->setSizeConstraint(10, 20, Gui::View::Pref);
-    _pServerBasePathLabel = new Gui::Label(pServerBasePathView);
-    _pServerBasePathLabel->setLabel("Path");
-    _pServerBasePathLabel->setStretchFactor(-1.0);
-    _pServerBasePathText = new Gui::TextLine(pServerBasePathView);
+    _pServerBasePathView = new Gui::View(this);
+    _pServerBasePathView->setLayout(new Gui::HorizontalLayout);
+    _pServerBasePathView->setStretchFactor(-1.0);
+    _pServerBasePathView->setSizeConstraint(10, 20, Gui::View::Pref);
+
+//    _pServerBasePathLabel = new Gui::Label(_pServerBasePathView);
+//    _pServerBasePathLabel->setLabel("Path");
+//    _pServerBasePathLabel->setStretchFactor(-1.0);
+//    _pServerBasePathText = new Gui::TextLine(_pServerBasePathView);
 
 //    Gui::View* pServerPollView = new Gui::View(this);
 //    pServerPollView->setLayout(new Gui::HorizontalLayout);
@@ -777,6 +846,35 @@ _newServer(newServer)
 
 void ServerConfView::syncViewImpl()
 {
+    if (static_cast<ServerConfModel*>(_pModel)->getPlugin() == "model-dvb") {
+        for (std::map<std::string, DvbFrontendKeySelectorModel>::iterator fit = static_cast<ServerConfModel*>(_pModel)->_dvbFrontendKeys.begin(); fit != static_cast<ServerConfModel*>(_pModel)->_dvbFrontendKeys.end(); ++fit) {
+            Gui::Label* pServerDvbFrontendNameLabel = new Gui::Label(_pServerBasePathView);
+            pServerDvbFrontendNameLabel->setLabel(fit->first);
+            pServerDvbFrontendNameLabel->setStretchFactor(-1.0);
+            Gui::SelectorView* pServerDvbFrontendKeySelector = new Gui::Selector(_pServerBasePathView);
+            pServerDvbFrontendKeySelector->setModel(&fit->second);
+            pServerDvbFrontendKeySelector->attachController(new DvbFrontendKeySelectorController(fit->first, static_cast<ServerConfModel*>(_pModel)));
+    //        for (int keyIndex = 0; keyIndex < fit->second.totalItemCount(); keyIndex++) {
+    //            LOGNS(Gui, gui, debug, "dvb frontend key: " + fit->first + "/" + fit->second.getItemLabel(keyIndex));
+    //        }
+        };
+    }
+    else {
+        _pServerBasePathLabel = new Gui::Label(_pServerBasePathView);
+        _pServerBasePathLabel->setLabel("Path");
+        _pServerBasePathLabel->setStretchFactor(-1.0);
+        _pServerBasePathText = new Gui::TextLine(_pServerBasePathView);
+        if (_newServer && _pServerPluginSelector->getCurrentIndex() || !_newServer && static_cast<ServerConfModel*>(_pModel)->getPlugin() != "model-file") {
+            _pServerBasePathText->hide();
+            _pServerBasePathLabel->hide();
+        }
+        else {
+            _pServerBasePathText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getBasePath());
+            _pServerBasePathText->show();
+            _pServerBasePathLabel->show();
+        }
+    }
+
     if (_newServer) {
         _pServerPluginSelector->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPlugin());
     }
@@ -785,15 +883,7 @@ void ServerConfView::syncViewImpl()
     }
     _pServerEnableSwitch->setState(static_cast<ServerConfModel*>(_pModel)->getEnabled());
     _pServerFriendlyNameText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getFriendlyName());
-    if (_newServer && _pServerPluginSelector->getCurrentIndex() || !_newServer && static_cast<ServerConfModel*>(_pModel)->getPlugin() != "model-file") {
-        _pServerBasePathText->hide();
-        _pServerBasePathLabel->hide();
-    }
-    else {
-        _pServerBasePathText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getBasePath());
-        _pServerBasePathText->show();
-        _pServerBasePathLabel->show();
-    }
+
 //    _pServerPollText->setTextLine(static_cast<ServerConfModel*>(_pModel)->getPollTime());
     std::string layout = static_cast<ServerConfModel*>(_pModel)->getLayout();
     if (layout == Av::ServerContainer::LAYOUT_FLAT) {

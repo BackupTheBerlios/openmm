@@ -2241,7 +2241,7 @@ AbstractDataModel::setCheckObjectModifications(bool check)
 
 
 void
-AbstractDataModel::checkSystemUpdateId()
+AbstractDataModel::checkSystemUpdateId(bool forceUpdate)
 {
 //    getServerContainer()->cacheConsistent();
 
@@ -2251,11 +2251,16 @@ AbstractDataModel::checkSystemUpdateId()
     }
 
     ui4 id = getSystemUpdateId(_checkMod);
-    if (getCacheSystemUpdateId(_checkMod) == id) {
+    if (!forceUpdate && getCacheSystemUpdateId(_checkMod) == id) {
         LOG(upnpav, debug, "data model is current, nothing to do.");
     }
     else {
-        LOG(upnpav, debug, "data model got new system update id: " + Poco::NumberFormatter::format(id));
+        if (forceUpdate) {
+            LOG(upnpav, debug, "data model force update");
+        }
+        else {
+            LOG(upnpav, debug, "data model got new system update id: " + Poco::NumberFormatter::format(id));
+        }
         incPublicSystemUpdateId();
         setCacheSystemUpdateId(id, _checkMod);
         _updateThread.start(_updateThreadRunnable);
