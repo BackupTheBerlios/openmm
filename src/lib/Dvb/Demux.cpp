@@ -267,7 +267,7 @@ Demux::readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout)
                 }
                 else if (bytesRead == -1) {
                     LOG(dvb, error, "demux read failed to read from device: " + std::string(strerror(errno)));
-                    return;
+                    throw Poco::Exception("demux read failed to read from device: " + std::string(strerror(errno)));
                 }
             }
             else {
@@ -276,11 +276,11 @@ Demux::readStream(Stream* pStream, Poco::UInt8* buf, int size, int timeout)
         }
         else if (pollRes == 0) {
             LOG(dvb, trace, "demux read timeout");
-            return;
+            throw Poco::TimeoutException("demux read timeout");
         }
         else if (pollRes == -1) {
             LOG(dvb, error, "demux read failure: " + std::string(strerror(errno)));
-            return;
+            throw Poco::Exception("demux read failure: " + std::string(strerror(errno)));
         }
     }
 }
@@ -298,9 +298,9 @@ Demux::readSection(Section* pSection)
         pSection->read(this, &stream);
         pSection->parse();
     }
-    catch (Poco::TimeoutException& e) {
+    catch (Poco::Exception& e) {
         success = false;
-        LOG(dvb, error, pSection->name() + " section read timeout");
+        LOG(dvb, error, pSection->name() + " section read failed");
     }
     runStream(&stream, false);
     unselectStream(&stream);
@@ -320,9 +320,9 @@ Demux::readTable(Table* pTable)
         pTable->read(this, &stream);
         pTable->parse();
     }
-    catch (Poco::TimeoutException& e) {
+    catch (Poco::Exception& e) {
         success = false;
-        LOG(dvb, error, pTable->getFirstSection()->name() + " table read timeout");
+        LOG(dvb, error, pTable->getFirstSection()->name() + " table read failed");
     }
     runStream(&stream, false);
     unselectStream(&stream);
