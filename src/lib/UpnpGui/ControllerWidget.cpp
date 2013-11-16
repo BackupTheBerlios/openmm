@@ -75,7 +75,7 @@ class MediaServerGroupController : public Omm::Gui::NavigatorController
     virtual void poppedToView(Gui::View* pView)
     {
         LOGNS(Gui, gui, debug, "media server group popped to view: " + (pView ? pView->getName() : ""));
-        if (!_pController->_pPlaylistEditorView->isVisible()) {
+        if (_pController->_pPlaylistEditorView && !_pController->_pPlaylistEditorView->isVisible()) {
             _pController->_pMediaServerGroupWidget->showRightButton(false);
         }
         _pController->_pMediaServerGroupWidget->showSearchBox(true);
