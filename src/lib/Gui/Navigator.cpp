@@ -49,6 +49,7 @@ NavigatorView::push(View* pView, const std::string& label)
 {
     LOG(gui, debug, "navigator push: " + pView->getName() + " ...");
     static_cast<NavigatorViewImpl*>(_pImpl)->pushView(pView, label);
+    // NOTE: is resize() needed or should navigator implementation care of that (also when "drag resize")?
     pView->resize(width(), height());
     LOG(gui, debug, "navigator push: " + pView->getName() + " finished.");
 }

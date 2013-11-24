@@ -39,8 +39,11 @@
 #include "UpnpGui/ControllerWidget.h"
 #include "UpnpGui/Setup.h"
 
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
 #include "Omm/Dvb/Device.h"
 #include "Omm/Dvb/Frontend.h"
+#endif
 
 
 namespace Omm {
@@ -469,6 +472,8 @@ class ServerScanNotification : public Av::DataModelScanNotification
 };
 
 
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
 class DvbFrontendKeySelectorModel : public Gui::SelectorModel
 {
 //    friend class ServerConfModel;
@@ -493,6 +498,7 @@ public:
 
     std::vector<std::string>    _frontendKeys;
 };
+#endif
 
 
 class ServerConfModel : public Gui::Model
@@ -505,10 +511,16 @@ class ServerConfModel : public Gui::Model
     friend class ServerScanNotification;
     friend class DvbFrontendKeySelectorController;
 
-    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id), _serverScanitemCount(0), _pDvbDevice(0)
+    ServerConfModel(GuiSetup* pGuiSetup, ServerConfView* pConfView, const std::string& id) : _pGuiSetup(pGuiSetup), _pConfView(pConfView), _id(id), _serverScanitemCount(0)
+    // TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
+    , _pDvbDevice(0)
+#endif
     {
         _uuid = _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".uuid", Poco::UUIDGenerator().createRandom().toString());
         _pServerScanNotification = new ServerScanNotification(this);
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
         if (getPlugin() == "model-dvb") {
             _pDvbDevice = Omm::Dvb::Device::instance();
             for (Omm::Dvb::Device::AdapterIterator it = _pDvbDevice->adapterBegin(); it != _pDvbDevice->adapterEnd(); ++it) {
@@ -520,6 +532,7 @@ class ServerConfModel : public Gui::Model
                 }
             }
         }
+#endif
     }
 
     bool getEnabled()
@@ -566,12 +579,15 @@ class ServerConfModel : public Gui::Model
         return _pGuiSetup->_pApp->getFileConfiguration()->getString("server." + _id + ".layout", "");
     }
 
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
     void setDvbFrontendKey(const std::string& frontendType, int index)
     {
         std::string key = _dvbFrontendKeys[frontendType].getItemLabel(index);
         _dvbSelectedKeys[frontendType] = key;
         Omm::Dvb::Device::instance()->addInitialTransponders(frontendType, key);
     }
+#endif
 
     void writeConf()
     {
@@ -600,12 +616,17 @@ class ServerConfModel : public Gui::Model
     ServerConfView*                                     _pConfView;
     ServerScanNotification*                             _pServerScanNotification;
     ui4                                                 _serverScanitemCount;
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
     Omm::Dvb::Device*                                   _pDvbDevice;
     std::map<std::string, DvbFrontendKeySelectorModel>  _dvbFrontendKeys;
     std::map<std::string, std::string>                  _dvbSelectedKeys;
+#endif
 };
 
 
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
 class DvbFrontendKeySelectorController : public Gui::SelectorController
 {
     friend class ServerConfView;
@@ -620,7 +641,7 @@ class DvbFrontendKeySelectorController : public Gui::SelectorController
     std::string         _frontendType;
     ServerConfModel*    _pConfModel;
 };
-
+#endif
 
 void
 ServerScanNotification::itemScanned(const std::string& path)
@@ -847,6 +868,8 @@ _newServer(newServer)
 void ServerConfView::syncViewImpl()
 {
     if (static_cast<ServerConfModel*>(_pModel)->getPlugin() == "model-dvb") {
+// TODO: find a better solution to handle dvb includes e.g. on smartphones (where not needed)
+#ifndef __IPHONE__
         for (std::map<std::string, DvbFrontendKeySelectorModel>::iterator fit = static_cast<ServerConfModel*>(_pModel)->_dvbFrontendKeys.begin(); fit != static_cast<ServerConfModel*>(_pModel)->_dvbFrontendKeys.end(); ++fit) {
             Gui::Label* pServerDvbFrontendNameLabel = new Gui::Label(_pServerBasePathView);
             pServerDvbFrontendNameLabel->setLabel(fit->first);
@@ -858,6 +881,7 @@ void ServerConfView::syncViewImpl()
     //            LOGNS(Gui, gui, debug, "dvb frontend key: " + fit->first + "/" + fit->second.getItemLabel(keyIndex));
     //        }
         };
+#endif
     }
     else {
         _pServerBasePathLabel = new Gui::Label(_pServerBasePathView);

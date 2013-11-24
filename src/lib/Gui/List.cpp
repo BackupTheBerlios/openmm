@@ -171,7 +171,7 @@ void
 ListScrollAreaController::shown()
 {
     LOG(gui, debug, "list scroll area shown");
-    resized(_pListView->width(), _pListView->height());
+    resized(_pListView->getViewportWidth(), _pListView->getViewportHeight());
 }
 
 
@@ -461,9 +461,10 @@ ListView::onResize(int width, int height)
     setItemViewWidth(width);
     updateScrollWidgetSize(totalItemCount());
 
-    LOG(gui, debug, "list view resize, view port height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows()) + \
+    LOG(gui, debug, "list view \"" + getName() + "\" resize, view port height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows()) + \
             ", visible views: " + Poco::NumberFormatter::format(_visibleViews.size()) + \
-            ", view pool size: " + Poco::NumberFormatter::format(_viewPool.size()));
+            ", view pool size: " + Poco::NumberFormatter::format(_viewPool.size()) + \
+            ", width: " + Poco::NumberFormatter::format(width));
     // finish if all item views fit into viewport
     ListModel* pModel = static_cast<ListModel*>(_pModel);
     if (!pModel) {
@@ -768,7 +769,8 @@ ListView::highlightItem(int row, bool async)
             ", lastVisibleRow: " + Poco::NumberFormatter::format(lastVisibleRow()) +\
             ", last _highlightedRow: " + Poco::NumberFormatter::format(_highlightedRow) +\
             ", viewport height (rows): " + Poco::NumberFormatter::format(viewPortHeightInRows()) +\
-            ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight()));
+            ", item view height: " + Poco::NumberFormatter::format(getItemViewHeight()) +\
+            ", selection view width: " + Poco::NumberFormatter::format(_pSelectionView ? _pSelectionView->width() : 0));
     if (row < 0) {
         return;
     }

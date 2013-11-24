@@ -323,7 +323,7 @@ ViewImpl::hidden()
 void
 ViewImpl::resized(int width, int height)
 {
-//    LOG(gui, debug, "view impl resized.");
+    LOG(gui, debug, "view impl resized width: " + Poco::NumberFormatter::format(width) + ", height: " + Poco::NumberFormatter::format(height));
     _pView->updateLayout();
     IMPL_NOTIFY_CONTROLLER(Controller, resized, width, height);
 }

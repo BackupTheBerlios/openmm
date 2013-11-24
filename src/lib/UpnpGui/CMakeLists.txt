@@ -34,12 +34,20 @@ UpnpApplication.cpp
 ${OMM_RESOURCES}
 )
 
+set(DEFAULT_ENGINE
+)
+set(EXTRA_LIBS
+ommdvb
+)
+
 if(IPHONE)
 set(DEFAULT_ENGINE
 ommx-engine-mpmovieplayer
 ommx-engine-avfoundation
 ommx-model-mpmedia
 ommx-model-iphonecamera
+)
+set(EXTRA_LIBS
 )
 elseif(IPHONE)
 set(DEFAULT_ENGINE
@@ -53,8 +61,8 @@ ommutil
 ommupnp
 ommupnpav
 ommgui
-ommdvb
 ${DEFAULT_ENGINE}
+${EXTRA_LIBS}
 )
 
 
