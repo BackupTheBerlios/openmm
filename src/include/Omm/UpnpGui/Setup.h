@@ -27,6 +27,7 @@
 #include "../Gui/Navigator.h"
 #include "../Gui/Selector.h"
 #include "../Gui/List.h"
+#include "../Gui/ScrollArea.h"
 
 
 namespace Omm {
@@ -58,13 +59,15 @@ private:
 
     UpnpApplication*    _pApp;
 
-    Gui::View*          _pSetupView;
-    Gui::Selector*      _pAppStateSelector;
-    Gui::View*          _pRendererConfig;
-    Gui::ListItemModel* _pRendererItemModel;
-    Gui::ListItemView*  _pRendererItem;
-    ServerListModel*    _pServerListModel;
-    Gui::ListView*      _pServerList;
+    Gui::ScrollAreaView*    _pSetupArea;
+    Gui::View*              _pSetupView;
+    Gui::Selector*          _pAppStateSelector;
+    Gui::View*              _pRendererConfig;
+    Gui::ListItemModel*     _pRendererItemModel;
+    Gui::ListItemView*      _pRendererItem;
+    Gui::ListItemView*      _pServerItem;
+    ServerListModel*        _pServerListModel;
+    Gui::ListView*          _pServerList;
 };
 
 

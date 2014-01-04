@@ -45,6 +45,7 @@ public:
     int getYOffset();
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show);
+    void setAreaResizable(bool resize);
     void viewScrolled();
 
 private:

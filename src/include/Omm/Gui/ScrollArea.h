@@ -50,6 +50,7 @@ public:
     int getYOffset();
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show = true);
+    void setAreaResizable(bool resize = true);
 };
 
 

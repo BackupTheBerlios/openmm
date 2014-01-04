@@ -246,6 +246,21 @@ RendererConfView::writeConf()
 }
 
 
+class ServerItemController : public Gui::Controller
+{
+    friend class GuiSetup;
+
+    ServerItemController(GuiSetup* pGuiSetup) : _pGuiSetup(pGuiSetup) {}
+
+    virtual void selected()
+    {
+        _pGuiSetup->push(_pGuiSetup->_pServerList, "Local Media");
+    }
+
+    GuiSetup*   _pGuiSetup;
+};
+
+
 class ServerListItemModel : public Gui::ListItemModel
 {
     friend class ServerListModel;
@@ -961,7 +976,7 @@ class ServerListController : public Gui::ListController
     {
         ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup, false);
         pServerConfView->setModel(new ServerConfModel(_pGuiSetup, pServerConfView, _pGuiSetup->_pServerListModel->getId(row)));
-        _pGuiSetup->push(pServerConfView);
+        _pGuiSetup->push(pServerConfView, _pGuiSetup->_pServerListModel->getId(row));
     }
 
     GuiSetup*   _pGuiSetup;
@@ -1064,31 +1079,38 @@ GuiSetup::GuiSetup(UpnpApplication* pApp, Gui::View* pParent) :
 NavigatorView(pParent),
 _pApp(pApp)
 {
-    _pSetupView = new View;
+    int itemHeight = 30;
+
+    _pSetupArea = new Gui::ScrollAreaView;
+    _pSetupView = _pSetupArea->getAreaView();
+//    _pSetupView = new Gui::View(_pSetupArea);
+//    _pSetupView = new Gui::View(_pSetupArea->getAreaView());
     _pSetupView->setName("Setup");
     _pSetupView->setLayout(new Gui::VerticalLayout);
 
     Gui::View* pVisibilityView = new Gui::View(_pSetupView);
     pVisibilityView->setLayout(new Gui::HorizontalLayout);
-    pVisibilityView->setSizeConstraint(10, 15, Gui::View::Pref);
+    pVisibilityView->setStretchFactor(-1.0);
+    pVisibilityView->setSizeConstraint(10, itemHeight, Gui::View::Pref);
     Gui::Label* pControllerLabel = new Gui::Label(pVisibilityView);
     pControllerLabel->setLabel("Device Visibility");
-    pControllerLabel->setBackgroundColor(Gui::Color(220, 220, 220));
-    pControllerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
+    pControllerLabel->setBackgroundColor(Gui::Color("white"));
+    pControllerLabel->setSizeConstraint(10, itemHeight, Gui::View::Pref);
 
     _pAppStateSelector = new AppStateSelector(pApp, pVisibilityView);
-    _pAppStateSelector->setSizeConstraint(20, 15, Gui::View::Pref);
+    _pAppStateSelector->setSizeConstraint(20, itemHeight, Gui::View::Pref);
 
     Gui::View* pRendererView = new Gui::View(_pSetupView);
     pRendererView->setLayout(new Gui::HorizontalLayout);
-    pRendererView->setSizeConstraint(10, 15, Gui::View::Pref);
+    pRendererView->setStretchFactor(-1.0);
+    pRendererView->setSizeConstraint(10, itemHeight, Gui::View::Pref);
     Gui::Label* pRendererLabel = new Gui::Label(pRendererView);
     pRendererLabel->setLabel("Media Player");
-    pRendererLabel->setBackgroundColor(Gui::Color(220, 220, 220));
-    pRendererLabel->setSizeConstraint(10, 15, Gui::View::Pref);
+    pRendererLabel->setBackgroundColor(Gui::Color("white"));
+    pRendererLabel->setSizeConstraint(10, itemHeight, Gui::View::Pref);
 
     _pRendererItem = new Gui::ListItemView(pRendererView);
-    _pRendererItem->setSizeConstraint(20, 15, Gui::View::Pref);
+    _pRendererItem->setSizeConstraint(20, itemHeight, Gui::View::Pref);
     _pRendererItemModel = new Gui::ListItemModel;
     Gui::LabelModel* pRendererItemLabel = new Gui::LabelModel;
     pRendererItemLabel->setLabel(_pApp->getFileConfiguration()->getString("renderer.friendlyName", "Local Renderer"));
@@ -1098,20 +1120,35 @@ _pApp(pApp)
 
     _pRendererConfig = new RendererConfView(this);
 
-    Gui::Label* pServerLabel = new Gui::Label(_pSetupView);
+    Gui::View* pServerView = new Gui::View(_pSetupView);
+    pServerView->setLayout(new Gui::HorizontalLayout);
+    pServerView->setStretchFactor(-1.0);
+    pServerView->setSizeConstraint(10, itemHeight, Gui::View::Pref);
+    Gui::Label* pServerLabel = new Gui::Label(pServerView);
     pServerLabel->setLabel("Local Media");
-    pServerLabel->setBackgroundColor(Gui::Color(220, 220, 220));
-    pServerLabel->setSizeConstraint(10, 15, Gui::View::Pref);
+    pServerLabel->setBackgroundColor(Gui::Color("white"));
+    pServerLabel->setSizeConstraint(10, itemHeight, Gui::View::Pref);
+
+    _pServerItem = new Gui::ListItemView(pServerView);
+    _pServerItem->setSizeConstraint(20, itemHeight, Gui::View::Pref);
+    _pServerItem->attachController(new ServerItemController(this));
 
     _pServerListModel = new ServerListModel(this);
     _pServerListModel->readConfig();
-    _pServerList = new Gui::ListView(_pSetupView);
+//    _pServerList = new Gui::ListView(_pSetupView);
+    _pServerList = new Gui::ListView;
+//    _pServerList->setName("Local Media");
     _pServerList->addTopView(new ServerNewButton(this));
     _pServerList->setModel(_pServerListModel);
     _pServerList->attachController(new ServerListController(this));
 
-    showNavigatorBar(false);
-    push(_pSetupView, "Setup");
+//    showNavigatorBar(false);
+    _pSetupArea->setAreaResizable(true);
+    _pSetupView->setSizeConstraint(150, 90, Gui::View::Min);
+    push(_pSetupArea, "Setup");
+    // push() does a resize on ScrollAreaView but not on the AreaView within ScrollAreaView
+//    _pSetupView->resize(350, 100);
+//    push(_pSetupView, "Setup");
 }
 
 

@@ -48,6 +48,7 @@ protected:
     int getYOffset();
     void scrollContentsTo(int x, int y);
     void showScrollBars(bool show);
+    void setAreaResizable(bool resize);
     virtual void setBackgroundColor(const Color& color);
     // need to override addSubview to operate on widget inside QScrollArea
     void addView(View* pView);

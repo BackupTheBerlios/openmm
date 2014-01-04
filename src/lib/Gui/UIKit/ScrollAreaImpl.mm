@@ -184,6 +184,13 @@ ScrollAreaViewImpl::showScrollBars(bool show)
 
 
 void
+ScrollAreaViewImpl::setAreaResizable(bool resize)
+{
+    // is there something similar in UIKit?
+}
+
+
+void
 ScrollAreaViewImpl::viewScrolled()
 {
     IMPL_NOTIFY_CONTROLLER(ScrollAreaController, scrolled, getXOffset(), getYOffset());

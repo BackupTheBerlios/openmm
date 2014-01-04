@@ -90,5 +90,11 @@ ScrollAreaView::showScrollBars(bool show)
 }
 
 
+void
+ScrollAreaView::setAreaResizable(bool resize)
+{
+    static_cast<ScrollAreaViewImpl*>(_pImpl)->setAreaResizable(resize);
+}
+
 } // namespace Gui
 } // namespace Omm

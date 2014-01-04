@@ -119,6 +119,13 @@ ScrollAreaViewImpl::showScrollBars(bool show)
 
 
 void
+ScrollAreaViewImpl::setAreaResizable(bool resize)
+{
+    static_cast<QScrollArea*>(_pNativeView)->setWidgetResizable(resize);
+}
+
+
+void
 ScrollAreaViewImpl::setBackgroundColor(const Color& color)
 {
     _pScrollWidget->setPalette(QPalette(*static_cast<QColor*>(color._pImpl->getNativeColor())));
