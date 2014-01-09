@@ -139,7 +139,7 @@ class RendererItemController : public Gui::Controller
 
     virtual void selected()
     {
-        _pGuiSetup->push(_pGuiSetup->_pRendererConfig);
+        _pGuiSetup->push(_pGuiSetup->_pRendererConfig, _pGuiSetup->_pRendererItemModel->getLabelModel()->getLabel());
     }
 
     GuiSetup*   _pGuiSetup;
@@ -294,7 +294,7 @@ class ServerListModel : public Gui::ListModel
     std::string getId(int row);
 
     virtual int totalItemCount();
-    virtual Gui::Model* getItemModel(int row);
+    virtual Gui::ListItemModel* getItemModel(int row);
     virtual Gui::View* createItemView();
 
     std::map<std::string, ServerListItemModel*> _configServerItems;
@@ -979,7 +979,7 @@ class ServerListController : public Gui::ListController
     {
         ServerConfView* pServerConfView = new ServerConfView(_pGuiSetup, false);
         pServerConfView->setModel(new ServerConfModel(_pGuiSetup, pServerConfView, _pGuiSetup->_pServerListModel->getId(row)));
-        _pGuiSetup->push(pServerConfView, _pGuiSetup->_pServerListModel->getId(row));
+        _pGuiSetup->push(pServerConfView, _pGuiSetup->_pServerListModel->getItemModel(row)->getLabelModel()->getLabel());
     }
 
     GuiSetup*   _pGuiSetup;
@@ -1062,7 +1062,7 @@ ServerListModel::totalItemCount()
 }
 
 
-Gui::Model*
+Gui::ListItemModel*
 ServerListModel::getItemModel(int row)
 {
     return _configServerItems[_configServerIds[row]];
