@@ -426,6 +426,12 @@ ViewImpl::resizeView(int width, int height)
 }
 
 
+void
+ViewImpl::setSizeConstraint(int width, int height, View::SizeConstraint size)
+{
+}
+
+
 float
 ViewImpl::getFontSize()
 {

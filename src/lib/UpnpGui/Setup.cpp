@@ -377,7 +377,7 @@ class ServerLayoutSelector : Gui::Selector
     }
 };
 
-class ServerConfView : public Gui::View
+class ServerConfView : public Gui::ScrollAreaView
 {
     friend class GuiSetup;
     friend class ServerConfModel;
@@ -785,15 +785,16 @@ class ServerNewButton : public Gui::Button
 
 
 ServerConfView::ServerConfView(GuiSetup* pGuiSetup, bool newServer, View* pParent) :
-View(pParent),
+ScrollAreaView(pParent),
 _pGuiSetup(pGuiSetup),
 _pServerPluginSelector(0),
 _pServerPluginText(0),
 _newServer(newServer)
 {
-    setLayout(new Gui::VerticalLayout);
+    setAreaResizable(true);
+    getAreaView()->setLayout(new Gui::VerticalLayout);
 
-    Gui::View* pServerPluginView = new Gui::View(this);
+    Gui::View* pServerPluginView = new Gui::View(getAreaView());
     pServerPluginView->setLayout(new Gui::HorizontalLayout);
     pServerPluginView->setStretchFactor(-1.0);
     pServerPluginView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -807,7 +808,7 @@ _newServer(newServer)
         _pServerPluginText = new Gui::Label(pServerPluginView);
     }
 
-    Gui::View* pServerFriendlyNameView = new Gui::View(this);
+    Gui::View* pServerFriendlyNameView = new Gui::View(getAreaView());
     pServerFriendlyNameView->setLayout(new Gui::HorizontalLayout);
     pServerFriendlyNameView->setStretchFactor(-1.0);
     pServerFriendlyNameView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -823,7 +824,7 @@ _newServer(newServer)
 //        Gui::TextLine* pServerUuidText = new Gui::TextLine(pServerUuidView);
 //        pServerUuidText->setTextLine(_pGuiSetup->_pApp->getFileConfiguration()->getString("renderer.uuid", ""));
 
-    Gui::View* pServerLayoutView = new Gui::View(this);
+    Gui::View* pServerLayoutView = new Gui::View(getAreaView());
     pServerLayoutView->setLayout(new Gui::HorizontalLayout);
     pServerLayoutView->setStretchFactor(-1.0);
     pServerLayoutView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -832,7 +833,7 @@ _newServer(newServer)
     pServerLayoutLabel->setStretchFactor(-1.0);
     _pServerLayoutSelector = new ServerLayoutSelector(pServerLayoutView);
 
-    Gui::View* pServerEnableView = new Gui::View(this);
+    Gui::View* pServerEnableView = new Gui::View(getAreaView());
     pServerEnableView->setLayout(new Gui::HorizontalLayout);
     pServerEnableView->setStretchFactor(-1.0);
     pServerEnableView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -841,7 +842,7 @@ _newServer(newServer)
     pServerEnableLabel->setStretchFactor(-1.0);
     _pServerEnableSwitch = new ServerEnableSwitch(_pGuiSetup->_pApp, pServerEnableView);
 
-    Gui::View* pServerScanView = new Gui::View(this);
+    Gui::View* pServerScanView = new Gui::View(getAreaView());
     pServerScanView->setLayout(new Gui::HorizontalLayout);
     pServerScanView->setStretchFactor(-1.0);
     pServerScanView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -853,7 +854,7 @@ _newServer(newServer)
     _pServerScanProgressLabel->setLabel("0");
     _pServerScanProgressLabel->setStretchFactor(-1.0);
 
-    _pServerBasePathView = new Gui::View(this);
+    _pServerBasePathView = new Gui::View(getAreaView());
     _pServerBasePathView->setLayout(new Gui::HorizontalLayout);
     _pServerBasePathView->setStretchFactor(-1.0);
     _pServerBasePathView->setSizeConstraint(10, 20, Gui::View::Pref);
@@ -871,12 +872,14 @@ _newServer(newServer)
 //    pServerPollLabel->setStretchFactor(-1.0);
 //    _pServerPollText = new Gui::TextLine(pServerPollView);
 
-    View* pDoneCancelView = new View(this);
+    View* pDoneCancelView = new View(getAreaView());
     pDoneCancelView->setLayout(new Gui::HorizontalLayout);
     pDoneCancelView->setStretchFactor(-1.0);
     pDoneCancelView->setSizeConstraint(10, 20, Gui::View::Pref);
     new ServerDoneButton(_pGuiSetup, this, pDoneCancelView);
     new ServerCancelButton(_pGuiSetup, pDoneCancelView);
+
+    getAreaView()->setSizeConstraint(300, 7 * 20, Gui::View::Min);
 }
 
 
