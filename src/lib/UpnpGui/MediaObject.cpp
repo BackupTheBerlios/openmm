@@ -288,14 +288,11 @@ ListItemView(pParent)
 {
     setName("media object view");
     if (playlistButton && !Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
-
-        _pPlaylistButton = new Gui::Button(this);
+        _pPlaylistButton = new Gui::Button;
         _pPlaylistButton->setLabel("P");
-    //    _pPlaylistButton->setBackgroundColor(Gui::Color("blue"));
-        _pPlaylistButton->setStretchFactor(-1.0);
-    //    _pPlaylistButton->resize(20, 15);
-        _pPlaylistButton->setSizeConstraint(20, 15, View::Pref);
+        _pPlaylistButton->setWidth(20);
         _pPlaylistButton->attachController(new MediaObjectViewPlaylistButtonController(this));
+        setRightView(_pPlaylistButton);
 
 //        _pDestroyButton = new Gui::Button(this);
 //        _pDestroyButton->setLabel("D");
@@ -305,7 +302,7 @@ ListItemView(pParent)
 //        _pDestroyButton->setSizeConstraint(20, 15, View::Pref);
 //        _pDestroyButton->attachController(new MediaObjectViewDestroyButtonController(this));
     }
-    else {
+    else if (Poco::Util::Application::instance().config().getBool("application.fullscreen", false)) {
         setBackgroundColor(Gui::Color("black"));
     }
 }

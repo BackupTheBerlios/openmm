@@ -9,19 +9,11 @@ endif(NOT ${RESGEN})
 
 #if(${RESGEN})
 message("Found resgen: ${RESGEN}")
-message("Resource name to include in your code: ${RES_NAME}")
 message("Adding resources: ${ARGN}")
 message("Resource working directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 message("Resource output directory: ${CMAKE_CURRENT_BINARY_DIR}")
-
-find_file(OMM_RESOURCES
-${RES_NAME}.cpp
-PATHS ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-#if(NOT ${OMM_RESOURCES})
-#message(WARNING "Rerun make.sh config to generate resource code")
-#endif(NOT ${OMM_RESOURCES})
+message("Resource include ${RES_NAME}.h and reference ${RES_NAME}::instance() in your C++ code")
+message("Resource build \${${RES_NAME}_CPP} in your CMakeLists.txt")
 
 execute_process(COMMAND
 ${RESGEN} --output-directory=${CMAKE_CURRENT_BINARY_DIR} --resource-name=${RES_NAME} ${ARGN}
@@ -31,9 +23,9 @@ OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/resgen.out
 ERROR_FILE ${CMAKE_CURRENT_BINARY_DIR}/resgen.err
 )
 
-set(OMM_RESOURCES
+set(${RES_NAME}_CPP
 ${CMAKE_CURRENT_BINARY_DIR}/${RES_NAME}.cpp
-CACHE INTERNAL omm_resources
+CACHE INTERNAL ${RES_NAME}_CPP
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

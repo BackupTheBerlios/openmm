@@ -26,9 +26,39 @@
 #include "Gui/HorizontalLayout.h"
 #include "Log.h"
 
+#include "GuiImages.h"
 
 namespace Omm {
 namespace Gui {
+
+
+class ListItemLayout : public Layout
+{
+    virtual void layoutView()
+    {
+        ListItemView* pItemView = static_cast<ListItemView*>(_pView);
+
+        int hspace = 5;
+        int vspace = 1;
+        int itemViewWidth = _pView->width();
+        int itemViewHeight = _pView->height() - 2 * vspace;
+        int arrowSize = itemViewHeight * 0.5;
+        int rightViewWidth = pItemView->_pRightView ? pItemView->_pRightView->width() : 0;
+
+        pItemView->_pImageView->resize(itemViewHeight, itemViewHeight);
+        pItemView->_pLabelView->resize(itemViewWidth - 2 * itemViewHeight - 2 * hspace - rightViewWidth, itemViewHeight);
+        pItemView->_pArrowView->resize(arrowSize, arrowSize);
+
+        pItemView->_pImageView->move(hspace, vspace);
+        pItemView->_pLabelView->move(2 * hspace + itemViewHeight, vspace);
+        pItemView->_pArrowView->move(itemViewWidth - arrowSize - hspace, vspace + (itemViewHeight - arrowSize) * 0.5);
+
+        if (pItemView->_pRightView) {
+            pItemView->_pRightView->setHeight(itemViewHeight);
+            pItemView->_pRightView->move(itemViewWidth - itemViewHeight - rightViewWidth, vspace);
+        }
+    }
+};
 
 
 ListItemModel::ListItemModel() :
@@ -86,29 +116,32 @@ ListItemModel::setImageModel(ImageModel* pImageModel)
     _pImageModel = pImageModel;
 }
 
+ImageModel* ListItemView::_pArrowModel = 0;
 
 ListItemView::ListItemView(View* pParent) :
-View(pParent)
+View(pParent),
+_pRightView(0)
 {
     setName("list item view");
     setBackgroundColor(Color("white"));
-//    setBackgroundColor(Color("black"));
 
     _pImageView = new ImageView(this);
-    // FIXME: stretch factor -1.0 on image view gives wrong sum of width of subviews.
-    _pImageView->setStretchFactor(-1.0);
     _pImageView->setBackgroundColor(Color("white"));
-
-//    View* pSpacer = new LabelView(this);
-//    pSpacer->setSizeConstraint(4, height(View::Pref), View::Pref);
-//    pSpacer->setBackgroundColor(Color("blue"));
 
     _pLabelView = new LabelView(this);
     _pLabelView->setBackgroundColor(Color("white"));
-//    _pLabelView->setStretchFactor(-1.0);
-//    _pLabelView->setSizeConstraint(220, 20, View::Pref);
 
-    _pLayout = new HorizontalLayout;
+    _pArrowView = new ImageView(this);
+    _pArrowView->setBackgroundColor(Color("white"));
+
+    if (!_pArrowModel) {
+        _pArrowModel = new ImageModel;
+        _pArrowModel->setData(GuiImages::instance()->getResource("right_arrow.gif"));
+    }
+    _pArrowView->setModel(_pArrowModel);
+    _pArrowView->hide(false);
+
+    _pLayout = new ListItemLayout;
     setLayout(_pLayout);
 }
 
@@ -137,6 +170,26 @@ ListItemView::setSpacing(int hSpace)
 
 
 void
+ListItemView::showRightArrow(bool show)
+{
+    if (show) {
+        _pArrowView->show();
+    }
+    else {
+        _pArrowView->hide();
+    }
+}
+
+
+void
+ListItemView::setRightView(View* pView)
+{
+    _pRightView = pView;
+    pView->setParent(this);
+}
+
+
+void
 ListItemView::syncViewImpl()
 {
 //    LOG(gui, debug, "list item view sync view impl: " + getName() + " ...");
@@ -151,6 +204,10 @@ ListItemView::syncViewImpl()
     else {
         _pImageView->setStretchFactor(0.2);
     }
+    if (_pArrowModel) {
+        _pArrowView->syncViewImpl();
+    }
+
 //    LOG(gui, debug, "list item view sync view impl: " + getName() + " finished.");
 }
 

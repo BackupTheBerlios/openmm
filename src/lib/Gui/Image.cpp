@@ -42,6 +42,10 @@ void
 ImageModel::setData(const std::string& data)
 {
 //    LOG(gui, debug, "Image model set data");
+    if (!data.length()) {
+        LOG(gui, warning, "Image model set data of zero length, ignore");
+        return;
+    }
     static_cast<ImageModelImpl*>(_pImpl)->setData(data);
 }
 

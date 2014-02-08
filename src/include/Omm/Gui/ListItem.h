@@ -29,8 +29,6 @@
 namespace Omm {
 namespace Gui {
 
-class HorizontalLayout;
-
 
 class ListItemModel : public Model
 {
@@ -54,17 +52,24 @@ private:
 
 class ListItemView : public View
 {
+    friend class ListItemLayout;
+
 public:
     ListItemView(View* pParent = 0);
     virtual void setModel(Model* pModel = 0);
     void setSpacing(int hSpace);
+    void showRightArrow(bool show = true);
+    void setRightView(View* pView);
 
 private:
     virtual void syncViewImpl();
 
     ImageView*          _pImageView;
     LabelView*          _pLabelView;
-    HorizontalLayout*   _pLayout;
+    ImageView*          _pArrowView;
+    static ImageModel*  _pArrowModel;
+    View*               _pRightView;
+    Layout*             _pLayout;
 };
 
 

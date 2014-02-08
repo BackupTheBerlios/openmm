@@ -88,9 +88,11 @@ ItemListModel::createItemView()
 {
     Omm::Gui::ListItemView* pView = new Omm::Gui::ListItemView;
     pView->setName("list item view " + Poco::NumberFormatter::format(_viewCount++));
-    Omm::Gui::Button* pButton = new Omm::Gui::Button(pView);
+    Omm::Gui::Button* pButton = new Omm::Gui::Button;
     pButton->setLabel("B");
-    pButton->setStretchFactor(-1.0);
+    pButton->setWidth(25);
+    pView->setRightView(pButton);
+    pView->showRightArrow();
     return pView;
 }
 

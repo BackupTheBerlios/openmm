@@ -253,6 +253,7 @@ class ServerItemController : public Gui::Controller
     ServerItemController(GuiSetup* pGuiSetup) : _pGuiSetup(pGuiSetup) {}
 
     virtual void selected()
+//    virtual void activated()
     {
         _pGuiSetup->push(_pGuiSetup->_pServerList, "Local Media");
     }
@@ -1073,7 +1074,10 @@ Gui::View*
 ServerListModel::createItemView()
 {
     Gui::ListItemView* pListItemView = new Gui::ListItemView;
-    ServerDeleteButton* pDeleteButton = new ServerDeleteButton(_pGuiSetup->_pServerList, pListItemView);
+    pListItemView->showRightArrow();
+    ServerDeleteButton* pDeleteButton = new ServerDeleteButton(_pGuiSetup->_pServerList);
+    pDeleteButton->setWidth(15);
+    pListItemView->setRightView(pDeleteButton);
     return pListItemView;
 }
 
@@ -1120,6 +1124,7 @@ _pApp(pApp)
     _pRendererItemModel->setLabelModel(pRendererItemLabel);
     _pRendererItem->setModel(_pRendererItemModel);
     _pRendererItem->attachController(new RendererItemController(this));
+    _pRendererItem->showRightArrow();
 
     _pRendererConfig = new RendererConfView(this);
 
@@ -1135,6 +1140,7 @@ _pApp(pApp)
     _pServerItem = new Gui::ListItemView(pServerView);
     _pServerItem->setSizeConstraint(20, itemHeight, Gui::View::Pref);
     _pServerItem->attachController(new ServerItemController(this));
+    _pServerItem->showRightArrow();
 
     _pServerListModel = new ServerListModel(this);
     _pServerListModel->readConfig();

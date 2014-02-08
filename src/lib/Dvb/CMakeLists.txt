@@ -12,11 +12,8 @@ ${OMM_INCLUDE_DIR}/Dvb
 )
 
 include(AddResources)
-set(DVB_TRANSPONDERS_RESOURCE
-TransponderData
-)
 
-add_resources(${DVB_TRANSPONDERS_RESOURCE}
+add_resources(TransponderData
 "transponder.zip"
 )
 
@@ -39,7 +36,7 @@ ElementaryStream.cpp
 
 add_library(ommdvb
 ${OMM_DVB_LIB_SRCS}
-${OMM_RESOURCES}
+${TransponderData_CPP}
 )
 
 set(OMM_DVB

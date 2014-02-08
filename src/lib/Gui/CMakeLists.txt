@@ -1,6 +1,12 @@
 include(DescendDirectories)
 descend_directories()
 
+include(AddResources)
+
+add_resources(GuiImages
+"img/right_arrow.gif"
+)
+
 if(LIB_OMMGUI_PLATFORM)
 message(STATUS "Gui implementation for " ${BUILD_TARGET} " is available, linking libommgui with lib" ${LIB_OMMGUI_PLATFORM})
 
@@ -41,6 +47,7 @@ GenericSplitterImpl.cpp
 Selector.cpp
 Switch.cpp
 Graphic.cpp
+${GuiImages_CPP}
 )
 
 target_link_libraries(ommgui

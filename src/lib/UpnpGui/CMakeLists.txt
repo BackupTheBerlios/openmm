@@ -1,9 +1,6 @@
 include(AddResources)
-set(MEDIA_IMAGE_RESOURCE
-MediaImages
-)
 
-add_resources(${MEDIA_IMAGE_RESOURCE}
+add_resources(MediaImages
 "img/media-server.png"
 "img/media-container.png"
 "img/media-item.png"
@@ -31,7 +28,7 @@ MediaObject.cpp
 Playlist.cpp
 Setup.cpp
 UpnpApplication.cpp
-${OMM_RESOURCES}
+${MediaImages_CPP}
 )
 
 set(DEFAULT_ENGINE
